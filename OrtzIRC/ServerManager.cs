@@ -60,9 +60,12 @@ namespace OrtzIRC
         }
 
     }
+
     public class Server
     {
         private bool _changed = false;
+
+        private int _id;
 
         private string _URI;
         public string URI
@@ -118,7 +121,6 @@ namespace OrtzIRC
     public class ServerManager
     {
         private static ServerManager _instance;
-        private DataSet _serverSet;
 
         protected ServerManager()
         {
@@ -134,60 +136,65 @@ namespace OrtzIRC
             return _instance;
         }
 
-        public static void Add()
+        public static void AddServer(Server server)
+        {
+
+        }
+        public static void AddServer(string URI, string description, int port, int networkID)
         {
 
         }
 
         private void LoadServers()
         {
+            DataSet set = new DataSet();
+
             SQLiteConnection db = new SQLiteConnection("Data Source=F:\\settings.s3db");
             db.Open();
 
-            SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM networks");
-            cmd.Connection = db;
+            SQLiteDataAdapter networks = new SQLiteDataAdapter(new SQLiteCommand("SELECT * FROM networks", db));
+            networks.FillSchema(set, SchemaType.Source);
+            networks.Fill(set);
+            DataTable pTable = set.Tables["Table"];
+            pTable.TableName = "Networks";
 
-            SQLiteDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            SQLiteDataAdapter servers = new SQLiteDataAdapter(new SQLiteCommand("SELECT * FROM servers", db));
+            servers.FillSchema(set, SchemaType.Source);
+            servers.Fill(set);
+            pTable = set.Tables["Table"];
+            pTable.TableName = "Servers";
+
+            set.Relations.Add(new DataRelation("ParentChild",
+                set.Tables["Networks"].Columns["id"],
+                set.Tables["Servers"].Columns["network_id"]));
+
+            foreach (DataTable dt in set.Tables)
+            {
+                PrintTable(dt);
+            }
+
+            db.Close();
+
+        }
+
+        private void PrintTable(DataTable dt)
+        {
+            Console.WriteLine("\n***** Rows in DataTable *****");
             
-            while (reader.Read())
-                Console.WriteLine("-> {0}, {1}", reader["id"], reader["name"]);
-            reader.Close();
-
-        }
-    }
-
-    public class WindowManager
-    {
-        private List<ServerForm> forms;
-        private Form parentForm;
-
-        public WindowManager(Form parentForm)
-        {
-            this.forms = new List<ServerForm>();
-            this.parentForm = parentForm;
-        }
-
-        public void AddNewServer(string uri, string description, int port)
-        {
-            bool exists = false;
-
-            // Check if window with this name exists
-            for (int x = 0; x < parentForm.MdiChildren.Length; x++)
+            DataTableReader dtReader = dt.CreateDataReader();
+            
+            while (dtReader.Read())
             {
-                Form tempChild = (Form)parentForm.MdiChildren[x];
-                if (tempChild.Text == uri)
+                for (int i = 0; i < dtReader.FieldCount; i++)
                 {
-                    exists = true;
+                    Console.Write("{0} = {1} ",
+                    dtReader.GetName(i),
+                    dtReader.GetValue(i).ToString().Trim());
                 }
+                Console.WriteLine();
             }
-
-            if (!exists)
-            {
-                ServerForm newForm = new ServerForm();
-                newForm.MdiParent = parentForm;
-                newForm.Text = uri;
-                newForm.Show();
-            }
+            dtReader.Close();
         }
     }
 }
