@@ -12,13 +12,11 @@ namespace OrtzIRC
 
     public partial class MainForm : Form
     {
-        WindowManager serverManager;
         public static ArrayList serverList;
 
         public MainForm()
         {
             this.FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
-            this.serverManager = new WindowManager(this);
             MainForm.serverList = new ArrayList();
             LoadServerList();
 

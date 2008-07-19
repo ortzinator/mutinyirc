@@ -38,7 +38,7 @@ namespace OrtzIRC.Dialogs
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Server temp = new Server("irc.gamesurge.net", "Hello new server", 6667);
+            //Server temp = new Server("irc.gamesurge.net", "Hello new server", 6667);
 
             //Settings.Default.ServerList.Add(temp);
         }
