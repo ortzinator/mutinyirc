@@ -107,6 +107,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IRC\Channel.cs" />
+    <Compile Include="IRC\Client.cs" />
+    <Compile Include="IRC\Nick.cs" />
+    <Compile Include="IRC\Objects.cs" />
+    <Compile Include="IRC\Server.cs" />
     <Compile Include="Windows\Dialogs\EditServerDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -170,6 +175,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <None Include="ClassDiagram1.cd" />
     <Compile Include="ServerManager.cs" />
   </ItemGroup>
   <ItemGroup>

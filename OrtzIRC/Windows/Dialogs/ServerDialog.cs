@@ -12,10 +12,10 @@ namespace OrtzIRC.Dialogs
 {
     public partial class ServerDialog : Form
     {
-        ServerManager _serverManager;
+        ServerSettingsManager _serverManager;
         public ServerDialog()
         {
-            _serverManager = ServerManager.Instance();
+            _serverManager = ServerSettingsManager.Instance();
             this.FormClosing += new FormClosingEventHandler(ServerDialog_FormClosing);
             InitializeComponent();
         }
