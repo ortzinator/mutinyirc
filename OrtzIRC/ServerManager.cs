@@ -8,130 +8,24 @@ using System.Configuration;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
+using OrtzIRC.IRC;
 
 namespace OrtzIRC
 {
-    public class Network
+    public class ServerSettingsManager
     {
-        private bool _changed = false;
-        public bool Changed
-        {
-            get { return _changed; }
-        }
+        private static ServerSettingsManager _instance;
 
-        private int _id;
-        public int ID
-        {
-            get { return _id; }
-            set
-            {
-                if (value != _id)
-                {
-                    _changed = true;
-                }
-                _id = value;
-            }
-        }
-
-        private int _name;
-        public int Name
-        {
-            get { return _name; }
-            set
-            {
-                if (value != _name)
-                {
-                    _changed = true;
-                }
-                _name = value;
-            }
-        }
-
-        private List<Server> _servers;
-        public List<Server> ServerCollection
-        {
-            get { return _servers; }
-        }
-
-        public void AddServer(Server server)
-        {
-            _servers.Add(server);
-            _changed = true;
-        }
-
-    }
-
-    public class Server
-    {
-        private bool _changed = false;
-
-        private int _id;
-
-        private string _URI;
-        public string URI
-        {
-            get { return _URI; }
-            set
-            {
-                if (value != _URI)
-                {
-                    _changed = true;
-                }
-                _URI = value; 
-            }
-        }
-
-        private string _description;
-        public string Description
-        {
-            get { return _description; }
-            set
-            {
-                if (value != _description)
-                {
-                    _changed = true;
-                }
-                _description = value;
-            }
-        }
-
-        private int _port;
-        public int Port
-        {
-            get { return _port; }
-            set
-            {
-                if (value != _port)
-                {
-                    _changed = true;
-                }
-                _port = value;
-            }
-        }
-
-        public Server(string URI, string description, int port, Network network)
-        {
-            this._URI = URI;
-            this._description = description;
-            this._port = port;
-            network.AddServer(this);
-        }
-    }
-
-    public class ServerManager
-    {
-        private static ServerManager _instance;
-
-        protected ServerManager()
+        protected ServerSettingsManager()
         {
             LoadServers();
         }
 
-        public static ServerManager Instance()
+        public static ServerSettingsManager Instance()
         {
             if (_instance == null)
             {
-                _instance = new ServerManager();
+                _instance = new ServerSettingsManager();
             }
             return _instance;
         }
