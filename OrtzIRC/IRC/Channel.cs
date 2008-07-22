@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OrtzIRC.IRC;
 
-namespace OrtzIRC
+namespace OrtzIRC.IRC
 {
     /// <summary>
     /// Represents a specific channel on a network
     /// </summary>
-    public class Channel : OrtzIRC.IRC.Target
+    public class Channel : Target
     {
         private List<Nick> _banList;
 
@@ -53,9 +54,9 @@ namespace OrtzIRC
             get { return _nickList; }
             set { _nickList = value; }
         }
-        private string _topic;
+        private Topic _topic;
 
-        public string Topic
+        public Topic Topic
         {
             get { return _topic; }
             set { _topic = value; }
