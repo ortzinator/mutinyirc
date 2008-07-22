@@ -28,17 +28,26 @@ namespace OrtzIRC.IRC
             set { _port = value; }
         }
 
-        public Server(string URI, string description, int port)
+        public Server(string URI, string description, int port, bool ssl)
         {
-            //this.uri = URI;
+            this._uri = URI;
             this._description = description;
             this._port = port;
+            this._ssl = ssl;
             //network.AddServer(this);
         }
 
         public override string ToString()
         {
             throw new System.NotImplementedException();
+        }
+
+        private bool _ssl;
+
+        public bool SSL
+        {
+            get { return _ssl; }
+            set { _ssl = value; }
         }
     }
 }

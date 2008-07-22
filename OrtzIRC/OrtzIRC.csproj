@@ -109,9 +109,11 @@
   <ItemGroup>
     <Compile Include="IRC\Channel.cs" />
     <Compile Include="IRC\Client.cs" />
+    <Compile Include="IRC\Mode.cs" />
     <Compile Include="IRC\Nick.cs" />
     <Compile Include="IRC\Objects.cs" />
     <Compile Include="IRC\Server.cs" />
+    <Compile Include="ServerSettings.cs" />
     <Compile Include="Windows\Dialogs\EditServerDialog.cs">
       <SubType>Form</SubType>
     </Compile>
