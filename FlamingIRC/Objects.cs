@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OrtzIRC.IRC
+namespace FlamingIRC
 {
     public abstract class Target
     {
@@ -60,12 +60,12 @@ namespace OrtzIRC.IRC
 
     public class Message : ClientMessage
     {
-        private string _message;
+        private string _msg;
 
-        public string Message1
+        public string Msg
         {
-            get { return _message; }
-            set { _message = value; }
+            get { return _msg; }
+            set { _msg = value; }
         }
         private Target _sender;
 
