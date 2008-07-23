@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OrtzIRC.IRC
+namespace FlamingIRC
 {
     /// <summary>
     /// A client connection to a server
@@ -45,7 +45,19 @@ namespace OrtzIRC.IRC
             throw new System.NotImplementedException();
         }
 
-        private TcpClient _connection;
+        private TcpClient _client;
+
+        public Connection(Server server)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private bool _connected;
+
+        public bool Connected
+        {
+            get { return _connected; }
+        }
 
     }
 }

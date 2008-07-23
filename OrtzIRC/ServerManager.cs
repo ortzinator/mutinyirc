@@ -8,7 +8,6 @@ using System.Configuration;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
-using OrtzIRC.IRC;
 
 namespace OrtzIRC
 {

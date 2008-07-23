@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using OrtzIRC.IRC;
 
-namespace OrtzIRC.IRC
+namespace FlamingIRC
 {
     /// <summary>
     /// Represents a specific channel on a network

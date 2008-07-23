@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OrtzIRC.IRC
+namespace FlamingIRC
 {
     /// <summary>
     /// Represents a user in a single channel
