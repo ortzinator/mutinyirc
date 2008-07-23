@@ -4,6 +4,9 @@ using System.Text;
 
 namespace FlamingIRC
 {
+    /// <summary>
+    /// Listens for server messages and calls events accordingly.
+    /// </summary>
     public class Listener
     {
         public event EventHandler Event;
