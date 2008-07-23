@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace FlamingIRC
 {
@@ -12,7 +13,7 @@ namespace FlamingIRC
 
     public enum ModeName
     {
-        Operator,
+        ChannelOperator,
         Private,
         Secret,
         InviteOnly,
@@ -32,5 +33,33 @@ namespace FlamingIRC
     public class Mode
     {
         private ModeName _mode;
+        private ModeAction _modeAction;
+    }
+
+    public enum ModeAction
+    {
+        Add,
+        Remove,
+    }
+
+    public class ChannelModeInfo
+    {
+        private ModeName _modeName;
+        private ModeAction _modeAction;
+    }
+
+    public class ChannelModeCollection : IEnumerable<ChannelModeInfo>
+    {
+        private List<ChannelModeInfo> _modes;
+
+        public IEnumerator<ChannelModeInfo> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

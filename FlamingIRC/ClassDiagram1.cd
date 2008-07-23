@@ -8,14 +8,14 @@
     </TypeIdentifier>
   </Class>
   <Class Name="FlamingIRC.Connection" Collapsed="true">
-    <Position X="10.75" Y="0.5" Width="1.5" />
+    <Position X="12.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQAAAAgAAAAQMAAQAAAgIAAAAEAAAAQAAAAAAQAEAA=</HashCode>
       <FileName>Client.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FlamingIRC.Listener" Collapsed="true">
-    <Position X="12.5" Y="0.5" Width="1.5" />
+    <Position X="14.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAgAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Listener.cs</FileName>
@@ -28,17 +28,17 @@
       <FileName>MessageBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="FlamingIRC.ModeCollection" Collapsed="true">
-    <Position X="12.5" Y="1.5" Width="1.5" />
+  <Class Name="FlamingIRC.ModeCollection">
+    <Position X="10.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Mode.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FlamingIRC.Mode" Collapsed="true">
-    <Position X="10.75" Y="1.5" Width="1.5" />
+    <Position X="16" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAACAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Mode.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -112,78 +112,114 @@
       <FileName>Server.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="FlamingIRC.ChannelModeInfo" Collapsed="true">
+    <Position X="10.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Mode.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FlamingIRC.ChannelModeCollection">
+    <Position X="14.75" Y="1.75" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAgAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
+      <FileName>Mode.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
   <Enum Name="FlamingIRC.ModeName" Collapsed="true">
+    <Position X="12.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEABACAEQAgAASAAAEAAAAAAEAAAACBAAAAAIAAAAIg=</HashCode>
+      <FileName>Mode.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="FlamingIRC.ModeAction" Collapsed="true">
     <Position X="10.75" Y="2.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AEABACAAQAgAASAAAEAAAAAAEAAAACBAAAAAIAAAIIg=</HashCode>
+      <HashCode>AAIAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Mode.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Delegate Name="FlamingIRC.PingEventHandler" Collapsed="true">
-    <Position X="10.75" Y="3.75" Width="1.5" />
+    <Position X="12.5" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="FlamingIRC.JoinEventHandler" Collapsed="true">
-    <Position X="10.75" Y="4.5" Width="1.5" />
+    <Position X="12.5" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAIAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="FlamingIRC.PartEventHandler" Collapsed="true">
-    <Position X="10.75" Y="5.25" Width="1.5" />
+    <Position X="10.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAACAAAIAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="FlamingIRC.NickEventHandler" Collapsed="true">
-    <Position X="10.75" Y="6" Width="1.5" />
+    <Position X="16" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="FlamingIRC.PrivateMessageEventHandler" Collapsed="true">
-    <Position X="10.75" Y="6.75" Width="1.5" />
+    <Position X="14.25" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="FlamingIRC.TopicEventHandler" Collapsed="true">
-    <Position X="10.75" Y="7.5" Width="1.5" />
+    <Position X="16" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAACAAAIAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="FlamingIRC.QuitEventHandler" Collapsed="true">
-    <Position X="12.5" Y="3.75" Width="1.5" />
+    <Position X="14.25" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="FlamingIRC.KickEventHandler" Collapsed="true">
-    <Position X="12.5" Y="4.5" Width="1.5" />
+    <Position X="14.25" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAIAAAAAAAAAAAAQAAEAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="FlamingIRC.PrivateNoticeEventHandler" Collapsed="true">
-    <Position X="12.5" Y="5.25" Width="1.5" />
+    <Position X="16" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
-  <Delegate Name="FlamingIRC.PublicNoticeEventHandler">
-    <Position X="12.5" Y="6" Width="1.5" />
+  <Delegate Name="FlamingIRC.PublicNoticeEventHandler" Collapsed="true">
+    <Position X="12.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAIAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
+      <FileName>Delegates.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="FlamingIRC.PublicMessageEventHandler" Collapsed="true">
+    <Position X="10.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAIAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
+      <FileName>Delegates.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="FlamingIRC.ChannelModeChangeEventHandler" Collapsed="true">
+    <Position X="10.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Delegates.cs</FileName>
