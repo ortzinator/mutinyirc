@@ -26,5 +26,5 @@ namespace FlamingIRC
 
     public delegate void PublicNoticeEventHandler(Nick nick, Channel channel, string message);
 
-    public delegate void ChannelModeChangeEventHandler(Nick nick, Channel channel, ChannelModeInfo[] modes);
+    public delegate void ChannelModeChangeEventHandler();
 }
