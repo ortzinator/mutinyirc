@@ -17,10 +17,21 @@ namespace OrtzIRC
         public MainForm()
         {
             this.FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
+            this.Load += new EventHandler(MainForm_Load);
             MainForm.serverList = new ArrayList();
             LoadServerList();
 
             InitializeComponent();
+        }
+
+        void MainForm_Load(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Do you wish to connect?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                ServerForm server = new ServerForm();
+                server.MdiParent = this;
+                server.Show();
+            }
         }
 
         void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -43,7 +54,7 @@ namespace OrtzIRC
         {
             //if (Settings.Default.ServerList == null)
             {
-               // Settings.Default.ServerList = new System.Collections.ArrayList();
+                // Settings.Default.ServerList = new System.Collections.ArrayList();
             }
         }
     }

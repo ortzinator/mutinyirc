@@ -62,4 +62,13 @@ namespace FlamingIRC
             throw new NotImplementedException();
         }
     }
+
+    public enum UserMode
+    {
+        Away,
+        Wallops,
+        Invisible,
+        Operator,
+        Restricted,
+    }
 }

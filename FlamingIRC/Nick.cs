@@ -42,5 +42,13 @@ namespace FlamingIRC
         {
             throw new NotImplementedException();
         }
+
+        public static Nick Empty
+        {
+            get
+            {
+                return new Nick();
+            }
+        }
     }
 }

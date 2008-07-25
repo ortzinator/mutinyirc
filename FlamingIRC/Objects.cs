@@ -74,6 +74,13 @@ namespace FlamingIRC
             get { return _sender; }
             set { _sender = value; }
         }
+
+        public Message() { }
+
+        public Message(string text)
+        {
+            _msg = text;
+        }
     }
 
     /// <summary>

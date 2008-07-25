@@ -4,26 +4,36 @@ using System.Text;
 
 namespace OrtzIRC
 {
-    public class ServerSettings
+    public class IRCSettingsManager
     {
-        private ServerSettings _instance;
-
-        public static ServerSettings Instance
+        private static IRCSettingsManager _instance;
+        public static IRCSettingsManager Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = new ServerSettings();
+                    _instance = new IRCSettingsManager();
                 }
                 return _instance;
             }
-            set { _instance = value; }
         }
 
-        protected ServerSettings()
-        {
-            throw new System.NotImplementedException();
-        }
+        protected IRCSettingsManager() { }
+
+
+    }
+
+    public struct NetworkSettings 
+    {
+
+        private string _name;
+    }
+
+    public struct ServerSettings
+    {
+        private string _URI;
+        private string _description;
+        private int _port;
     }
 }
