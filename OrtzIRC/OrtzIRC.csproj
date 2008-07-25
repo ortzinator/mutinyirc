@@ -107,7 +107,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\CommandTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CommandTextBox.Designer.cs">
+      <DependentUpon>CommandTextBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="ServerSettings.cs" />
+    <Compile Include="Windows\ChannelForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\ChannelForm.Designer.cs">
+      <DependentUpon>ChannelForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Windows\Dialogs\EditServerDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -172,7 +184,6 @@
     </Compile>
     <None Include="app.config" />
     <None Include="ClassDiagram1.cd" />
-    <Compile Include="ServerManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
@@ -195,6 +206,12 @@
     <Content Include="System.Data.SQLite.DLL">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj">
+      <Project>{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}</Project>
+      <Name>FlamingIRC</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

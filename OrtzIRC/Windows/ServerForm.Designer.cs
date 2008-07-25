@@ -28,31 +28,65 @@ namespace OrtzIRC
         /// </summary>
         private void InitializeComponent()
         {
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.serverLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.serverOutputBox = new System.Windows.Forms.RichTextBox();
+            this.commandTextBox = new System.Windows.Forms.TextBox();
+            this.serverLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // richTextBox1
+            // serverLayoutPanel
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(38, 33);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(127, 107);
-            this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = "";
+            this.serverLayoutPanel.ColumnCount = 1;
+            this.serverLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.serverLayoutPanel.Controls.Add(this.serverOutputBox, 0, 0);
+            this.serverLayoutPanel.Controls.Add(this.commandTextBox, 0, 1);
+            this.serverLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.serverLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.serverLayoutPanel.Name = "serverLayoutPanel";
+            this.serverLayoutPanel.RowCount = 2;
+            this.serverLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.serverLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
+            this.serverLayoutPanel.Size = new System.Drawing.Size(552, 406);
+            this.serverLayoutPanel.TabIndex = 1;
+            // 
+            // serverOutputBox
+            // 
+            this.serverOutputBox.BackColor = System.Drawing.SystemColors.Window;
+            this.serverOutputBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.serverOutputBox.Location = new System.Drawing.Point(3, 3);
+            this.serverOutputBox.Name = "serverOutputBox";
+            this.serverOutputBox.ReadOnly = true;
+            this.serverOutputBox.Size = new System.Drawing.Size(546, 373);
+            this.serverOutputBox.TabIndex = 0;
+            this.serverOutputBox.Text = "";
+            // 
+            // commandTextBox
+            // 
+            this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.commandTextBox.Location = new System.Drawing.Point(3, 382);
+            this.commandTextBox.Name = "commandTextBox";
+            this.commandTextBox.Size = new System.Drawing.Size(546, 20);
+            this.commandTextBox.TabIndex = 1;
             // 
             // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(512, 431);
-            this.Controls.Add(this.richTextBox1);
+            this.ClientSize = new System.Drawing.Size(552, 406);
+            this.Controls.Add(this.serverLayoutPanel);
             this.Name = "ServerForm";
             this.Text = "Server";
+            this.serverLayoutPanel.ResumeLayout(false);
+            this.serverLayoutPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.TableLayoutPanel serverLayoutPanel;
+        private System.Windows.Forms.RichTextBox serverOutputBox;
+        private System.Windows.Forms.TextBox commandTextBox;
+
     }
 }
