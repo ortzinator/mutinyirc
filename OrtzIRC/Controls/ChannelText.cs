@@ -6,18 +6,23 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace OrtzIRC
+namespace OrtzIRC.Controls
 {
-    public partial class ChannelForm : Form
+    public partial class ChannelText : RichTextBox
     {
-        public ChannelForm()
+        public ChannelText()
         {
             InitializeComponent();
         }
 
+        protected override void OnPaint(PaintEventArgs pe)
+        {
+            base.OnPaint(pe);
+        }
+
         public void AppendLine(string line)
         {
-            channelOutputBox.AppendLine(line);
+            this.Text += "\n" + line.Trim();
         }
     }
 }

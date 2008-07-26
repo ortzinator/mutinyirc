@@ -1,1 +1,87 @@
- 
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="OrtzIRC.Controls.CommandTextBox" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAACAAAAAAAACAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Controls\CommandTextBox.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Program" Collapsed="true">
+    <Position X="4" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.IRCSettingsManager" Collapsed="true">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>ServerSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.ChannelForm" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAgAAAACAQAACAAAAAAAAAAAEAAAAACA=</HashCode>
+      <FileName>Windows\ChannelForm.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.NewServerDialog" Collapsed="true">
+    <Position X="2.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACQAAAQAAAGAAAACAAAAAAAAgIAQAAAACQA=</HashCode>
+      <FileName>Windows\Dialogs\NewServerDialog.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.MainForm" Collapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAACAAKAAgAAAAkCAEAACAIACABABAAAAAQAAAAA=</HashCode>
+      <FileName>Windows\MainForm.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.ServerForm" Collapsed="true">
+    <Position X="2.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CMAAAAAAACAAAgBAEAGAQABCAAIAAAIBAAAAgAAAAAA=</HashCode>
+      <FileName>Windows\ServerForm.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Properties.Resources" Collapsed="true">
+    <Position X="5.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAABEAAAAQAAAAAAAAAAAAAAAIA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Dialogs.EditServerDialog" Collapsed="true">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAACQAAAQAAAGAAAACAAAAAAAAAIAQAAAACQA=</HashCode>
+      <FileName>Windows\Dialogs\EditServerDialog.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Dialogs.ServerDialog" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAACAAAAAAACCAAIACAAAAAAAAAEAAAAAgAAA=</HashCode>
+      <FileName>Windows\Dialogs\ServerDialog.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="OrtzIRC.NetworkSettings">
+    <Position X="0.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ServerSettings.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="OrtzIRC.ServerSettings">
+    <Position X="2.5" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAgAAgEAAAAAAAACDAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ServerSettings.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

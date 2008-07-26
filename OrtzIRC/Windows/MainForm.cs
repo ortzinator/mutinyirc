@@ -28,7 +28,8 @@ namespace OrtzIRC
         {
             if (MessageBox.Show("Do you wish to connect?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                ServerForm server = new ServerForm();
+                ServerSettings settings = new ServerSettings("openircnet.ath.cx", "what", 6667, false);
+                ServerForm server = new ServerForm(settings);
                 server.MdiParent = this;
                 server.Show();
             }
