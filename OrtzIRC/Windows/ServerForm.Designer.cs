@@ -1,3 +1,4 @@
+using OrtzIRC.Controls;
 namespace OrtzIRC
 {
     partial class ServerForm
@@ -29,7 +30,7 @@ namespace OrtzIRC
         private void InitializeComponent()
         {
             this.serverLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.serverOutputBox = new System.Windows.Forms.RichTextBox();
+            this.serverOutputBox = new OrtzIRC.Controls.ChannelText();
             this.commandTextBox = new System.Windows.Forms.TextBox();
             this.serverLayoutPanel.SuspendLayout();
             this.SuspendLayout();
@@ -46,33 +47,34 @@ namespace OrtzIRC
             this.serverLayoutPanel.RowCount = 2;
             this.serverLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.serverLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
-            this.serverLayoutPanel.Size = new System.Drawing.Size(552, 406);
+            this.serverLayoutPanel.Size = new System.Drawing.Size(582, 429);
             this.serverLayoutPanel.TabIndex = 1;
             // 
             // serverOutputBox
             // 
             this.serverOutputBox.BackColor = System.Drawing.SystemColors.Window;
+            this.serverOutputBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.serverOutputBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.serverOutputBox.Location = new System.Drawing.Point(3, 3);
             this.serverOutputBox.Name = "serverOutputBox";
             this.serverOutputBox.ReadOnly = true;
-            this.serverOutputBox.Size = new System.Drawing.Size(546, 373);
+            this.serverOutputBox.Size = new System.Drawing.Size(576, 396);
             this.serverOutputBox.TabIndex = 0;
             this.serverOutputBox.Text = "";
             // 
             // commandTextBox
             // 
             this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.commandTextBox.Location = new System.Drawing.Point(3, 382);
+            this.commandTextBox.Location = new System.Drawing.Point(3, 405);
             this.commandTextBox.Name = "commandTextBox";
-            this.commandTextBox.Size = new System.Drawing.Size(546, 20);
+            this.commandTextBox.Size = new System.Drawing.Size(576, 20);
             this.commandTextBox.TabIndex = 1;
             // 
             // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(552, 406);
+            this.ClientSize = new System.Drawing.Size(582, 429);
             this.Controls.Add(this.serverLayoutPanel);
             this.Name = "ServerForm";
             this.Text = "Server";
@@ -85,7 +87,7 @@ namespace OrtzIRC
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel serverLayoutPanel;
-        private System.Windows.Forms.RichTextBox serverOutputBox;
+        private ChannelText serverOutputBox;
         private System.Windows.Forms.TextBox commandTextBox;
 
     }

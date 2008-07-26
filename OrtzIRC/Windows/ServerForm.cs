@@ -13,16 +13,17 @@ namespace OrtzIRC
     {
         private Connection _con;
         private string _nick;
-        private Dictionary<string, ChannelForm> _channels;
+        private Dictionary<string, ChannelForm> _channels = new Dictionary<string,ChannelForm>();
         delegate void SetTextCallback(string text);
+        delegate void NewChannelCallback(string channel);
 
-        public ServerForm()
+        public ServerForm(ServerSettings settings)
         {
             InitializeComponent();
 
             //TODO: Get nick from settings
             _nick = "Ortz";
-            ConnectionArgs args = new ConnectionArgs(_nick, "irc.gamesurge.net");
+            ConnectionArgs args = new ConnectionArgs(_nick, settings.URI);
 
             _con = new Connection(args, false, false);
 
@@ -38,7 +39,7 @@ namespace OrtzIRC
             }
             catch (Exception e)
             {
-                ServerOutLine("Could not connect to server: " + e.Message);
+                this.AppendLine("Could not connect to server: " + e.Message);
             }
         }
 
@@ -59,41 +60,65 @@ namespace OrtzIRC
             }
         }
 
-        private void ServerOutLine(string line)
+        private void AppendLine(string line)
         {
 
             if (this.serverOutputBox.InvokeRequired)
             {
-                SetTextCallback d = new SetTextCallback(ServerOutLine);
+                SetTextCallback d = new SetTextCallback(AppendLine);
                 this.Invoke(d, new object[] { line });
             }
             else
             {
                 serverOutputBox.Text += "\n" + line.Trim();
             }
-
         }
 
         private void OnJoin(UserInfo user, string channel)
         {
             if (user.Nick == _nick)
             {
-                ServerOutLine("Joined: " + channel);
+                if (_channels.ContainsKey(channel))
+                {
+                    _channels[channel].AppendLine("Joined: " + channel);
+                }
+                else
+                {
+                    this.Invoke(new NewChannelCallback(NewChannel), new object[] { channel });
+                    //this.NewChannel(channel);
+                }
+
             }
             else
             {
-                ServerOutLine("<<" + user.Nick + ">> has joined " + channel);
+                _channels[channel].AppendLine("<<" + user.Nick + ">> has joined " + channel);
             }
+        }
+
+        private void NewChannel(string channel)
+        {
+            ChannelForm newChan = new ChannelForm();
+            newChan.Text = channel;
+            newChan.MdiParent = this.MdiParent;
+            newChan.AppendLine("Joined: " + channel);
+            _channels.Add(channel, newChan);
+            newChan.Show();
+            newChan.Focus();
         }
 
         private void OnPublic(UserInfo user, string channel, string message)
         {
-            ServerOutLine("<" + user.Nick + "> " + message);
+            _channels[channel].AppendLine("<" + user.Nick + "> " + message);
         }
 
         private void OnRegistered()
         {
-            _con.Sender.Join("#luahelp");
+            JoinChannel("#ortzirc");
+        }
+
+        private void JoinChannel(string channel)
+        {
+            _con.Sender.Join(channel);
         }
     }
 }
