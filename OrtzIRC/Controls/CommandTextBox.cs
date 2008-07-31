@@ -10,9 +10,62 @@ namespace OrtzIRC.Controls
 {
     public partial class CommandTextBox : TextBox
     {
+        public List<string> CmdHistory { get; private set; }
+        private int _historyIndex;
+
         public CommandTextBox()
         {
             InitializeComponent();
+
+            CmdHistory = new List<string>();
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                    if (_historyIndex > 0)
+                    {
+                        _historyIndex--;
+                        this.Text = CmdHistory[_historyIndex];
+                    }
+                    break;
+                case Keys.Down:
+                    if (_historyIndex == CmdHistory.Count && this.Text.Trim() != string.Empty)
+                    {
+                        CmdHistory.Add(this.Text);
+                        _historyIndex = CmdHistory.Count;
+                        this.Clear();
+                    }
+                    else if (_historyIndex == CmdHistory.Count - 1)
+                    {
+                        _historyIndex++;
+                        this.Clear();
+                    }
+                    else if (_historyIndex < CmdHistory.Count)
+                    {
+                        _historyIndex++;
+                        this.Text = CmdHistory[_historyIndex];
+                    }
+                    break;
+                case Keys.Enter:
+                    if (this.Text.Trim() != string.Empty)
+                    {
+                        if (_historyIndex != CmdHistory.Count)
+                        {
+                            CmdHistory.RemoveAt(_historyIndex);
+                        }
+                        CmdHistory.Add(this.Text);
+                        this.Clear();
+                        _historyIndex = CmdHistory.Count;
+
+                        //TODO: Parse command
+                    }
+                    break;
+            }
+
+            base.OnKeyDown(e);
         }
 
         protected override void OnPaint(PaintEventArgs pe)
