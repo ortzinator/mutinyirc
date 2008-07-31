@@ -31,6 +31,7 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.commandTextBox = new OrtzIRC.Controls.CommandTextBox();
             this.channelOutputBox = new OrtzIRC.Controls.ChannelText();
+            this.nickListBox = new OrtzIRC.Controls.NickListBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -41,6 +42,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 132F));
             this.tableLayoutPanel1.Controls.Add(this.commandTextBox, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.channelOutputBox, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.nickListBox, 1, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -68,6 +70,16 @@
             this.channelOutputBox.TabIndex = 1;
             this.channelOutputBox.Text = "";
             // 
+            // nickListBox
+            // 
+            this.nickListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nickListBox.FormattingEnabled = true;
+            this.nickListBox.Location = new System.Drawing.Point(700, 3);
+            this.nickListBox.Name = "nickListBox";
+            this.nickListBox.Size = new System.Drawing.Size(126, 485);
+            this.nickListBox.Sorted = true;
+            this.nickListBox.TabIndex = 2;
+            // 
             // ChannelForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -87,5 +99,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private OrtzIRC.Controls.CommandTextBox commandTextBox;
         private OrtzIRC.Controls.ChannelText channelOutputBox;
+        private OrtzIRC.Controls.NickListBox nickListBox;
     }
 }

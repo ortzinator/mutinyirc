@@ -12,13 +12,13 @@ namespace OrtzIRC
 
     public partial class MainForm : Form
     {
-        public static ArrayList serverList;
+        public static List<ServerForm> ServerList { get; private set; }
 
         public MainForm()
         {
             this.FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
             this.Load += new EventHandler(MainForm_Load);
-            MainForm.serverList = new ArrayList();
+            MainForm.ServerList = new List<ServerForm>();
             LoadServerList();
 
             InitializeComponent();
@@ -26,7 +26,7 @@ namespace OrtzIRC
 
         void MainForm_Load(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Do you wish to connect?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 ServerSettings settings = new ServerSettings("openircnet.ath.cx", "what", 6667, false);
                 ServerForm server = new ServerForm(settings);

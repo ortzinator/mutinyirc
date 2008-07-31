@@ -446,7 +446,8 @@ namespace Sharkbite.Irc
                             try
                             {
                                 ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 3);
-                                OnChannelModeChange(who, tokens[2], modes);
+                                string raw = CondenseStrings(tokens, 3);
+                                OnChannelModeChange(who, tokens[2], modes, raw);
                             }
                             catch (Exception e)
                             {
