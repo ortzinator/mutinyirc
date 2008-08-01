@@ -27,11 +27,14 @@ namespace OrtzIRC
             this.SSL = settings.Ssl;
             //network.AddServer(this);
 
+            this.ChanManager = new ChannelManager(this);
+
             this.Nick = "OrtzIRC";
 
             this.ServerView = new ServerForm(this);
             this.ServerView.MdiParent = parent;
             this.ServerView.Show();
+            this.ServerView.Focus();
             this.ServerView.AppendLine("Connecting...");
 
             ConnectionArgs args = new ConnectionArgs(this.Nick, settings.URI);
@@ -69,6 +72,7 @@ namespace OrtzIRC
 
         private void JoinChannel(string channel)
         {
+            ChanManager.NewChannel(channel);
             Connection.Sender.Join(channel);
         }
 
@@ -77,24 +81,9 @@ namespace OrtzIRC
             ChanManager.GetChannel(channel).AppendLine("<" + user.Nick + "> " + message);
         }
 
-        private bool recievingNames = false;
         private void OnNames(string channel, string[] nicks, bool last)
         {
-            if (!recievingNames)
-            {
-                ChanManager.GetChannel(channel).ResetNicks();
-                recievingNames = true;
-            }
-
-            foreach (string nick in nicks)
-            {
-                ChanManager.GetChannel(channel).AddNick(nick);
-            }
-
-            if (last)
-            {
-                recievingNames = false;
-            }
+            ChanManager.OnNames(channel, nicks, last);
         }
 
         private void OnJoin(UserInfo user, string channel)

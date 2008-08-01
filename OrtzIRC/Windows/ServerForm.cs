@@ -21,6 +21,8 @@ namespace OrtzIRC
         public ServerForm(Server parent)
         {
             InitializeComponent();
+
+            this.commandTextBox.Focus();
         }
 
         private void ServerForm_FormClosing(object sender, FormClosingEventArgs e)
