@@ -1,15 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+using OrtzIRC.Properties;
+using System.Collections;
+
 namespace OrtzIRC
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Drawing;
-    using System.Text;
-    using System.Windows.Forms;
-    using OrtzIRC.Properties;
-    using System.Collections;
-
     public partial class MainForm : Form
     {
         public static List<ServerForm> ServerList { get; private set; }
@@ -29,9 +29,7 @@ namespace OrtzIRC
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 ServerSettings settings = new ServerSettings("openircnet.ath.cx", "what", 6667, false);
-                ServerForm server = new ServerForm(settings);
-                server.MdiParent = this;
-                server.Show();
+                Server server = new Server(settings, this);
             }
         }
 

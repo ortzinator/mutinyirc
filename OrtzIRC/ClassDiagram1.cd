@@ -1,95 +1,160 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
-  <Class Name="OrtzIRC.Controls.CommandTextBox" Collapsed="true">
-    <Position X="2.25" Y="0.5" Width="1.5" />
+  <Class Name="OrtzIRC.Channel">
+    <Position X="0.5" Y="5.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AACAAAAAACAAAAAAAACAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>ACAAAAAAAAAABAQEAAAgAQQAAAAAAAAAAAAAAgAAAEA=</HashCode>
+      <FileName>Channel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FlamingIRC.Topic" Collapsed="true">
+    <Position X="7.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAACAAAAAA=</HashCode>
+      <FileName>Objects.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FlamingIRC.ClientMessage" Collapsed="true">
+    <Position X="3.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAAAAAAAACAAQAAAAAAAAAAAAAAAAQA=</HashCode>
+      <FileName>Objects.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FlamingIRC.IRCError" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Objects.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FlamingIRC.Message" Collapsed="true">
+    <Position X="3.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAAAAAAAAAAAAAAAAAABAAIAAAAAAAIAAA=</HashCode>
+      <FileName>Objects.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FlamingIRC.CTCP" Collapsed="true">
+    <Position X="2.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAA=</HashCode>
+      <FileName>Objects.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FlamingIRC.PrivMsg" Collapsed="true">
+    <Position X="5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Objects.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Server">
+    <Position X="5.75" Y="5.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>kAAAAAAAAACgAAEAEAFAYAAACDAAAAIBAgAAgAAAAAA=</HashCode>
+      <FileName>Server.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Controls.ChannelText" Collapsed="true">
+    <Position X="11.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAACAAAAAAAACAQAACAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Controls\ChannelText.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Controls.CommandTextBox" Collapsed="true">
+    <Position X="13.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAACAAAAAAAACAAAACAAIAAAAAAAAAAAAAgIA=</HashCode>
       <FileName>Controls\CommandTextBox.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="OrtzIRC.Controls.NickListBox" Collapsed="true">
+    <Position X="15" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAACAAACAAAIAAAACAAAACAAIAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Controls\NickListBox.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Class Name="OrtzIRC.Program" Collapsed="true">
-    <Position X="4" Y="1.5" Width="1.5" />
+    <Position X="9.75" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
       <FileName>Program.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.IRCSettingsManager" Collapsed="true">
-    <Position X="5.75" Y="0.5" Width="1.5" />
+    <Position X="9.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
       <FileName>ServerSettings.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.ChannelForm" Collapsed="true">
-    <Position X="0.5" Y="0.5" Width="1.5" />
+    <Position X="9.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAACAAAgAAAACAQAASEAAAAAAAAAAEAAAAACA=</HashCode>
+      <HashCode>AEAAACAAACEAAoAAAACAQAASEAAAAAAAAAAEAAAAACA=</HashCode>
       <FileName>Windows\ChannelForm.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.NewServerDialog" Collapsed="true">
-    <Position X="2.25" Y="1.5" Width="1.5" />
+    <Position X="13.25" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAACQAAAQAAAGAAAACAAAAAAAAgIAQAAAACQA=</HashCode>
       <FileName>Windows\Dialogs\NewServerDialog.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.MainForm" Collapsed="true">
-    <Position X="0.5" Y="1.5" Width="1.5" />
+    <Position X="11.5" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AIAAAACAAKAAgAAAAkCAEAACAIACABABAAAAAQAAAAA=</HashCode>
+      <HashCode>AIAAAACAAKAAgAAAAkCAEAACAIACAAABAAAQAQAAAAA=</HashCode>
       <FileName>Windows\MainForm.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.ServerForm" Collapsed="true">
-    <Position X="5.75" Y="2.5" Width="3" />
-    <NestedTypes>
-      <Delegate Name="OrtzIRC.ServerForm.SetTextCallback" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Windows\ServerForm.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Delegate>
-      <Delegate Name="OrtzIRC.ServerForm.NewChannelCallback" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Windows\ServerForm.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Delegate>
-    </NestedTypes>
+    <Position X="15" Y="2.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>CMAAAAAAACAAAgBAEAGAQABCAAMAAAIBAAAAgAAAAAA=</HashCode>
+      <HashCode>CIAAAAAAACAAAgBAAACAQAACAAAAAAAAAAAAAgAAAAA=</HashCode>
       <FileName>Windows\ServerForm.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.Properties.Resources" Collapsed="true">
-    <Position X="5.75" Y="1.5" Width="1.5" />
+    <Position X="11.5" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAABEAAAAQAAAAAAAAAAAAAAAIA=</HashCode>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.Dialogs.EditServerDialog" Collapsed="true">
-    <Position X="4" Y="0.5" Width="1.5" />
+    <Position X="15" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAIAACQAAAQAAAGAAAACAAAAAAAAAIAQAAAACQA=</HashCode>
       <FileName>Windows\Dialogs\EditServerDialog.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.Dialogs.ServerDialog" Collapsed="true">
-    <Position X="0.5" Y="2.5" Width="1.5" />
+    <Position X="13.25" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>EAAAAAAAACAAAAAAACCAAIACAAAAAAAAAEAAAAAgAAA=</HashCode>
       <FileName>Windows\Dialogs\ServerDialog.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Struct Name="OrtzIRC.NetworkSettings">
-    <Position X="0.5" Y="3.75" Width="1.5" />
+  <Class Name="OrtzIRC.ChannelManager">
+    <Position X="3" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAEAA=</HashCode>
+      <FileName>ChannelManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="OrtzIRC.NetworkSettings" Collapsed="true">
+    <Position X="9.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>ServerSettings.cs</FileName>
     </TypeIdentifier>
   </Struct>
-  <Struct Name="OrtzIRC.ServerSettings">
-    <Position X="2.5" Y="4" Width="1.75" />
+  <Struct Name="OrtzIRC.ServerSettings" Collapsed="true">
+    <Position X="11.5" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAABAgAAgEAAAAAAAACDAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>ServerSettings.cs</FileName>
