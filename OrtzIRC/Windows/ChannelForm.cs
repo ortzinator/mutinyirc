@@ -10,22 +10,25 @@ namespace OrtzIRC
 {
     public partial class ChannelForm : Form
     {
-        private Server _parent;
-        private string _channel;
+        private Server Server;
+        private string ChannelName;
+        private Channel Channel;
 
         public ChannelForm(Server parent, string channelName)
         {
             InitializeComponent();
 
-            _parent = parent;
-            _channel = channelName;
+            Server = parent;
+            ChannelName = channelName;
 
-            this.FormClosing += new FormClosingEventHandler(ChannelForm_FormClosing);
+            this.Text = channelName;
+            this.MdiParent = parent.ServerView.MdiParent;
+            this.commandTextBox.Focus();
         }
 
-        void ChannelForm_FormClosing(object sender, FormClosingEventArgs e)
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            _parent.Connection.Sender.Part(_channel);
+            Server.Connection.Sender.Part(ChannelName);
         }
 
         public void AppendLine(string line)
@@ -33,12 +36,12 @@ namespace OrtzIRC
             channelOutputBox.AppendLine(line);
         }
 
-        internal void AddNick(string nick)
+        public void AddNick(string nick)
         {
             nickListBox.AddNick(nick);
         }
 
-        internal void ResetNicks()
+        public void ResetNicks()
         {
             nickListBox.ResetNicks();
         }

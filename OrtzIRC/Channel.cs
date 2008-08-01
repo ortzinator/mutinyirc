@@ -25,6 +25,9 @@ namespace OrtzIRC
             Server = parent;
 
             ChannelView = new ChannelForm(Server, Name);
+            ChannelView.MdiParent = parent.ServerView.MdiParent;
+            ChannelView.Show();
+            ChannelView.Focus();
         }
 
         public void Act()
@@ -50,6 +53,16 @@ namespace OrtzIRC
         public void AppendLine(string line)
         {
             ChannelView.AppendLine(line);
+        }
+
+        public void AddNick(string nick)
+        {
+            ChannelView.AddNick(nick);
+        }
+
+        public void ResetNicks()
+        {
+            ChannelView.ResetNicks();
         }
     }
 }
