@@ -107,6 +107,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Channel.cs" />
+    <Compile Include="ChannelManager.cs" />
     <Compile Include="Controls\ChannelText.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -125,6 +127,9 @@
     <Compile Include="Controls\NickListBox.Designer.cs">
       <DependentUpon>NickListBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Nick.cs" />
+    <Compile Include="Objects.cs" />
+    <Compile Include="Server.cs" />
     <Compile Include="ServerSettings.cs" />
     <Compile Include="Windows\ChannelForm.cs">
       <SubType>Form</SubType>

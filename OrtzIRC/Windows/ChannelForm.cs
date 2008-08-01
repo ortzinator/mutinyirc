@@ -10,10 +10,10 @@ namespace OrtzIRC
 {
     public partial class ChannelForm : Form
     {
-        private ServerForm _parent;
+        private Server _parent;
         private string _channel;
 
-        public ChannelForm(ServerForm parent, string channelName)
+        public ChannelForm(Server parent, string channelName)
         {
             InitializeComponent();
 
@@ -25,7 +25,7 @@ namespace OrtzIRC
 
         void ChannelForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            _parent.Con.Sender.Part(_channel);
+            _parent.Connection.Sender.Part(_channel);
         }
 
         public void AppendLine(string line)
