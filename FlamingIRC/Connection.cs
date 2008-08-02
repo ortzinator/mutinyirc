@@ -1,5 +1,5 @@
 /*
- * Thresher IRC client library
+ * Thresher IRC socket library
  * Copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
  * This program is free software; you can redistribute it and/or
@@ -54,11 +54,17 @@ namespace Sharkbite.Irc
         /// </summary>
         public event RawMessageSentEventHandler OnRawMessageSent;
 
+        public event ConnectEventHandler OnConnectSuccess;
+
+        private AsyncCallback asynConnect;
+        private AsyncCallback asynReceive;
+        private AsyncCallback asynSend;
+
 
 #if SSL
-		private SecureTcpClient client;
+		private SecureTcpClient socket;
 #else
-        private TcpClient client;
+        private Socket socket;
 #endif
 
         private readonly Regex propertiesRegex;
@@ -156,9 +162,9 @@ namespace Sharkbite.Irc
         /// <summary>
         /// A read-only property indicating whether the connection 
         /// has been opened with the IRC server and the 
-        /// client has been successfully registered.
+        /// socket has been successfully registered.
         /// </summary>
-        /// <value>True if the client is connected and registered.</value>
+        /// <value>True if the socket is connected and registered.</value>
         public bool Registered
         {
             get
@@ -171,7 +177,7 @@ namespace Sharkbite.Irc
         /// has been opened with the IRC server (but not whether 
         /// registration has succeeded).
         /// </summary>
-        /// <value>True if the client is connected.</value>
+        /// <value>True if the socket is connected.</value>
         public bool Connected
         {
             get
@@ -181,7 +187,7 @@ namespace Sharkbite.Irc
         }
         /// <summary>
         /// By default the connection itself will handle the case
-        /// where, while attempting to register the client's nick
+        /// where, while attempting to register the socket's nick
         /// is already in use. It does this by simply appending
         /// 2 random numbers to the end of the nick. 
         /// </summary>
@@ -191,7 +197,7 @@ namespace Sharkbite.Irc
         /// in the replacement nickname.
         /// </remarks>
         /// <value>True if the connection should handle this case and
-        /// false if the client will handle it itself.</value>
+        /// false if the socket will handle it itself.</value>
         public bool HandleNickTaken
         {
             get
@@ -279,7 +285,7 @@ namespace Sharkbite.Irc
             }
         }
         /// <summary>
-        /// The amount of time that has passed since the client
+        /// The amount of time that has passed since the socket
         /// sent a command to the IRC server.
         /// </summary>
         /// <value>Read only TimeSpan</value>
@@ -497,13 +503,13 @@ namespace Sharkbite.Irc
 					options.VerificationType = CredentialVerification.None;
 					options.Flags = SecurityFlags.Default;
 					options.AllowedAlgorithms = SslAlgorithms.SECURE_CIPHERS;
-					client = new SecureTcpClient( options );		
-					client.Connect( connectionArgs.Hostname, connectionArgs.Port );
+					socket = new SecureTcpClient( options );		
+					socket.Connect( connectionArgs.Hostname, connectionArgs.Port );
 			
 				connected = true;
-				writer = new StreamWriter( client.GetStream(), TextEncoding );
+				writer = new StreamWriter( socket.GetStream(), TextEncoding );
 				writer.AutoFlush = true;
-				reader = new StreamReader(  client.GetStream(), TextEncoding );
+				reader = new StreamReader(  socket.GetStream(), TextEncoding );
 				socketListenThread = new Thread(new ThreadStart( ReceiveIRCMessages ) );
 				socketListenThread.Name = Name;
 				socketListenThread.Start();		
@@ -518,56 +524,52 @@ namespace Sharkbite.Irc
         /// Discard CTCP and DCC messages if these protocols
         /// are not enabled.
         /// </summary>
-        internal void ReceiveIRCMessages()
+        internal void ReceiveIRCMessages(IAsyncResult a)
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages()");
-            string line;
+
+            SocketPacket theSockId = (SocketPacket)a.AsyncState;
+            int iRx = socket.EndReceive(a);
+            char[] chars = new char[iRx + 1];
+            System.Text.Decoder d = System.Text.Encoding.UTF8.GetDecoder();
+            int charLen = d.GetChars(theSockId.dataBuffer, 0, iRx, chars, 0);
+            string line = new string(chars);
+
             try
             {
-                while ((line = reader.ReadLine()) != null)
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages() rec'd:" + line);
+                //Try any custom parsers first
+                if (CustomParse(line))
                 {
-                    try
+                    //One of the custom parsers handled this message so
+                    //we go back to listening
+                    WaitforData();
+                    return;
+                }
+                if (DccListener.IsDccRequest(line))
+                {
+                    if (dccEnabled)
                     {
-                        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages() rec'd:" + line);
-                        //Try any custom parsers first
-                        if (CustomParse(line))
-                        {
-                            //One of the custom parsers handled this message so
-                            //we go back to listening
-                            continue;
-                        }
-                        if (DccListener.IsDccRequest(line))
-                        {
-                            if (dccEnabled)
-                            {
-                                DccListener.DefaultInstance.Parse(this, line);
-                            }
-                        }
-                        else if (CtcpListener.IsCtcpMessage(line))
-                        {
-                            if (ctcpEnabled)
-                            {
-                                ctcpListener.Parse(line);
-                            }
-                        }
-                        else
-                        {
-                            listener.Parse(line);
-                        }
-                        if (OnRawMessageReceived != null)
-                        {
-                            OnRawMessageReceived(line);
-                        }
-                    }
-                    catch (ThreadAbortException e)
-                    {
-                        Thread.ResetAbort();
-                        //This exception is raised when the Thread
-                        //is stopped at user request, i.e. via Disconnect()
-                        //This will stop the read loop and close the connection.
-                        break;
+                        DccListener.DefaultInstance.Parse(this, line);
                     }
                 }
+                else if (CtcpListener.IsCtcpMessage(line))
+                {
+                    if (ctcpEnabled)
+                    {
+                        ctcpListener.Parse(line);
+                    }
+                }
+                else
+                {
+                    listener.Parse(line);
+                }
+                if (OnRawMessageReceived != null)
+                {
+                    OnRawMessageReceived(line);
+                }
+
+
             }
             catch (IOException e)
             {
@@ -575,12 +577,9 @@ namespace Sharkbite.Irc
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages() IO Error while listening for messages " + e);
                 listener.Error(ReplyCode.ConnectionFailed, "Connection to server unexpectedly failed.");
             }
-            //The connection to the IRC server has been closed either
-            //by client request or the server itself closed the connection.
-            client.Close();
-            registered = false;
-            connected = false;
-            listener.Disconnected();
+
+            //Loop back again
+            WaitforData();
         }
         /// <summary>
         /// Send a message to the IRC server and clear the command buffer.
@@ -589,7 +588,11 @@ namespace Sharkbite.Irc
         {
             try
             {
-                writer.WriteLine(command.ToString());
+                NetworkStream networkStream = new NetworkStream(socket);
+                System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(networkStream);
+                streamWriter.WriteLine(command.ToString());
+                streamWriter.Flush();
+
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() sent= " + command);
                 timeLastSent = DateTime.Now;
             }
@@ -605,14 +608,18 @@ namespace Sharkbite.Irc
         }
         /// <summary>
         /// Send a message to the IRC server which does
-        /// not affect the client's idle time. Used for automatic replies
+        /// not affect the socket's idle time. Used for automatic replies
         /// such as PONG or Ctcp repsones.
         /// </summary>
         internal void SendAutomaticReply(StringBuilder command)
         {
             try
             {
-                writer.WriteLine(command.ToString());
+                NetworkStream networkStream = new NetworkStream(socket);
+                System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(networkStream);
+                streamWriter.WriteLine(command.ToString());
+                streamWriter.Flush();
+
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() message=" + command);
             }
             catch (Exception e)
@@ -661,19 +668,42 @@ namespace Sharkbite.Irc
                     throw new Exception("Connection with IRC server already opened.");
                 }
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
-                client = new TcpClient();
-                client.Connect(connectionArgs.Hostname, connectionArgs.Port);
-                connected = true;
-                writer = new StreamWriter(client.GetStream(), TextEncoding);
-                writer.AutoFlush = true;
-                reader = new StreamReader(client.GetStream(), TextEncoding);
-                socketListenThread = new Thread(new ThreadStart(ReceiveIRCMessages));
-                socketListenThread.Name = Name;
-                socketListenThread.Start();
-                sender.RegisterConnection(connectionArgs);
+
+
+                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                if (asynConnect == null)
+                    asynConnect = new AsyncCallback(ConnectCallback);
+
+                socket.BeginConnect(connectionArgs.Hostname, connectionArgs.Port, asynConnect, null);
             }
         }
+
+
 #endif
+        private void ConnectCallback(IAsyncResult asyn)
+        {
+            connected = true;
+            if (OnConnectSuccess != null)
+                OnConnectSuccess();
+
+            WaitforData();
+            sender.RegisterConnection(connectionArgs);
+
+            socket.EndConnect(asyn);
+        }
+
+        private void WaitforData()
+        {
+            if (asynReceive == null)
+                asynReceive = new AsyncCallback(ReceiveIRCMessages);
+
+            SocketPacket packet = new SocketPacket();
+            packet.thisSocket = this.socket;
+
+            socket.BeginReceive(packet.dataBuffer, 0, packet.dataBuffer.Length, SocketFlags.None, asynReceive, packet);
+        }
+
         /// <summary>
         /// Sends a 'Quit' message to the server, closes the connection,
         /// and stops the listening thread. 
@@ -686,9 +716,8 @@ namespace Sharkbite.Irc
             lock (this)
             {
                 if (!connected)
-                {
                     throw new Exception("Not connected to IRC server.");
-                }
+
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Disconnect()");
                 listener.Disconnecting();
                 sender.Quit(reason);
@@ -728,5 +757,11 @@ namespace Sharkbite.Irc
             parsers.Remove(parser);
         }
 
+    }
+
+    public class SocketPacket
+    {
+        public System.Net.Sockets.Socket thisSocket;
+        public byte[] dataBuffer = new byte[512];
     }
 }

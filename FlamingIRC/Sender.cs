@@ -107,6 +107,7 @@ namespace Sharkbite.Irc
 				Buffer.Append(SPACE);
 				Buffer.Append('*');
 				Buffer.Append(SPACE);
+                Buffer.Append(':');
 				Buffer.Append( args.RealName );
 				Connection.SendCommand( Buffer );
 			}
@@ -132,7 +133,7 @@ namespace Sharkbite.Irc
 				if( IsEmpty( reason ) ) 
 				{
 					ClearBuffer();
-					throw new ArgumentException("Quite reason cannot be null or empty.");
+					throw new ArgumentException("Quit reason cannot be null or empty.");
 				}
 				Buffer.Append(SPACE_COLON);
 				if (reason.Length > 502) 

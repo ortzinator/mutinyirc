@@ -48,6 +48,8 @@ namespace OrtzIRC
             Connection.Listener.OnChannelModeChange += new ChannelModeChangeEventHandler(OnChannelModeChange);
             Connection.Listener.OnError += new ErrorMessageEventHandler(OnError);
 
+            Connection.OnConnectSuccess += new ConnectEventHandler(OnConnectSuccess);
+
             try
             {
                 Connection.Connect();
@@ -56,6 +58,11 @@ namespace OrtzIRC
             {
                 this.AppendLine("Could not connect to server: " + e.Message);
             }
+        }
+
+        void OnConnectSuccess()
+        {
+            ServerView.AppendLine("Connected!");
         }
 
         private void AppendLine(string line)
@@ -116,7 +123,6 @@ namespace OrtzIRC
 
         private void OnRegistered()
         {
-            this.AppendLine("Connected to server");
             JoinChannel("#ortzirc");
         }
 
