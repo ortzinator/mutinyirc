@@ -534,6 +534,7 @@ namespace Sharkbite.Irc
             System.Text.Decoder d = System.Text.Encoding.UTF8.GetDecoder();
             int charLen = d.GetChars(theSockId.dataBuffer, 0, iRx, chars, 0);
             string line = new string(chars);
+            line = line.Trim();
 
             try
             {

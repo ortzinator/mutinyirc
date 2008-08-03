@@ -14,16 +14,25 @@ namespace OrtzIRC
         private string ChannelName;
         private Channel Channel;
 
-        public ChannelForm(Server parent, string channelName)
+        private delegate void SyncDelegate();
+
+        public ChannelForm(Server server, string channelName)
         {
             InitializeComponent();
 
-            Server = parent;
+            Server = server;
             ChannelName = channelName;
 
             this.Text = channelName;
-            this.MdiParent = parent.ServerView.MdiParent;
+
+            this.Server.ServerView.Invoke(new SyncDelegate(SetMdi));
+            
             this.commandTextBox.Focus();
+        }
+
+        private void SetMdi()
+        {
+            this.MdiParent = this.Server.ServerView.MdiParent;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

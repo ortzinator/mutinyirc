@@ -22,10 +22,12 @@ namespace OrtzIRC
         {
             InitializeComponent();
 
+            Server = parent;
+
             this.commandTextBox.Focus();
         }
 
-        private void ServerForm_FormClosing(object sender, FormClosingEventArgs e)
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (Server.Connection.Connected)
             {
@@ -40,6 +42,8 @@ namespace OrtzIRC
                     e.Cancel = true;
                 }
             }
+
+            base.OnFormClosing(e);
         }
 
         public void AppendLine(string line)

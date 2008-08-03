@@ -20,12 +20,19 @@ namespace OrtzIRC
         //public Topic Topic { get; private set; }
         public bool InChannel { get; private set; }
 
+        private delegate void SyncDelegate();
+
         public Channel(Server parent, string Name)
         {
             Server = parent;
 
             ChannelView = new ChannelForm(Server, Name);
-            ChannelView.MdiParent = parent.ServerView.MdiParent;
+            ChannelView.Invoke(new SyncDelegate(SetupView));
+        }
+
+        private void SetupView()
+        {
+            ChannelView.MdiParent = this.Server.ServerView.MdiParent;
             ChannelView.Show();
             ChannelView.Focus();
         }
