@@ -210,7 +210,7 @@
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
       <Visible>False</Visible>
       <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
-      <Install>true</Install>
+      <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
       <Visible>False</Visible>
@@ -220,7 +220,7 @@
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5</ProductName>
-      <Install>false</Install>
+      <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>

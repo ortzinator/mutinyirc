@@ -60,6 +60,8 @@ namespace Sharkbite.Irc
         private AsyncCallback asynReceive;
         private AsyncCallback asynSend;
 
+        private string buffer;
+
 
 #if SSL
 		private SecureTcpClient socket;
@@ -75,7 +77,6 @@ namespace Sharkbite.Irc
         private CtcpResponder ctcpResponder;
         private bool ctcpEnabled;
         private bool dccEnabled;
-        private Thread socketListenThread;
         private StreamReader reader;
         private DateTime timeLastSent;
         //Connected and registered with IRC server
@@ -524,17 +525,9 @@ namespace Sharkbite.Irc
         /// Discard CTCP and DCC messages if these protocols
         /// are not enabled.
         /// </summary>
-        internal void ReceiveIRCMessages(IAsyncResult a)
+        internal void ReceiveIRCMessages(string line)
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages()");
-
-            SocketPacket theSockId = (SocketPacket)a.AsyncState;
-            int iRx = socket.EndReceive(a);
-            char[] chars = new char[iRx + 1];
-            System.Text.Decoder d = System.Text.Encoding.UTF8.GetDecoder();
-            int charLen = d.GetChars(theSockId.dataBuffer, 0, iRx, chars, 0);
-            string line = new string(chars);
-            line = line.Trim();
 
             try
             {
@@ -569,8 +562,6 @@ namespace Sharkbite.Irc
                 {
                     OnRawMessageReceived(line);
                 }
-
-
             }
             catch (IOException e)
             {
@@ -578,10 +569,50 @@ namespace Sharkbite.Irc
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages() IO Error while listening for messages " + e);
                 listener.Error(ReplyCode.ConnectionFailed, "Connection to server unexpectedly failed.");
             }
-
-            //Loop back again
-            WaitforData();
         }
+
+        /// <summary>
+        /// //TODO
+        /// </summary>
+        private void BuildBuffer(IAsyncResult a)
+        {
+            SocketPacket theSockId = (SocketPacket)a.AsyncState;
+
+            char[] chars = new char[theSockId.dataBuffer.Length + 1];
+            System.Text.Decoder d = System.Text.Encoding.UTF8.GetDecoder();
+            int charLen = d.GetChars(theSockId.dataBuffer, 0, theSockId.dataBuffer.Length, chars, 0);
+            string line = new string(chars);
+            line = line.TrimEnd("\0".ToCharArray());
+
+            if (line.Contains("\r\n"))
+            {
+                socket.EndReceive(a);
+
+                string[] segments = line.Split("\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string s in segments)
+                {
+                    if (s.EndsWith("\r"))
+                    {
+                        this.ReceiveIRCMessages(buffer + s.Trim());
+                        buffer = String.Empty;
+                    }
+                    else
+                    {
+                        buffer += s;
+                    }
+                }
+
+                //Loop back again
+                WaitforData();
+            }
+            else
+            {
+                buffer += line;
+            }
+
+        }
+
         /// <summary>
         /// Send a message to the IRC server and clear the command buffer.
         /// </summary>
@@ -697,7 +728,7 @@ namespace Sharkbite.Irc
         private void WaitforData()
         {
             if (asynReceive == null)
-                asynReceive = new AsyncCallback(ReceiveIRCMessages);
+                asynReceive = new AsyncCallback(BuildBuffer);
 
             SocketPacket packet = new SocketPacket();
             packet.thisSocket = this.socket;
@@ -706,12 +737,11 @@ namespace Sharkbite.Irc
         }
 
         /// <summary>
-        /// Sends a 'Quit' message to the server, closes the connection,
-        /// and stops the listening thread. 
+        /// Sends a 'Quit' message to the server, and closes the connection.
         /// </summary>
         /// <remarks>The state of the connection will remain the same even after a disconnect,
         /// so the connection can be reopened. All the event handlers will remain registered.</remarks>
-        /// <param name="reason">A message displayed to IRC users upon disconnect.</param>
+        /// <param name="reason">A message displayed to other IRC users upon disconnect.</param>
         public void Disconnect(string reason)
         {
             lock (this)
@@ -723,9 +753,6 @@ namespace Sharkbite.Irc
                 listener.Disconnecting();
                 sender.Quit(reason);
                 listener.Disconnected();
-                //Thanks to Thomas for this next block
-                if (socketListenThread.Join(TimeSpan.FromSeconds(1)) == false)
-                    socketListenThread.Abort();
             }
         }
         /// <summary>

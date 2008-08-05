@@ -35,6 +35,8 @@ namespace OrtzIRC.Controls
                 DateTime now = DateTime.Now;
                 this.Text += "\n" + now.ToString("T",
                   CultureInfo.CreateSpecificCulture("es-ES")) + " " + line.Trim();
+                this.SelectionStart = this.Text.Length;
+                this.SelectionLength = 0;
             }
         }
     }

@@ -18,6 +18,7 @@ namespace OrtzIRC
         public ServerForm ServerView { get; private set; }
 
         public ChannelManager ChanManager { get; private set; }
+        private delegate void NewChannelCallback(string channel);
 
         public Server(ServerSettings settings, Form parent)
         {
@@ -47,6 +48,7 @@ namespace OrtzIRC
             Connection.Listener.OnNames += new NamesEventHandler(OnNames);
             Connection.Listener.OnChannelModeChange += new ChannelModeChangeEventHandler(OnChannelModeChange);
             Connection.Listener.OnError += new ErrorMessageEventHandler(OnError);
+            Connection.OnRawMessageReceived += new RawMessageReceivedEventHandler(OnRawMessageReceived);
 
             Connection.OnConnectSuccess += new ConnectEventHandler(OnConnectSuccess);
 
@@ -60,12 +62,17 @@ namespace OrtzIRC
             }
         }
 
+        void OnRawMessageReceived(string message)
+        {
+            this.AppendLine(@message + "\n");
+        }
+
         void OnConnectSuccess()
         {
             ServerView.AppendLine("Connected!");
         }
 
-        private void AppendLine(string line)
+        public void AppendLine(string line)
         {
             ServerView.AppendLine(line);
         }
@@ -74,7 +81,6 @@ namespace OrtzIRC
         {
             //TODO: de-crappify this
             ChanManager.NewChannel(channelName);
-            ChanManager.GetChannel(channelName).AppendLine("Joined: " + channelName);
         }
 
         private void JoinChannel(string channel)
@@ -99,14 +105,11 @@ namespace OrtzIRC
             {
                 if (ChanManager.InChannel(channel))
                 {
+                    //ServerView.Invoke(new NewChannelCallback(NewChannel), new object[] { channel });
+                    //this.NewChannel(channel);
                     ChanManager.GetChannel(channel).AppendLine("Joined: " + channel);
                 }
-                else
-                {
-                    //this.Invoke(new NewChannelCallback(NewChannel), new object[] { channel });
-                    //this.NewChannel(channel);
-                }
-
+                
             }
             else
             {

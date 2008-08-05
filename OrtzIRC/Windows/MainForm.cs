@@ -12,13 +12,14 @@ namespace OrtzIRC
 {
     public partial class MainForm : Form
     {
-        public static List<ServerForm> ServerList { get; private set; }
+        public static List<Server> ServerList { get; private set; }
+        //TODO: ServerManager
 
         public MainForm()
         {
             this.FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
             this.Load += new EventHandler(MainForm_Load);
-            MainForm.ServerList = new List<ServerForm>();
+            MainForm.ServerList = new List<Server>();
             LoadServerList();
 
             InitializeComponent();
