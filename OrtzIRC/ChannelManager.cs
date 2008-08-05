@@ -22,12 +22,15 @@ namespace OrtzIRC
 
         public bool InChannel(string channelName)
         {
-            return Channels.ContainsKey(channelName) && Channels[channelName].InChannel;
+            return Channels.ContainsKey(channelName);
         }
 
         internal void CloseAll()
         {
-            throw new NotImplementedException();
+            foreach (KeyValuePair<string, Channel> chan in Channels)
+            {
+                chan.Value.ChannelView.Close();
+            }
         }
 
         public Channel NewChannel(string channelName)
@@ -54,6 +57,8 @@ namespace OrtzIRC
             if (last)
             {
                 recievingNames = false;
+                Server.AppendLine("NAMES received for " + channel);
+                //GetChannel(channel).ChannelView.RefreshNicks();
             }
         }
     }

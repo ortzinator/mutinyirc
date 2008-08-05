@@ -48,19 +48,7 @@ namespace OrtzIRC
 
         public void AppendLine(string line)
         {
-
-            if (this.serverOutputBox.InvokeRequired)
-            {
-                SetTextCallback d = new SetTextCallback(AppendLine);
-                this.Invoke(d, new object[] { line });
-            }
-            else
-            {
-                serverOutputBox.Text += "\n" + line.Trim();
-            }
+            serverOutputBox.AppendLine(line);
         }
-
-        
-
     }
 }

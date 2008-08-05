@@ -16,17 +16,19 @@ namespace OrtzIRC
 
         private delegate void SyncDelegate();
 
-        public ChannelForm(Server server, string channelName)
+        public ChannelForm(Channel channel, Server server, string channelName)
         {
             InitializeComponent();
 
             Server = server;
             ChannelName = channelName;
+            Channel = channel;
 
             this.Text = channelName;
+            this.nickListBox.DataSource = channel.NickList;
 
             this.Server.ServerView.Invoke(new SyncDelegate(SetMdi));
-            
+
             this.commandTextBox.Focus();
         }
 
@@ -43,16 +45,7 @@ namespace OrtzIRC
         public void AppendLine(string line)
         {
             channelOutputBox.AppendLine(line);
-        }
-
-        public void AddNick(string nick)
-        {
-            nickListBox.AddNick(nick);
-        }
-
-        public void ResetNicks()
-        {
-            nickListBox.ResetNicks();
+            //channelOutputBox.AppendLine(this.nickListBox.BindingContext.ToString());
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
   <Class Name="OrtzIRC.Channel">
-    <Position X="0.5" Y="5.75" Width="1.5" />
+    <Position X="16.25" Y="6.25" Width="1.75" />
     <NestedTypes>
       <Delegate Name="OrtzIRC.Channel.SyncDelegate" Collapsed="true">
         <TypeIdentifier>
@@ -10,9 +10,13 @@
       </Delegate>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>ACAAACAIIAAABIYAAAAgQQQAAAAAAAAAAAAAAgAAAEA=</HashCode>
+      <HashCode>ACAAACAIIAAAAIQAAAAAQQQAAAAAIAAAAAAAAgACAAA=</HashCode>
       <FileName>Channel.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Server" />
+      <Property Name="ChannelView" />
+    </ShowAsAssociation>
   </Class>
   <Class Name="FlamingIRC.Topic" Collapsed="true">
     <Position X="7.25" Y="1.75" Width="1.5" />
@@ -57,11 +61,24 @@
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.Server">
-    <Position X="5.75" Y="5.25" Width="2" />
+    <Position X="21.25" Y="5.5" Width="2.25" />
+    <AssociationLine Name="ChanManager" Type="OrtzIRC.ChannelManager" ManuallyRouted="true">
+      <Path>
+        <Point X="21.625" Y="9.492" />
+        <Point X="21.625" Y="10.25" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.07" Y="0.089" />
+      </MemberNameLabel>
+    </AssociationLine>
     <TypeIdentifier>
       <HashCode>EAAAAAAAAgCgAAEAEAFAYAAACDAAAAIBAgAAgAAAAAA=</HashCode>
       <FileName>Server.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="ServerView" />
+      <Property Name="ChanManager" />
+    </ShowAsAssociation>
   </Class>
   <Class Name="OrtzIRC.Controls.ChannelText" Collapsed="true">
     <Position X="11.5" Y="0.5" Width="1.5" />
@@ -77,8 +94,20 @@
       <FileName>Controls\CommandTextBox.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="OrtzIRC.Controls.NickListBox" Collapsed="true">
-    <Position X="15" Y="1.5" Width="1.5" />
+  <Class Name="OrtzIRC.Controls.NickListBox">
+    <Position X="16.25" Y="14.5" Width="2" />
+    <NestedTypes>
+      <Delegate Name="OrtzIRC.Controls.NickListBox.ResetNicksDelegate" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Controls\NickListBox.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="OrtzIRC.Controls.NickListBox.AddNickDelegate" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Controls\NickListBox.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
     <TypeIdentifier>
       <HashCode>AACAACAAACAAAIAAAACAAAACAAIAAAAAAAACAAAAAAA=</HashCode>
       <FileName>Controls\NickListBox.cs</FileName>
@@ -92,18 +121,28 @@
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.IRCSettingsManager" Collapsed="true">
-    <Position X="9.75" Y="1.5" Width="1.5" />
+    <Position X="9.75" Y="1.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
       <FileName>ServerSettings.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="OrtzIRC.ChannelForm" Collapsed="true">
-    <Position X="9.75" Y="0.5" Width="1.5" />
+  <Class Name="OrtzIRC.ChannelForm">
+    <Position X="16.25" Y="9.75" Width="2.5" />
+    <NestedTypes>
+      <Delegate Name="OrtzIRC.ChannelForm.SyncDelegate" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Windows\ChannelForm.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAAAACAgACEAAoIAAACAQAACAkAAAAAAAAAEAgAAACA=</HashCode>
+      <HashCode>AAAAACAgACEAAoYAAACAQAACAkAAAAAAAAAEAgAAACg=</HashCode>
       <FileName>Windows\ChannelForm.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="nickListBox" />
+    </ShowAsAssociation>
   </Class>
   <Class Name="OrtzIRC.NewServerDialog" Collapsed="true">
     <Position X="13.25" Y="1.5" Width="1.5" />
@@ -112,17 +151,32 @@
       <FileName>Windows\Dialogs\NewServerDialog.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="OrtzIRC.MainForm" Collapsed="true">
-    <Position X="11.5" Y="1.5" Width="1.5" />
+  <Class Name="OrtzIRC.MainForm">
+    <Position X="20.75" Y="0.5" Width="3" />
     <TypeIdentifier>
       <HashCode>AIAAAACAAKAAgAAAAkCAEAACAIACAAABAAAQAQAAAAA=</HashCode>
       <FileName>Windows\MainForm.cs</FileName>
     </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="ServerList" />
+    </ShowAsCollectionAssociation>
   </Class>
-  <Class Name="OrtzIRC.ServerForm" Collapsed="true">
-    <Position X="15" Y="2.5" Width="1.5" />
+  <Class Name="OrtzIRC.ServerForm">
+    <Position X="24.75" Y="6" Width="2.5" />
+    <NestedTypes>
+      <Delegate Name="OrtzIRC.ServerForm.SetTextCallback" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Windows\ServerForm.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="OrtzIRC.ServerForm.NewChannelCallback" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Windows\ServerForm.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
     <TypeIdentifier>
-      <HashCode>CIAAAAAAACAAAgBAAACAQAACAAAAAAAAAAAAAgAAAAA=</HashCode>
+      <HashCode>AIAAAAAAACAAAgBAAACAQAACAEAAAAAAAAAAAgAAAAA=</HashCode>
       <FileName>Windows\ServerForm.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -147,11 +201,14 @@
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.ChannelManager">
-    <Position X="3" Y="6" Width="1.5" />
+    <Position X="20" Y="10.25" Width="2" />
     <TypeIdentifier>
       <HashCode>gAAAAAAAIAAAAAAAAAFAAAAAAAAAAAAAAgAAAgAAEAI=</HashCode>
       <FileName>ChannelManager.cs</FileName>
     </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Channels" />
+    </ShowAsCollectionAssociation>
   </Class>
   <Struct Name="OrtzIRC.NetworkSettings" Collapsed="true">
     <Position X="9.75" Y="3.75" Width="1.5" />

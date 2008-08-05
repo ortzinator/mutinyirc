@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.ComponentModel;
 
 namespace OrtzIRC
 {
@@ -16,17 +17,19 @@ namespace OrtzIRC
         public string Key { get; private set; }
         public int Limit { get; private set; }
         public string Name { get; private set; }
-        //public List<Nick> NickList { get; private set; }
+        public BindingList<string> NickList { get; private set; }
         //public Topic Topic { get; private set; }
-        public bool InChannel { get; private set; }
 
         private delegate void SyncDelegate();
 
-        public Channel(Server parent, string Name)
+        public Channel(Server parent, string name)
         {
-            Server = parent;
+            this.Server = parent;
+            this.Name = name;
 
-            ChannelView = new ChannelForm(Server, Name);
+            NickList = new BindingList<string>();
+
+            ChannelView = new ChannelForm(this, Server, Name);
             ChannelView.Invoke(new SyncDelegate(SetupView));
         }
 
@@ -37,26 +40,6 @@ namespace OrtzIRC
             ChannelView.Focus();
         }
 
-        public void Act()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Say()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Method()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void ChangeTopic(string topic)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public void AppendLine(string line)
         {
             ChannelView.AppendLine(line);
@@ -64,12 +47,13 @@ namespace OrtzIRC
 
         public void AddNick(string nick)
         {
-            ChannelView.AddNick(nick);
+            //ChannelView.AddNick(nick);
+            NickList.Add(nick);
         }
 
         public void ResetNicks()
         {
-            ChannelView.ResetNicks();
+            NickList.Clear();
         }
     }
 }
