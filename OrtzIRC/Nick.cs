@@ -2,46 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FlamingIRC
+namespace OrtzIRC
 {
     /// <summary>
     /// Represents a user in a single channel
     /// </summary>
     public class Nick : Target
     {
-        private string _hostMask;
-
-        public string HostMask
-        {
-            get { return _hostMask; }
-            set { _hostMask = value; }
-        }
-        private string _name;
-
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
-        private string _realName;
-
-        public string RealName
-        {
-            get { return _realName; }
-            set { _realName = value; }
-        }
-        private string _userName;
-
-        public string UserName
-        {
-            get { return _userName; }
-            set { _userName = value; }
-        }
-
-        public override string ToString()
-        {
-            throw new NotImplementedException();
-        }
+        public string Name { get; set; }
+        public string RealName { get; set; }
+        public string HostMask { get; set; }
+        public string UserName { get; set; }
 
         public static Nick Empty
         {
@@ -49,6 +20,20 @@ namespace FlamingIRC
             {
                 return new Nick();
             }
+        }
+
+        public static Nick FromUserInfo(Sharkbite.Irc.UserInfo info)
+        {
+            var nick = new Nick();
+            nick.HostMask = info.Hostname;
+            nick.Name = info.Nick;
+
+            return nick;
+        }
+
+        public override string ToString()
+        {
+            throw new NotImplementedException();
         }
     }
 }

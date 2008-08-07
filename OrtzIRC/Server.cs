@@ -1,12 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Forms;
 using Sharkbite.Irc;
 using OrtzIRC;
-using System.Windows.Forms;
 
 namespace OrtzIRC
 {
+    public delegate void Server_SelfJoinEventHandler(Channel chan);
+    public delegate void Server_OtherJoinEventHandler(Nick nick, Channel chan);
+    public delegate void Server_PartEventHandler(Nick nick, Channel chan, string message);
+    public delegate void Server_ConnectingEventHandler();
+    public delegate void Server_ConnectFailedEventHandler(string message);
+    public delegate void Server_PublicMessageEventHandler(Nick nick, Channel chan, string message);
+    public delegate void Server_ChannelModeChangeEventHandler(Nick nick, Channel chan, ChannelModeInfo[] modes, string raw);
+
     public class Server
     {
         public string URI { get; set; }
@@ -14,15 +22,30 @@ namespace OrtzIRC
         public int Port { get; set; }
         public bool SSL { get; set; }
         public Connection Connection { get; private set; }
-        public string Nick { get; private set; }
-        public ServerForm ServerView { get; private set; }
+        public string UserNick { get; private set; }
+        public string Name { get; private set; }
 
         public ChannelManager ChanManager { get; private set; }
+
         private delegate void NewChannelCallback(string channel);
 
-        public Server(ServerSettings settings, Form parent)
+        public event Server_SelfJoinEventHandler OnJoinSelf;
+        public event Server_ConnectingEventHandler OnConnecting;
+        public event Server_OtherJoinEventHandler OnJoinOther;
+        public event Server_ConnectFailedEventHandler OnConnectFail;
+        public event RawMessageReceivedEventHandler OnRawMessageReceived;
+        public event Server_PublicMessageEventHandler OnPublicMessage;
+        public event ConnectEventHandler OnConnectSuccess;
+        public event ErrorMessageEventHandler OnError;
+        public event RegisteredEventHandler OnRegistered;
+        public event Server_PartEventHandler OnPart;
+        public event Server_ChannelModeChangeEventHandler OnChannelModeChange;
+        public event DisconnectingEventHandler OnDisconnecting;
+        public event DisconnectedEventHandler OnDisconnected;
+
+        public Server(ServerSettings settings)
         {
-            this.URI = settings.URI;
+            this.URI = settings.Uri;
             this.Description = settings.Description;
             this.Port = settings.Port;
             this.SSL = settings.Ssl;
@@ -30,27 +53,23 @@ namespace OrtzIRC
 
             this.ChanManager = new ChannelManager(this);
 
-            this.Nick = "OrtzIRC";
+            this.UserNick = "OrtzIRC";
 
-            this.ServerView = new ServerForm(this);
-            this.ServerView.MdiParent = parent;
-            this.ServerView.Show();
-            this.ServerView.Focus();
-            this.ServerView.AppendLine("Connecting...");
-
-            ConnectionArgs args = new ConnectionArgs(this.Nick, settings.URI);
+            ConnectionArgs args = new ConnectionArgs(this.UserNick, settings.Uri);
             this.Connection = new Connection(args, false, false);
 
-            Connection.Listener.OnJoin += new JoinEventHandler(OnJoin);
-            Connection.Listener.OnPart += new PartEventHandler(OnPart);
-            Connection.Listener.OnPublic += new PublicMessageEventHandler(OnPublic);
-            Connection.Listener.OnRegistered += new RegisteredEventHandler(OnRegistered);
-            Connection.Listener.OnNames += new NamesEventHandler(OnNames);
-            Connection.Listener.OnChannelModeChange += new ChannelModeChangeEventHandler(OnChannelModeChange);
-            Connection.Listener.OnError += new ErrorMessageEventHandler(OnError);
-            Connection.OnRawMessageReceived += new RawMessageReceivedEventHandler(OnRawMessageReceived);
+            Connection.Listener.OnJoin += new JoinEventHandler(Listener_OnJoin);
+            Connection.Listener.OnPart += new PartEventHandler(Listener_OnPart);
+            Connection.Listener.OnPublic += new PublicMessageEventHandler(Listener_OnPublic);
+            Connection.Listener.OnRegistered += new RegisteredEventHandler(Listener_OnRegistered);
+            Connection.Listener.OnNames += new NamesEventHandler(Listener_OnNames);
+            Connection.Listener.OnChannelModeChange += new ChannelModeChangeEventHandler(Listener_OnChannelModeChange);
+            Connection.Listener.OnError += new ErrorMessageEventHandler(Listener_OnError);
+            Connection.Listener.OnDisconnecting += new DisconnectingEventHandler(Listener_OnDisconnecting);
+            Connection.Listener.OnDisconnected += new DisconnectedEventHandler(Listener_OnDisconnected);
 
-            Connection.OnConnectSuccess += new ConnectEventHandler(OnConnectSuccess);
+            Connection.OnRawMessageReceived += new RawMessageReceivedEventHandler(Connection_OnRawMessageReceived);
+            Connection.OnConnectSuccess += new ConnectEventHandler(Connection_OnConnectSuccess);
 
             try
             {
@@ -58,86 +77,96 @@ namespace OrtzIRC
             }
             catch (Exception e)
             {
-                this.AppendLine("Could not connect to server: " + e.Message);
+                if (OnConnectFail != null)
+                    OnConnectFail(e.Message);
             }
         }
 
-        void OnRawMessageReceived(string message)
+        public Server(string uri, string description, int port, bool ssl) : this(new ServerSettings(uri, description, port, ssl)) { }
+
+        void Listener_OnDisconnected()
         {
-            this.AppendLine(@message + "\n");
+            if (OnDisconnected != null)
+                OnDisconnected();
         }
 
-        void OnConnectSuccess()
+        void Listener_OnDisconnecting()
         {
-            ServerView.AppendLine("Connected!");
+            if (OnDisconnecting != null)
+                OnDisconnecting();
         }
 
-        public void AppendLine(string line)
+        void Connection_OnRawMessageReceived(string message)
         {
-            ServerView.AppendLine(line);
+            if (OnRawMessageReceived != null)
+                OnRawMessageReceived(message);
         }
 
-        private void NewChannel(string channelName)
+        void Connection_OnConnectSuccess()
         {
-            //TODO: de-crappify this
-            ChanManager.NewChannel(channelName);
+            if (OnConnectSuccess != null)
+                OnConnectSuccess();
         }
 
-        private void JoinChannel(string channel)
+        private void Listener_OnPublic(UserInfo user, string channel, string message)
         {
-            ChanManager.NewChannel(channel);
-            Connection.Sender.Join(channel);
+            if (OnPublicMessage != null)
+                OnPublicMessage(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), message);
         }
 
-        private void OnPublic(UserInfo user, string channel, string message)
-        {
-            ChanManager.GetChannel(channel).AppendLine("<" + user.Nick + "> " + message);
-        }
-
-        private void OnNames(string channel, string[] nicks, bool last)
+        private void Listener_OnNames(string channel, string[] nicks, bool last)
         {
             ChanManager.OnNames(channel, nicks, last);
         }
 
-        private void OnJoin(UserInfo user, string channel)
+        private void Listener_OnJoin(UserInfo user, string channel)
         {
-            if (user.Nick == Nick)
+            if (user.Nick == UserNick)
             {
-                if (ChanManager.InChannel(channel))
-                {
-                    //ServerView.Invoke(new NewChannelCallback(NewChannel), new object[] { channel });
-                    //this.NewChannel(channel);
-                    ChanManager.GetChannel(channel).AppendLine("Joined: " + channel);
-                }
-                
+                if (OnJoinSelf != null)
+                    OnJoinSelf(ChanManager.GetChannel(channel));
             }
             else
             {
-                ChanManager.GetChannel(channel).AppendLine("<<" + user.Nick + ">> has joined " + channel);
+                if (OnJoinOther != null)
+                    OnJoinOther(Nick.FromUserInfo(user), ChanManager.Create(channel));
+
                 Connection.Sender.Names(channel);
             }
         }
 
-        private void OnPart(UserInfo user, string channel, string reason)
+        private void Listener_OnPart(UserInfo user, string channel, string reason)
         {
-            ChanManager.GetChannel(channel).AppendLine("<<" + user.Nick + ">> has parted " + channel);
+            if (OnPart != null)
+                OnPart(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), reason);
             Connection.Sender.Names(channel);
         }
 
-        private void OnRegistered()
+        private void Listener_OnRegistered()
         {
-            JoinChannel("#ortzirc");
+            if (OnRegistered != null)
+                OnRegistered();
+            //JoinChannel("#ortzirc");
         }
 
-        private void OnChannelModeChange(UserInfo who, string channel, ChannelModeInfo[] modes, string raw)
+        private void Listener_OnChannelModeChange(UserInfo who, string channel, ChannelModeInfo[] modes, string raw)
         {
-            ChanManager.GetChannel(channel).AppendLine("<<" + who.Nick + ">> sets mode (" + raw + ")");
+            if (OnChannelModeChange != null)
+                OnChannelModeChange(Nick.FromUserInfo(who), ChanManager.GetChannel(channel), modes, raw);
             Connection.Sender.Names(channel);
         }
 
-        private void OnError(ReplyCode code, string message)
+        private void Listener_OnError(ReplyCode code, string message)
         {
-            this.AppendLine(message);
+            if (OnError != null)
+                OnError(code, message);
+        }
+
+        public Channel JoinChannel(string channel)
+        {
+            Channel newChan = ChanManager.Create(channel);
+            Connection.Sender.Join(channel);
+            return newChan;
         }
     }
 }

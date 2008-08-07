@@ -3,87 +3,88 @@
   <Class Name="OrtzIRC.Channel">
     <Position X="16.25" Y="6.25" Width="1.75" />
     <NestedTypes>
-      <Delegate Name="OrtzIRC.Channel.SyncDelegate" Collapsed="true">
+      <Delegate Name="OrtzIRC.Channel.SyncCallback" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Channel.cs</NewMemberFileName>
         </TypeIdentifier>
       </Delegate>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>ACAAACAIIAAAAIQAAAAAQQQAAAAAIAAAAAAAAgACAAA=</HashCode>
+      <HashCode>AAAAACAAAAAAAIQEAAAAAQQAAAAAAAAAAAAAAgACAAA=</HashCode>
       <FileName>Channel.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="Server" />
-      <Property Name="ChannelView" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="FlamingIRC.Topic" Collapsed="true">
+  <Class Name="OrtzIRC.Topic" Collapsed="true">
     <Position X="7.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAACAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
       <FileName>Objects.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="FlamingIRC.ClientMessage" Collapsed="true">
+  <Class Name="OrtzIRC.ClientMessage" Collapsed="true">
     <Position X="3.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAgAAAAAAAAACAAQAAAAAAAAAAAAAAAAQA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAQA=</HashCode>
       <FileName>Objects.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="FlamingIRC.IRCError" Collapsed="true">
+  <Class Name="OrtzIRC.IRCError" Collapsed="true">
     <Position X="0.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Objects.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="FlamingIRC.Message" Collapsed="true">
+  <Class Name="OrtzIRC.Message" Collapsed="true">
     <Position X="3.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAEAAAAAAAAAAAAAAAAAAAAABAAIAAAAAAAIAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAIAAA=</HashCode>
       <FileName>Objects.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="FlamingIRC.CTCP" Collapsed="true">
+  <Class Name="OrtzIRC.CTCP" Collapsed="true">
     <Position X="2.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAA=</HashCode>
       <FileName>Objects.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="FlamingIRC.PrivMsg" Collapsed="true">
+  <Class Name="OrtzIRC.PrivMsg" Collapsed="true">
     <Position X="5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAA=</HashCode>
       <FileName>Objects.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.Server">
     <Position X="21.25" Y="5.5" Width="2.25" />
-    <AssociationLine Name="ChanManager" Type="OrtzIRC.ChannelManager" ManuallyRouted="true">
-      <Path>
-        <Point X="21.625" Y="9.492" />
-        <Point X="21.625" Y="10.25" />
-      </Path>
+    <NestedTypes>
+      <Delegate Name="OrtzIRC.Server.NewChannelCallback" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Server.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
+    <AssociationLine Name="ChanManager" Type="OrtzIRC.ChannelManager">
       <MemberNameLabel ManuallyPlaced="true">
-        <Position X="0.07" Y="0.089" />
+        <Position X="0.089" Y="0.07" />
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>EAAAAAAAAgCgAAEAEAFAYAAACDAAAAIBAgAAgAAAAAA=</HashCode>
+      <HashCode>EAAAIAAAAgCggAEAEAFAQAQACDAIAAIBAiAAgAAAAAA=</HashCode>
       <FileName>Server.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Property Name="ServerView" />
       <Property Name="ChanManager" />
     </ShowAsAssociation>
   </Class>
   <Class Name="OrtzIRC.Controls.ChannelText" Collapsed="true">
     <Position X="11.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AACAAAAAACAAAAAAAACAQAACAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAiAAAAAACAAAAAAAACAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Controls\ChannelText.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -96,20 +97,8 @@
   </Class>
   <Class Name="OrtzIRC.Controls.NickListBox">
     <Position X="16.25" Y="14.5" Width="2" />
-    <NestedTypes>
-      <Delegate Name="OrtzIRC.Controls.NickListBox.ResetNicksDelegate" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Controls\NickListBox.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Delegate>
-      <Delegate Name="OrtzIRC.Controls.NickListBox.AddNickDelegate" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Controls\NickListBox.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Delegate>
-    </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AACAACAAACAAAIAAAACAAAACAAIAAAAAAAACAAAAAAA=</HashCode>
+      <HashCode>AACAAAAAACAAAAAAAACAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Controls\NickListBox.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -124,20 +113,13 @@
     <Position X="9.75" Y="1.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
-      <FileName>ServerSettings.cs</FileName>
+      <FileName>Settings.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OrtzIRC.ChannelForm">
     <Position X="16.25" Y="9.75" Width="2.5" />
-    <NestedTypes>
-      <Delegate Name="OrtzIRC.ChannelForm.SyncDelegate" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Windows\ChannelForm.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Delegate>
-    </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAAAACAgACEAAoYAAACAQAACAkAAAAAAAAAEAgAAACg=</HashCode>
+      <HashCode>AAAAAAAgACEAAgAAAACAQAACAkAAAAAAAAAEAgAAACA=</HashCode>
       <FileName>Windows\ChannelForm.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -154,7 +136,7 @@
   <Class Name="OrtzIRC.MainForm">
     <Position X="20.75" Y="0.5" Width="3" />
     <TypeIdentifier>
-      <HashCode>AIAAAACAAKAAgAAAAkCAEAACAIACAAABAAAQAQAAAAA=</HashCode>
+      <HashCode>AIAAABCAAKAAgAAAAkCCEAACCIBCAAABAgAQAwAAAEA=</HashCode>
       <FileName>Windows\MainForm.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
@@ -203,25 +185,32 @@
   <Class Name="OrtzIRC.ChannelManager">
     <Position X="20" Y="10.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>gAAAAAAAIAAAAAAAAAFAAAAAAAAAAAAAAgAAAgAAEAI=</HashCode>
+      <HashCode>gAAAAAAAIAAAAAAAAABAAAAAAAAAAEAAAgAAAgAAEAA=</HashCode>
       <FileName>ChannelManager.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
       <Property Name="Channels" />
     </ShowAsCollectionAssociation>
   </Class>
+  <Class Name="OrtzIRC.ServerManager">
+    <Position X="22.75" Y="11" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAAAAAAAAAAAAAAAAAEAAQAAQAAAAAAA=</HashCode>
+      <FileName>ServerManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Struct Name="OrtzIRC.NetworkSettings" Collapsed="true">
     <Position X="9.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>ServerSettings.cs</FileName>
+      <FileName>Settings.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="OrtzIRC.ServerSettings" Collapsed="true">
     <Position X="11.5" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAABAgAAgEAAAAAAAACDAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>ServerSettings.cs</FileName>
+      <HashCode>AAAAAAAAAAAgAAAAAAAAAAAACDAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Settings.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Font Name="Tahoma" Size="8.25" />
