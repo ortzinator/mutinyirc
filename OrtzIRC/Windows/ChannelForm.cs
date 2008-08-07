@@ -11,10 +11,8 @@ namespace OrtzIRC
     public partial class ChannelForm : Form
     {
         private Server Server;
-        private string ChannelName;
         private Channel Channel;
-
-        private delegate void SyncDelegate();
+        private string ChannelName;
 
         public ChannelForm(Channel channel, Server server, string channelName)
         {
@@ -27,14 +25,7 @@ namespace OrtzIRC
             this.Text = channelName;
             this.nickListBox.DataSource = channel.NickList;
 
-            this.Server.ServerView.Invoke(new SyncDelegate(SetMdi));
-
             this.commandTextBox.Focus();
-        }
-
-        private void SetMdi()
-        {
-            this.MdiParent = this.Server.ServerView.MdiParent;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -42,10 +33,10 @@ namespace OrtzIRC
             Server.Connection.Sender.Part(ChannelName);
         }
 
-        public void AppendLine(string line)
+        public void AddLine(string line)
         {
-            channelOutputBox.AppendLine(line);
-            //channelOutputBox.AppendLine(this.nickListBox.BindingContext.ToString());
+            channelOutputBox.AddLine(line);
+            //channelOutputBox.AddLine(this.nickListBox.BindingContext.ToString());
         }
     }
 }

@@ -8,10 +8,9 @@ namespace OrtzIRC
     /// <summary>
     /// Represents a specific channel on a network
     /// </summary>
-    public class Channel
+    public class Channel : Target
     {
         public Server Server { get; private set; }
-        public ChannelForm ChannelView { get; private set; }
         //public List<Nick> BanList { get; private set; }
         //public ModeCollection Mode { get; private set; }
         public string Key { get; private set; }
@@ -20,7 +19,7 @@ namespace OrtzIRC
         public BindingList<string> NickList { get; private set; }
         //public Topic Topic { get; private set; }
 
-        private delegate void SyncDelegate();
+        private delegate void SyncCallback();
 
         public Channel(Server parent, string name)
         {
@@ -28,21 +27,6 @@ namespace OrtzIRC
             this.Name = name;
 
             NickList = new BindingList<string>();
-
-            ChannelView = new ChannelForm(this, Server, Name);
-            ChannelView.Invoke(new SyncDelegate(SetupView));
-        }
-
-        private void SetupView()
-        {
-            ChannelView.MdiParent = this.Server.ServerView.MdiParent;
-            ChannelView.Show();
-            ChannelView.Focus();
-        }
-
-        public void AppendLine(string line)
-        {
-            ChannelView.AppendLine(line);
         }
 
         public void AddNick(string nick)
@@ -54,6 +38,11 @@ namespace OrtzIRC
         public void ResetNicks()
         {
             NickList.Clear();
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
         }
     }
 }

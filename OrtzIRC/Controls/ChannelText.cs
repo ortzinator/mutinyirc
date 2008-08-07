@@ -23,11 +23,11 @@ namespace OrtzIRC.Controls
             base.OnPaint(pe);
         }
 
-        public void AppendLine(string line)
+        public void AddLine(string line)
         {
             if (this.InvokeRequired)
             {
-                AppendLineHandler d = new AppendLineHandler(AppendLine);
+                AppendLineHandler d = new AppendLineHandler(AddLine);
                 this.Invoke(d, new object[] { line });
             }
             else

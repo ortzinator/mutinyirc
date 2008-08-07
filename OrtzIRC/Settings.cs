@@ -20,8 +20,6 @@ namespace OrtzIRC
         }
 
         protected IRCSettingsManager() { }
-
-
     }
 
     public struct NetworkSettings 
@@ -33,7 +31,7 @@ namespace OrtzIRC
     public struct ServerSettings
     {
         private string _uri;
-        public string URI
+        public string Uri
         {
             get { return _uri; }
             set { _uri = value; }

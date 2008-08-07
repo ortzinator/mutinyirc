@@ -31,7 +31,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
-#if SSL
+#if Ssl
 using Org.Mentalis.Security.Ssl;
 #endif
 
@@ -63,7 +63,7 @@ namespace Sharkbite.Irc
         private string buffer;
 
 
-#if SSL
+#if Ssl
 		private SecureTcpClient socket;
 #else
         private Socket socket;
@@ -487,7 +487,7 @@ namespace Sharkbite.Irc
             listener.OnRegistered += new RegisteredEventHandler(OnRegistered);
         }
 
-#if SSL
+#if Ssl
 		private void ConnectClient( SecureProtocol protocol )   
 		{
 			lock ( this ) 
@@ -662,7 +662,7 @@ namespace Sharkbite.Irc
         }
 
 
-#if SSL
+#if Ssl
 		///<summary>
 		/// Connect to the IRC server and start listening for messages
 		/// on a new thread.
