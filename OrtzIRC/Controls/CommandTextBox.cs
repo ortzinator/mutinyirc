@@ -8,10 +8,14 @@ using System.Windows.Forms;
 
 namespace OrtzIRC.Controls
 {
+    public delegate void CommandEnteredEventHandler(string command);
+
     public partial class CommandTextBox : TextBox
     {
         public List<string> CmdHistory { get; private set; }
         private int _historyIndex;
+
+        public event CommandEnteredEventHandler OnCommandEntered;
 
         public CommandTextBox()
         {
@@ -56,11 +60,13 @@ namespace OrtzIRC.Controls
                         {
                             CmdHistory.RemoveAt(_historyIndex);
                         }
-                        CmdHistory.Add(this.Text);
+                        CmdHistory.Add(this.Text); 
+
+                        if (OnCommandEntered != null)
+                            OnCommandEntered(this.Text.Trim());
+
                         this.Clear();
                         _historyIndex = CmdHistory.Count;
-
-                        //TODO: Parse command
                     }
                     break;
             }

@@ -27,9 +27,16 @@ namespace OrtzIRC
 
         public Channel Create(string channelName)
         {
-            Channel newChan = new Channel(this.Server, channelName);
-            Channels.Add(channelName, newChan);
-            return newChan;
+            if (Channels.ContainsKey(channelName))
+            {
+                return Channels[channelName];
+            }
+            else
+            {
+                Channel newChan = new Channel(this.Server, channelName);
+                Channels.Add(channelName, newChan);
+                return newChan;
+            }
         }
 
         private bool recievingNames = false;
