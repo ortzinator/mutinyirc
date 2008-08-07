@@ -8,7 +8,7 @@ namespace OrtzIRC
     {
         private static ServerManager _instance;
 
-        public List<Server> ServerList { get; private set; }
+        public static List<Server> ServerList { get; private set; }
         public static ServerManager Instance
         {
             get
@@ -16,6 +16,7 @@ namespace OrtzIRC
                 if (_instance == null)
                 {
                     _instance = new ServerManager();
+                    ServerList = new List<Server>();
                 }
                 return _instance;
             }

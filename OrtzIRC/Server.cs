@@ -9,11 +9,12 @@ namespace OrtzIRC
 {
     public delegate void Server_SelfJoinEventHandler(Channel chan);
     public delegate void Server_OtherJoinEventHandler(Nick nick, Channel chan);
-    public delegate void Server_PartEventHandler(Nick nick, Channel chan, string message);
     public delegate void Server_ConnectingEventHandler();
     public delegate void Server_ConnectFailedEventHandler(string message);
-    public delegate void Server_PublicMessageEventHandler(Nick nick, Channel chan, string message);
     public delegate void Server_ChannelModeChangeEventHandler(Nick nick, Channel chan, ChannelModeInfo[] modes, string raw);
+    public delegate void Server_ChannelMessageEventHandler(Nick nick, Channel chan, string message);
+    public delegate void Server_PrivateNoticeEventHandler(Nick nick, string message);
+    public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
 
     public class Server
     {
@@ -27,21 +28,22 @@ namespace OrtzIRC
 
         public ChannelManager ChanManager { get; private set; }
 
-        private delegate void NewChannelCallback(string channel);
-
         public event Server_SelfJoinEventHandler OnJoinSelf;
         public event Server_ConnectingEventHandler OnConnecting;
         public event Server_OtherJoinEventHandler OnJoinOther;
         public event Server_ConnectFailedEventHandler OnConnectFail;
         public event RawMessageReceivedEventHandler OnRawMessageReceived;
-        public event Server_PublicMessageEventHandler OnPublicMessage;
+        public event Server_ChannelMessageEventHandler OnPublicMessage;
         public event ConnectEventHandler OnConnectSuccess;
         public event ErrorMessageEventHandler OnError;
         public event RegisteredEventHandler OnRegistered;
-        public event Server_PartEventHandler OnPart;
+        public event Server_ChannelMessageEventHandler OnPart;
         public event Server_ChannelModeChangeEventHandler OnChannelModeChange;
         public event DisconnectingEventHandler OnDisconnecting;
         public event DisconnectedEventHandler OnDisconnected;
+        public event Server_ChannelMessageEventHandler OnAction;
+        public event Server_PrivateNoticeEventHandler OnPrivateNotice;
+        public event Server_TopicRequestEventHandler OnGotTopic;
 
         public Server(ServerSettings settings)
         {
@@ -67,6 +69,9 @@ namespace OrtzIRC
             Connection.Listener.OnError += new ErrorMessageEventHandler(Listener_OnError);
             Connection.Listener.OnDisconnecting += new DisconnectingEventHandler(Listener_OnDisconnecting);
             Connection.Listener.OnDisconnected += new DisconnectedEventHandler(Listener_OnDisconnected);
+            Connection.Listener.OnAction += new ActionEventHandler(Listener_OnAction);
+            Connection.Listener.OnPrivateNotice += new PrivateNoticeEventHandler(Listener_OnPrivateNotice);
+            Connection.Listener.OnTopicRequest += new TopicRequestEventHandler(Listener_OnTopicRequest);
 
             Connection.OnRawMessageReceived += new RawMessageReceivedEventHandler(Connection_OnRawMessageReceived);
             Connection.OnConnectSuccess += new ConnectEventHandler(Connection_OnConnectSuccess);
@@ -80,6 +85,24 @@ namespace OrtzIRC
                 if (OnConnectFail != null)
                     OnConnectFail(e.Message);
             }
+        }
+
+        void Listener_OnTopicRequest(string channel, string topic)
+        {
+            if (OnGotTopic != null)
+                OnGotTopic(ChanManager.Create(channel), topic);
+        }
+
+        void Listener_OnPrivateNotice(UserInfo user, string notice)
+        {
+            if (OnPrivateNotice != null)
+                OnPrivateNotice(Nick.FromUserInfo(user), notice);
+        }
+
+        void Listener_OnAction(UserInfo user, string channel, string description)
+        {
+            if (OnAction != null)
+                OnAction(Nick.FromUserInfo(user), ChanManager.Create(channel), description);
         }
 
         public Server(string uri, string description, int port, bool ssl) : this(new ServerSettings(uri, description, port, ssl)) { }
@@ -124,7 +147,7 @@ namespace OrtzIRC
             if (user.Nick == UserNick)
             {
                 if (OnJoinSelf != null)
-                    OnJoinSelf(ChanManager.GetChannel(channel));
+                    OnJoinSelf(ChanManager.Create(channel));
             }
             else
             {
