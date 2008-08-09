@@ -16,6 +16,9 @@ namespace OrtzIRC.Controls
         public ChannelText()
         {
             InitializeComponent();
+            this.ReadOnly = true;
+            this.BackColor = System.Drawing.SystemColors.Window;
+            this.Cursor = System.Windows.Forms.Cursors.Default;
         }
 
         protected override void OnPaint(PaintEventArgs pe)
@@ -35,9 +38,15 @@ namespace OrtzIRC.Controls
                 DateTime now = DateTime.Now;
                 this.Text += "\n" + now.ToString("T",
                   CultureInfo.CreateSpecificCulture("es-ES")) + " " + line.Trim();
-                this.SelectionStart = this.Text.Length;
-                this.SelectionLength = 0;
+                ScrollToBottom();
             }
+        }
+
+        public void ScrollToBottom()
+        {
+            this.SelectionStart = this.Text.Length;
+            this.SelectionLength = 0;
+            this.ScrollToCaret();
         }
     }
 }

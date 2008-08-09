@@ -51,7 +51,7 @@ namespace Sharkbite.Irc
         {
             realName = name;
             nickName = name;
-            userName = name;
+            userName = name.ToLower();
             modeMask = "4";
             this.hostname = hostname;
             port = 6667;
