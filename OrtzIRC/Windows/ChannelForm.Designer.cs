@@ -49,16 +49,16 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(829, 523);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(692, 467);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // commandTextBox
             // 
             this.tableLayoutPanel1.SetColumnSpan(this.commandTextBox, 2);
             this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.commandTextBox.Location = new System.Drawing.Point(3, 499);
+            this.commandTextBox.Location = new System.Drawing.Point(3, 443);
             this.commandTextBox.Name = "commandTextBox";
-            this.commandTextBox.Size = new System.Drawing.Size(823, 20);
+            this.commandTextBox.Size = new System.Drawing.Size(686, 20);
             this.commandTextBox.TabIndex = 0;
             // 
             // channelOutputBox
@@ -66,7 +66,7 @@
             this.channelOutputBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.channelOutputBox.Location = new System.Drawing.Point(3, 3);
             this.channelOutputBox.Name = "channelOutputBox";
-            this.channelOutputBox.Size = new System.Drawing.Size(691, 490);
+            this.channelOutputBox.Size = new System.Drawing.Size(554, 434);
             this.channelOutputBox.TabIndex = 1;
             this.channelOutputBox.Text = "";
             // 
@@ -74,9 +74,9 @@
             // 
             this.nickListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.nickListBox.FormattingEnabled = true;
-            this.nickListBox.Location = new System.Drawing.Point(700, 3);
+            this.nickListBox.Location = new System.Drawing.Point(563, 3);
             this.nickListBox.Name = "nickListBox";
-            this.nickListBox.Size = new System.Drawing.Size(126, 485);
+            this.nickListBox.Size = new System.Drawing.Size(126, 433);
             this.nickListBox.Sorted = true;
             this.nickListBox.TabIndex = 2;
             // 
@@ -84,7 +84,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(829, 523);
+            this.ClientSize = new System.Drawing.Size(692, 467);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "ChannelForm";
             this.Text = "ChannelForm";

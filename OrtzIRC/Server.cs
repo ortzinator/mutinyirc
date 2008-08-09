@@ -15,6 +15,9 @@ namespace OrtzIRC
     public delegate void Server_ChannelMessageEventHandler(Nick nick, Channel chan, string message);
     public delegate void Server_PrivateNoticeEventHandler(Nick nick, string message);
     public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
+    public delegate void Server_NickEventHandler(Nick nick, string newNick);
+    public delegate void Server_KickEventHandler(Nick nick, Channel chan, string kickee, string reason);
+
 
     public class Server
     {
@@ -24,7 +27,6 @@ namespace OrtzIRC
         public bool SSL { get; set; }
         public Connection Connection { get; private set; }
         public string UserNick { get; private set; }
-        public string Name { get; private set; }
 
         public ChannelManager ChanManager { get; private set; }
 
@@ -39,11 +41,15 @@ namespace OrtzIRC
         public event RegisteredEventHandler OnRegistered;
         public event Server_ChannelMessageEventHandler OnPart;
         public event Server_ChannelModeChangeEventHandler OnChannelModeChange;
+        public event UserModeChangeEventHandler OnUserModeChange;
         public event DisconnectingEventHandler OnDisconnecting;
         public event DisconnectedEventHandler OnDisconnected;
         public event Server_ChannelMessageEventHandler OnAction;
         public event Server_PrivateNoticeEventHandler OnPrivateNotice;
         public event Server_TopicRequestEventHandler OnGotTopic;
+        public event Server_NickEventHandler OnNick;
+        public event NamesEventHandler OnNames;
+        public event Server_KickEventHandler OnKick;
 
         public Server(ServerSettings settings)
         {
@@ -58,7 +64,7 @@ namespace OrtzIRC
             this.UserNick = "OrtzIRC";
 
             ConnectionArgs args = new ConnectionArgs(this.UserNick, settings.Uri);
-            this.Connection = new Connection(args, false, false);
+            this.Connection = new Connection(args, true, false);
 
             Connection.Listener.OnJoin += new JoinEventHandler(Listener_OnJoin);
             Connection.Listener.OnPart += new PartEventHandler(Listener_OnPart);
@@ -66,12 +72,15 @@ namespace OrtzIRC
             Connection.Listener.OnRegistered += new RegisteredEventHandler(Listener_OnRegistered);
             Connection.Listener.OnNames += new NamesEventHandler(Listener_OnNames);
             Connection.Listener.OnChannelModeChange += new ChannelModeChangeEventHandler(Listener_OnChannelModeChange);
+            Connection.Listener.OnUserModeChange += new UserModeChangeEventHandler(Listener_OnUserModeChange);
             Connection.Listener.OnError += new ErrorMessageEventHandler(Listener_OnError);
             Connection.Listener.OnDisconnecting += new DisconnectingEventHandler(Listener_OnDisconnecting);
             Connection.Listener.OnDisconnected += new DisconnectedEventHandler(Listener_OnDisconnected);
             Connection.Listener.OnAction += new ActionEventHandler(Listener_OnAction);
             Connection.Listener.OnPrivateNotice += new PrivateNoticeEventHandler(Listener_OnPrivateNotice);
             Connection.Listener.OnTopicRequest += new TopicRequestEventHandler(Listener_OnTopicRequest);
+            Connection.Listener.OnNick += new NickEventHandler(Listener_OnNick);
+            Connection.Listener.OnKick += new KickEventHandler(Listener_OnKick);
 
             Connection.OnRawMessageReceived += new RawMessageReceivedEventHandler(Connection_OnRawMessageReceived);
             Connection.OnConnectSuccess += new ConnectEventHandler(Connection_OnConnectSuccess);
@@ -85,6 +94,30 @@ namespace OrtzIRC
                 if (OnConnectFail != null)
                     OnConnectFail(e.Message);
             }
+        }
+
+        void Listener_OnKick(UserInfo user, string channel, string kickee, string reason)
+        {
+            if (OnKick != null)
+                OnKick(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), kickee, reason);
+            Connection.Sender.Names(channel);
+        }
+
+        void Listener_OnUserModeChange(ModeAction action, UserMode mode)
+        {
+            if (OnUserModeChange != null)
+                OnUserModeChange(action, mode);
+            foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
+            {
+                Connection.Sender.Names(item.Key);
+            }
+            
+        }
+
+        void Listener_OnNick(UserInfo user, string newNick)
+        {
+            if (OnNick != null)
+                OnNick(Nick.FromUserInfo(user), newNick);
         }
 
         void Listener_OnTopicRequest(string channel, string topic)
@@ -139,7 +172,9 @@ namespace OrtzIRC
 
         private void Listener_OnNames(string channel, string[] nicks, bool last)
         {
-            ChanManager.OnNames(channel, nicks, last);
+            //ChanManager.OnNames(channel, nicks, last);
+            if (OnNames != null)
+                OnNames(channel, nicks, last);
         }
 
         private void Listener_OnJoin(UserInfo user, string channel)

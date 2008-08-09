@@ -52,8 +52,6 @@ namespace OrtzIRC
             // 
             // serverOutputBox
             // 
-            this.serverOutputBox.BackColor = System.Drawing.SystemColors.Window;
-            this.serverOutputBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.serverOutputBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.serverOutputBox.Location = new System.Drawing.Point(3, 3);
             this.serverOutputBox.Name = "serverOutputBox";
