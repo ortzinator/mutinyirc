@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace OrtzIRC.Controls
@@ -22,6 +18,7 @@ namespace OrtzIRC.Controls
             InitializeComponent();
 
             CmdHistory = new List<string>();
+            CmdHistory.Capacity = 40;
         }
 
         protected override void OnKeyDown(KeyEventArgs e)

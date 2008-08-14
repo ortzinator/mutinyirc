@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
-using System.Globalization;
 
 namespace OrtzIRC.Controls
 {
@@ -37,7 +33,7 @@ namespace OrtzIRC.Controls
             {
                 DateTime now = DateTime.Now;
                 this.Text += "\n" + now.ToString("T",
-                  CultureInfo.CreateSpecificCulture("es-ES")) + " " + line.Trim();
+                  System.Globalization.CultureInfo.CreateSpecificCulture("es-ES")) + " " + line.Trim();
                 ScrollToBottom();
             }
         }
