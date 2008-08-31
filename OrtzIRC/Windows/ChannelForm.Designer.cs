@@ -79,6 +79,7 @@
             // nickListBox
             // 
             this.nickListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nickListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.nickListBox.FormattingEnabled = true;
             this.nickListBox.ItemHeight = 15;
             this.nickListBox.Location = new System.Drawing.Point(442, 3);
