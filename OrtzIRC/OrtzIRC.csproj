@@ -130,8 +130,14 @@
     <Compile Include="Mode.cs" />
     <Compile Include="Nick.cs" />
     <Compile Include="Objects.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="Server.cs" />
     <Compile Include="ServerManager.cs" />
+    <Compile Include="IrcSettings.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Windows\ChannelForm.cs">
       <SubType>Form</SubType>
@@ -206,6 +212,10 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

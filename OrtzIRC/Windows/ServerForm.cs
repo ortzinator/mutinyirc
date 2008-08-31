@@ -94,7 +94,7 @@ namespace OrtzIRC
 
         void ParentServer_OnRegistered()
         {
-            ParentServer.Connection.Sender.Join("#luahelp");
+            ParentServer.Connection.Sender.Join("##csharp");
             this.Invoke((MethodInvoker)delegate
             {
                 this.Text = "Status: " + ParentServer.UserNick + " on " + ParentServer.Description +

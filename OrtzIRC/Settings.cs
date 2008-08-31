@@ -1,69 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OrtzIRC
-{
-    public class IRCSettingsManager
-    {
-        private static IRCSettingsManager _instance;
-        public static IRCSettingsManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new IRCSettingsManager();
-                }
-                return _instance;
-            }
+﻿namespace OrtzIRC.Properties {
+    
+    
+    // This class allows you to handle specific events on the settings class:
+    //  The SettingChanging event is raised before a setting's value is changed.
+    //  The PropertyChanged event is raised after a setting's value is changed.
+    //  The SettingsLoaded event is raised after the setting values are loaded.
+    //  The SettingsSaving event is raised before the setting values are saved.
+    internal sealed partial class Settings {
+        
+        public Settings() {
+            // // To add event handlers for saving and changing settings, uncomment the lines below:
+            //
+            // this.SettingChanging += this.SettingChangingEventHandler;
+            //
+            // this.SettingsSaving += this.SettingsSavingEventHandler;
+            //
         }
-
-        protected IRCSettingsManager() { }
-    }
-
-    public struct NetworkSettings 
-    {
-
-        private string _name;
-    }
-
-    public struct ServerSettings
-    {
-        private string _uri;
-        public string Uri
-        {
-            get { return _uri; }
-            set { _uri = value; }
+        
+        private void SettingChangingEventHandler(object sender, System.Configuration.SettingChangingEventArgs e) {
+            // Add code to handle the SettingChangingEvent event here.
         }
-
-        private string _description;
-        public string Description
-        {
-            get { return _description; }
-            set { _description = value; }
-        }
-
-        private int _port;
-        public int Port
-        {
-            get { return _port; }
-            set { _port = value; }
-        }
-
-        private bool _ssl;
-        public bool Ssl
-        {
-            get { return _ssl; }
-            set { _ssl = value; }
-        }
-
-        public ServerSettings(string uri, string description, int port, bool ssl)
-        {
-            _uri = uri;
-            _description = description;
-            _port = port;
-            _ssl = ssl;
+        
+        private void SettingsSavingEventHandler(object sender, System.ComponentModel.CancelEventArgs e) {
+            // Add code to handle the SettingsSaving event here.
         }
     }
 }

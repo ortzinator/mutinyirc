@@ -17,20 +17,19 @@ namespace OrtzIRC
 
         public MainForm()
         {
-            this.FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
-            this.Load += new EventHandler(MainForm_Load);
             MainForm.ServerList = new List<Server>();
+
             LoadServerList();
 
             InitializeComponent();
         }
 
-        void MainForm_Load(object sender, EventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
 
-                ServerSettings settings = new ServerSettings("irc.gamesurge.net", "GameSurge", 6667, false);
+                ServerSettings settings = new ServerSettings("chat.freenode.net", "Freenode", 6667, false);
                 Server newServer = ServerManager.Instance.Create(settings);
                 ServerForm newServerForm = new ServerForm(newServer);
                 newServerForm.MdiParent = this;
@@ -39,11 +38,14 @@ namespace OrtzIRC
 
                 //Server server = new Server(settings, this);
             }
+
+            base.OnLoad(e);
         }
 
-        void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
             //Settings.Default.Save();
+            base.OnClosing(e);
         }
 
         private void exitMenuItem_Click(object sender, EventArgs e)

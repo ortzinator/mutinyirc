@@ -50,7 +50,7 @@ namespace OrtzIRC
 
         void Channel_OnReceivedNames(List<Nick> nickList)
         {
-            this.Invoke((MethodInvoker)delegate
+            this.BeginInvoke((MethodInvoker)delegate
             {
                 nickListBox.Items.Clear();
 
