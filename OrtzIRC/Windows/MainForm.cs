@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using OrtzIRC.Properties;
-using System.Collections;
-
 namespace OrtzIRC
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Windows.Forms;
+
     public partial class MainForm : Form
     {
         public static List<Server> ServerList { get; private set; }
@@ -17,18 +12,17 @@ namespace OrtzIRC
 
         public MainForm()
         {
+            InitializeComponent();
+
             MainForm.ServerList = new List<Server>();
 
             LoadServerList();
-
-            InitializeComponent();
         }
 
         protected override void OnLoad(EventArgs e)
         {
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-
                 ServerSettings settings = new ServerSettings("chat.freenode.net", "Freenode", 6667, false);
                 Server newServer = ServerManager.Instance.Create(settings);
                 ServerForm newServerForm = new ServerForm(newServer);
@@ -55,7 +49,7 @@ namespace OrtzIRC
 
         private void newServerMenuItem_Click(object sender, EventArgs e)
         {
-            OrtzIRC.Dialogs.ServerDialog servers = new OrtzIRC.Dialogs.ServerDialog();
+            Dialogs.ServerDialog servers = new Dialogs.ServerDialog();
             servers.Show();
         }
 

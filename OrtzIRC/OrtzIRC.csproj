@@ -18,7 +18,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3F50443A-7CC6-4490-9916-523D80DEE58F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -28,7 +28,7 @@
     <ManifestCertificateThumbprint>88202D8A1CE1772CA735C32369C2CEE89D322C2F</ManifestCertificateThumbprint>
     <ManifestKeyFile>OrtzIRC_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -129,7 +129,6 @@
     </Compile>
     <Compile Include="Mode.cs" />
     <Compile Include="Nick.cs" />
-    <Compile Include="Objects.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -233,11 +232,6 @@
       <ProductName>.NET Framework 3.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="System.Data.SQLite.DLL">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj">
