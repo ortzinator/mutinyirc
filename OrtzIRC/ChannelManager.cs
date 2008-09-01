@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Sharkbite.Irc;
-
-namespace OrtzIRC
+﻿namespace OrtzIRC
 {
+    using System.Collections.Generic;
+    using Sharkbite.Irc;
+
     public class ChannelManager
     {
         public Dictionary<string, Channel> Channels { get; private set; }

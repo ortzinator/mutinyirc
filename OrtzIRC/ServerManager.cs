@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OrtzIRC
+﻿namespace OrtzIRC
 {
+    using System.Collections.Generic;
+
     public class ServerManager
     {
         private static ServerManager _instance;

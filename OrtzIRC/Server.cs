@@ -2,8 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using Sharkbite.Irc;
     using OrtzIRC.Common;
+    using Sharkbite.Irc;
 
     public delegate void Server_ConnectFailedEventHandler(string message);
     public delegate void Server_ChannelModeChangeEventHandler(Nick nick, Channel chan, ChannelModeInfo[] modes, string raw);
