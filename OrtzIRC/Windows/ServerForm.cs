@@ -2,11 +2,11 @@ namespace OrtzIRC
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Windows.Forms;
     using OrtzIRC.Common;
-    using Sharkbite.Irc;
     using OrtzIRC.Resources;
-    using System.ComponentModel;
+    using Sharkbite.Irc;
 
     public partial class ServerForm : Form
     {
@@ -28,9 +28,7 @@ namespace OrtzIRC
 
                 this.server.Connecting += Server_Connecting;
             }
-        }
-
-        public List<ChannelForm> ChannelFormList { get; private set; }
+        }    
 
         delegate void SetTextCallback(string text);
         delegate void NewChannelCallback(string channel);
@@ -38,8 +36,6 @@ namespace OrtzIRC
         public ServerForm()
         {
             InitializeComponent();
-            
-            ChannelFormList = new List<ChannelForm>();
 
             this.server.Registered += new RegisteredEventHandler(ParentServer_OnRegistered);
             this.server.PublicMessage += new Server_ChannelMessageEventHandler(ParentServer_OnPublicMessage);
@@ -125,7 +121,6 @@ namespace OrtzIRC
                 ChannelForm newChan = new ChannelForm(e.Data, this.server);
                 newChan.MdiParent = this.MdiParent;
                 newChan.Show();
-                ChannelFormList.Add(newChan);
                 newChan.AddLine("Joined: " + e.Data.Name);
             });
         }
