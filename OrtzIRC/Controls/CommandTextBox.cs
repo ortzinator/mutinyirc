@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-
-namespace OrtzIRC.Controls
+﻿namespace OrtzIRC.Controls
 {
+    using System.Collections.Generic;
+    using System.Windows.Forms;
+
     public delegate void CommandEnteredEventHandler(string command);
 
     public partial class CommandTextBox : TextBox
