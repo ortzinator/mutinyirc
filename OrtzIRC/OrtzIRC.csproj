@@ -138,6 +138,7 @@
     <Compile Include="ServerManager.cs" />
     <Compile Include="IrcSettings.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Target.cs" />
     <Compile Include="Windows\ChannelForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -237,6 +238,10 @@
     <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj">
       <Project>{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}</Project>
       <Name>FlamingIRC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OrtzIRC.Common\OrtzIRC.Common.csproj">
+      <Project>{1594A34C-9BB8-4334-880B-26671436D95E}</Project>
+      <Name>OrtzIRC.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
