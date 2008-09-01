@@ -48,7 +48,7 @@ namespace OrtzIRC
             this.server.JoinSelf += ParentServer_OnJoinSelf;
             this.server.JoinOther += ParentServer_OnJoinOther;
             this.server.Part += ParentServer_OnPart;
-            this.server.ConnectFail += ParentServer_OnConnectFail;
+            this.server.ConnectFail += Server_OnConnectFail;
             this.server.PrivateNotice += ParentServer_OnPrivateNotice;
             this.server.GotTopic += ParentServer_OnGotTopic;
             this.server.RawMessageReceived += ParentServer_OnRawMessageReceived;
@@ -65,7 +65,7 @@ namespace OrtzIRC
             this.server.JoinSelf -= ParentServer_OnJoinSelf;
             this.server.JoinOther -= ParentServer_OnJoinOther;
             this.server.Part -= ParentServer_OnPart;
-            this.server.ConnectFail -= ParentServer_OnConnectFail;
+            this.server.ConnectFail -= Server_OnConnectFail;
             this.server.PrivateNotice -= ParentServer_OnPrivateNotice;
             this.server.GotTopic -= ParentServer_OnGotTopic;
             this.server.RawMessageReceived -= ParentServer_OnRawMessageReceived;
@@ -76,7 +76,7 @@ namespace OrtzIRC
 
         private void Server_Connecting(object sender, CancelEventArgs e)
         {
-            this.serverOutputBox.AddLine(ServerStrings.ConnectingDisplayMessage.With(this.server.URI, this.server.Port));
+            this.serverOutputBox.AddLine(ServerStrings.ConnectingMessage.With(this.server.URI, this.server.Port));
         }
 
         private void ParentServer_OnKick(Nick nick, Channel chan, string kickee, string reason)
@@ -114,9 +114,9 @@ namespace OrtzIRC
             this.serverOutputBox.AddLine("-" + nick.Name + ":" + notice + "-");
         }
 
-        private void ParentServer_OnConnectFail(object sender, DataEventArgs<string> e)
+        private void Server_OnConnectFail(object sender, DataEventArgs<string> e)
         {
-            this.serverOutputBox.AddLine("Could not connect: {0}".With(e.Data));
+            this.serverOutputBox.AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
         }
 
         private void ParentServer_OnAction(Nick nick, Channel chan, string message)

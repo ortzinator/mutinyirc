@@ -63,9 +63,18 @@ namespace OrtzIRC.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Connecting to {0} ({1})....
         /// </summary>
-        internal static string ConnectingDisplayMessage {
+        internal static string ConnectingMessage {
             get {
-                return ResourceManager.GetString("ConnectingDisplayMessage", resourceCulture);
+                return ResourceManager.GetString("ConnectingMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not connect: {0}.
+        /// </summary>
+        internal static string ConnectionFailedMessage {
+            get {
+                return ResourceManager.GetString("ConnectionFailedMessage", resourceCulture);
             }
         }
     }
