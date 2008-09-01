@@ -9,15 +9,17 @@ namespace OrtzIRC
         private static ServerManager _instance;
 
         public static List<Server> ServerList { get; private set; }
+
         public static ServerManager Instance
         {
-            get
+            get 
             {
                 if (_instance == null)
                 {
                     _instance = new ServerManager();
                     ServerList = new List<Server>();
                 }
+
                 return _instance;
             }
         }
@@ -33,6 +35,7 @@ namespace OrtzIRC
         {
             Server newServer = new Server(uri, description, port, ssl);
             ServerList.Add(newServer);
+
             return newServer;
         }
     }

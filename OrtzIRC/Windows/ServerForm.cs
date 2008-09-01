@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Sharkbite.Irc;
 using System.Collections;
 using FlamingIRC;
+using OrtzIRC.Common;
 
 namespace OrtzIRC
 {
@@ -30,19 +31,19 @@ namespace OrtzIRC
 
             ParentServer = parent;
 
-            ParentServer.OnRegistered += new RegisteredEventHandler(ParentServer_OnRegistered);
-            ParentServer.OnDisconnected += new DisconnectedEventHandler(ParentServer_OnDisconnected);
-            ParentServer.OnPublicMessage += new Server_ChannelMessageEventHandler(ParentServer_OnPublicMessage);
-            ParentServer.OnAction += new Server_ChannelMessageEventHandler(ParentServer_OnAction);
-            ParentServer.OnJoinSelf += new Server_SelfJoinEventHandler(ParentServer_OnJoinSelf);
-            ParentServer.OnJoinOther += new Server_OtherJoinEventHandler(ParentServer_OnJoinOther);
-            ParentServer.OnPart += new Server_ChannelMessageEventHandler(ParentServer_OnPart);
-            ParentServer.OnConnectFail += new Server_ConnectFailedEventHandler(ParentServer_OnConnectFail);
-            ParentServer.OnPrivateNotice += new Server_PrivateNoticeEventHandler(ParentServer_OnPrivateNotice);
-            ParentServer.OnGotTopic += new Server_TopicRequestEventHandler(ParentServer_OnGotTopic);
-            ParentServer.OnRawMessageReceived += new RawMessageReceivedEventHandler(ParentServer_OnRawMessageReceived);
-            ParentServer.OnError += new ErrorMessageEventHandler(ParentServer_OnError);
-            ParentServer.OnKick += new Server_KickEventHandler(ParentServer_OnKick);
+            ParentServer.Registered += new RegisteredEventHandler(ParentServer_OnRegistered);
+            ParentServer.Disconnected += new DisconnectedEventHandler(ParentServer_OnDisconnected);
+            ParentServer.PublicMessage += new Server_ChannelMessageEventHandler(ParentServer_OnPublicMessage);
+            ParentServer.Action += new Server_ChannelMessageEventHandler(ParentServer_OnAction);
+            ParentServer.JoinSelf += new EventHandler<DataEventArgs<Channel>>(ParentServer_OnJoinSelf);
+            ParentServer.JoinOther += ParentServer_OnJoinOther;
+            ParentServer.Part += new Server_ChannelMessageEventHandler(ParentServer_OnPart);
+            ParentServer.ConnectFail += new Server_ConnectFailedEventHandler(ParentServer_OnConnectFail);
+            ParentServer.PrivateNotice += new Server_PrivateNoticeEventHandler(ParentServer_OnPrivateNotice);
+            ParentServer.GotTopic += new Server_TopicRequestEventHandler(ParentServer_OnGotTopic);
+            ParentServer.RawMessageReceived += new RawMessageReceivedEventHandler(ParentServer_OnRawMessageReceived);
+            ParentServer.Error += new ErrorMessageEventHandler(ParentServer_OnError);
+            ParentServer.Kick += new Server_KickEventHandler(ParentServer_OnKick);
 
             this.commandTextBox.Focus();
         }
@@ -102,15 +103,15 @@ namespace OrtzIRC
             });
         }
 
-        void ParentServer_OnJoinSelf(Channel chan)
+        private void ParentServer_OnJoinSelf(object sender, DataEventArgs<Channel> e)
         {
             this.Invoke((MethodInvoker)delegate
             {
-                ChannelForm newChan = new ChannelForm(chan, ParentServer);
+                ChannelForm newChan = new ChannelForm(e.Data, ParentServer);
                 newChan.MdiParent = this.MdiParent;
                 newChan.Show();
                 ChannelFormList.Add(newChan);
-                newChan.AddLine("Joined: " + chan.Name);
+                newChan.AddLine("Joined: " + e.Data.Name);
             });
         }
 
