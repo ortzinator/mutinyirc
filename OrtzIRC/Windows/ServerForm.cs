@@ -160,7 +160,7 @@ namespace OrtzIRC
                 if (MessageBox.Show("Do you wish to disconnect from the server?", "", MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    this.server.Disconnect("Quitan");
+                    this.server.Connection.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
                 }
                 else
                 {

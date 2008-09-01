@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows.Forms;
-
-namespace OrtzIRC.Controls
+﻿namespace OrtzIRC.Controls
 {
+    using System;
+    using System.Windows.Forms;
+
     public partial class ChannelText : RichTextBox
     {
         private delegate void AppendLineHandler(string line);
@@ -24,6 +22,7 @@ namespace OrtzIRC.Controls
 
         public void AddLine(string line)
         {
+            //TODO: Color parsing - http://www.mirc.co.uk/help/color.txt
             if (this.InvokeRequired)
             {
                 AppendLineHandler d = new AppendLineHandler(AddLine);
@@ -38,7 +37,13 @@ namespace OrtzIRC.Controls
             }
         }
 
-        public void ScrollToBottom()
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ScrollToBottom();
+        }
+
+        private void ScrollToBottom()
         {
             this.SelectionStart = this.Text.Length;
             this.SelectionLength = 0;

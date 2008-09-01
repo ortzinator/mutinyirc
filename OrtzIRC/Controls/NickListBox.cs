@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using Sharkbite.Irc;
-
-namespace OrtzIRC.Controls
+﻿namespace OrtzIRC.Controls
 {
+    using System.Drawing;
+    using System.Windows.Forms;
+
     public partial class NickListBox : ListBox
     {
         public NickListBox()

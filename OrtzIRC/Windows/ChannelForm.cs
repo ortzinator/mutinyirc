@@ -108,11 +108,5 @@ namespace OrtzIRC
         {
             channelOutputBox.AddLine(line);
         }
-
-        protected override void OnResize(EventArgs e)
-        {
-            channelOutputBox.ScrollToBottom();
-            base.OnResize(e);
-        }
     }
 }
