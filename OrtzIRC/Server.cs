@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
-using Sharkbite.Irc;
-using OrtzIRC;
-
-namespace OrtzIRC
+﻿namespace OrtzIRC
 {
-    public delegate void Server_SelfJoinEventHandler(Channel chan);
-    public delegate void Server_OtherJoinEventHandler(Nick nick, Channel chan);
-    public delegate void Server_ConnectingEventHandler();
+    using System;
+    using System.Collections.Generic;
+    using Sharkbite.Irc;
+    using OrtzIRC.Common;
+
     public delegate void Server_ConnectFailedEventHandler(string message);
     public delegate void Server_ChannelModeChangeEventHandler(Nick nick, Channel chan, ChannelModeInfo[] modes, string raw);
     public delegate void Server_ChannelMessageEventHandler(Nick nick, Channel chan, string message);
@@ -30,26 +25,26 @@ namespace OrtzIRC
 
         public ChannelManager ChanManager { get; private set; }
 
-        public event Server_SelfJoinEventHandler OnJoinSelf;
-        public event Server_ConnectingEventHandler OnConnecting;
-        public event Server_OtherJoinEventHandler OnJoinOther;
-        public event Server_ConnectFailedEventHandler OnConnectFail;
-        public event RawMessageReceivedEventHandler OnRawMessageReceived;
-        public event Server_ChannelMessageEventHandler OnPublicMessage;
-        public event ConnectEventHandler OnConnectSuccess;
-        public event ErrorMessageEventHandler OnError;
-        public event RegisteredEventHandler OnRegistered;
-        public event Server_ChannelMessageEventHandler OnPart;
-        public event Server_ChannelModeChangeEventHandler OnChannelModeChange;
-        public event UserModeChangeEventHandler OnUserModeChange;
-        public event DisconnectingEventHandler OnDisconnecting;
-        public event DisconnectedEventHandler OnDisconnected;
-        public event Server_ChannelMessageEventHandler OnAction;
-        public event Server_PrivateNoticeEventHandler OnPrivateNotice;
-        public event Server_TopicRequestEventHandler OnGotTopic;
+        public event EventHandler<DataEventArgs<Channel>> JoinSelf;
+        public event EventHandler<EventArgs> Connecting;
+        public event EventHandler<DoubleDataEventArgs<Nick, Channel>> JoinOther;
+        public event Server_ConnectFailedEventHandler ConnectFail;
+        public event RawMessageReceivedEventHandler RawMessageReceived;
+        public event Server_ChannelMessageEventHandler PublicMessage;
+        public event ConnectEventHandler ConnectSuccess;
+        public event ErrorMessageEventHandler Error;
+        public event RegisteredEventHandler Registered;
+        public event Server_ChannelMessageEventHandler Part;
+        public event Server_ChannelModeChangeEventHandler ChannelModeChange;
+        public event UserModeChangeEventHandler UserModeChange;
+        public event DisconnectingEventHandler Disconnecting;
+        public event DisconnectedEventHandler Disconnected;
+        public event Server_ChannelMessageEventHandler Action;
+        public event Server_PrivateNoticeEventHandler PrivateNotice;
+        public event Server_TopicRequestEventHandler GotTopic;
         public event Server_NickEventHandler OnNick;
         public event NamesEventHandler OnNames;
-        public event Server_KickEventHandler OnKick;
+        public event Server_KickEventHandler Kick;
 
         public Server(ServerSettings settings)
         {
@@ -91,22 +86,22 @@ namespace OrtzIRC
             }
             catch (Exception e)
             {
-                if (OnConnectFail != null)
-                    OnConnectFail(e.Message);
+                if (ConnectFail != null)
+                    ConnectFail(e.Message);
             }
         }
 
-        void Listener_OnKick(UserInfo user, string channel, string kickee, string reason)
+        private void Listener_OnKick(UserInfo user, string channel, string kickee, string reason)
         {
-            if (OnKick != null)
-                OnKick(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), kickee, reason);
+            if (Kick != null)
+                Kick(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), kickee, reason);
             Connection.Sender.Names(channel);
         }
 
-        void Listener_OnUserModeChange(ModeAction action, UserMode mode)
+        private void Listener_OnUserModeChange(ModeAction action, UserMode mode)
         {
-            if (OnUserModeChange != null)
-                OnUserModeChange(action, mode);
+            if (UserModeChange != null)
+                UserModeChange(action, mode);
             foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
             {
                 Connection.Sender.Names(item.Key);
@@ -114,60 +109,60 @@ namespace OrtzIRC
             
         }
 
-        void Listener_OnNick(UserInfo user, string newNick)
+        private void Listener_OnNick(UserInfo user, string newNick)
         {
             if (OnNick != null)
                 OnNick(Nick.FromUserInfo(user), newNick);
         }
 
-        void Listener_OnTopicRequest(string channel, string topic)
+        private void Listener_OnTopicRequest(string channel, string topic)
         {
-            if (OnGotTopic != null)
-                OnGotTopic(ChanManager.Create(channel), topic);
+            if (GotTopic != null)
+                GotTopic(ChanManager.Create(channel), topic);
         }
 
-        void Listener_OnPrivateNotice(UserInfo user, string notice)
+        private void Listener_OnPrivateNotice(UserInfo user, string notice)
         {
-            if (OnPrivateNotice != null)
-                OnPrivateNotice(Nick.FromUserInfo(user), notice);
+            if (PrivateNotice != null)
+                PrivateNotice(Nick.FromUserInfo(user), notice);
         }
 
-        void Listener_OnAction(UserInfo user, string channel, string description)
+        private void Listener_OnAction(UserInfo user, string channel, string description)
         {
-            if (OnAction != null)
-                OnAction(Nick.FromUserInfo(user), ChanManager.Create(channel), description);
+            if (Action != null)
+                Action(Nick.FromUserInfo(user), ChanManager.Create(channel), description);
         }
 
         public Server(string uri, string description, int port, bool ssl) : this(new ServerSettings(uri, description, port, ssl)) { }
 
-        void Listener_OnDisconnected()
+        private void Listener_OnDisconnected()
         {
-            if (OnDisconnected != null)
-                OnDisconnected();
+            if (Disconnected != null)
+                Disconnected();
         }
 
-        void Listener_OnDisconnecting()
+        private void Listener_OnDisconnecting()
         {
-            if (OnDisconnecting != null)
-                OnDisconnecting();
+            if (Disconnecting != null)
+                Disconnecting();
         }
 
-        void Connection_OnRawMessageReceived(string message)
+        private void Connection_OnRawMessageReceived(string message)
         {
-            if (OnRawMessageReceived != null)
-                OnRawMessageReceived(message);
+            if (RawMessageReceived != null)
+                RawMessageReceived(message);
         }
 
-        void Connection_OnConnectSuccess()
+        private void Connection_OnConnectSuccess()
         {
-            if (OnConnectSuccess != null)
-                OnConnectSuccess();
+            if (ConnectSuccess != null)
+                ConnectSuccess();
         }
 
         private void Listener_OnPublic(UserInfo user, string channel, string message)
         {
-            if (OnPublicMessage != null)
-                OnPublicMessage(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), message);
+            if (PublicMessage != null)
+                PublicMessage(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), message);
         }
 
         private void Listener_OnNames(string channel, string[] nicks, bool last)
@@ -181,43 +176,39 @@ namespace OrtzIRC
         {
             if (user.Nick == UserNick)
             {
-                if (OnJoinSelf != null)
-                    OnJoinSelf(ChanManager.Create(channel));
+                this.OnJoinSelf(new DataEventArgs<Channel>(ChanManager.Create(channel)));
             }
             else
             {
-                if (OnJoinOther != null)
-                    OnJoinOther(Nick.FromUserInfo(user), ChanManager.Create(channel));
-
-                Connection.Sender.Names(channel);
+                this.OnJoinOther(new DoubleDataEventArgs<Nick, Channel>(Nick.FromUserInfo(user), ChanManager.Create(channel)));
             }
         }
 
         private void Listener_OnPart(UserInfo user, string channel, string reason)
         {
-            if (OnPart != null)
-                OnPart(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), reason);
+            if (Part != null)
+                Part(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), reason);
             Connection.Sender.Names(channel);
         }
 
         private void Listener_OnRegistered()
         {
-            if (OnRegistered != null)
-                OnRegistered();
+            if (Registered != null)
+                Registered();
             //JoinChannel("#ortzirc");
         }
 
         private void Listener_OnChannelModeChange(UserInfo who, string channel, ChannelModeInfo[] modes, string raw)
         {
-            if (OnChannelModeChange != null)
-                OnChannelModeChange(Nick.FromUserInfo(who), ChanManager.GetChannel(channel), modes, raw);
+            if (ChannelModeChange != null)
+                ChannelModeChange(Nick.FromUserInfo(who), ChanManager.GetChannel(channel), modes, raw);
             Connection.Sender.Names(channel);
         }
 
         private void Listener_OnError(ReplyCode code, string message)
         {
-            if (OnError != null)
-                OnError(code, message);
+            if (Error != null)
+                Error(code, message);
         }
 
         public Channel JoinChannel(string channel)
@@ -225,6 +216,16 @@ namespace OrtzIRC
             Channel newChan = ChanManager.Create(channel);
             Connection.Sender.Join(channel);
             return newChan;
+        }
+
+        protected virtual void OnJoinSelf(DataEventArgs<Channel> e)
+        {
+            JoinSelf.Fire<DataEventArgs<Channel>>(this, e);
+        }
+
+        protected virtual void OnJoinOther(DoubleDataEventArgs<Nick, Channel> e)
+        {
+            JoinOther.Fire<DoubleDataEventArgs<Nick, Channel>>(this, e);
         }
     }
 }

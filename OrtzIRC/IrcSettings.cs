@@ -17,7 +17,6 @@
 
     public struct NetworkSettings
     {
-
         private string _name;
     }
 
