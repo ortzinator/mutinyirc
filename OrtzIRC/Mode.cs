@@ -5,10 +5,8 @@ using Sharkbite.Irc;
 
 namespace OrtzIRC
 {
-
     public class ModeCollection
     {
         //private List<chan> _modes;
     }
-
 }

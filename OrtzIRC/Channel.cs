@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.ComponentModel;
-
-namespace OrtzIRC
+﻿namespace OrtzIRC
 {
+    using System.Collections.Generic;
+
     public delegate void ChannelMessageEventHandler(Nick nick, string message);
     public delegate void TopicShowEventHandler(string topic);
     public delegate void ChannelJoinEventHandler(Nick nick);
