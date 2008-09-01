@@ -21,12 +21,12 @@ namespace OrtzIRC
                 {
                     this.server.Disconnect();
 
-                    // todo - unhook events
+                    this.UnhookEvents();
                 }
 
                 this.server = value;
-
-                this.server.Connecting += Server_Connecting;
+                
+                this.HookupEvents();
             }
         }    
 
@@ -37,20 +37,41 @@ namespace OrtzIRC
         {
             InitializeComponent();
 
-            this.server.Registered += new RegisteredEventHandler(ParentServer_OnRegistered);
-            this.server.PublicMessage += new Server_ChannelMessageEventHandler(ParentServer_OnPublicMessage);
-            this.server.Action += new Server_ChannelMessageEventHandler(ParentServer_OnAction);
-            this.server.JoinSelf += new EventHandler<DataEventArgs<Channel>>(ParentServer_OnJoinSelf);
-            this.server.JoinOther += ParentServer_OnJoinOther;
-            this.server.Part += new Server_ChannelMessageEventHandler(ParentServer_OnPart);
-            this.server.ConnectFail += new Server_ConnectFailedEventHandler(ParentServer_OnConnectFail);
-            this.server.PrivateNotice += new Server_PrivateNoticeEventHandler(ParentServer_OnPrivateNotice);
-            this.server.GotTopic += new Server_TopicRequestEventHandler(ParentServer_OnGotTopic);
-            this.server.RawMessageReceived += new RawMessageReceivedEventHandler(ParentServer_OnRawMessageReceived);
-            this.server.Error += new ErrorMessageEventHandler(ParentServer_OnError);
-            this.server.Kick += new Server_KickEventHandler(ParentServer_OnKick);
-
             this.commandTextBox.Focus();
+        }
+
+        private void HookupEvents()
+        {
+            this.server.Registered += ParentServer_OnRegistered;
+            this.server.PublicMessage += ParentServer_OnPublicMessage;
+            this.server.Action += ParentServer_OnAction;
+            this.server.JoinSelf += ParentServer_OnJoinSelf;
+            this.server.JoinOther += ParentServer_OnJoinOther;
+            this.server.Part += ParentServer_OnPart;
+            this.server.ConnectFail += ParentServer_OnConnectFail;
+            this.server.PrivateNotice += ParentServer_OnPrivateNotice;
+            this.server.GotTopic += ParentServer_OnGotTopic;
+            this.server.RawMessageReceived += ParentServer_OnRawMessageReceived;
+            this.server.Error += ParentServer_OnError;
+            this.server.Kick += ParentServer_OnKick;
+            this.server.Connecting += Server_Connecting;
+        }
+
+        private void UnhookEvents()
+        {
+            this.server.Registered -= ParentServer_OnRegistered;
+            this.server.PublicMessage -= ParentServer_OnPublicMessage;
+            this.server.Action -= ParentServer_OnAction;
+            this.server.JoinSelf -= ParentServer_OnJoinSelf;
+            this.server.JoinOther -= ParentServer_OnJoinOther;
+            this.server.Part -= ParentServer_OnPart;
+            this.server.ConnectFail -= ParentServer_OnConnectFail;
+            this.server.PrivateNotice -= ParentServer_OnPrivateNotice;
+            this.server.GotTopic -= ParentServer_OnGotTopic;
+            this.server.RawMessageReceived -= ParentServer_OnRawMessageReceived;
+            this.server.Error -= ParentServer_OnError;
+            this.server.Kick -= ParentServer_OnKick;
+            this.server.Connecting -= Server_Connecting;
         }
 
         private void Server_Connecting(object sender, CancelEventArgs e)
@@ -58,12 +79,12 @@ namespace OrtzIRC
             this.serverOutputBox.AddLine(ServerStrings.ConnectingDisplayMessage.With(this.server.URI, this.server.Port));
         }
 
-        void ParentServer_OnKick(Nick nick, Channel chan, string kickee, string reason)
+        private void ParentServer_OnKick(Nick nick, Channel chan, string kickee, string reason)
         {
             chan.UserKick(nick, kickee, reason);
         }
 
-        void ParentServer_OnPart(Nick nick, Channel chan, string message)
+        private void ParentServer_OnPart(Nick nick, Channel chan, string message)
         {
             chan.UserPart(nick, message);
         }
@@ -73,39 +94,39 @@ namespace OrtzIRC
             e.Second.UserJoin(e.First);
         }
 
-        void ParentServer_OnError(ReplyCode code, string message)
+        private void ParentServer_OnError(ReplyCode code, string message)
         {
             this.serverOutputBox.AddLine(code.ToString() + " " + message);
         }
 
-        void ParentServer_OnRawMessageReceived(string message)
+        private void ParentServer_OnRawMessageReceived(string message)
         {
             //this.serverOutputBox.AddLine(message);
         }
 
-        void ParentServer_OnGotTopic(Channel chan, string topic)
+        private void ParentServer_OnGotTopic(Channel chan, string topic)
         {
             chan.ShowTopic(topic);
         }
 
-        void ParentServer_OnPrivateNotice(Nick nick, string notice)
+        private void ParentServer_OnPrivateNotice(Nick nick, string notice)
         {
             this.serverOutputBox.AddLine("-" + nick.Name + ":" + notice + "-");
         }
 
-        void ParentServer_OnConnectFail(string message)
+        private void ParentServer_OnConnectFail(object sender, DataEventArgs<string> e)
         {
-            this.serverOutputBox.AddLine("Could not connect");
+            this.serverOutputBox.AddLine("Could not connect: {0}".With(e.Data));
         }
 
-        void ParentServer_OnAction(Nick nick, Channel chan, string message)
+        private void ParentServer_OnAction(Nick nick, Channel chan, string message)
         {
             chan.NewAction(nick, message);
         }
 
-        void ParentServer_OnRegistered()
+        private void ParentServer_OnRegistered()
         {
-            this.server.Connection.Sender.Join("##csharp");
+            this.server.Connection.Sender.Join("#ortzirc");
 
             this.Invoke((MethodInvoker)delegate
             {
@@ -125,27 +146,27 @@ namespace OrtzIRC
             });
         }
 
-        void ParentServer_OnPublicMessage(Nick nick, Channel chan, string message)
+        private void ParentServer_OnPublicMessage(Nick nick, Channel chan, string message)
         {
             chan.NewMessage(nick, message);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            base.OnFormClosing(e);
+
             if (this.server.Connection.Connected)
             {
                 if (MessageBox.Show("Do you wish to disconnect from the server?", "", MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    this.server.Connection.Disconnect("Quitan");
+                    this.server.Disconnect("Quitan");
                 }
                 else
                 {
                     e.Cancel = true;
                 }
             }
-
-            base.OnFormClosing(e);
         }
     }
 }

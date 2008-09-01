@@ -109,6 +109,7 @@
   <ItemGroup>
     <Compile Include="Channel.cs" />
     <Compile Include="ChannelManager.cs" />
+    <Compile Include="ChannelModeChangeEventArgs.cs" />
     <Compile Include="Controls\ChannelText.cs">
       <SubType>Component</SubType>
     </Compile>

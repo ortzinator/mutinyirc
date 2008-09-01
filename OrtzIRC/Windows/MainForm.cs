@@ -23,7 +23,7 @@ namespace OrtzIRC
         {
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                ServerSettings settings = new ServerSettings("chat.freenode.net", "Freenode", 6667, false);
+                ServerSettings settings = new ServerSettings("irc.randomirc.com", "RandomIRC", 6667, false);
                 Server newServer = ServerManager.Instance.Create(settings);
                 ServerForm newServerForm = new ServerForm() { Server = newServer };
                 newServerForm.MdiParent = this;

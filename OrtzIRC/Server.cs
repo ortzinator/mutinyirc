@@ -4,10 +4,8 @@
     using System.Collections.Generic;
     using OrtzIRC.Common;
     using Sharkbite.Irc;
-using System.ComponentModel;
-
-    public delegate void Server_ConnectFailedEventHandler(string message);
-    public delegate void Server_ChannelModeChangeEventHandler(Nick nick, Channel chan, ChannelModeInfo[] modes, string raw);
+    using System.ComponentModel;
+        
     public delegate void Server_ChannelMessageEventHandler(Nick nick, Channel chan, string message);
     public delegate void Server_PrivateNoticeEventHandler(Nick nick, string message);
     public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
@@ -20,14 +18,20 @@ using System.ComponentModel;
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
         public event EventHandler<CancelEventArgs> Connecting;
         public event EventHandler<DoubleDataEventArgs<Nick, Channel>> JoinOther;
-        public event Server_ConnectFailedEventHandler ConnectFail;
+        /// <summary>
+        /// Informs the subscriber that a connect attempt fails.
+        /// </summary>
+        /// <remarks>
+        /// The string data is the message about why the connection failed.
+        /// </remarks>
+        public event EventHandler<DataEventArgs<string>> ConnectFail;
         public event RawMessageReceivedEventHandler RawMessageReceived;
         public event Server_ChannelMessageEventHandler PublicMessage;
         public event ConnectEventHandler ConnectSuccess;
         public event ErrorMessageEventHandler Error;
         public event RegisteredEventHandler Registered;
         public event Server_ChannelMessageEventHandler Part;
-        public event Server_ChannelModeChangeEventHandler ChannelModeChange;
+        public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
         public event UserModeChangeEventHandler UserModeChange;
         public event DisconnectingEventHandler Disconnecting;
         public event DisconnectedEventHandler Disconnected;
@@ -103,7 +107,12 @@ using System.ComponentModel;
 
         public void Disconnect()
         {
-            this.Connection.Disconnect(string.Empty);
+            this.Connection.Disconnect("User exited...");
+        }
+
+        public void Disconnect(string reason)
+        {
+            this.Connection.Disconnect(reason);
         }
 
         // hack - needs to try connection in the background
@@ -115,8 +124,7 @@ using System.ComponentModel;
             }
             catch (Exception e)
             {
-                if (ConnectFail != null)
-                    ConnectFail(e.Message);
+                OnConnectFail(new DataEventArgs<string>(e.Message));
             }
         }
 
@@ -227,8 +235,8 @@ using System.ComponentModel;
 
         private void Listener_OnChannelModeChange(UserInfo who, string channel, ChannelModeInfo[] modes, string raw)
         {
-            if (ChannelModeChange != null)
-                ChannelModeChange(Nick.FromUserInfo(who), ChanManager.GetChannel(channel), modes, raw);
+            OnChannelModeChange(new ChannelModeChangeEventArgs(Nick.FromUserInfo(who), ChanManager.GetChannel(channel), modes, raw));
+
             Connection.Sender.Names(channel);
         }
 
@@ -258,6 +266,16 @@ using System.ComponentModel;
         protected virtual void OnJoinOther(DoubleDataEventArgs<Nick, Channel> e)
         {
             JoinOther.Fire<DoubleDataEventArgs<Nick, Channel>>(this, e);
+        }
+
+        protected virtual void OnConnectFail(DataEventArgs<string> e)
+        {
+            ConnectFail.Fire<DataEventArgs<string>>(this, e);
+        }
+
+        protected virtual void OnChannelModeChange(ChannelModeChangeEventArgs e)
+        {
+            ChannelModeChange.Fire<ChannelModeChangeEventArgs>(this, e);
         }
     }
 }
