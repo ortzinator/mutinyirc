@@ -1,26 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
-namespace OrtzIRC
+﻿namespace OrtzIRC
 {
-    public class IRCSettingsManager
+    public sealed class IRCSettingsManager
     {
         private static IRCSettingsManager _instance;
+
         public static IRCSettingsManager Instance
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new IRCSettingsManager();
-                }
-                return _instance;
-            }
+            get { return _instance ?? (_instance = new IRCSettingsManager()); }
         }
 
-        protected IRCSettingsManager() { }
+        private IRCSettingsManager() 
+        { 
+            //this is just here to make the class inconstructible
+        }
     }
 
     public struct NetworkSettings

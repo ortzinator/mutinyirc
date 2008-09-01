@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OrtzIRC
+﻿namespace OrtzIRC
 {
+    using System;
+    using OrtzIRC.Common;
+
     /// <summary>
     /// Represents a user in a single channel
     /// </summary>
@@ -21,10 +20,7 @@ namespace OrtzIRC
 
         public static Nick Empty
         {
-            get
-            {
-                return new Nick();
-            }
+            get { return new Nick(); }
         }
 
         public static Nick FromUserInfo(Sharkbite.Irc.UserInfo info)
@@ -60,7 +56,7 @@ namespace OrtzIRC
 
         public override string ToString()
         {
-            throw new NotImplementedException();
+            return "{0} ({1})".With(this.UserName, this.RealName); // todo - replace. this probably isn't how we want it formatted.
         }
     }
 }
