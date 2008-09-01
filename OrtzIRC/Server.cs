@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using OrtzIRC.Common;
     using Sharkbite.Irc;
+using System.ComponentModel;
 
     public delegate void Server_ConnectFailedEventHandler(string message);
     public delegate void Server_ChannelModeChangeEventHandler(Nick nick, Channel chan, ChannelModeInfo[] modes, string raw);
@@ -16,17 +17,8 @@
 
     public class Server
     {
-        public string URI { get; set; }
-        public string Description { get; set; }
-        public int Port { get; set; }
-        public bool SSL { get; set; }
-        public Connection Connection { get; private set; }
-        public string UserNick { get; private set; }
-
-        public ChannelManager ChanManager { get; private set; }
-
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
-        public event EventHandler<EventArgs> Connecting;
+        public event EventHandler<CancelEventArgs> Connecting;
         public event EventHandler<DoubleDataEventArgs<Nick, Channel>> JoinOther;
         public event Server_ConnectFailedEventHandler ConnectFail;
         public event RawMessageReceivedEventHandler RawMessageReceived;
@@ -45,6 +37,15 @@
         public event Server_NickEventHandler OnNick;
         public event NamesEventHandler OnNames;
         public event Server_KickEventHandler Kick;
+
+        public string URI { get; set; }
+        public string Description { get; set; }
+        public int Port { get; set; }
+        public bool SSL { get; set; }
+        public Connection Connection { get; private set; }
+        public string UserNick { get; private set; }
+
+        public ChannelManager ChanManager { get; private set; }
 
         public Server(ServerSettings settings)
         {
@@ -80,6 +81,34 @@
             Connection.OnRawMessageReceived += new RawMessageReceivedEventHandler(Connection_OnRawMessageReceived);
             Connection.OnConnectSuccess += new ConnectEventHandler(Connection_OnConnectSuccess);
 
+            DoConnect();
+        }
+
+        public Server(string uri, string description, int port, bool ssl) 
+            : this(new ServerSettings(uri, description, port, ssl)) 
+        {
+            //intentionally left blank
+        }
+
+        // hack - should call dispose
+        ~Server()
+        {
+            this.Disconnect();
+        }
+
+        public void Connect()
+        {
+            DoConnect();
+        }
+
+        public void Disconnect()
+        {
+            this.Connection.Disconnect(string.Empty);
+        }
+
+        // hack - needs to try connection in the background
+        private void DoConnect()
+        {
             try
             {
                 Connection.Connect();
@@ -132,8 +161,6 @@
             if (Action != null)
                 Action(Nick.FromUserInfo(user), ChanManager.Create(channel), description);
         }
-
-        public Server(string uri, string description, int port, bool ssl) : this(new ServerSettings(uri, description, port, ssl)) { }
 
         private void Listener_OnDisconnected()
         {
@@ -216,6 +243,11 @@
             Channel newChan = ChanManager.Create(channel);
             Connection.Sender.Join(channel);
             return newChan;
+        }
+
+        protected virtual void OnConnecting(CancelEventArgs e)
+        {
+            this.Connecting.Fire<CancelEventArgs>(this, e);
         }
 
         protected virtual void OnJoinSelf(DataEventArgs<Channel> e)
