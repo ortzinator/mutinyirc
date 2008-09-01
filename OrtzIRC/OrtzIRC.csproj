@@ -138,7 +138,6 @@
     <Compile Include="ServerManager.cs" />
     <Compile Include="IrcSettings.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="Target.cs" />
     <Compile Include="Windows\ChannelForm.cs">
       <SubType>Form</SubType>
     </Compile>

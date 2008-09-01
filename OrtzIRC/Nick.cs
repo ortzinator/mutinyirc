@@ -6,7 +6,7 @@
     /// <summary>
     /// Represents a user in a single channel
     /// </summary>
-    public class Nick : Target
+    public class Nick
     {
         public string Name { get; set; }
         public string RealName { get; set; }
