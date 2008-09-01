@@ -25,7 +25,7 @@ namespace OrtzIRC
             {
                 ServerSettings settings = new ServerSettings("chat.freenode.net", "Freenode", 6667, false);
                 Server newServer = ServerManager.Instance.Create(settings);
-                ServerForm newServerForm = new ServerForm(newServer);
+                ServerForm newServerForm = new ServerForm() { Server = newServer };
                 newServerForm.MdiParent = this;
                 newServerForm.Text = settings.Uri;
                 newServerForm.Show();

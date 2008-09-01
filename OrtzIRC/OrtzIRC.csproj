@@ -137,6 +137,11 @@
     <Compile Include="Server.cs" />
     <Compile Include="ServerManager.cs" />
     <Compile Include="IrcSettings.cs" />
+    <Compile Include="Resources\ServerStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ServerStrings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Windows\ChannelForm.cs">
       <SubType>Form</SubType>
@@ -176,6 +181,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Resources\ServerStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ServerStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Windows\ChannelForm.resx">
       <DependentUpon>ChannelForm.cs</DependentUpon>
       <SubType>Designer</SubType>
