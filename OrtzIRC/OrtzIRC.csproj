@@ -109,6 +109,7 @@
   <ItemGroup>
     <Compile Include="Channel.cs" />
     <Compile Include="ChannelManager.cs" />
+    <Compile Include="ChannelMessageEventArgs.cs" />
     <Compile Include="ChannelModeChangeEventArgs.cs" />
     <Compile Include="Controls\ChannelText.cs">
       <SubType>Component</SubType>
@@ -128,12 +129,19 @@
     <Compile Include="Controls\NickListBox.Designer.cs">
       <DependentUpon>NickListBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Mode.cs" />
+    <Compile Include="KickEventArgs.cs" />
     <Compile Include="Nick.cs" />
+    <Compile Include="PartEventArgs.cs" />
+    <Compile Include="PrivateMessageEventArgs.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\CommonStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CommonStrings.resx</DependentUpon>
     </Compile>
     <Compile Include="Server.cs" />
     <Compile Include="ServerManager.cs" />
@@ -182,6 +190,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Resources\CommonStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\ServerStrings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ServerStrings.Designer.cs</LastGenOutput>

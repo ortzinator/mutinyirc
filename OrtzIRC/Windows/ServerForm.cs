@@ -1,7 +1,5 @@
 namespace OrtzIRC
 {
-    using System;
-    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Windows.Forms;
     using OrtzIRC.Common;
@@ -79,14 +77,14 @@ namespace OrtzIRC
             this.serverOutputBox.AddLine(ServerStrings.ConnectingMessage.With(this.server.URI, this.server.Port));
         }
 
-        private void ParentServer_OnKick(Nick nick, Channel chan, string kickee, string reason)
+        private void ParentServer_OnKick(object sender, KickEventArgs e)
         {
-            chan.UserKick(nick, kickee, reason);
+            e.Channel.UserKick(e.Nick, e.Kickee, e.Reason);
         }
 
-        private void ParentServer_OnPart(Nick nick, Channel chan, string message)
+        private void ParentServer_OnPart(object sender, PartEventArgs e)
         {
-            chan.UserPart(nick, message);
+            e.Channel.UserPart(e.Nick, e.Reason);
         }
 
         private void ParentServer_OnJoinOther(object sender, DoubleDataEventArgs<Nick, Channel> e)
@@ -99,7 +97,7 @@ namespace OrtzIRC
             this.serverOutputBox.AddLine(code.ToString() + " " + message);
         }
 
-        private void ParentServer_OnRawMessageReceived(string message)
+        private void ParentServer_OnRawMessageReceived(object sender, DataEventArgs<string> e)
         {
             //this.serverOutputBox.AddLine(message);
         }
@@ -109,9 +107,9 @@ namespace OrtzIRC
             chan.ShowTopic(topic);
         }
 
-        private void ParentServer_OnPrivateNotice(Nick nick, string notice)
+        private void ParentServer_OnPrivateNotice(object sender, PrivateMessageEventArgs e)
         {
-            this.serverOutputBox.AddLine("-" + nick.Name + ":" + notice + "-");
+            this.serverOutputBox.AddLine("-" + e.Nick.Name + ":" + e.Message + "-");
         }
 
         private void Server_OnConnectFail(object sender, DataEventArgs<string> e)
@@ -119,9 +117,9 @@ namespace OrtzIRC
             this.serverOutputBox.AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
         }
 
-        private void ParentServer_OnAction(Nick nick, Channel chan, string message)
+        private void ParentServer_OnAction(object sender, ChannelMessageEventArgs e)
         {
-            chan.NewAction(nick, message);
+            e.Channel.NewAction(e.Nick, e.Message);
         }
 
         private void ParentServer_OnRegistered()
@@ -146,9 +144,9 @@ namespace OrtzIRC
             });
         }
 
-        private void ParentServer_OnPublicMessage(Nick nick, Channel chan, string message)
+        private void ParentServer_OnPublicMessage(object sender, ChannelMessageEventArgs e)
         {
-            chan.NewMessage(nick, message);
+            e.Channel.NewMessage(e.Nick, e.Message);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -157,10 +155,11 @@ namespace OrtzIRC
 
             if (this.server.Connection.Connected)
             {
-                if (MessageBox.Show("Do you wish to disconnect from the server?", "", MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question) == DialogResult.Yes)
+                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect, CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+                if (result == DialogResult.OK)
                 {
-                    this.server.Connection.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
+                    this.server.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
                 }
                 else
                 {
