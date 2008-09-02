@@ -54,7 +54,7 @@ namespace Sharkbite.Irc
         /// </summary>
         public event RawMessageSentEventHandler OnRawMessageSent;
 
-        public event ConnectEventHandler OnConnectSuccess;
+        public event EventHandler<EventArgs> OnConnectSuccess;
 
         private AsyncCallback asynConnect;
         private AsyncCallback asynReceive;
@@ -716,8 +716,8 @@ namespace Sharkbite.Irc
         private void ConnectCallback(IAsyncResult asyn)
         {
             connected = true;
-            if (OnConnectSuccess != null)
-                OnConnectSuccess();
+
+            if (this.OnConnectSuccess != null) this.OnConnectSuccess(this, EventArgs.Empty);
 
             WaitforData();
             sender.RegisterConnection(connectionArgs);

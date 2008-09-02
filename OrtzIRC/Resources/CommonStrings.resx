@@ -117,16 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ConnectingMessage" xml:space="preserve">
-    <value>Connecting to {0} ({1})...</value>
-    <comment>Displayed to user in a server window when trying to connect.</comment>
-  </data>
-  <data name="ConnectionFailedMessage" xml:space="preserve">
-    <value>Could not connect: {0}</value>
-    <comment>Displayed to the user when a connection attempt is not successful.</comment>
-  </data>
-  <data name="WarnDisconnect" xml:space="preserve">
-    <value>This will disconnect you from the server.server?</value>
-    <comment>Displayed to the user when an action they performed will indirectly cause disconnection.</comment>
+  <data name="DialogCaption" xml:space="preserve">
+    <value>OrtzIRC</value>
   </data>
 </root>

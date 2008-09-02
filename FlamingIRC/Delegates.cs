@@ -552,6 +552,4 @@ namespace Sharkbite.Irc
     /// <param name="reason">Why the nick was disconnected.</param>
     /// <seealso cref="Listener.OnKill"/>
     public delegate void KillEventHandler(UserInfo user, string nick, string reason);
-
-    public delegate void ConnectEventHandler();
 }

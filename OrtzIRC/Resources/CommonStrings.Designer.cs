@@ -22,14 +22,14 @@ namespace OrtzIRC.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "2.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class ServerStrings {
+    internal class CommonStrings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ServerStrings() {
+        internal CommonStrings() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace OrtzIRC.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OrtzIRC.Resources.ServerStrings", typeof(ServerStrings).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OrtzIRC.Resources.CommonStrings", typeof(CommonStrings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,29 +61,11 @@ namespace OrtzIRC.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connecting to {0} ({1})....
+        ///   Looks up a localized string similar to OrtzIRC.
         /// </summary>
-        internal static string ConnectingMessage {
+        internal static string DialogCaption {
             get {
-                return ResourceManager.GetString("ConnectingMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Could not connect: {0}.
-        /// </summary>
-        internal static string ConnectionFailedMessage {
-            get {
-                return ResourceManager.GetString("ConnectionFailedMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This will disconnect you from the server.server?.
-        /// </summary>
-        internal static string WarnDisconnect {
-            get {
-                return ResourceManager.GetString("WarnDisconnect", resourceCulture);
+                return ResourceManager.GetString("DialogCaption", resourceCulture);
             }
         }
     }

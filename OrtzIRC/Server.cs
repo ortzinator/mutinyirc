@@ -6,13 +6,9 @@
     using Sharkbite.Irc;
     using System.ComponentModel;
         
-    public delegate void Server_ChannelMessageEventHandler(Nick nick, Channel chan, string message);
-    public delegate void Server_PrivateNoticeEventHandler(Nick nick, string message);
     public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
     public delegate void Server_NickEventHandler(Nick nick, string newNick);
-    public delegate void Server_KickEventHandler(Nick nick, Channel chan, string kickee, string reason);
-
-
+    
     public class Server
     {
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
@@ -25,22 +21,22 @@
         /// The string data is the message about why the connection failed.
         /// </remarks>
         public event EventHandler<DataEventArgs<string>> ConnectFail;
-        public event RawMessageReceivedEventHandler RawMessageReceived;
-        public event Server_ChannelMessageEventHandler PublicMessage;
-        public event ConnectEventHandler ConnectSuccess;
+        public event EventHandler<DataEventArgs<string>> RawMessageReceived;
+        public event EventHandler<ChannelMessageEventArgs> PublicMessage;
+        public event EventHandler<EventArgs> Connected;
         public event ErrorMessageEventHandler Error;
         public event RegisteredEventHandler Registered;
-        public event Server_ChannelMessageEventHandler Part;
+        public event EventHandler<PartEventArgs> Part;
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
         public event UserModeChangeEventHandler UserModeChange;
         public event DisconnectingEventHandler Disconnecting;
         public event DisconnectedEventHandler Disconnected;
-        public event Server_ChannelMessageEventHandler Action;
-        public event Server_PrivateNoticeEventHandler PrivateNotice;
+        public event EventHandler<ChannelMessageEventArgs> Action;
+        public event EventHandler<PrivateMessageEventArgs> PrivateNotice;
         public event Server_TopicRequestEventHandler GotTopic;
         public event Server_NickEventHandler OnNick;
         public event NamesEventHandler OnNames;
-        public event Server_KickEventHandler Kick;
+        public event EventHandler<KickEventArgs> Kick;
 
         public string URI { get; set; }
         public string Description { get; set; }
@@ -83,7 +79,7 @@
             Connection.Listener.OnKick += new KickEventHandler(Listener_OnKick);
 
             Connection.OnRawMessageReceived += new RawMessageReceivedEventHandler(Connection_OnRawMessageReceived);
-            Connection.OnConnectSuccess += new ConnectEventHandler(Connection_OnConnectSuccess);
+            Connection.OnConnectSuccess += new EventHandler<EventArgs>(Connection_OnConnectSuccess);
 
             DoConnect();
         }
@@ -130,8 +126,8 @@
 
         private void Listener_OnKick(UserInfo user, string channel, string kickee, string reason)
         {
-            if (Kick != null)
-                Kick(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), kickee, reason);
+            this.OnKick(new KickEventArgs(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), kickee, reason));
+
             Connection.Sender.Names(channel);
         }
 
@@ -160,14 +156,12 @@
 
         private void Listener_OnPrivateNotice(UserInfo user, string notice)
         {
-            if (PrivateNotice != null)
-                PrivateNotice(Nick.FromUserInfo(user), notice);
+            this.OnPrivateNotice(new PrivateMessageEventArgs(Nick.FromUserInfo(user), notice));
         }
 
         private void Listener_OnAction(UserInfo user, string channel, string description)
         {
-            if (Action != null)
-                Action(Nick.FromUserInfo(user), ChanManager.Create(channel), description);
+            this.OnAction(new ChannelMessageEventArgs(Nick.FromUserInfo(user), ChanManager.Create(channel), description));
         }
 
         private void Listener_OnDisconnected()
@@ -184,20 +178,17 @@
 
         private void Connection_OnRawMessageReceived(string message)
         {
-            if (RawMessageReceived != null)
-                RawMessageReceived(message);
+            this.OnRawMessageReceived(new DataEventArgs<string>(message));
         }
 
-        private void Connection_OnConnectSuccess()
+        private void Connection_OnConnectSuccess(object sender, EventArgs e)
         {
-            if (ConnectSuccess != null)
-                ConnectSuccess();
+            this.OnConnected(EventArgs.Empty);
         }
 
         private void Listener_OnPublic(UserInfo user, string channel, string message)
         {
-            if (PublicMessage != null)
-                PublicMessage(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), message);
+            this.OnPublicMessage(new ChannelMessageEventArgs(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), message));
         }
 
         private void Listener_OnNames(string channel, string[] nicks, bool last)
@@ -221,8 +212,8 @@
 
         private void Listener_OnPart(UserInfo user, string channel, string reason)
         {
-            if (Part != null)
-                Part(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), reason);
+            this.OnPart(new PartEventArgs(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), reason));
+
             Connection.Sender.Names(channel);
         }
 
@@ -251,6 +242,41 @@
             Channel newChan = ChanManager.Create(channel);
             Connection.Sender.Join(channel);
             return newChan;
+        }
+
+        protected virtual void OnPart(PartEventArgs e)
+        {
+            this.Part.Fire<PartEventArgs>(this, e);
+        }
+
+        protected virtual void OnPublicMessage(ChannelMessageEventArgs e)
+        {
+            this.PublicMessage.Fire<ChannelMessageEventArgs>(this, e);
+        }
+
+        protected virtual void OnAction(ChannelMessageEventArgs e)
+        {
+            this.Action.Fire<ChannelMessageEventArgs>(this, e);
+        }
+
+        protected virtual void OnPrivateNotice(PrivateMessageEventArgs e)
+        {
+            this.PrivateNotice.Fire<PrivateMessageEventArgs>(this, e);
+        }
+
+        protected virtual void OnConnected(EventArgs e)
+        {
+            this.Connected.Fire<EventArgs>(this, e);
+        }
+
+        protected virtual void OnKick(KickEventArgs e)
+        {
+            this.Kick.Fire<KickEventArgs>(this, e);
+        }
+
+        protected virtual void OnRawMessageReceived(DataEventArgs<string> e)
+        {
+            this.RawMessageReceived(this, e);
         }
 
         protected virtual void OnConnecting(CancelEventArgs e)
