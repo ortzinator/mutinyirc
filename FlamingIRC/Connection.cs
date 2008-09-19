@@ -1,6 +1,6 @@
 /*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
@@ -50,14 +50,14 @@ namespace FlamingIRC
         /// Receive all the messages, unparsed, sent by the IRC server. This is not
         /// normally needed but provided for those who are interested.
         /// </summary>
-        public event EventHandler<DataEventArgs<string>> RawMessageReceived;
+        public event EventHandler<FlamingDataEventArgs<string>> RawMessageReceived;
         /// <summary>
         /// Receive all the raw messages sent to the IRC from this connection
         /// </summary>
-        public event EventHandler<DataEventArgs<string>> OnRawMessageSent;
+        public event EventHandler<FlamingDataEventArgs<string>> OnRawMessageSent;
 
-        public event EventHandler<DataEventArgs<string>> OnConnectSuccess;
-        public event EventHandler<DataEventArgs<string>> OnConnectFail;
+        public event EventHandler OnConnectSuccess;
+        public event EventHandler<FlamingDataEventArgs<string>> ConnectFailed;
 
         private AsyncCallback asynConnect, asynReceive, asynSend;
 
@@ -399,7 +399,7 @@ namespace FlamingIRC
         /// </summary>
         /// <param name="user">Who changed their nick</param>
         /// <param name="newNick">The new nick name</param>
-        private void MyNickChanged(UserInfo user, string newNick)
+        private void MyNickChanged(User user, string newNick)
         {
             if (connectionArgs.Nick == user.Nick)
             {
@@ -559,7 +559,7 @@ namespace FlamingIRC
                     listener.Parse(line);
                 }
 
-                this.RawMessageReceived.Fire(this, new DataEventArgs<string>(line));
+                this.RawMessageReceived.Fire<FlamingDataEventArgs<string>>(this, new FlamingDataEventArgs<string>(line));
             }
             catch (IOException e)
             {
@@ -631,7 +631,7 @@ namespace FlamingIRC
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() exception=" + e);
             }
 
-            this.OnRawMessageSent.Fire(this, new DataEventArgs<string>(command.ToString()));
+            this.OnRawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
 
             command.Remove(0, command.Length);
         }
@@ -714,7 +714,7 @@ namespace FlamingIRC
         {
             try
             {
-                this.OnConnectSuccess.Fire(this, EventArgs.Empty);
+                this.OnConnectSuccess.Fire<EventArgs>(this, EventArgs.Empty);
 
                 WaitforData();
                 sender.RegisterConnection(connectionArgs);
@@ -725,7 +725,7 @@ namespace FlamingIRC
             }
             catch (SocketException e)
             {
-                if (this.OnConnectFail != null) this.OnConnectFail(this, new DataEventArgs<string>(e.Message));
+                if (this.ConnectFailed != null) this.ConnectFailed(this, new FlamingDataEventArgs<string>(e.Message));
             }
         }
 

@@ -1,6 +1,6 @@
 /*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
@@ -109,7 +109,7 @@ namespace FlamingIRC
     /// <param name="channel">The target channel.</param>
     /// <param name="notice">A message.</param>
     /// <seealso cref="Listener.OnPublicNotice"/>
-    public delegate void PublicNoticeEventHandler(UserInfo user, string channel, string notice);
+    public delegate void PublicNoticeEventHandler(User user, string channel, string notice);
 
     /// <summary>
     /// A private Notice type message was sent to the user.
@@ -117,7 +117,7 @@ namespace FlamingIRC
     /// <param name="user">The user who sent the message.</param>
     /// <param name="notice">A message.</param>
     /// <seealso cref="Listener.OnPrivateNotice"/>
-    public delegate void PrivateNoticeEventHandler(UserInfo user, string notice);
+    public delegate void PrivateNoticeEventHandler(User user, string notice);
 
     /// <summary>
     /// Someone has joined a channel.
@@ -125,7 +125,7 @@ namespace FlamingIRC
     /// <param name="user">Who joined.</param>
     /// <param name="channel">The channel name.</param>
     /// <seealso cref="Listener.OnJoin"/>
-    public delegate void JoinEventHandler(UserInfo user, string channel);
+    public delegate void JoinEventHandler(User user, string channel);
 
     /// <summary>
     /// An action message was sent to a channel.
@@ -134,7 +134,7 @@ namespace FlamingIRC
     /// <param name="channel">The target channel.</param>
     /// <param name="description">An action.</param>
     /// <seealso cref="Listener.OnAction"/>
-    public delegate void ActionEventHandler(UserInfo user, string channel, string description);
+    public delegate void ActionEventHandler(User user, string channel, string description);
 
     /// <summary>
     /// A private action message was sent to the user.
@@ -142,7 +142,7 @@ namespace FlamingIRC
     /// <param name="user">The user who expresses the action.</param>
     /// <param name="description">An action.</param>
     /// <seealso cref="Listener.OnPrivateAction"/>
-    public delegate void PrivateActionEventHandler(UserInfo user, string description);
+    public delegate void PrivateActionEventHandler(User user, string description);
 
     /// <summary>
     /// A public message was sent to a channel.
@@ -151,7 +151,7 @@ namespace FlamingIRC
     /// <param name="channel">The taregt channel.</param>
     /// <param name="message">A message.</param>
     /// <seealso cref="Listener.OnPublic"/>
-    public delegate void PublicMessageEventHandler(UserInfo user, string channel, string message);
+    public delegate void PublicMessageEventHandler(User user, string channel, string message);
 
     /// <summary>
     /// A user changed his nickname.
@@ -159,7 +159,7 @@ namespace FlamingIRC
     /// <param name="user">The user who is changing his nick.</param>
     /// <param name="newNick">The new nickname.</param>
     /// <seealso cref="Listener.OnNick"/>
-    public delegate void NickEventHandler(UserInfo user, string newNick);
+    public delegate void NickEventHandler(User user, string newNick);
 
     /// <summary>
     /// A private message was sent to the user.
@@ -167,7 +167,7 @@ namespace FlamingIRC
     /// <param name="user">Who sent the message.</param>
     /// <param name="message">The message.</param>
     /// <seealso cref="Listener.OnPrivate"/>
-    public delegate void PrivateMessageEventHandler(UserInfo user, string message);
+    public delegate void PrivateMessageEventHandler(User user, string message);
 
     /// <summary>
     /// A channel's topic has changed.
@@ -176,7 +176,7 @@ namespace FlamingIRC
     /// <param name="channel">Which channel had its topic changed.</param>
     /// <param name="newTopic">The new topic.</param>
     /// <seealso cref="Listener.OnTopicChanged"/>
-    public delegate void TopicEventHandler(UserInfo user, string channel, string newTopic);
+    public delegate void TopicEventHandler(User user, string channel, string newTopic);
 
     /// <summary>
     /// The response to a <see cref="Sender.RequestTopic"/> command.
@@ -193,7 +193,7 @@ namespace FlamingIRC
     /// <param name="channel">The channel he left.</param>
     /// <param name="reason">The reason for leaving.</param>
     /// <seealso cref="Listener.OnPart"/>
-    public delegate void PartEventHandler(UserInfo user, string channel, string reason);
+    public delegate void PartEventHandler(User user, string channel, string reason);
 
     /// <summary>
     /// Someone has quit IRC.
@@ -201,7 +201,7 @@ namespace FlamingIRC
     /// <param name="user">The user who quit.</param>
     /// <param name="reason">A goodbye message.</param>
     /// <seealso cref="Listener.OnQuit"/>
-    public delegate void QuitEventHandler(UserInfo user, string reason);
+    public delegate void QuitEventHandler(User user, string reason);
 
     /// <summary>
     /// The user has been invited to a channel.
@@ -209,7 +209,7 @@ namespace FlamingIRC
     /// <param name="user">Who sent the invite.</param>
     /// <param name="channel">The target channel.</param>
     /// <seealso cref="Listener.OnInvite"/>
-    public delegate void InviteEventHandler(UserInfo user, string channel);
+    public delegate void InviteEventHandler(User user, string channel);
 
     /// <summary>
     /// Someone has been kicked from a channel. 
@@ -219,7 +219,7 @@ namespace FlamingIRC
     /// <param name="kickee">Who was kicked.</param>
     /// <param name="reason">Why the person was kicked.</param>
     /// <seealso cref="Listener.OnKick"/>
-    public delegate void KickEventHandler(UserInfo user, string channel, string kickee, string reason);
+    public delegate void KickEventHandler(User user, string channel, string kickee, string reason);
 
     /// <summary>
     /// The response to a <see cref="Sender.Names"/> request.
@@ -263,7 +263,7 @@ namespace FlamingIRC
     /// <param name="realName">The user's real name</param>
     /// <param name="last">True if this is the last response</param>
     /// <seealso cref="Listener.OnWho"/>
-    public delegate void WhoEventHandler(UserInfo user, string channel, string ircServer, string mask,
+    public delegate void WhoEventHandler(User user, string channel, string ircServer, string mask,
     int hopCount, string realName, bool last);
 
     /// <summary>
@@ -280,7 +280,7 @@ namespace FlamingIRC
     /// <param name="realName">The user's real name.</param>
     /// <param name="last">True if this is the final reply.</param>
     /// <seealso cref="Listener.OnWhowas"/>
-    public delegate void WhowasEventHandler(UserInfo user, string realName, bool last);
+    public delegate void WhowasEventHandler(User user, string realName, bool last);
 
     /// <summary>
     /// This user's mode has changed.
@@ -313,7 +313,7 @@ namespace FlamingIRC
     /// <param name="modes">Objects which hold all the information about 1 or more mode changes.</param>
     /// <param name="raw">Raw modes string.</param>
     /// <seealso cref="Listener.OnChannelModeChange"/>
-    public delegate void ChannelModeChangeEventHandler(UserInfo who, string channel, ChannelModeInfo[] modes, string raw);
+    public delegate void ChannelModeChangeEventHandler(User who, string channel, ChannelModeInfo[] modes, string raw);
 
 
     /// <summary>
@@ -327,7 +327,7 @@ namespace FlamingIRC
     /// <param name="who">Who set the mask (not for ChannelCreator).</param>
     /// <param name="whenSet">When was it set (not for ChannelCreator).</param>
     /// <seealso cref="Listener.OnChannelList"/>
-    public delegate void ChannelListEventHandler(string channel, ChannelMode mode, string item, UserInfo who, long whenSet, bool last);
+    public delegate void ChannelListEventHandler(string channel, ChannelMode mode, string item, User who, long whenSet, bool last);
 
 
     /// <summary>
@@ -337,7 +337,7 @@ namespace FlamingIRC
     /// <param name="command">The Ctcp command this replies to."</param>
     /// <param name="reply">The text of the reply.</param>
     /// <see cref="CtcpListener.OnCtcpReply"/>
-    public delegate void CtcpReplyEventHandler(string command, UserInfo who, string reply);
+    public delegate void CtcpReplyEventHandler(string command, User who, string reply);
 
     /// <summary>
     /// Someone has sent a Ctcp request.
@@ -345,7 +345,7 @@ namespace FlamingIRC
     /// <param name="who">Who sent the request.</param>
     /// <param name="command">The Ctcp command to send to IRC."</param>
     /// <see cref="CtcpListener.OnCtcpRequest"/>
-    public delegate void CtcpRequestEventHandler(string command, UserInfo who);
+    public delegate void CtcpRequestEventHandler(string command, User who);
 
     /// <summary>
     /// Someone has replied to a Ctcp ping request sent by this client.
@@ -353,7 +353,7 @@ namespace FlamingIRC
     /// <param name="who">Who sent the reply.</param>
     /// <param name="timestamp">The timestamp originally sent in the request."</param>
     /// <see cref="CtcpListener.OnCtcpPingReply"/>
-    public delegate void CtcpPingReplyEventHandler(UserInfo who, string timestamp);
+    public delegate void CtcpPingReplyEventHandler(User who, string timestamp);
 
     /// <summary>
     /// Someone has sent a Ctcp Ping request.
@@ -362,14 +362,14 @@ namespace FlamingIRC
     /// <param name="timestamp">The timestamp which should be sent 
     /// back."</param>
     /// <see cref="CtcpListener.OnCtcpPingRequest"/>
-    public delegate void CtcpPingRequestEventHandler(UserInfo who, string timestamp);
+    public delegate void CtcpPingRequestEventHandler(User who, string timestamp);
 
     /// <summary>
     /// Someone has requested a DCC chat session.
     /// </summary>
-    /// <param name="dccUserInfo">The collection of information about the remote user.</param>
+    /// <param name="dccUser">The collection of information about the remote user.</param>
     /// <see cref="DccListener.OnDccChatRequest"/>
-    public delegate void DccChatRequestEventHandler(DccUserInfo dccUserInfo);
+    public delegate void DccChatRequestEventHandler(DccUser dccUser);
 
     /// <summary>
     /// A DCC chat session has been opened with a remote user.
@@ -404,12 +404,12 @@ namespace FlamingIRC
     /// <summary>
     /// Another user has offered to send a file.
     /// </summary>
-    /// <param name="dccUserInfo">The collection of information about the remote user.</param>
+    /// <param name="dccUser">The collection of information about the remote user.</param>
     /// <param name="fileName">The name of the file to be sent.</param>
     /// <param name="size">The size in bytes of the offered file.</param>
     /// <param name="turbo">True if the sender will use send-ahead mode.</param>
     /// <see cref="DccListener.OnDccSendRequest"/>
-    public delegate void DccSendRequestEventHandler(DccUserInfo dccUserInfo, string fileName, int size, bool turbo);
+    public delegate void DccSendRequestEventHandler(DccUser dccUser, string fileName, int size, bool turbo);
 
     /// <summary>
     /// There has been no activity in this session for the timeout period. The 
@@ -457,11 +457,11 @@ namespace FlamingIRC
     /// A remote user has requested a file. To respond
     /// use <see cref="DccFileSession.Send"/> with the relevant information.
     /// </summary>
-    /// <param name="dccUserInfo">The requestor's information.</param>
+    /// <param name="dccUser">The requestor's information.</param>
     /// <param name="fileName">The name of the requested file.</param>
     /// <param name="turbo">True to use send-ahead mode for transfers.</param>
     /// <see cref="DccListener.OnDccGetRequest"/>
-    public delegate void DccGetRequestEventHandler(DccUserInfo dccUserInfo, string fileName, bool turbo);
+    public delegate void DccGetRequestEventHandler(DccUser dccUser, string fileName, bool turbo);
 
     /// <summary>
     /// The full unparsed text messages received from the IRC server. It
@@ -553,5 +553,5 @@ namespace FlamingIRC
     /// <param name="nick">Who was Killed.</param>
     /// <param name="reason">Why the nick was disconnected.</param>
     /// <seealso cref="Listener.OnKill"/>
-    public delegate void KillEventHandler(UserInfo user, string nick, string reason);
+    public delegate void KillEventHandler(User user, string nick, string reason);
 }

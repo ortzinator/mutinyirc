@@ -117,12 +117,12 @@ namespace FlamingIRC
 							return;
 						}
 						//Send event
-						DccUserInfo dccUserInfo = null;
+						DccUser dccUser = null;
 						try
 						{
-							dccUserInfo = new DccUserInfo(
+							dccUser = new DccUser(
 								connection,
-								Rfc2812Util.ParseUserInfoLine( requestor ),
+								Rfc2812Util.ParseUserLine( requestor ),
 								new IPEndPoint( DccUtil.LongToIPAddress( tokens[ Address ]), int.Parse( tokens[ Port], CultureInfo.InvariantCulture ) ) );
 						}
 						catch( ArgumentException ae ) 
@@ -132,7 +132,7 @@ namespace FlamingIRC
 						}
 						try 
 						{
-							OnDccChatRequest( dccUserInfo );
+							OnDccChatRequest( dccUser );
 						}
 						catch( ArgumentException ae ) 
 						{
@@ -149,12 +149,12 @@ namespace FlamingIRC
 					}
 					if( OnDccSendRequest != null ) 
 					{
-						DccUserInfo dccUserInfo = null;
+						DccUser dccUser = null;
 						try
 						{
-							dccUserInfo = new DccUserInfo(
+							dccUser = new DccUser(
 								connection,
-								Rfc2812Util.ParseUserInfoLine( requestor ),
+								Rfc2812Util.ParseUserLine( requestor ),
 								new IPEndPoint( DccUtil.LongToIPAddress( tokens[ Address ]), int.Parse( tokens[ Port], CultureInfo.InvariantCulture ) ) );
 						}
 						catch( ArgumentException ae ) 
@@ -165,7 +165,7 @@ namespace FlamingIRC
 						try
 						{
 							OnDccSendRequest( 
-								dccUserInfo,
+								dccUser,
 								tokens[FileName],
 								int.Parse( tokens[FileSize], CultureInfo.InvariantCulture ),
 								IsTurbo( 5, tokens) );
@@ -188,9 +188,9 @@ namespace FlamingIRC
 						try 
 						{
 							OnDccGetRequest(
-								new DccUserInfo( 
+								new DccUser( 
 								connection,
-								Rfc2812Util.ParseUserInfoLine( requestor ) ),
+								Rfc2812Util.ParseUserLine( requestor ) ),
 								tokens[ FileName], 
 								IsTurbo( 2, tokens) );
 						}

@@ -1,17 +1,18 @@
 ﻿namespace OrtzIRC
 {
     using System;
+    using FlamingIRC;
 
     public class KickEventArgs : EventArgs
     {
-        public Nick Nick { get; private set; }
+        public User User { get; private set; }
         public Channel Channel { get; private set; }
         public string Kickee { get; private set; }
         public string Reason {get; private set; }
 
-        public KickEventArgs(Nick nick, Channel channel, string kickee, string reason)
+        public KickEventArgs(User user, Channel channel, string kickee, string reason)
         {
-            this.Nick = nick;
+            this.User = user;
             this.Channel = channel;
             this.Kickee = kickee;
             this.Reason = reason;

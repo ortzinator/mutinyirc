@@ -2,17 +2,18 @@
 {
     using System;
     using System.Collections.Generic;
-    using FlamingIRC;
     using System.ComponentModel;
+    using FlamingIRC;
+    using OrtzIRC.Common;
         
     public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
-    public delegate void Server_NickEventHandler(Nick nick, string newNick);
+    public delegate void Server_NickEventHandler(User nick, string newNick);
     
     public class Server
     {
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
         public event EventHandler<CancelEventArgs> Connecting;
-        public event EventHandler<DoubleDataEventArgs<Nick, Channel>> JoinOther;
+        public event EventHandler<DoubleDataEventArgs<User, Channel>> JoinOther;
         /// <summary>
         /// Informs the subscriber that a connect attempt fails.
         /// </summary>
@@ -77,9 +78,9 @@
             Connection.Listener.OnNick += new NickEventHandler(Listener_OnNick);
             Connection.Listener.OnKick += new KickEventHandler(Listener_OnKick);
 
-            Connection.RawMessageReceived += new FlamingIRC.DataEventArgs<string>(Connection_OnRawMessageReceived);
+            Connection.RawMessageReceived += new EventHandler<FlamingDataEventArgs<string>>(Connection_OnRawMessageReceived);
             //Connection.OnConnectSuccess += new ConnectEventHandler(Connection_OnConnectSuccess);
-            Connection.OnConnectFail += new EventHandler<DataEventArgs<string>>(Connection_ConnectFailed);
+            Connection.ConnectFailed += new EventHandler<FlamingDataEventArgs<string>>(Connection_ConnectFailed);
 
             DoConnect();
         }
@@ -124,9 +125,9 @@
             }
         }
 
-        private void Listener_OnKick(UserInfo user, string channel, string kickee, string reason)
+        private void Listener_OnKick(User user, string channel, string kickee, string reason)
         {
-            this.OnKick(new KickEventArgs(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), kickee, reason));
+            this.OnKick(new KickEventArgs(user, ChanManager.GetChannel(channel), kickee, reason));
 
             Connection.Sender.Names(channel);
         }
@@ -142,10 +143,10 @@
             
         }
 
-        private void Listener_OnNick(UserInfo user, string newNick)
+        private void Listener_OnNick(User user, string newNick)
         {
             if (OnNick != null)
-                OnNick(Nick.FromUserInfo(user), newNick);
+                OnNick(user, newNick);
         }
 
         private void Listener_OnTopicRequest(string channel, string topic)
@@ -154,14 +155,14 @@
                 GotTopic(ChanManager.Create(channel), topic);
         }
 
-        private void Listener_OnPrivateNotice(UserInfo user, string notice)
+        private void Listener_OnPrivateNotice(User user, string notice)
         {
-            this.OnPrivateNotice(new PrivateMessageEventArgs(Nick.FromUserInfo(user), notice));
+            this.OnPrivateNotice(new PrivateMessageEventArgs(user, notice));
         }
 
-        private void Listener_OnAction(UserInfo user, string channel, string description)
+        private void Listener_OnAction(User user, string channel, string description)
         {
-            this.OnAction(new ChannelMessageEventArgs(Nick.FromUserInfo(user), ChanManager.Create(channel), description));
+            this.OnAction(new ChannelMessageEventArgs(user, ChanManager.Create(channel), description));
         }
 
         private void Listener_OnDisconnected()
@@ -176,9 +177,9 @@
                 Disconnecting();
         }
 
-        private void Connection_OnRawMessageReceived(string message)
+        private void Connection_OnRawMessageReceived(object sender, FlamingDataEventArgs<string> e)
         {
-            this.OnRawMessageReceived(new DataEventArgs<string>(message));
+            this.OnRawMessageReceived(new DataEventArgs<string>(e.Data));
         }
 
         private void Connection_OnConnectSuccess(object sender, EventArgs e)
@@ -186,14 +187,14 @@
             this.OnConnected(EventArgs.Empty);
         }
 
-        private void Connection_ConnectFailed(object sender, DataEventArgs<string> e)
+        private void Connection_ConnectFailed(object sender, FlamingDataEventArgs<string> e)
         {
-            this.ConnectFailed(e);
+            this.ConnectFailed(new DataEventArgs<string>(e.Data));
         }
 
-        private void Listener_OnPublic(UserInfo user, string channel, string message)
+        private void Listener_OnPublic(User user, string channel, string message)
         {
-            this.OnPublicMessage(new ChannelMessageEventArgs(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), message));
+            this.OnPublicMessage(new ChannelMessageEventArgs(user, ChanManager.GetChannel(channel), message));
         }
 
         private void Listener_OnNames(string channel, string[] nicks, bool last)
@@ -203,7 +204,7 @@
                 OnNames(channel, nicks, last);
         }
 
-        private void Listener_OnJoin(UserInfo user, string channel)
+        private void Listener_OnJoin(User user, string channel)
         {
             if (user.Nick == UserNick)
             {
@@ -211,13 +212,13 @@
             }
             else
             {
-                this.OnJoinOther(new DoubleDataEventArgs<Nick, Channel>(Nick.FromUserInfo(user), ChanManager.Create(channel)));
+                this.OnJoinOther(new DoubleDataEventArgs<User, Channel>(user, ChanManager.Create(channel)));
             }
         }
 
-        private void Listener_OnPart(UserInfo user, string channel, string reason)
+        private void Listener_OnPart(User user, string channel, string reason)
         {
-            this.OnPart(new PartEventArgs(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), reason));
+            this.OnPart(new PartEventArgs(user, ChanManager.GetChannel(channel), reason));
 
             Connection.Sender.Names(channel);
         }
@@ -229,9 +230,9 @@
             JoinChannel("#ortzirc");
         }
 
-        private void Listener_OnChannelModeChange(UserInfo who, string channel, ChannelModeInfo[] modes, string raw)
+        private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
         {
-            OnChannelModeChange(new ChannelModeChangeEventArgs(Nick.FromUserInfo(who), ChanManager.GetChannel(channel), modes, raw));
+            OnChannelModeChange(new ChannelModeChangeEventArgs(who, ChanManager.GetChannel(channel), modes, raw));
 
             Connection.Sender.Names(channel);
         }
@@ -294,9 +295,9 @@
             JoinSelf.Fire<DataEventArgs<Channel>>(this, e);
         }
 
-        protected virtual void OnJoinOther(DoubleDataEventArgs<Nick, Channel> e)
+        protected virtual void OnJoinOther(DoubleDataEventArgs<User, Channel> e)
         {
-            JoinOther.Fire<DoubleDataEventArgs<Nick, Channel>>(this, e);
+            JoinOther.Fire<DoubleDataEventArgs<User, Channel>>(this, e);
         }
 
         protected virtual void ConnectFailed(DataEventArgs<string> e)

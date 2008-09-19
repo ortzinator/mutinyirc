@@ -1,6 +1,6 @@
 /*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
@@ -40,7 +40,7 @@ namespace FlamingIRC
 		private static readonly Regex userRegex;
 		// Regex that matches a legal IRC nick 
 		private static readonly Regex nickRegex;
-		//Regex to create a UserInfo from a string
+		//Regex to create a User from a string
 		private static readonly Regex nameSplitterRegex;
 		private const string ChannelPrefix = "#!+&";
 		private const string ActionModes = "+-";
@@ -50,17 +50,17 @@ namespace FlamingIRC
 
 		internal static TraceSwitch IrcTrace = new TraceSwitch("IrcTraceSwitch", "Debug level for RFC2812 classes.");
 		// Odd chars that IRC allows in nicknames 
-		internal const string Special = "\\[\\]\\`_\\^\\{\\|\\}";
-		internal const string Nick = "[" + Special + "a-zA-Z][\\w\\-" + Special + "]{0,8}";
-		internal const string User = "(" + Nick+ ")!([\\~\\w]+)@([\\w\\.\\-]+)";
+		internal const string specialReg = "\\[\\]\\`_\\^\\{\\|\\}";
+		internal const string nickReg = "[" + specialReg + "a-zA-Z][\\w\\-" + specialReg + "]{0,8}";
+		internal const string userReg = "(" + nickReg+ ")!([\\~\\w]+)@([\\w\\.\\-]+)";
 
 		/// <summary>
 		/// Static initializer 
 		/// </summary>
 		static Rfc2812Util() 
 		{
-			userRegex = new Regex( User );
-			nickRegex = new Regex( Nick ); 
+			userRegex = new Regex( userReg );
+			nickRegex = new Regex( nickReg ); 
 			nameSplitterRegex = new Regex("[!@]",RegexOptions.Compiled | RegexOptions.Singleline );
 		}
 
@@ -69,20 +69,20 @@ namespace FlamingIRC
 
 		/// <summary>
 		/// Converts the user string sent by the IRC server
-		/// into a UserInfo object.
+		/// into a User object.
 		/// </summary>
 		/// <param name="fullUserName">The user in nick!user@host form.</param>
-		/// <returns>A UserInfo object.</returns>
-		public static UserInfo UserInfoFromString( string fullUserName ) 
+		/// <returns>A User object.</returns>
+		public static User UserFromString( string fullUserName ) 
 		{
-			string[] parts = ParseUserInfoLine( fullUserName );
+			string[] parts = ParseUserLine( fullUserName );
 			if( parts == null ) 
 			{
-				return UserInfo.Empty;
+				return User.Empty;
 			}
 			else 
 			{
-				return new UserInfo( parts[0], parts[1], parts[2] );
+				return new User( parts[0], parts[1], parts[2] );
 			}
 		}
 		/// <summary>
@@ -91,7 +91,7 @@ namespace FlamingIRC
 		/// </summary>
 		/// <param name="fullUserName">The user in nick!user@host form</param>
 		/// <returns>A string array with the first item being nick, then user, and then host.</returns>
-		public static string[] ParseUserInfoLine( string fullUserName ) 
+		public static string[] ParseUserLine( string fullUserName ) 
 		{
 			if( fullUserName == null || fullUserName.Trim().Length == 0 ) 
 			{

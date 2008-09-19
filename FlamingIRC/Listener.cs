@@ -1,6 +1,6 @@
 /*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
@@ -243,7 +243,7 @@ namespace FlamingIRC
         /// </summary>
         public Listener()
         {
-            userPattern = new Regex("([\\w\\-" + Rfc2812Util.Special + "]+![\\~\\w]+@[\\w\\.\\-]+)", RegexOptions.Compiled | RegexOptions.Singleline);
+            userPattern = new Regex("([\\w\\-" + Rfc2812Util.specialReg + "]+![\\~\\w]+@[\\w\\.\\-]+)", RegexOptions.Compiled | RegexOptions.Singleline);
             channelPattern = new Regex("([#!+&]\\w+)", RegexOptions.Compiled | RegexOptions.Singleline);
             replyRegex = new Regex("^:([^\\s]*) ([\\d]{3}) ([^\\s]*) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
         }
@@ -268,7 +268,7 @@ namespace FlamingIRC
                 if (OnPrivateNotice != null)
                 {
                     OnPrivateNotice(
-                        UserInfo.Empty,
+                        User.Empty,
                         CondenseStrings(tokens, 2));
                 }
             }
@@ -336,7 +336,7 @@ namespace FlamingIRC
                         if (OnPublicNotice != null)
                         {
                             OnPublicNotice(
-                                Rfc2812Util.UserInfoFromString(tokens[0]),
+                                Rfc2812Util.UserFromString(tokens[0]),
                                 tokens[2],
                                 CondenseStrings(tokens, 3));
                         }
@@ -346,7 +346,7 @@ namespace FlamingIRC
                         if (OnPrivateNotice != null)
                         {
                             OnPrivateNotice(
-                                Rfc2812Util.UserInfoFromString(tokens[0]),
+                                Rfc2812Util.UserFromString(tokens[0]),
                                 CondenseStrings(tokens, 3));
                         }
                     }
@@ -354,7 +354,7 @@ namespace FlamingIRC
                 case JOIN:
                     if (OnJoin != null)
                     {
-                        OnJoin(Rfc2812Util.UserInfoFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
+                        OnJoin(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
                     }
                     break;
                 case PRIVMSG:
@@ -367,7 +367,7 @@ namespace FlamingIRC
                             {
                                 int last = tokens.Length - 1;
                                 tokens[last] = RemoveTrailingQuote(tokens[last]);
-                                OnAction(Rfc2812Util.UserInfoFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 4));
+                                OnAction(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 4));
                             }
                         }
                         else
@@ -376,7 +376,7 @@ namespace FlamingIRC
                             {
                                 int last = tokens.Length - 1;
                                 tokens[last] = RemoveTrailingQuote(tokens[last]);
-                                OnPrivateAction(Rfc2812Util.UserInfoFromString(tokens[0]), CondenseStrings(tokens, 4));
+                                OnPrivateAction(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 4));
                             }
                         }
                     }
@@ -384,21 +384,21 @@ namespace FlamingIRC
                     {
                         if (OnPublic != null)
                         {
-                            OnPublic(Rfc2812Util.UserInfoFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3));
+                            OnPublic(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3));
                         }
                     }
                     else
                     {
                         if (OnPrivate != null)
                         {
-                            OnPrivate(Rfc2812Util.UserInfoFromString(tokens[0]), CondenseStrings(tokens, 3));
+                            OnPrivate(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 3));
                         }
                     }
                     break;
                 case NICK:
                     if (OnNick != null)
                     {
-                        OnNick(Rfc2812Util.UserInfoFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
+                        OnNick(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
                     }
                     break;
                 case TOPIC:
@@ -406,14 +406,14 @@ namespace FlamingIRC
                     {
                         tokens[3] = RemoveLeadingColon(tokens[3]);
                         OnTopicChanged(
-                            Rfc2812Util.UserInfoFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3));
+                            Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3));
                     }
                     break;
                 case PART:
                     if (OnPart != null)
                     {
                         OnPart(
-                            Rfc2812Util.UserInfoFromString(tokens[0]),
+                            Rfc2812Util.UserFromString(tokens[0]),
                             tokens[2],
                             tokens.Length >= 4 ? RemoveLeadingColon(CondenseStrings(tokens, 3)) : "");
                     }
@@ -422,21 +422,21 @@ namespace FlamingIRC
                     if (OnQuit != null)
                     {
                         tokens[2] = RemoveLeadingColon(tokens[2]);
-                        OnQuit(Rfc2812Util.UserInfoFromString(tokens[0]), CondenseStrings(tokens, 2));
+                        OnQuit(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 2));
                     }
                     break;
                 case INVITE:
                     if (OnInvite != null)
                     {
                         OnInvite(
-                            Rfc2812Util.UserInfoFromString(tokens[0]), RemoveLeadingColon(tokens[3]));
+                            Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[3]));
                     }
                     break;
                 case KICK:
                     if (OnKick != null)
                     {
                         tokens[4] = RemoveLeadingColon(tokens[4]);
-                        OnKick(Rfc2812Util.UserInfoFromString(tokens[0]), tokens[2], tokens[3], CondenseStrings(tokens, 4));
+                        OnKick(Rfc2812Util.UserFromString(tokens[0]), tokens[2], tokens[3], CondenseStrings(tokens, 4));
                     }
                     break;
                 case MODE:
@@ -444,7 +444,7 @@ namespace FlamingIRC
                     {
                         if (OnChannelModeChange != null)
                         {
-                            UserInfo who = Rfc2812Util.UserInfoFromString(tokens[0]);
+                            User who = Rfc2812Util.UserFromString(tokens[0]);
                             try
                             {
                                 ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 3);
@@ -480,7 +480,7 @@ namespace FlamingIRC
                             tokens[3] = RemoveLeadingColon(tokens[3]);
                             reason = CondenseStrings(tokens, 3);
                         }
-                        OnKill(Rfc2812Util.UserInfoFromString(tokens[0]), tokens[2], reason);
+                        OnKill(Rfc2812Util.UserFromString(tokens[0]), tokens[2], reason);
                     }
                     break;
                 default:
@@ -596,7 +596,7 @@ namespace FlamingIRC
                 case ReplyCode.RPL_WHOREPLY:
                     if (OnWho != null)
                     {
-                        UserInfo user = new UserInfo(tokens[7], tokens[4], tokens[5]);
+                        User user = new User(tokens[7], tokens[4], tokens[5]);
                         OnWho(
                             user,
                             tokens[3],
@@ -610,13 +610,13 @@ namespace FlamingIRC
                 case ReplyCode.RPL_ENDOFWHO:
                     if (OnWho != null)
                     {
-                        OnWho(UserInfo.Empty, "", "", "", 0, "", true);
+                        OnWho(User.Empty, "", "", "", 0, "", true);
                     }
                     break;
                 case ReplyCode.RPL_WHOISUSER:
-                    UserInfo whoUser = new UserInfo(tokens[3], tokens[4], tokens[5]);
+                    User whoUser = new User(tokens[3], tokens[4], tokens[5]);
                     WhoisInfo whoisInfo = LookupInfo(whoUser.Nick);
-                    whoisInfo.userInfo = whoUser;
+                    whoisInfo.user = whoUser;
                     tokens[7] = RemoveLeadingColon(tokens[7]);
                     whoisInfo.realName = CondenseStrings(tokens, 7);
                     break;
@@ -654,7 +654,7 @@ namespace FlamingIRC
                 case ReplyCode.RPL_WHOWASUSER:
                     if (OnWhowas != null)
                     {
-                        UserInfo whoWasUser = new UserInfo(tokens[3], tokens[4], tokens[5]);
+                        User whoWasUser = new User(tokens[3], tokens[4], tokens[5]);
                         tokens[7] = RemoveLeadingColon(tokens[7]);
                         OnWhowas(whoWasUser, CondenseStrings(tokens, 7), false);
                     }
@@ -662,7 +662,7 @@ namespace FlamingIRC
                 case ReplyCode.RPL_ENDOFWHOWAS:
                     if (OnWhowas != null)
                     {
-                        OnWhowas(UserInfo.Empty, "", true);
+                        OnWhowas(User.Empty, "", true);
                     }
                     break;
                 case ReplyCode.RPL_UMODEIS:
@@ -695,43 +695,43 @@ namespace FlamingIRC
                 case ReplyCode.RPL_BANLIST:
                     if (OnChannelList != null)
                     {
-                        OnChannelList(tokens[3], ChannelMode.Ban, tokens[4], Rfc2812Util.UserInfoFromString(tokens[5]), Convert.ToInt64(tokens[6], CultureInfo.InvariantCulture), false);
+                        OnChannelList(tokens[3], ChannelMode.Ban, tokens[4], Rfc2812Util.UserFromString(tokens[5]), Convert.ToInt64(tokens[6], CultureInfo.InvariantCulture), false);
                     }
                     break;
                 case ReplyCode.RPL_ENDOFBANLIST:
                     if (OnChannelList != null)
                     {
-                        OnChannelList(tokens[3], ChannelMode.Ban, "", UserInfo.Empty, 0, true);
+                        OnChannelList(tokens[3], ChannelMode.Ban, "", User.Empty, 0, true);
                     }
                     break;
                 case ReplyCode.RPL_INVITELIST:
                     if (OnChannelList != null)
                     {
-                        OnChannelList(tokens[3], ChannelMode.Invitation, tokens[4], Rfc2812Util.UserInfoFromString(tokens[5]), Convert.ToInt64(tokens[6]), false);
+                        OnChannelList(tokens[3], ChannelMode.Invitation, tokens[4], Rfc2812Util.UserFromString(tokens[5]), Convert.ToInt64(tokens[6]), false);
                     }
                     break;
                 case ReplyCode.RPL_ENDOFINVITELIST:
                     if (OnChannelList != null)
                     {
-                        OnChannelList(tokens[3], ChannelMode.Invitation, "", UserInfo.Empty, 0, true);
+                        OnChannelList(tokens[3], ChannelMode.Invitation, "", User.Empty, 0, true);
                     }
                     break;
                 case ReplyCode.RPL_EXCEPTLIST:
                     if (OnChannelList != null)
                     {
-                        OnChannelList(tokens[3], ChannelMode.Exception, tokens[4], Rfc2812Util.UserInfoFromString(tokens[5]), Convert.ToInt64(tokens[6]), false);
+                        OnChannelList(tokens[3], ChannelMode.Exception, tokens[4], Rfc2812Util.UserFromString(tokens[5]), Convert.ToInt64(tokens[6]), false);
                     }
                     break;
                 case ReplyCode.RPL_ENDOFEXCEPTLIST:
                     if (OnChannelList != null)
                     {
-                        OnChannelList(tokens[3], ChannelMode.Exception, "", UserInfo.Empty, 0, true);
+                        OnChannelList(tokens[3], ChannelMode.Exception, "", User.Empty, 0, true);
                     }
                     break;
                 case ReplyCode.RPL_UNIQOPIS:
                     if (OnChannelList != null)
                     {
-                        OnChannelList(tokens[3], ChannelMode.ChannelCreator, tokens[4], UserInfo.Empty, 0, true);
+                        OnChannelList(tokens[3], ChannelMode.ChannelCreator, tokens[4], User.Empty, 0, true);
                     }
                     break;
                 case ReplyCode.RPL_VERSION:

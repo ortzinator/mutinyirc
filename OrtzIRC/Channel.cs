@@ -1,14 +1,15 @@
 ﻿namespace OrtzIRC
 {
     using System.Collections.Generic;
+    using FlamingIRC;
 
-    public delegate void ChannelMessageEventHandler(Nick nick, string message);
+    public delegate void ChannelMessageEventHandler(User nick, string message);
     public delegate void TopicShowEventHandler(string topic);
-    public delegate void ChannelJoinEventHandler(Nick nick);
-    public delegate void ChannelPartOtherEventHandler(Nick nick, string message);
-    public delegate void ChannelQuitEventHandler(Nick nick, string message);
-    public delegate void ReceivedNamesEventHandler(List<Nick> nickList);
-    public delegate void ChannelKickEventHandler(Nick nick, string kickee, string reason);
+    public delegate void ChannelJoinEventHandler(User nick);
+    public delegate void ChannelPartOtherEventHandler(User nick, string message);
+    public delegate void ChannelQuitEventHandler(User nick, string message);
+    public delegate void ReceivedNamesEventHandler(List<User> nickList);
+    public delegate void ChannelKickEventHandler(User nick, string kickee, string reason);
 
     /// <summary>
     /// Represents a specific channel on a network
@@ -21,7 +22,7 @@
         public string Key { get; private set; }
         public int Limit { get; private set; }
         public string Name { get; private set; }
-        public List<Nick> NickList { get; private set; }
+        public List<User> NickList { get; private set; }
         //public Topic Topic { get; private set; }
 
         public event ChannelMessageEventHandler OnMessage;
@@ -39,10 +40,10 @@
             this.Server = parent;
             this.Name = name;
 
-            NickList = new List<Nick>();
+            NickList = new List<User>();
         }
 
-        public void AddNick(Nick nick)
+        public void AddNick(User nick)
         {
             //ChannelView.AddNick(nick);
             NickList.Add(nick);
@@ -59,11 +60,11 @@
             return this.Name;
         }
 
-        internal void NewMessage(Nick nick, string message)
+        internal void NewMessage(User nick, string message)
         {
-            foreach (Nick n in NickList)
+            foreach (User n in NickList)
             {
-                if (nick.Name == n.Name)
+                if (nick.Nick == n.Nick)
                 {
                     if (OnMessage != null)
                         OnMessage(n, message);
@@ -71,11 +72,11 @@
             }
         }
 
-        internal void NewAction(Nick nick, string message)
+        internal void NewAction(User nick, string message)
         {
-            foreach (Nick n in NickList)
+            foreach (User n in NickList)
             {
-                if (nick.Name == n.Name)
+                if (nick.Nick == n.Nick)
                 {
                     if (OnAction != null)
                         OnAction(n, message);
@@ -89,23 +90,23 @@
                 OnShowTopic(topic);
         }
 
-        internal void UserJoin(Nick nick)
+        internal void UserJoin(User nick)
         {
             if (OnJoin != null)
                 OnJoin(nick);
         }
 
-        internal void UserPart(Nick nick, string message)
+        internal void UserPart(User nick, string message)
         {
             if (OnUserPart != null)
                 OnUserPart(nick, message);
         }
 
-        internal void UserQuit(Nick nick, string message)
+        internal void UserQuit(User nick, string message)
         {
-            foreach (Nick n in NickList)
+            foreach (User n in NickList)
             {
-                if (nick.Name == n.Name)
+                if (nick.Nick == n.Nick)
                 {
                     if (OnUserQuit != null)
                         OnUserQuit(n, message);
@@ -113,11 +114,11 @@
             }
         }
 
-        internal void NickChange(Nick nick, string newNick)
+        internal void NickChange(User nick, string newNick)
         {
-            foreach (Nick n in NickList)
+            foreach (User n in NickList)
             {
-                if (nick.Name == n.Name)
+                if (nick.Nick == n.Nick)
                 {
                     if (OnNick != null)
                         OnNick(n, newNick);
@@ -128,9 +129,9 @@
 
         public bool HasUser(string nick)
         {
-            foreach (Nick n in NickList)
+            foreach (User n in NickList)
             {
-                if (nick == n.Name)
+                if (nick == n.Nick)
                 {
                     return true;
                 }
@@ -138,7 +139,7 @@
             return false;
         }
 
-        internal void UserKick(Nick nick, string kickee, string reason)
+        internal void UserKick(User nick, string kickee, string reason)
         {
             Server.Connection.Sender.Names(this.Name);
             if (OnKick != null)

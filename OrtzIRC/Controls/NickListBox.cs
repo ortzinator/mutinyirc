@@ -2,6 +2,7 @@
 {
     using System.Drawing;
     using System.Windows.Forms;
+    using FlamingIRC;
 
     public partial class NickListBox : ListBox
     {
@@ -26,7 +27,7 @@
 
                 Brush fore = Brushes.Black;
 
-                var cur = this.Items[e.Index] as Nick;
+                var cur = this.Items[e.Index] as User;
 
                 switch (cur.Prefix)
                 {

@@ -1,6 +1,6 @@
 /*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
@@ -39,7 +39,7 @@ namespace FlamingIRC
 		/// <summary>CTCP Finger.</summary>
 		public const string Finger = "FINGER";
 		/// <summary>CTCP USERINFO.</summary>
-		public const string UserInfo = "USERINFO";
+		public const string User = "USERINFO";
 		/// <summary>CTCP VERSION.</summary>
 		public const string Version = "VERSION";
 		/// <summary>CTCP SOURCE.</summary>

@@ -1,6 +1,6 @@
 /*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
@@ -38,7 +38,7 @@ namespace FlamingIRC
 		private long nextTime;
 		private double floodDelay;
 		private string fingerMessage;
-		private string userInfoMessage;
+		private string userMessage;
 		private string versionMessage;
 		private string sourceMessage;
 		private string clientInfoMessage;
@@ -57,8 +57,8 @@ namespace FlamingIRC
 			//Wait at least 2 second in between automatic CTCP responses
 			floodDelay = 2000;
 			//Send back user nick by default for finger requests.
-			userInfoMessage = "Thresher CTCP Responder";		
-			fingerMessage = userInfoMessage;
+			userMessage = "Thresher CTCP Responder";		
+			fingerMessage = userMessage;
 			versionMessage = "Thresher IRC library 1.1";
 			sourceMessage = "http://thresher.sourceforge.net";
 			clientInfoMessage = "This client supports: UserInfo, Finger, Version, Source, Ping, Time and ClientInfo";
@@ -91,7 +91,7 @@ namespace FlamingIRC
 		/// and the idle time.
 		/// </summary>
 		/// <value>The Idle time will be automatically appended
-		/// to the finger response. This default to the UserInfo message.</value>
+		/// to the finger response. This default to the User message.</value>
 		public string FingerResponse
 		{
 			get
@@ -108,15 +108,15 @@ namespace FlamingIRC
 		/// </summary>
 		/// <value>Any string which does not exceed the IRC max length.
 		/// This defaults to "Thresher Auto-Responder".</value>
-		public string UserInfoResponse
+		public string UserResponse
 		{
 			get
 			{
-				return userInfoMessage;
+				return userMessage;
 			}
 			set
 			{
-				userInfoMessage = value;
+				userMessage = value;
 			}
 		}
 		/// <summary>
@@ -201,7 +201,7 @@ namespace FlamingIRC
 		{
 			nextTime = DateTime.Now.ToFileTime() + (long)( floodDelay * TimeSpan.TicksPerMillisecond );
 		}
-		private void OnCtcpRequest( string command, UserInfo who ) 
+		private void OnCtcpRequest( string command, User who ) 
 		{
 			if( DateTime.Now.ToFileTime() > nextTime ) 
 			{
@@ -213,8 +213,8 @@ namespace FlamingIRC
 					case CtcpUtil.Time:
 						connection.CtcpSender.CtcpReply( command, who.Nick, FormatDateTime() );
 						break;
-					case CtcpUtil.UserInfo:
-						connection.CtcpSender.CtcpReply( command, who.Nick, userInfoMessage );
+					case CtcpUtil.User:
+						connection.CtcpSender.CtcpReply( command, who.Nick, userMessage );
 						break;
 					case CtcpUtil.Version:
 						connection.CtcpSender.CtcpReply( command, who.Nick, versionMessage );
@@ -233,7 +233,7 @@ namespace FlamingIRC
 				UpdateTime();
 			}
 		}
-		private void OnCtcpPingRequest( UserInfo who, string timestamp ) 
+		private void OnCtcpPingRequest( User who, string timestamp ) 
 		{
 			connection.CtcpSender.CtcpPingReply( who.Nick, timestamp );
 		}
