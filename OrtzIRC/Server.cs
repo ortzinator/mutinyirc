@@ -2,8 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using OrtzIRC.Common;
-    using Sharkbite.Irc;
+    using FlamingIRC;
     using System.ComponentModel;
         
     public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
@@ -78,8 +77,9 @@
             Connection.Listener.OnNick += new NickEventHandler(Listener_OnNick);
             Connection.Listener.OnKick += new KickEventHandler(Listener_OnKick);
 
-            Connection.OnRawMessageReceived += new RawMessageReceivedEventHandler(Connection_OnRawMessageReceived);
-            Connection.OnConnectSuccess += new EventHandler<EventArgs>(Connection_OnConnectSuccess);
+            Connection.RawMessageReceived += new FlamingIRC.DataEventArgs<string>(Connection_OnRawMessageReceived);
+            //Connection.OnConnectSuccess += new ConnectEventHandler(Connection_OnConnectSuccess);
+            Connection.OnConnectFail += new EventHandler<DataEventArgs<string>>(Connection_ConnectFailed);
 
             DoConnect();
         }
@@ -120,7 +120,7 @@
             }
             catch (Exception e)
             {
-                OnConnectFail(new DataEventArgs<string>(e.Message));
+                ConnectFailed(new DataEventArgs<string>(e.Message));
             }
         }
 
@@ -186,6 +186,11 @@
             this.OnConnected(EventArgs.Empty);
         }
 
+        private void Connection_ConnectFailed(object sender, DataEventArgs<string> e)
+        {
+            this.ConnectFailed(e);
+        }
+
         private void Listener_OnPublic(UserInfo user, string channel, string message)
         {
             this.OnPublicMessage(new ChannelMessageEventArgs(Nick.FromUserInfo(user), ChanManager.GetChannel(channel), message));
@@ -221,7 +226,7 @@
         {
             if (Registered != null)
                 Registered();
-            //JoinChannel("#ortzirc");
+            JoinChannel("#ortzirc");
         }
 
         private void Listener_OnChannelModeChange(UserInfo who, string channel, ChannelModeInfo[] modes, string raw)
@@ -294,7 +299,7 @@
             JoinOther.Fire<DoubleDataEventArgs<Nick, Channel>>(this, e);
         }
 
-        protected virtual void OnConnectFail(DataEventArgs<string> e)
+        protected virtual void ConnectFailed(DataEventArgs<string> e)
         {
             ConnectFail.Fire<DataEventArgs<string>>(this, e);
         }

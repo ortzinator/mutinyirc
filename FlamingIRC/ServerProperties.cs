@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 
-namespace Sharkbite.Irc
+namespace FlamingIRC
 {
 	/// <summary>
 	/// Encapsulates the collection of properties sent by the IRC server

@@ -1,6 +1,8 @@
 /*
- * Thresher IRC socket library
- * Copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
+ * FlamingIRC IRC library
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * 
+ * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,7 +38,7 @@ using Org.Mentalis.Security.Ssl;
 #endif
 
 [assembly: CLSCompliant(true)]
-namespace Sharkbite.Irc
+namespace FlamingIRC
 {
     /// <summary>
     /// This class manages the connection to the IRC server and provides
@@ -48,17 +50,16 @@ namespace Sharkbite.Irc
         /// Receive all the messages, unparsed, sent by the IRC server. This is not
         /// normally needed but provided for those who are interested.
         /// </summary>
-        public event RawMessageReceivedEventHandler OnRawMessageReceived;
+        public event EventHandler<DataEventArgs<string>> RawMessageReceived;
         /// <summary>
         /// Receive all the raw messages sent to the IRC from this connection
         /// </summary>
-        public event RawMessageSentEventHandler OnRawMessageSent;
+        public event EventHandler<DataEventArgs<string>> OnRawMessageSent;
 
-        public event EventHandler<EventArgs> OnConnectSuccess;
+        public event EventHandler<DataEventArgs<string>> OnConnectSuccess;
+        public event EventHandler<DataEventArgs<string>> OnConnectFail;
 
-        private AsyncCallback asynConnect;
-        private AsyncCallback asynReceive;
-        private AsyncCallback asynSend;
+        private AsyncCallback asynConnect, asynReceive, asynSend;
 
         private string buffer;
 
@@ -77,7 +78,6 @@ namespace Sharkbite.Irc
         private CtcpResponder ctcpResponder;
         private bool ctcpEnabled;
         private bool dccEnabled;
-        private StreamReader reader;
         private DateTime timeLastSent;
         //Connected and registered with IRC server
         private bool registered;
@@ -88,7 +88,6 @@ namespace Sharkbite.Irc
         private ServerProperties properties;
         private Encoding encoding;
 
-        internal StreamWriter writer; //Access is internal for testing
         internal ConnectionArgs connectionArgs;
 
         /// <summary>
@@ -487,6 +486,7 @@ namespace Sharkbite.Irc
             listener.OnRegistered += new RegisteredEventHandler(OnRegistered);
         }
 
+        //TODO: SSL
 #if Ssl
 		private void ConnectClient( SecureProtocol protocol )   
 		{
@@ -558,10 +558,8 @@ namespace Sharkbite.Irc
                 {
                     listener.Parse(line);
                 }
-                if (OnRawMessageReceived != null)
-                {
-                    OnRawMessageReceived(line);
-                }
+
+                this.RawMessageReceived.Fire(this, new DataEventArgs<string>(line));
             }
             catch (IOException e)
             {
@@ -632,10 +630,9 @@ namespace Sharkbite.Irc
             {
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() exception=" + e);
             }
-            if (OnRawMessageSent != null)
-            {
-                OnRawMessageSent(command.ToString());
-            }
+
+            this.OnRawMessageSent.Fire(this, new DataEventArgs<string>(command.ToString()));
+
             command.Remove(0, command.Length);
         }
         /// <summary>
@@ -715,14 +712,21 @@ namespace Sharkbite.Irc
 #endif
         private void ConnectCallback(IAsyncResult asyn)
         {
-            connected = true;
+            try
+            {
+                this.OnConnectSuccess.Fire(this, EventArgs.Empty);
 
-            if (this.OnConnectSuccess != null) this.OnConnectSuccess(this, EventArgs.Empty);
+                WaitforData();
+                sender.RegisterConnection(connectionArgs);
 
-            WaitforData();
-            sender.RegisterConnection(connectionArgs);
+                socket.EndConnect(asyn);
 
-            socket.EndConnect(asyn);
+                connected = true;
+            }
+            catch (SocketException e)
+            {
+                if (this.OnConnectFail != null) this.OnConnectFail(this, new DataEventArgs<string>(e.Message));
+            }
         }
 
         private void WaitforData()

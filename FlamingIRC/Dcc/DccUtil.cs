@@ -1,5 +1,5 @@
 /*
- * Thresher IRC client library
+ * FlamingIRC IRC library
  * Copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
  * This program is free software; you can redistribute it and/or
@@ -26,7 +26,7 @@ using System.Diagnostics;
 using System.Globalization;
 
 
-namespace Sharkbite.Irc
+namespace FlamingIRC
 {
 	/// <summary>
 	/// Utility methods needed to handle DCC requests.

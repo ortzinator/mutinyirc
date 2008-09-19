@@ -1,6 +1,8 @@
 /*
- * Thresher IRC client library
- * Copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
+ * FlamingIRC IRC library
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * 
+ * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,7 +24,7 @@
 
 using System;
 
-namespace Sharkbite.Irc
+namespace FlamingIRC
 {
 	/// <summary>
 	/// Whether a mode has been added or removed.

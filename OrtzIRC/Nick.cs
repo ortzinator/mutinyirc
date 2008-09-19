@@ -6,7 +6,7 @@
     /// <summary>
     /// Represents a user in a single channel
     /// </summary>
-    public class Nick
+    public class Nick //TODO: Move to FlamingIRC and merge with UserInfo and rename "User"
     {
         public string Name { get; set; }
         public string RealName { get; set; }
@@ -23,7 +23,7 @@
             get { return new Nick(); }
         }
 
-        public static Nick FromUserInfo(Sharkbite.Irc.UserInfo info)
+        public static Nick FromUserInfo(FlamingIRC.UserInfo info)
         {
             var nick = new Nick();
             nick.HostMask = info.Hostname;
