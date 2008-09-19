@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC.Common
+﻿namespace FlamingIRC
 {
     using System;
 

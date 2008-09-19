@@ -46,7 +46,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChannelMessageEventArgs.cs" />
     <Compile Include="ChannelModeInfo.cs" />
     <Compile Include="CommandBuilder.cs" />
     <Compile Include="Connection.cs" />
@@ -71,13 +70,13 @@
     <Compile Include="IParser.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="NameGenerator.cs" />
+    <Compile Include="User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReplyCode.cs" />
     <Compile Include="Rfc2812Util.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="ServerProperties.cs" />
     <Compile Include="TextColor.cs" />
-    <Compile Include="UserInfo.cs" />
     <Compile Include="WhoisInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

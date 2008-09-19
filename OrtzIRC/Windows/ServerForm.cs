@@ -79,15 +79,15 @@ namespace OrtzIRC
 
         private void ParentServer_OnKick(object sender, KickEventArgs e)
         {
-            e.Channel.UserKick(e.Nick, e.Kickee, e.Reason);
+            e.Channel.UserKick(e.User, e.Kickee, e.Reason);
         }
 
         private void ParentServer_OnPart(object sender, PartEventArgs e)
         {
-            e.Channel.UserPart(e.Nick, e.Reason);
+            e.Channel.UserPart(e.User, e.Reason);
         }
 
-        private void ParentServer_OnJoinOther(object sender, OrtzIRC.Common.DoubleDataEventArgs<Nick, Channel> e)
+        private void ParentServer_OnJoinOther(object sender, OrtzIRC.Common.DoubleDataEventArgs<User, Channel> e)
         {
             e.Second.UserJoin(e.First);
         }
@@ -109,7 +109,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnPrivateNotice(object sender, PrivateMessageEventArgs e)
         {
-            this.serverOutputBox.AddLine("-" + e.Nick.Name + ":" + e.Message + "-");
+            this.serverOutputBox.AddLine("-" + e.User.Nick + ":" + e.Message + "-");
         }
 
         private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<string> e)
@@ -119,7 +119,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnAction(object sender, ChannelMessageEventArgs e)
         {
-            e.Channel.NewAction(e.Nick, e.Message);
+            e.Channel.NewAction(e.User, e.Message);
         }
 
         private void ParentServer_OnRegistered()
@@ -146,7 +146,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnPublicMessage(object sender, ChannelMessageEventArgs e)
         {
-            e.Channel.NewMessage(e.Nick, e.Message);
+            e.Channel.NewMessage(e.User, e.Message);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

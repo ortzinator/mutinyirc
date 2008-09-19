@@ -1,6 +1,6 @@
 /*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
@@ -35,7 +35,7 @@ namespace FlamingIRC
 	/// </summary>
 	public sealed class WhoisInfo
 	{
-		internal UserInfo userInfo;
+		internal User user;
 		internal string realName;
 		internal string[] channels;
 		internal string ircServer;
@@ -55,12 +55,12 @@ namespace FlamingIRC
 		/// <summary>
 		/// A user's nick, logon, and hostname.
 		/// </summary>
-		/// <value>A UserInfo instance.</value>
-		public UserInfo User
+		/// <value>A User instance.</value>
+		public User User
 		{
 			get
 			{
-				return userInfo;
+				return user;
 			}
 		}
 		/// <summary>

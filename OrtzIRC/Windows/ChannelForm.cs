@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-
-namespace OrtzIRC
+﻿namespace OrtzIRC
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Windows.Forms;
+    using FlamingIRC;
+
     public partial class ChannelForm : Form
     {
         private Server Server;
@@ -43,45 +40,45 @@ namespace OrtzIRC
             this.commandTextBox.Focus();
         }
 
-        void Channel_OnKick(Nick nick, string kickee, string reason)
+        void Channel_OnKick(User nick, string kickee, string reason)
         {
-            this.AddLine("-- Kick: (" + nick.Name + ") was kicked by (" + kickee + ") " + reason);
+            this.AddLine("-- Kick: (" + nick.Nick + ") was kicked by (" + kickee + ") " + reason);
         }
 
-        void Channel_OnReceivedNames(List<Nick> nickList)
+        void Channel_OnReceivedNames(List<User> nickList)
         {
             this.BeginInvoke((MethodInvoker)delegate
             {
                 nickListBox.Items.Clear();
 
-                foreach (Nick nick in nickList)
+                foreach (User nick in nickList)
                 {
                     nickListBox.Items.Add(nick);
                 }
             });
         }
 
-        void Channel_OnNick(Nick nick, string newNick)
+        void Channel_OnNick(User nick, string newNick)
         {
-            this.AddLine("-- Nick: (" + nick.Name + ") is now known as (" + newNick + ")");
+            this.AddLine("-- Nick: (" + nick.Nick + ") is now known as (" + newNick + ")");
         }
 
-        void Channel_OnUserQuit(Nick nick, string message)
+        void Channel_OnUserQuit(User nick, string message)
         {
-            this.AddLine("-- Quit: (" + nick.Name + ") (" + nick.HostMask + ") " + message);
+            this.AddLine("-- Quit: (" + nick.Nick + ") (" + nick.HostMask + ") " + message);
         }
 
-        void Channel_OnPartOther(Nick nick, string message)
+        void Channel_OnPartOther(User nick, string message)
         {
             if (message != String.Empty)
-                this.AddLine("-- Parted: (" + nick.Name + ") (" + nick.HostMask + ") " + message);
+                this.AddLine("-- Parted: (" + nick.Nick + ") (" + nick.HostMask + ") " + message);
             else
-                this.AddLine("-- Parted: (" + nick.Name + ") (" + nick.HostMask + ")");
+                this.AddLine("-- Parted: (" + nick.Nick + ") (" + nick.HostMask + ")");
         }
 
-        void Channel_OnJoin(Nick nick)
+        void Channel_OnJoin(User nick)
         {
-            this.AddLine("-- Joined: (" + nick.Name + ") (" + nick.HostMask + ")");
+            this.AddLine("-- Joined: (" + nick.Nick + ") (" + nick.HostMask + ")");
         }
 
         void Channel_OnShowTopic(string topic)
@@ -89,12 +86,12 @@ namespace OrtzIRC
             this.AddLine("topic: (" + topic + ")");
         }
 
-        void Channel_OnAction(Nick nick, string message)
+        void Channel_OnAction(User nick, string message)
         {
-            this.AddLine("-- " + nick.Name + " " + message);
+            this.AddLine("-- " + nick.Nick + " " + message);
         }
 
-        void Channel_OnMessage(Nick nick, string message)
+        void Channel_OnMessage(User nick, string message)
         {
             this.AddLine(nick.NamesLiteral + ": " + message);
         }

@@ -1,6 +1,6 @@
 /*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
@@ -31,7 +31,7 @@ namespace FlamingIRC
 	/// This class encapsulates all the information known
 	/// about a remote user in the context of a DCC session.
 	/// </summary>
-	public sealed class DccUserInfo : UserInfo
+	public sealed class DccUser : User
 	{
 
 		private Connection connection;
@@ -42,17 +42,17 @@ namespace FlamingIRC
 		/// Create a new instance.
 		/// </summary>
 		/// <param name="connection">The originating connection instance.</param>
-		/// <param name="userInfoParts">The parsed nick!user@host string</param>
+		/// <param name="userParts">The parsed nick!user@host string</param>
 		/// <param name="remoteEndPoint">The TCP/IP settings from the other user.</param>
-		internal DccUserInfo( Connection connection, string[] userInfoParts , IPEndPoint remoteEndPoint ) :
-			base( userInfoParts[0],userInfoParts[1],userInfoParts[2])
+		internal DccUser( Connection connection, string[] userParts , IPEndPoint remoteEndPoint ) :
+			base( userParts[0],userParts[1],userParts[2])
 		{
 			this.connection = connection;
 			this.remoteEndPoint = remoteEndPoint;
 		}
 
-		internal DccUserInfo( Connection connection, string[] userInfoParts) :
-			base( userInfoParts[0],userInfoParts[1],userInfoParts[2])
+		internal DccUser( Connection connection, string[] userParts) :
+			base( userParts[0],userParts[1],userParts[2])
 		{
 			this.connection = connection;
 		}
@@ -62,7 +62,7 @@ namespace FlamingIRC
 		/// <param name="connection">The IRC server connection which the remote user
 		/// is on.</param>
 		/// <param name="nick">The remote user's nick.</param>
-		public DccUserInfo( Connection connection, string nick) :
+		public DccUser( Connection connection, string nick) :
 			base( nick,"","")
 		{
 			this.connection = connection;

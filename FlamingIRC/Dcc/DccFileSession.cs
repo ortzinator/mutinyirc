@@ -69,7 +69,7 @@ namespace FlamingIRC
 		//Signals whether the session is waiting for an Accept message 
 		//in reponse to a Resume request.
 		private bool waitingOnAccept;
-		private DccUserInfo dccUserInfo;
+		private DccUser dccUser;
 		private byte[] buffer;
 		private int listenPort;
 		private string sessionID;
@@ -84,9 +84,9 @@ namespace FlamingIRC
 		/// Prepare a new instance with default values but do not connect
 		/// to another user.
 		/// </summary>
-		internal DccFileSession( DccUserInfo dccUserInfo, DccFileInfo dccFileInfo, int bufferSize, int listenPort, string sessionID ) 
+		internal DccFileSession( DccUser dccUser, DccFileInfo dccFileInfo, int bufferSize, int listenPort, string sessionID ) 
 		{
-			this.dccUserInfo = dccUserInfo;
+			this.dccUser = dccUser;
 			this.dccFileInfo = dccFileInfo;
 			buffer = new byte[ bufferSize ];
 			this.listenPort = listenPort;
@@ -117,13 +117,13 @@ namespace FlamingIRC
 			}
 		}
 		/// <summary>
-		/// The DccUserInfo object associated with this DccFileSession.
+		/// The DccUser object associated with this DccFileSession.
 		/// </summary>
-		public DccUserInfo User 
+		public DccUser User 
 		{
 			get 
 			{
-				return dccUserInfo;
+				return dccUser;
 			}
 		}
 		/// <summary>
@@ -139,19 +139,19 @@ namespace FlamingIRC
 		/// <summary>
 		/// The information about the remote user.
 		/// </summary>
-		/// <value>A read only instance of DccUserInfo.</value>
-		public DccUserInfo ClientInfo 
+		/// <value>A read only instance of DccUser.</value>
+		public DccUser ClientInfo 
 		{
 			get 
 			{
-				return dccUserInfo;
+				return dccUser;
 			}
 		}
 
 		private void SendAccept() 
 		{
 			StringBuilder builder = new StringBuilder("PRIVMSG ", 512 );
-			builder.Append( dccUserInfo.Nick );
+			builder.Append( dccUser.Nick );
 			builder.Append( " :\x0001DCC ACCEPT " );
 			builder.Append( dccFileInfo.DccFileName );
 			builder.Append( " " );
@@ -159,12 +159,12 @@ namespace FlamingIRC
 			builder.Append( " " );
 			builder.Append( dccFileInfo.FileStartingPosition );
 			builder.Append( "\x0001\n");
-			dccUserInfo.Connection.Sender.Raw( builder.ToString() );
+			dccUser.Connection.Sender.Raw( builder.ToString() );
 		}
 		private void DccSend( IPAddress sendAddress ) 
 		{
 			StringBuilder builder = new StringBuilder("PRIVMSG ", 512 );
-			builder.Append( dccUserInfo.Nick );
+			builder.Append( dccUser.Nick );
 			builder.Append( " :\x0001DCC SEND " );
 			builder.Append( dccFileInfo.DccFileName );
 			builder.Append( " " );
@@ -175,12 +175,12 @@ namespace FlamingIRC
 			builder.Append( dccFileInfo.CompleteFileSize );
 			builder.Append( turboMode ? " T": "" );
 			builder.Append( "\x0001\n");
-			dccUserInfo.Connection.Sender.Raw( builder.ToString() );
+			dccUser.Connection.Sender.Raw( builder.ToString() );
 		}
 		private void SendResume() 
 		{
 			StringBuilder builder = new StringBuilder("PRIVMSG ", 512 );
-			builder.Append( dccUserInfo.Nick );
+			builder.Append( dccUser.Nick );
 			builder.Append( " :\x0001DCC RESUME " );
 			builder.Append( dccFileInfo.DccFileName );
 			builder.Append( " " );
@@ -188,7 +188,7 @@ namespace FlamingIRC
 			builder.Append( " " );
 			builder.Append( dccFileInfo.FileStartingPosition );
 			builder.Append( "\x0001\n");
-			dccUserInfo.Connection.Sender.Raw( builder.ToString() );
+			dccUser.Connection.Sender.Raw( builder.ToString() );
 		}
 		/// <summary>
 		/// Attempt to shut the session down correctly.
@@ -317,7 +317,7 @@ namespace FlamingIRC
 			try 
 			{
 				socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
-				socket.Connect(dccUserInfo.RemoteEndPoint );
+				socket.Connect(dccUser.RemoteEndPoint );
 				int bytesRead = 0;
 				while( !dccFileInfo.AllBytesTransfered() ) 
 				{
@@ -345,11 +345,11 @@ namespace FlamingIRC
 				Debug.WriteLineIf( Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name +"] DccFileSession::Download() exception=" + e);		
 				if( e.Message.IndexOf("refused" ) > 0 ) 
 				{
-					dccUserInfo.Connection.Listener.Error( ReplyCode.DccConnectionRefused, "Connection refused by remote user." );
+					dccUser.Connection.Listener.Error( ReplyCode.DccConnectionRefused, "Connection refused by remote user." );
 				}
 				else 
 				{
-					dccUserInfo.Connection.Listener.Error( ReplyCode.ConnectionFailed, "Unknown socket error:" + e.Message );
+					dccUser.Connection.Listener.Error( ReplyCode.ConnectionFailed, "Unknown socket error:" + e.Message );
 				}
 				Interrupted();
 			}
@@ -381,7 +381,7 @@ namespace FlamingIRC
 				waitingOnAccept = false;
 				if( !dccFileInfo.AcceptPositionMatches( position ) ) 
 				{
-					dccUserInfo.Connection.Listener.Error( ReplyCode.BadDccAcceptValue, "Asked to start at " + dccFileInfo.FileStartingPosition + " but was sent " + position );
+					dccUser.Connection.Listener.Error( ReplyCode.BadDccAcceptValue, "Asked to start at " + dccFileInfo.FileStartingPosition + " but was sent " + position );
 					Interrupted();
 					return;
 				}
@@ -418,7 +418,7 @@ namespace FlamingIRC
 					}
 					else
 					{
-						dccUserInfo.Connection.Listener.Error( ReplyCode.BadResumePosition, ToString() + " sent an invalid resume position.");
+						dccUser.Connection.Listener.Error( ReplyCode.BadResumePosition, ToString() + " sent an invalid resume position.");
 						//Close the socket and stop listening
 						Cleanup();
 					}
@@ -497,7 +497,7 @@ namespace FlamingIRC
 		/// <returns>Simple information about this session in human readable format.</returns>
 		public override string ToString() 
 		{
-			return "DccFileSession:: ID=" + sessionID + " User=" + dccUserInfo.ToString() + " File=" + dccFileInfo.DccFileName;
+			return "DccFileSession:: ID=" + sessionID + " User=" + dccUser.ToString() + " File=" + dccFileInfo.DccFileName;
 		}
 
 		/// <summary>
@@ -532,7 +532,7 @@ namespace FlamingIRC
 		/// in case there are socket errors. This methods will also automatically 
 		/// handle a Resume if the remote client requests it.
 		/// </remarks>
-		/// <param name="dccUserInfo">The information about the remote user.</param>
+		/// <param name="dccUser">The information about the remote user.</param>
 		/// <param name="listenIPAddress">The IP address of the local machine in dot 
 		/// quad format (e.g. 192.168.0.25). This is the address that will be sent to the 
 		/// remote user. The IP address of the NAT machine must be used if the
@@ -546,7 +546,7 @@ namespace FlamingIRC
 		/// <returns>A unique session instance for this file and remote user.</returns>
 		/// <exception cref="ArgumentException">If the listen port is already in use.</exception>
 		public static DccFileSession Send( 
-			DccUserInfo dccUserInfo, 
+			DccUser dccUser, 
 			string listenIPAddress, 
 			int listenPort, 
 			DccFileInfo dccFileInfo, 
@@ -562,7 +562,7 @@ namespace FlamingIRC
 			}
 			try
 			{
-				session = new DccFileSession( dccUserInfo, dccFileInfo , bufferSize, listenPort, "S" + listenPort );
+				session = new DccFileSession( dccUser, dccFileInfo , bufferSize, listenPort, "S" + listenPort );
 				//set turbo mode
 				session.turboMode = turbo;
 				//Set server IP address
@@ -599,26 +599,26 @@ namespace FlamingIRC
 		/// in case it is unable to connect or there are other socket
 		/// errors.
 		/// </remarks>
-		/// <param name="dccUserInfo">Information on the remote user.</param>
+		/// <param name="dccUser">Information on the remote user.</param>
 		/// <param name="dccFileInfo">The local file that will hold the data being sent. If the file 
 		/// is the result of a previous incomplete download the the attempt will be made
 		/// to resume where the previous left off.</param>
 		/// <param name="turbo">Will the send ahead protocol be used.</param>
 		/// <returns>A unique session instance for this file and remote user.</returns>
 		/// <exception cref="ArgumentException">If the listen port is already in use.</exception>
-		public static DccFileSession Receive(DccUserInfo dccUserInfo, DccFileInfo dccFileInfo, bool turbo ) 
+		public static DccFileSession Receive(DccUser dccUser, DccFileInfo dccFileInfo, bool turbo ) 
 		{
 			Debug.WriteLineIf( DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name +"] DccFileSession::Receive()");
 			//Test if we are already using this port
-			if( DccFileSessionManager.DefaultInstance.ContainsSession( "C" + dccUserInfo.remoteEndPoint.Port ) ) 
+			if( DccFileSessionManager.DefaultInstance.ContainsSession( "C" + dccUser.remoteEndPoint.Port ) ) 
 			{
-				throw new ArgumentException("Already listening on port " + dccUserInfo.remoteEndPoint.Port );
+				throw new ArgumentException("Already listening on port " + dccUser.remoteEndPoint.Port );
 			}
 			DccFileSession session = null;
 			try 
 			{
-				session = new DccFileSession( dccUserInfo, dccFileInfo, (64 * 1024 ), 
-					dccUserInfo.remoteEndPoint.Port, "C" + dccUserInfo.remoteEndPoint.Port );
+				session = new DccFileSession( dccUser, dccFileInfo, (64 * 1024 ), 
+					dccUser.remoteEndPoint.Port, "C" + dccUser.remoteEndPoint.Port );
 				//Has the initiator specified the turbo protocol? 
 				session.turboMode = turbo;
 				//Open file for writing

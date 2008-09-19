@@ -1,6 +1,6 @@
 /*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc/admin>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
@@ -125,7 +125,7 @@ namespace FlamingIRC
 						connection.CtcpSender.ReplyReceived( ctcpTokens[ Text] );
 						if( OnCtcpPingReply != null ) 
 						{
-							OnCtcpPingReply( Rfc2812Util.UserInfoFromString( ctcpTokens[ Name ] ), ctcpTokens[ Text] ) ;
+							OnCtcpPingReply( Rfc2812Util.UserFromString( ctcpTokens[ Name ] ), ctcpTokens[ Text] ) ;
 						}
 					}
 					else 
@@ -135,7 +135,7 @@ namespace FlamingIRC
 						{
 							if( OnCtcpPingRequest != null ) 
 							{
-								OnCtcpPingRequest( Rfc2812Util.UserInfoFromString( ctcpTokens[ Name ] ), ctcpTokens[ Text] ) ;
+								OnCtcpPingRequest( Rfc2812Util.UserFromString( ctcpTokens[ Name ] ), ctcpTokens[ Text] ) ;
 							}
 						}
 					}
@@ -146,14 +146,14 @@ namespace FlamingIRC
 					{
 						if( OnCtcpReply != null ) 
 						{
-							OnCtcpReply( ctcpTokens[ Command].ToUpper( CultureInfo.CurrentCulture ) ,  Rfc2812Util.UserInfoFromString( ctcpTokens[ Name ] ), ctcpTokens[ Text] );
+							OnCtcpReply( ctcpTokens[ Command].ToUpper( CultureInfo.CurrentCulture ) ,  Rfc2812Util.UserFromString( ctcpTokens[ Name ] ), ctcpTokens[ Text] );
 						}
 					}
 					else 
 					{
 						if( OnCtcpRequest != null ) 
 						{
-							OnCtcpRequest( ctcpTokens[ Command].ToUpper( CultureInfo.CurrentCulture ) , Rfc2812Util.UserInfoFromString( ctcpTokens[ Name ] ));
+							OnCtcpRequest( ctcpTokens[ Command].ToUpper( CultureInfo.CurrentCulture ) , Rfc2812Util.UserFromString( ctcpTokens[ Name ] ));
 						}	
 					}
 				}

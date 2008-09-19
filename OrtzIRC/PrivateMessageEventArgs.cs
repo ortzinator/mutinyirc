@@ -1,15 +1,16 @@
 ﻿namespace OrtzIRC
 {
     using System;
+    using FlamingIRC;
 
     public class PrivateMessageEventArgs : EventArgs
     {
-        public Nick Nick { get; private set; }
+        public User User { get; private set; }
         public string Message { get; private set; }
 
-        public PrivateMessageEventArgs(Nick nick, string message)
+        public PrivateMessageEventArgs(User user, string message)
         {
-            this.Nick = nick;
+            this.User = user;
             this.Message = message;
         }
     }

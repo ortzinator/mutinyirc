@@ -17,11 +17,11 @@
             Server.OnNick += new Server_NickEventHandler(Server_OnNick);
         }
 
-        void Server_OnNick(Nick nick, string newNick)
+        void Server_OnNick(User nick, string newNick)
         {
             foreach (KeyValuePair<string, Channel> item in Channels)
             {
-                if (item.Value.HasUser(nick.Name))
+                if (item.Value.HasUser(nick.Nick))
                 {
                     item.Value.NickChange(nick, newNick);
                 }
@@ -39,7 +39,7 @@
 
             foreach (string nick in nicks)
             {
-                GetChannel(channel).NickList.Add(Nick.FromNames(nick));
+                GetChannel(channel).NickList.Add(User.FromNames(nick));
             }
 
             if (last)

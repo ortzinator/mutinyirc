@@ -130,7 +130,6 @@
       <DependentUpon>NickListBox.cs</DependentUpon>
     </Compile>
     <Compile Include="KickEventArgs.cs" />
-    <Compile Include="Nick.cs" />
     <Compile Include="PartEventArgs.cs" />
     <Compile Include="PrivateMessageEventArgs.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
