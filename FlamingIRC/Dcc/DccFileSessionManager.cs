@@ -1,6 +1,8 @@
 /*
- * Thresher IRC client library
+ * FlamingIRC IRC library
  * Copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
+ * 
+ * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +28,7 @@ using System.Collections;
 using System.Threading;
 
 
-namespace Sharkbite.Irc
+namespace FlamingIRC
 {
 	/// <summary>
 	/// This class checks each file session to see if it has not 

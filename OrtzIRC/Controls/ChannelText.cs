@@ -2,10 +2,29 @@
 {
     using System;
     using System.Windows.Forms;
+    using System.Drawing;
 
     public partial class ChannelText : RichTextBox
     {
-        private delegate void AppendLineHandler(string line);
+        private Color[] IrcColors = new Color[]
+			{
+			    Color.White,
+			    Color.Black,
+			    Color.DarkBlue,
+			    Color.Green,
+			    Color.Red,
+			    Color.Maroon,
+			    Color.Purple,
+			    Color.Orange,
+			    Color.Yellow,
+			    Color.LimeGreen,
+			    Color.Aqua,
+			    Color.SkyBlue,
+			    Color.Blue,
+			    Color.Pink,
+			    Color.DarkGray,
+			    Color.Gray
+			};
 
         public ChannelText()
         {
@@ -23,18 +42,25 @@
         public void AddLine(string line)
         {
             //TODO: Color parsing - http://www.mirc.co.uk/help/color.txt
-            if (this.InvokeRequired)
-            {
-                AppendLineHandler d = new AppendLineHandler(AddLine);
-                this.Invoke(d, new object[] { line });
-            }
-            else
+            this.Invoke((MethodInvoker)delegate
             {
                 DateTime now = DateTime.Now;
-                this.Text += "\n" + now.ToString("T",
-                  System.Globalization.CultureInfo.CreateSpecificCulture("es-ES")) + " " + line.Trim();
-                ScrollToBottom();
-            }
+
+                for (int i = 0; i < line.Length; i++)
+                {
+                    switch (line[i])
+                    {
+                        case (char)2: //bold
+                            SelectionFont = new Font(this.Font, FontStyle.Bold);
+                            break;
+                        default:
+                            this.Text += "\n" + now.ToString("T",
+                                                System.Globalization.CultureInfo.CreateSpecificCulture("es-ES")) + " " + line.Trim();
+                            ScrollToBottom();
+                            break;
+                    }
+                }
+            });
         }
 
         protected override void OnResize(EventArgs e)

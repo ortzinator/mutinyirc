@@ -4,7 +4,7 @@ namespace OrtzIRC
     using System.Windows.Forms;
     using OrtzIRC.Common;
     using OrtzIRC.Resources;
-    using Sharkbite.Irc;
+    using FlamingIRC;
 
     public partial class ServerForm : Form
     {
@@ -87,7 +87,7 @@ namespace OrtzIRC
             e.Channel.UserPart(e.Nick, e.Reason);
         }
 
-        private void ParentServer_OnJoinOther(object sender, DoubleDataEventArgs<Nick, Channel> e)
+        private void ParentServer_OnJoinOther(object sender, OrtzIRC.Common.DoubleDataEventArgs<Nick, Channel> e)
         {
             e.Second.UserJoin(e.First);
         }
@@ -97,7 +97,7 @@ namespace OrtzIRC
             this.serverOutputBox.AddLine(code.ToString() + " " + message);
         }
 
-        private void ParentServer_OnRawMessageReceived(object sender, DataEventArgs<string> e)
+        private void ParentServer_OnRawMessageReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
         {
             //this.serverOutputBox.AddLine(message);
         }
@@ -112,7 +112,7 @@ namespace OrtzIRC
             this.serverOutputBox.AddLine("-" + e.Nick.Name + ":" + e.Message + "-");
         }
 
-        private void Server_OnConnectFail(object sender, DataEventArgs<string> e)
+        private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<string> e)
         {
             this.serverOutputBox.AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
         }
@@ -133,7 +133,7 @@ namespace OrtzIRC
             });
         }
 
-        private void ParentServer_OnJoinSelf(object sender, DataEventArgs<Channel> e)
+        private void ParentServer_OnJoinSelf(object sender, OrtzIRC.Common.DataEventArgs<Channel> e)
         {
             this.Invoke((MethodInvoker)delegate
             {

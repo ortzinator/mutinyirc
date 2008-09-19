@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChannelMessageEventArgs.cs" />
     <Compile Include="ChannelModeInfo.cs" />
     <Compile Include="CommandBuilder.cs" />
     <Compile Include="Connection.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="Ctcp\CtcpResponder.cs" />
     <Compile Include="Ctcp\CtcpSender.cs" />
     <Compile Include="Ctcp\CtcpUtil.cs" />
+    <Compile Include="DataEventArgs.cs" />
     <Compile Include="Dcc\DccChatSession.cs" />
     <Compile Include="Dcc\DccFileInfo.cs" />
     <Compile Include="Dcc\DccFileSession.cs" />
@@ -62,7 +64,9 @@
     <Compile Include="Dcc\DccUserInfo.cs" />
     <Compile Include="Dcc\DccUtil.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="DoubleDataEventArgs.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="EventUtil.cs" />
     <Compile Include="Identd.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="Listener.cs" />

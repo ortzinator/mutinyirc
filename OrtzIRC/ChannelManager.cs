@@ -1,7 +1,7 @@
 ﻿namespace OrtzIRC
 {
     using System.Collections.Generic;
-    using Sharkbite.Irc;
+    using FlamingIRC;
 
     public class ChannelManager
     {
