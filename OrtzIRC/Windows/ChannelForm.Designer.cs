@@ -30,7 +30,7 @@
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.commandTextBox = new OrtzIRC.Controls.CommandTextBox();
-            this.channelOutputBox = new OrtzIRC.Controls.ChannelText();
+            this.channelOutputBox = new OrtzIRC.Controls.IrcTextBox();
             this.nickListBox = new OrtzIRC.Controls.NickListBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -110,7 +110,7 @@
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private OrtzIRC.Controls.CommandTextBox commandTextBox;
-        private OrtzIRC.Controls.ChannelText channelOutputBox;
+        private OrtzIRC.Controls.IrcTextBox channelOutputBox;
         private OrtzIRC.Controls.NickListBox nickListBox;
     }
 }

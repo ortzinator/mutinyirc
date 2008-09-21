@@ -30,7 +30,7 @@ namespace OrtzIRC
         private void InitializeComponent()
         {
             this.serverLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.serverOutputBox = new OrtzIRC.Controls.ChannelText();
+            this.serverOutputBox = new OrtzIRC.Controls.IrcTextBox();
             this.commandTextBox = new System.Windows.Forms.TextBox();
             this.serverLayoutPanel.SuspendLayout();
             this.SuspendLayout();
@@ -92,7 +92,7 @@ namespace OrtzIRC
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel serverLayoutPanel;
-        private ChannelText serverOutputBox;
+        private IrcTextBox serverOutputBox;
         private System.Windows.Forms.TextBox commandTextBox;
 
     }

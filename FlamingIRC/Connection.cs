@@ -438,9 +438,9 @@ namespace FlamingIRC
         /// </summary>
         /// <param name="code">Reply code enum</param>
         /// <param name="info">An info line</param>
-        private void OnReply(ReplyCode code, string info)
+        private void OnReply(object sender, ReplyEventArgs a)
         {
-            if (code == ReplyCode.RPL_BOUNCE) //Code 005
+            if (a.ReplyCode == ReplyCode.RPL_BOUNCE) //Code 005
             {
                 //Lazy instantiation
                 if (properties == null)
@@ -448,7 +448,7 @@ namespace FlamingIRC
                     properties = new ServerProperties();
                 }
                 //Populate properties from name/value matches
-                MatchCollection matches = propertiesRegex.Matches(info);
+                MatchCollection matches = propertiesRegex.Matches(a.Message);
                 if (matches.Count > 0)
                 {
                     foreach (Match match in matches)
@@ -482,7 +482,7 @@ namespace FlamingIRC
             listener.OnPing += new PingEventHandler(KeepAlive);
             listener.OnNick += new NickEventHandler(MyNickChanged);
             listener.OnNickError += new NickErrorEventHandler(OnNickError);
-            listener.OnReply += new ReplyEventHandler(OnReply);
+            listener.OnReply += new EventHandler<ReplyEventArgs>(OnReply);
             listener.OnRegistered += new RegisteredEventHandler(OnRegistered);
         }
 
