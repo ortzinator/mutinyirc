@@ -4,7 +4,7 @@
     using System.Windows.Forms;
     using System.Drawing;
 
-    public partial class ChannelText : RichTextBox
+    public partial class IrcTextBox : RichTextBox
     {
         private Color[] IrcColors = new Color[]
 			{
@@ -26,7 +26,7 @@
 			    Color.Gray
 			};
 
-        public ChannelText()
+        public IrcTextBox()
         {
             InitializeComponent();
             this.ReadOnly = true;

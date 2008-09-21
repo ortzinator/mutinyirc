@@ -1,6 +1,6 @@
 ﻿namespace OrtzIRC.Controls
 {
-    partial class ChannelText
+    partial class IrcTextBox
     {
         /// <summary>
         /// Required designer variable.

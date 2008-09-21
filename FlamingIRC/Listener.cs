@@ -43,7 +43,7 @@ namespace FlamingIRC
         /// <summary>
         /// Messages that are not handled by other events and are not errors.
         /// </summary>
-        public event ReplyEventHandler OnReply;
+        public event EventHandler<ReplyEventArgs> OnReply;
         /// <summary>
         /// Error messages from the IRC server.
         /// </summary>

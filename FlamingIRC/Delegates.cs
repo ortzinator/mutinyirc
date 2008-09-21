@@ -28,14 +28,6 @@ namespace FlamingIRC
 {
 
     /// <summary>
-    /// Messages that are not handled by other events and are not errors.
-    /// </summary>
-    /// <param name="code">The RFC 2812 numeric code.</param>
-    /// <param name="message">The unparsed message text.</param>
-    /// <seealso cref="Listener.OnReply"/>
-    public delegate void ReplyEventHandler(ReplyCode code, string message);
-
-    /// <summary>
     /// Error messages from the IRC server.
     /// </summary>
     /// <param name="code">The RFC 2812 or custom numeric code.</param>
