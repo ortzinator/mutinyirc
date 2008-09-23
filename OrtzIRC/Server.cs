@@ -24,7 +24,7 @@
         public event EventHandler<DataEventArgs<string>> RawMessageReceived;
         public event EventHandler<ChannelMessageEventArgs> PublicMessage;
         public event EventHandler<EventArgs> Connected;
-        public event ErrorMessageEventHandler Error;
+        public event EventHandler<ErrorMessageEventArgs> Error;
         public event RegisteredEventHandler Registered;
         public event EventHandler<PartEventArgs> Part;
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
@@ -69,7 +69,7 @@
             Connection.Listener.OnNames += new NamesEventHandler(Listener_OnNames);
             Connection.Listener.OnChannelModeChange += new ChannelModeChangeEventHandler(Listener_OnChannelModeChange);
             Connection.Listener.OnUserModeChange += new UserModeChangeEventHandler(Listener_OnUserModeChange);
-            Connection.Listener.OnError += new ErrorMessageEventHandler(Listener_OnError);
+            Connection.Listener.OnError += new EventHandler<ErrorMessageEventArgs>(Listener_OnError);
             Connection.Listener.OnDisconnecting += new DisconnectingEventHandler(Listener_OnDisconnecting);
             Connection.Listener.OnDisconnected += new DisconnectedEventHandler(Listener_OnDisconnected);
             Connection.Listener.OnAction += new ActionEventHandler(Listener_OnAction);
@@ -237,10 +237,10 @@
             Connection.Sender.Names(channel);
         }
 
-        private void Listener_OnError(ReplyCode code, string message)
+        private void Listener_OnError(object sender, ErrorMessageEventArgs a)
         {
             if (Error != null)
-                Error(code, message);
+                Error(a.ReplyCode, a.Message);
         }
 
         public Channel JoinChannel(string channel)
