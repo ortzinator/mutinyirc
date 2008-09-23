@@ -47,7 +47,7 @@ namespace FlamingIRC
         /// <summary>
         /// Error messages from the IRC server.
         /// </summary>
-        public event ErrorMessageEventHandler OnError;
+        public event EventHandler<ErrorMessageEventArgs> OnError;
         /// <summary>
         ///A <see cref="Sender.PrivateNotice"/> or <see cref="Sender.PrivateMessage"/> message was sent to someone who is away.
         /// </summary>
@@ -313,7 +313,7 @@ namespace FlamingIRC
         {
             if (OnError != null)
             {
-                OnError(code, message);
+                OnError(this, new ErrorMessageEventArgs(code, message));
             }
         }
 
@@ -455,7 +455,7 @@ namespace FlamingIRC
                             {
                                 if (OnError != null)
                                 {
-                                    OnError(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0));
+                                    OnError(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0)));
                                 }
                                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Bad IRC MODE string=" + tokens[0]);
                             }
@@ -486,7 +486,7 @@ namespace FlamingIRC
                 default:
                     if (OnError != null)
                     {
-                        OnError(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0));
+                        OnError(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0)));
                     }
                     Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Unknown IRC command=" + tokens[1]);
                     break;
@@ -571,7 +571,7 @@ namespace FlamingIRC
                 case ReplyCode.RPL_NOTOPIC:
                     if (OnError != null)
                     {
-                        OnError(code, CondenseStrings(tokens, 3));
+                        OnError(this, new ErrorMessageEventArgs(code, CondenseStrings(tokens, 3)));
                     }
                     break;
                 case ReplyCode.RPL_TOPIC:
@@ -686,7 +686,7 @@ namespace FlamingIRC
                         {
                             if (OnError != null)
                             {
-                                OnError(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0));
+                                OnError(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0)));
                             }
                             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Listener::ParseReply() Bad IRC MODE string=" + tokens[0]);
                         }
@@ -823,12 +823,12 @@ namespace FlamingIRC
             {
                 if (OnError != null)
                 {
-                    OnError(code, CondenseStrings(tokens, 3));
+                    OnError(this, new ErrorMessageEventArgs(code, CondenseStrings(tokens, 3)));
                 }
             }
             else if (OnReply != null)
             {
-                OnReply(code, CondenseStrings(tokens, 3));
+                OnReply(this, new ReplyEventArgs(code, CondenseStrings(tokens, 3)));
             }
         }
         /// <summary>

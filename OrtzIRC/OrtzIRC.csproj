@@ -111,11 +111,11 @@
     <Compile Include="ChannelManager.cs" />
     <Compile Include="ChannelMessageEventArgs.cs" />
     <Compile Include="ChannelModeChangeEventArgs.cs" />
-    <Compile Include="Controls\ChannelText.cs">
+    <Compile Include="Controls\IrcTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\ChannelText.Designer.cs">
-      <DependentUpon>ChannelText.cs</DependentUpon>
+    <Compile Include="Controls\IrcTextBox.Designer.cs">
+      <DependentUpon>IrcTextBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\CommandTextBox.cs">
       <SubType>Component</SubType>
