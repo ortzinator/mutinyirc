@@ -74,7 +74,7 @@ namespace OrtzIRC
 
         private void Server_Connecting(object sender, CancelEventArgs e)
         {
-            this.serverOutputBox.AddLine(ServerStrings.ConnectingMessage.With(this.server.URI, this.server.Port));
+            this.serverOutputBox.AppendLine(ServerStrings.ConnectingMessage.With(this.server.URI, this.server.Port));
         }
 
         private void ParentServer_OnKick(object sender, KickEventArgs e)
@@ -92,9 +92,9 @@ namespace OrtzIRC
             e.Second.UserJoin(e.First);
         }
 
-        private void ParentServer_OnError(ReplyCode code, string message)
+        private void ParentServer_OnError(object sender, ErrorMessageEventArgs a)
         {
-            this.serverOutputBox.AddLine(code.ToString() + " " + message);
+            this.serverOutputBox.AppendLine(a.Code.ToString() + " " + a.Message);
         }
 
         private void ParentServer_OnRawMessageReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
@@ -109,12 +109,12 @@ namespace OrtzIRC
 
         private void ParentServer_OnPrivateNotice(object sender, PrivateMessageEventArgs e)
         {
-            this.serverOutputBox.AddLine("-" + e.User.Nick + ":" + e.Message + "-");
+            this.serverOutputBox.AppendLine("-" + e.User.Nick + ":" + e.Message + "-");
         }
 
         private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<string> e)
         {
-            this.serverOutputBox.AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
+            this.serverOutputBox.AppendLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
         }
 
         private void ParentServer_OnAction(object sender, ChannelMessageEventArgs e)
