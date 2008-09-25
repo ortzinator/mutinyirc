@@ -240,7 +240,7 @@
         private void Listener_OnError(object sender, ErrorMessageEventArgs a)
         {
             if (Error != null)
-                Error(a.ReplyCode, a.Message);
+                Error(sender, new ErrorMessageEventArgs(a.Code, a.Message));
         }
 
         public Channel JoinChannel(string channel)

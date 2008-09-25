@@ -39,28 +39,75 @@
             base.OnPaint(pe);
         }
 
-        public void AddLine(string line)
+        private new void AppendText(string line)
         {
             //TODO: Color parsing - http://www.mirc.co.uk/help/color.txt
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                char c = line[i];
+                switch (c)
+                {
+                    case (char)2: //bold
+                        if (SelectionFont.Style == FontStyle.Bold)
+                            SetFontStyle(FontStyle.Regular);
+                        else
+                            SetFontStyle(FontStyle.Bold);
+                        break;
+                    case ((char)3): //color
+                        break;
+                    case ((char)37): //underline
+                        if (SelectionFont.Style == FontStyle.Underline)
+                            SetFontStyle(FontStyle.Regular);
+                        else
+                            SetFontStyle(FontStyle.Underline);
+                        break;
+                    case ((char)26): //reverse (colors)
+                        if (SelectionColor == BackColor)
+                        {
+                            SetColor(ForeColor);
+                            SetBackColor(BackColor);
+                        }
+                        else
+                        {
+                            SetColor(BackColor);
+                            SetBackColor(ForeColor);
+                        }
+                        break;
+                    default:
+                        base.AppendText(c.ToString());
+                        break;
+                }
+            }
+            SetFontStyle(FontStyle.Regular);
+        }
+
+        public void AppendLine(string line)
+        {
             this.Invoke((MethodInvoker)delegate
             {
                 DateTime now = DateTime.Now;
 
-                for (int i = 0; i < line.Length; i++)
-                {
-                    switch (line[i])
-                    {
-                        case (char)2: //bold
-                            SelectionFont = new Font(this.Font, FontStyle.Bold);
-                            break;
-                        default:
-                            this.Text += "\n" + now.ToString("T",
-                                                System.Globalization.CultureInfo.CreateSpecificCulture("es-ES")) + " " + line.Trim();
-                            ScrollToBottom();
-                            break;
-                    }
-                }
+                this.AppendText("\n" + now.ToString("T",
+                    System.Globalization.CultureInfo.CreateSpecificCulture("es-ES")) + " ");
+                this.AppendText(line.Trim());
+                ScrollToBottom();
             });
+        }
+
+        private void SetColor(Color c)
+        {
+            SelectionColor = c;
+        }
+
+        private void SetBackColor(Color c)
+        {
+            SelectionBackColor = c;
+        }
+
+        private void SetFontStyle(FontStyle fs)
+        {
+            SelectionFont = new Font(Font, fs);
         }
 
         protected override void OnResize(EventArgs e)

@@ -103,7 +103,7 @@
 
         public void AddLine(string line)
         {
-            channelOutputBox.AddLine(line);
+            channelOutputBox.AppendLine(line);
         }
     }
 }
