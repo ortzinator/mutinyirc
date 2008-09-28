@@ -1,8 +1,8 @@
-﻿namespace FlamingIRC
+﻿namespace OrtzIRC
 {
     using System;
 
-    internal static class EventUtil
+    public static class EventUtil
     {
         public static void Fire<TEventArgs>(this EventHandler<TEventArgs> myEvent, object sender, TEventArgs e) where TEventArgs : EventArgs
         {
