@@ -55,14 +55,15 @@
                             SetFontStyle(FontStyle.Bold);
                         break;
                     case ((char)3): //color
+
                         break;
-                    case ((char)37): //underline
+                    case ((char)31): //underline
                         if (SelectionFont.Style == FontStyle.Underline)
                             SetFontStyle(FontStyle.Regular);
                         else
                             SetFontStyle(FontStyle.Underline);
                         break;
-                    case ((char)26): //reverse (colors)
+                    case ((char)22): //reverse (colors)
                         if (SelectionColor == BackColor)
                         {
                             SetColor(ForeColor);
@@ -80,6 +81,8 @@
                 }
             }
             SetFontStyle(FontStyle.Regular);
+            SetColor(ForeColor);
+            SetBackColor(BackColor);
         }
 
         public void AppendLine(string line)
