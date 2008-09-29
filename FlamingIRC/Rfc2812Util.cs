@@ -22,14 +22,13 @@
  * the archive of this library for complete text of license.
 */
 
-using System.Text.RegularExpressions;
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.Collections;
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Collections;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.Text.RegularExpressions;
 
 	/// <summary>
 	/// RFC 2812 Utility methods.

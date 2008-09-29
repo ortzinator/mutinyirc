@@ -22,14 +22,13 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Collections;
-
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Collections;
+
     /// <summary>
-    /// A simple struct designed to hold al the attributes that 
+    /// A simple struct designed to hold all the attributes that 
     /// are contain in a Channel mode. 
     /// </summary>
     public sealed class ChannelModeInfo

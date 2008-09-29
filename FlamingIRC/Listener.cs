@@ -22,18 +22,15 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Globalization;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Threading;
-
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Collections;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+
     /// <summary>
     /// This class parses messages received from the IRC server and
     /// raises the appropriate event. 

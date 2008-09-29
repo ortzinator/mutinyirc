@@ -22,10 +22,6 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Globalization;
-
-
 namespace FlamingIRC
 {
 	/// <summary>

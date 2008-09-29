@@ -24,8 +24,6 @@
 
 namespace FlamingIRC
 {
-
-
 	/// <summary>
 	/// Numeric message codes taken from RFC 2812
 	/// </summary>
@@ -34,7 +32,7 @@ namespace FlamingIRC
 	{
 
 		/// <summary>
-		/// IRC: Welcome to the Internet Relay Networ [nick]![user]@[host]
+		/// IRC: Welcome to the Internet Relay Network [nick]![user]@[host]
 		/// 
 		/// </summary>
 		RPL_WELCOME = 001,

@@ -22,15 +22,14 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.IO;
-using System.Net.Sockets;
-using System.Threading;
-using System.Diagnostics;
-
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Net.Sockets;
+    using System.Threading;
+
 	/// <summary>
 	/// An Ident daemon is still used by some IRC networks for 
 	/// authentication. It is a simple service which when queried

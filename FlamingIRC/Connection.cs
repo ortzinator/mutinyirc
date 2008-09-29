@@ -22,24 +22,18 @@
  * the archive of this library for complete text of license.
 */
 
-using System.Runtime.InteropServices;
-using System;
-using System.Collections;
-using System.Text;
-using System.Threading;
-using System.Net.Sockets;
-using System.IO;
-using System.Globalization;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-
-#if Ssl
-using Org.Mentalis.Security.Ssl;
-#endif
-
-[assembly: CLSCompliant(true)]
+[assembly: System.CLSCompliant(true)] //TODO: Should these be here?
 namespace FlamingIRC
 {
+    using System;
+    using System.Collections;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Net.Sockets;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+
     /// <summary>
     /// This class manages the connection to the IRC server and provides
     /// access to all the objects needed to send and receive messages.

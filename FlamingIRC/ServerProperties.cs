@@ -1,8 +1,8 @@
-using System;
-using System.Collections;
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Collections;
+
 	/// <summary>
 	/// Encapsulates the collection of properties sent by the IRC server
 	/// after registration.

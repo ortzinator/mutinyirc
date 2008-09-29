@@ -22,10 +22,10 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-
 namespace FlamingIRC
 {
+    using System;
+
 	/// <summary>
 	/// Generates random, made-up names. The names appear to be language neutral (sort of).
 	/// </summary>
