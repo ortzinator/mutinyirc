@@ -22,15 +22,13 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Text;
-using System.Text.RegularExpressions;
-
 namespace FlamingIRC
 {
+    using System.Text;
+    using System.Text.RegularExpressions;
 
 	/// <summary>
-	/// This class conatins a set of methods for adding and removing mIRC color
+	/// This class contains a set of methods for adding and removing mIRC color
 	/// and other control codes.
 	/// </summary>
 	public sealed class TextColor

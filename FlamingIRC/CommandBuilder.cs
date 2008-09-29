@@ -22,12 +22,11 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Text;
-
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Text;
+
     /// <summary>
     /// CommandBuilder provides the support methods needed
     /// by its subclasses to build correctly formatted messages for
@@ -37,7 +36,7 @@ namespace FlamingIRC
     {
         // Buffer to hold commands 
         private StringBuilder commandBuffer;
-        //Containing conenction instance
+        //Containing connection instance
         private Connection connection;
 
         internal const char SPACE = ' ';
@@ -88,7 +87,7 @@ namespace FlamingIRC
             commandBuffer.Remove(0, commandBuffer.Length);
         }
         /// <summary>
-        /// Break up a large message into smaller peices that will fit within the IRC
+        /// Break up a large message into smaller pieces that will fit within the IRC
         /// max message size.
         /// </summary>
         /// <param name="message">The text to be broken up</param>

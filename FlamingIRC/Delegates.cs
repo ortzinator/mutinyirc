@@ -22,11 +22,8 @@
  * the archive of this library for complete text of license.
 */
 
-using System.Net;
-
 namespace FlamingIRC
 {
-
     /// <summary>
     /// Error messages from the IRC server.
     /// </summary>

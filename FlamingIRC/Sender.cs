@@ -22,12 +22,11 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Text;
-using System.IO;
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Text;
+
 	/// <summary>
 	/// This class is used to send all the IRC commands except for CTCP and DCC
 	/// messages. Instances of this class are retrieved as properties of the Connection
