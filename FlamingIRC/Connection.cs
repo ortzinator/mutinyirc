@@ -564,7 +564,7 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// //TODO
+        /// TODO
         /// </summary>
         private void BuildBuffer(IAsyncResult a)
         {

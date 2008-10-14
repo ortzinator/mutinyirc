@@ -111,6 +111,9 @@
     <Compile Include="ChannelManager.cs" />
     <Compile Include="ChannelMessageEventArgs.cs" />
     <Compile Include="ChannelModeChangeEventArgs.cs" />
+    <Compile Include="Command.cs" />
+    <Compile Include="CommandAttribute.cs" />
+    <Compile Include="PluginManager.cs" />
     <Compile Include="Controls\IrcTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -131,6 +134,7 @@
     </Compile>
     <Compile Include="KickEventArgs.cs" />
     <Compile Include="PartEventArgs.cs" />
+    <Compile Include="Plugin.cs" />
     <Compile Include="PrivateMessageEventArgs.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

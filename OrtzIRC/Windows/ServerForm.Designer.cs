@@ -31,7 +31,7 @@ namespace OrtzIRC
         {
             this.serverLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.serverOutputBox = new OrtzIRC.Controls.IrcTextBox();
-            this.commandTextBox = new System.Windows.Forms.TextBox();
+            this.commandTextBox = new OrtzIRC.Controls.CommandTextBox();
             this.serverLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -67,10 +67,9 @@ namespace OrtzIRC
             // commandTextBox
             // 
             this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.commandTextBox.Location = new System.Drawing.Point(4, 343);
-            this.commandTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.commandTextBox.Location = new System.Drawing.Point(3, 343);
             this.commandTextBox.Name = "commandTextBox";
-            this.commandTextBox.Size = new System.Drawing.Size(584, 23);
+            this.commandTextBox.Size = new System.Drawing.Size(586, 23);
             this.commandTextBox.TabIndex = 1;
             // 
             // ServerForm
@@ -93,7 +92,7 @@ namespace OrtzIRC
 
         private System.Windows.Forms.TableLayoutPanel serverLayoutPanel;
         private IrcTextBox serverOutputBox;
-        private System.Windows.Forms.TextBox commandTextBox;
+        private CommandTextBox commandTextBox;
 
     }
 }
