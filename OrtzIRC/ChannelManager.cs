@@ -3,11 +3,8 @@
     using System.Collections.Generic;
     using FlamingIRC;
 
-    public class ChannelManager
+    public sealed class ChannelManager
     {
-        public Dictionary<string, Channel> Channels { get; private set; }
-        public Server Server { get; private set; }
-
         public ChannelManager(Server server)
         {
             this.Server = server;
@@ -16,6 +13,11 @@
             Server.OnNames += new NamesEventHandler(Server_OnNames);
             Server.OnNick += new Server_NickEventHandler(Server_OnNick);
         }
+
+        private bool recievingNames = false;
+
+        public Dictionary<string, Channel> Channels { get; private set; }
+        public Server Server { get; private set; }
 
         void Server_OnNick(User nick, string newNick)
         {
@@ -28,7 +30,6 @@
             }
         }
 
-        private bool recievingNames = false;
         void Server_OnNames(string channel, string[] nicks, bool last)
         {
             if (!recievingNames)

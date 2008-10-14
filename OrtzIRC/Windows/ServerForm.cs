@@ -1,5 +1,6 @@
 namespace OrtzIRC
 {
+    using System;
     using System.ComponentModel;
     using System.Windows.Forms;
     using OrtzIRC.Common;
@@ -36,6 +37,8 @@ namespace OrtzIRC
             InitializeComponent();
 
             this.commandTextBox.Focus();
+
+            commandTextBox.CommandEntered += new EventHandler<DataEventArgs<string>>(commandTextBox_CommandEntered);
         }
 
         private void HookupEvents()
@@ -53,6 +56,7 @@ namespace OrtzIRC
             this.server.Error += ParentServer_OnError;
             this.server.Kick += ParentServer_OnKick;
             this.server.Connecting += Server_Connecting;
+
         }
 
         private void UnhookEvents()
@@ -70,6 +74,11 @@ namespace OrtzIRC
             this.server.Error -= ParentServer_OnError;
             this.server.Kick -= ParentServer_OnKick;
             this.server.Connecting -= Server_Connecting;
+        }
+
+        private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
+        {
+            PluginManager.Instance.ParseCommand(this.Server, e.Data);
         }
 
         private void Server_Connecting(object sender, CancelEventArgs e)

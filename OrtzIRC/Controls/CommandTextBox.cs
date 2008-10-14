@@ -1,16 +1,16 @@
 ﻿namespace OrtzIRC.Controls
 {
+    using System;
     using System.Collections.Generic;
     using System.Windows.Forms;
-
-    public delegate void CommandEnteredEventHandler(string command);
+    using OrtzIRC.Common;
 
     public partial class CommandTextBox : TextBox
     {
         public List<string> CmdHistory { get; private set; }
         private int _historyIndex;
 
-        public event CommandEnteredEventHandler OnCommandEntered;
+        public event EventHandler<DataEventArgs<string>> CommandEntered;
 
         public CommandTextBox()
         {
@@ -56,10 +56,9 @@
                         {
                             CmdHistory.RemoveAt(_historyIndex);
                         }
-                        CmdHistory.Add(this.Text); 
+                        CmdHistory.Add(this.Text);
 
-                        if (OnCommandEntered != null)
-                            OnCommandEntered(this.Text.Trim());
+                        CommandEntered.Fire(this, new DataEventArgs<string>(this.Text.Trim()));
 
                         this.Clear();
                         _historyIndex = CmdHistory.Count;

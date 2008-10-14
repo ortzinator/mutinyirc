@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Windows.Forms;
     using FlamingIRC;
+    using OrtzIRC.Common;
 
     public partial class ChannelForm : Form
     {
@@ -37,7 +38,14 @@
             Channel.OnNick += new Server_NickEventHandler(Channel_OnNick);
             Channel.OnKick += new ChannelKickEventHandler(Channel_OnKick);
 
+            commandTextBox.CommandEntered += new EventHandler<DataEventArgs<string>>(commandTextBox_CommandEntered);
+
             this.commandTextBox.Focus();
+        }
+
+        void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
+        {
+            PluginManager.Instance.ParseCommand(this.Channel, e.Data);
         }
 
         void Channel_OnKick(User nick, string kickee, string reason)

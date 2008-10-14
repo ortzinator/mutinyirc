@@ -125,5 +125,25 @@
             this.SelectionLength = 0;
             this.ScrollToCaret();
         }
+
+        private void ResetSelection()
+        {
+            this.SelectionStart = this.Text.Length;
+            this.SelectionLength = 0;
+        }
+
+        //hack - might be a better way than using OnMouseUp...
+        protected override void OnMouseUp(MouseEventArgs mevent)
+        {
+            base.OnMouseUp(mevent);
+
+            string trimmed = this.SelectedText.Trim();
+
+            if (trimmed.Length > 1)
+            {
+                Clipboard.SetText(trimmed, TextDataFormat.UnicodeText);
+            }
+            ResetSelection();
+        }
     }
 }
