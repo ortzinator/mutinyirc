@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC
+﻿namespace OrtzIRC.Plugins
 {
     using System;
     using System.Collections;
@@ -9,24 +9,40 @@
 
     public sealed class PluginManager
     {
-        private List<Command> commands;
-        private List<Plugin> plugins;
+        private static List<Command> commands;
+        private static List<Plugin> plugins;
+
+        private static PluginManager _instance;
 
         public static PluginManager Instance
         {
-            get { return new PluginManager(); }
+            get
+            {
+                if (_instance == null)
+                    return null;
+                
+                return _instance;
+            }
         }
 
         private PluginManager()
         {
             commands = new List<Command>();
-            LoadPlugins();
+
+        }
+
+        public static void LoadPlugins()
+        {
+            if (_instance == null)
+                _instance = new PluginManager();
+
+            FindPlugins();
         }
 
         /// <summary>
         /// Searches the plugins directory for assemblies
         /// </summary>
-        private void LoadPlugins()
+        private static void FindPlugins()
         {
             Console.WriteLine("Loading plugins...");
             Assembly dll;
@@ -52,7 +68,7 @@
         /// Examine assembly for OrtzIRC plugins and commands
         /// </summary>
         /// <param name="asm">The assembly to examine</param>
-        private void ExamineAssembly(Assembly asm)
+        private static void ExamineAssembly(Assembly asm)
         {
             Type[] types = asm.GetTypes();
             object[] attributes;

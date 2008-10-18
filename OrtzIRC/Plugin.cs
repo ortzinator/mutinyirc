@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC
+﻿namespace OrtzIRC.Plugins
 {
     internal class Plugin
     {
