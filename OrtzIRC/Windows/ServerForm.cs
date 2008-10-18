@@ -3,9 +3,10 @@ namespace OrtzIRC
     using System;
     using System.ComponentModel;
     using System.Windows.Forms;
-    using OrtzIRC.Common;
-    using OrtzIRC.Resources;
     using FlamingIRC;
+    using OrtzIRC.Common;
+    using OrtzIRC.Plugins;
+    using OrtzIRC.Resources;
 
     public partial class ServerForm : Form
     {

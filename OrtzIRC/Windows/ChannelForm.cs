@@ -5,6 +5,7 @@
     using System.Windows.Forms;
     using FlamingIRC;
     using OrtzIRC.Common;
+    using OrtzIRC.Plugins;
 
     public partial class ChannelForm : Form
     {
