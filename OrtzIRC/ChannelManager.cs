@@ -19,7 +19,7 @@
         public Dictionary<string, Channel> Channels { get; private set; }
         public Server Server { get; private set; }
 
-        void Server_OnNick(User nick, string newNick)
+        private void Server_OnNick(User nick, string newNick)
         {
             foreach (KeyValuePair<string, Channel> item in Channels)
             {
@@ -30,7 +30,7 @@
             }
         }
 
-        void Server_OnNames(string channel, string[] nicks, bool last)
+        private void Server_OnNames(string channel, string[] nicks, bool last)
         {
             if (!recievingNames)
             {

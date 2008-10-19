@@ -44,17 +44,17 @@
             this.commandTextBox.Focus();
         }
 
-        void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
+        private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
             PluginManager.Instance.ParseCommand(this.Channel, e.Data);
         }
 
-        void Channel_OnKick(User nick, string kickee, string reason)
+        private void Channel_OnKick(User nick, string kickee, string reason)
         {
             this.AddLine("-- Kick: (" + nick.Nick + ") was kicked by (" + kickee + ") " + reason);
         }
 
-        void Channel_OnReceivedNames(List<User> nickList)
+        private void Channel_OnReceivedNames(List<User> nickList)
         {
             this.BeginInvoke((MethodInvoker)delegate
             {
@@ -67,17 +67,17 @@
             });
         }
 
-        void Channel_OnNick(User nick, string newNick)
+        private void Channel_OnNick(User nick, string newNick)
         {
             this.AddLine("-- Nick: (" + nick.Nick + ") is now known as (" + newNick + ")");
         }
 
-        void Channel_OnUserQuit(User nick, string message)
+        private void Channel_OnUserQuit(User nick, string message)
         {
             this.AddLine("-- Quit: (" + nick.Nick + ") (" + nick.HostMask + ") " + message);
         }
 
-        void Channel_OnPartOther(User nick, string message)
+        private void Channel_OnPartOther(User nick, string message)
         {
             if (message != String.Empty)
                 this.AddLine("-- Parted: (" + nick.Nick + ") (" + nick.HostMask + ") " + message);
@@ -85,22 +85,22 @@
                 this.AddLine("-- Parted: (" + nick.Nick + ") (" + nick.HostMask + ")");
         }
 
-        void Channel_OnJoin(User nick)
+        private void Channel_OnJoin(User nick)
         {
             this.AddLine("-- Joined: (" + nick.Nick + ") (" + nick.HostMask + ")");
         }
 
-        void Channel_OnShowTopic(string topic)
+        private void Channel_OnShowTopic(string topic)
         {
             this.AddLine("topic: (" + topic + ")");
         }
 
-        void Channel_OnAction(User nick, string message)
+        private void Channel_OnAction(User nick, string message)
         {
             this.AddLine("-- " + nick.Nick + " " + message);
         }
 
-        void Channel_OnMessage(User nick, string message)
+        private void Channel_OnMessage(User nick, string message)
         {
             this.AddLine(nick.NamesLiteral + ": " + message);
         }

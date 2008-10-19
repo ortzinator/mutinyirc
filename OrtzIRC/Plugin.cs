@@ -1,11 +1,11 @@
 ﻿namespace OrtzIRC.Plugins
 {
-    internal class Plugin
+    internal class PluginInfo
     {
         public string AssemblyPath { get; set; }
         public string ClassName { get; set; }
 
-        public Plugin(string path, string name)
+        public PluginInfo(string path, string name)
         {
             this.AssemblyPath = path;
             this.ClassName = name;
