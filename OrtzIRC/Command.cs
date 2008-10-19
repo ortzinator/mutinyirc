@@ -1,8 +1,8 @@
 ﻿namespace OrtzIRC.Plugins
 {
-    internal class Command : Plugin
+    internal class CommandInfo : PluginInfo
     {
-        public Command(string path, string name) : base(path, name)
+        public CommandInfo(string path, string name) : base(path, name)
         {
 
         }

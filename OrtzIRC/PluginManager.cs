@@ -9,8 +9,8 @@
 
     public sealed class PluginManager
     {
-        private static List<Command> commands;
-        private static List<Plugin> plugins;
+        private static List<CommandInfo> commands;
+        private static List<PluginInfo> plugins;
 
         private static PluginManager _instance;
 
@@ -24,7 +24,7 @@
 
         private PluginManager()
         {
-            commands = new List<Command>();
+            commands = new List<CommandInfo>();
 
         }
 
@@ -69,7 +69,7 @@
         {
             Type[] types = asm.GetTypes();
             object[] attributes;
-            Command newCommand;
+            CommandInfo newCommand;
 
             foreach (Type type in types)
             {
@@ -80,7 +80,7 @@
                         attributes = type.GetCustomAttributes(typeof(CommandAttribute), false);
                         if (attributes.Length > 0)
                         {
-                            newCommand = new Command(asm.Location, type.FullName);
+                            newCommand = new CommandInfo(asm.Location, type.FullName);
 
                             commands.Add(newCommand);
                             Console.WriteLine("Added plugin at " + asm.Location);

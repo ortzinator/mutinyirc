@@ -39,9 +39,9 @@
     [Flags]
     public enum CommandContext : int
     {
-        All = 0,
         Channel = 1,
         Server = 2,
         PrivateMessage = 4,
+        All = 7,
     }
 }
