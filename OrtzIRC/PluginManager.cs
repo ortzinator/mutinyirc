@@ -7,20 +7,15 @@
     using System.Collections.Generic;
     using System.Diagnostics;
 
+    /// <summary>
+    /// Manages plugins and commands.
+    /// </summary>
     public sealed class PluginManager
     {
         private static List<CommandInfo> commands;
-        private static List<PluginInfo> plugins;
+        //private static List<PluginInfo> plugins;
 
-        private static PluginManager _instance;
-
-        public static PluginManager Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
+        public static PluginManager Instance { get; private set; }
 
         private PluginManager()
         {
@@ -28,10 +23,14 @@
 
         }
 
+        /// <summary>
+        /// Instantiates the PluginManager and loads any plugins found.
+        /// </summary>
+        /// <remarks>Must be called first</remarks>
         public static void LoadPlugins()
         {
-            if (_instance == null)
-                _instance = new PluginManager();
+            if (Instance == null)
+                Instance = new PluginManager();
 
             FindPlugins();
         }
