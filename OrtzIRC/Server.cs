@@ -20,18 +20,18 @@
         /// <remarks>
         /// The string data is the message about why the connection failed.
         /// </remarks>
-        public event EventHandler<DataEventArgs<string>> ConnectFail;
+        public event EventHandler<DataEventArgs<string>> ConnectFailed;
         public event EventHandler<DataEventArgs<string>> RawMessageReceived;
         public event EventHandler<ChannelMessageEventArgs> PublicMessage;
         public event EventHandler<EventArgs> Connected;
-        public event EventHandler<ErrorMessageEventArgs> Error;
+        public event EventHandler<ErrorMessageEventArgs> ErrorMessageRecieved;
         public event RegisteredEventHandler Registered;
         public event EventHandler<PartEventArgs> Part;
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
-        public event UserModeChangeEventHandler UserModeChange;
+        public event UserModeChangeEventHandler UserModeChanged;
         public event DisconnectingEventHandler Disconnecting;
         public event DisconnectedEventHandler Disconnected;
-        public event EventHandler<ChannelMessageEventArgs> Action;
+        public event EventHandler<ChannelMessageEventArgs> UserAction;
         public event EventHandler<PrivateMessageEventArgs> PrivateNotice;
         public event Server_TopicRequestEventHandler GotTopic;
         public event Server_NickEventHandler OnNick;
@@ -135,8 +135,8 @@
 
         private void Listener_OnUserModeChange(ModeAction action, UserMode mode)
         {
-            if (UserModeChange != null)
-                UserModeChange(action, mode);
+            if (UserModeChanged != null)
+                UserModeChanged(action, mode);
             foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
             {
                 Connection.Sender.Names(item.Key);
@@ -240,8 +240,8 @@
 
         private void Listener_OnError(object sender, ErrorMessageEventArgs a)
         {
-            if (Error != null)
-                Error(sender, new ErrorMessageEventArgs(a.Code, a.Message));
+            if (ErrorMessageRecieved != null)
+                ErrorMessageRecieved(sender, new ErrorMessageEventArgs(a.Code, a.Message));
         }
 
         public Channel JoinChannel(string channel)
@@ -263,7 +263,7 @@
 
         protected virtual void OnAction(ChannelMessageEventArgs e)
         {
-            this.Action.Fire<ChannelMessageEventArgs>(this, e);
+            this.UserAction.Fire<ChannelMessageEventArgs>(this, e);
         }
 
         protected virtual void OnPrivateNotice(PrivateMessageEventArgs e)
@@ -303,7 +303,7 @@
 
         protected virtual void ConnectFailed(DataEventArgs<string> e)
         {
-            ConnectFail.Fire<DataEventArgs<string>>(this, e);
+            ConnectFailed.Fire<DataEventArgs<string>>(this, e);
         }
 
         protected virtual void OnChannelModeChange(ChannelModeChangeEventArgs e)
