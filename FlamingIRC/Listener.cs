@@ -448,7 +448,7 @@ namespace FlamingIRC
                                 string raw = CondenseStrings(tokens, 3);
                                 OnChannelModeChange(who, tokens[2], modes, raw);
                             }
-                            catch (Exception e)
+                            catch (Exception ex)
                             {
                                 if (OnError != null)
                                 {
@@ -679,7 +679,7 @@ namespace FlamingIRC
                             ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 4);
                             OnChannelModeRequest(tokens[3], modes);
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
                             if (OnError != null)
                             {

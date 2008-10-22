@@ -620,9 +620,9 @@ namespace FlamingIRC
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() sent= " + command);
                 timeLastSent = DateTime.Now;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() exception=" + e);
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() exception=" + ex);
             }
 
             this.OnRawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
@@ -645,9 +645,9 @@ namespace FlamingIRC
 
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() message=" + command);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() exception=" + e);
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() exception=" + ex);
             }
             command.Remove(0, command.Length);
         }

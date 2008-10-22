@@ -5,10 +5,10 @@
     using System.ComponentModel;
     using FlamingIRC;
     using OrtzIRC.Common;
-        
+
     public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
     public delegate void Server_NickEventHandler(User nick, string newNick);
-    
+
     public class Server
     {
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
@@ -43,6 +43,7 @@
         public int Port { get; set; }
         public bool SSL { get; set; }
         public Connection Connection { get; private set; }
+        public bool IsConnected { get { return Connection.Connected; } }
         public string UserNick { get; private set; }
 
         public ChannelManager ChanManager { get; private set; }
@@ -85,8 +86,8 @@
             DoConnect();
         }
 
-        public Server(string uri, string description, int port, bool ssl) 
-            : this(new ServerSettings(uri, description, port, ssl)) 
+        public Server(string uri, string description, int port, bool ssl)
+            : this(new ServerSettings(uri, description, port, ssl))
         {
             //intentionally left blank
         }
@@ -119,9 +120,9 @@
             {
                 Connection.Connect();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                ConnectFailed(new DataEventArgs<string>(e.Message));
+                ConnectFailed(new DataEventArgs<string>(ex.Message));
             }
         }
 
@@ -140,7 +141,7 @@
             {
                 Connection.Sender.Names(item.Key);
             }
-            
+
         }
 
         private void Listener_OnNick(User user, string newNick)

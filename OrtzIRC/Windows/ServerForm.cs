@@ -163,7 +163,7 @@ namespace OrtzIRC
         {
             base.OnFormClosing(e);
 
-            if (this.server.Connection.Connected)
+            if (this.server.IsConnected)
             {
                 DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect, CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
