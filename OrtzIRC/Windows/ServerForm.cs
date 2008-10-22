@@ -46,15 +46,15 @@ namespace OrtzIRC
         {
             this.server.Registered += ParentServer_OnRegistered;
             this.server.PublicMessage += ParentServer_OnPublicMessage;
-            this.server.Action += ParentServer_OnAction;
+            this.server.UserAction += ParentServer_OnAction;
             this.server.JoinSelf += ParentServer_OnJoinSelf;
             this.server.JoinOther += ParentServer_OnJoinOther;
             this.server.Part += ParentServer_OnPart;
-            this.server.ConnectFail += Server_OnConnectFail;
+            this.server.ConnectFailed += Server_OnConnectFail;
             this.server.PrivateNotice += ParentServer_OnPrivateNotice;
             this.server.GotTopic += ParentServer_OnGotTopic;
             this.server.RawMessageReceived += ParentServer_OnRawMessageReceived;
-            this.server.Error += ParentServer_OnError;
+            this.server.ErrorMessageRecieved += ParentServer_OnError;
             this.server.Kick += ParentServer_OnKick;
             this.server.Connecting += Server_Connecting;
 
@@ -64,15 +64,15 @@ namespace OrtzIRC
         {
             this.server.Registered -= ParentServer_OnRegistered;
             this.server.PublicMessage -= ParentServer_OnPublicMessage;
-            this.server.Action -= ParentServer_OnAction;
+            this.server.UserAction -= ParentServer_OnAction;
             this.server.JoinSelf -= ParentServer_OnJoinSelf;
             this.server.JoinOther -= ParentServer_OnJoinOther;
             this.server.Part -= ParentServer_OnPart;
-            this.server.ConnectFail -= Server_OnConnectFail;
+            this.server.ConnectFailed -= Server_OnConnectFail;
             this.server.PrivateNotice -= ParentServer_OnPrivateNotice;
             this.server.GotTopic -= ParentServer_OnGotTopic;
             this.server.RawMessageReceived -= ParentServer_OnRawMessageReceived;
-            this.server.Error -= ParentServer_OnError;
+            this.server.ErrorMessageRecieved -= ParentServer_OnError;
             this.server.Kick -= ParentServer_OnKick;
             this.server.Connecting -= Server_Connecting;
         }
