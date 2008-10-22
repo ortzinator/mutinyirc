@@ -13,7 +13,6 @@
     public sealed class PluginManager
     {
         private static List<CommandInfo> commands;
-        //private static List<PluginInfo> plugins;
 
         public static PluginManager Instance { get; private set; }
 
@@ -27,7 +26,7 @@
         /// Instantiates the PluginManager and loads any plugins found.
         /// </summary>
         /// <remarks>Must be called first</remarks>
-        public static void LoadPlugins()
+        internal static void LoadPlugins()
         {
             if (Instance == null)
                 Instance = new PluginManager();
@@ -40,7 +39,7 @@
         /// </summary>
         private static void FindPlugins()
         {
-            Console.WriteLine("Loading plugins...");
+            Trace.WriteLine("Loading plugins...");
             Assembly dll;
 
             string[] files = Directory.GetFileSystemEntries(Path.Combine(
@@ -53,9 +52,9 @@
                     dll = Assembly.LoadFrom(file);
                     ExamineAssembly(dll);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Could not load " + file);
+                    Trace.WriteLine("Could not load " + file);
                 }
             }
         }
@@ -66,24 +65,17 @@
         /// <param name="asm">The assembly to examine</param>
         private static void ExamineAssembly(Assembly asm)
         {
-            Type[] types = asm.GetTypes();
-            object[] attributes;
-            CommandInfo newCommand;
-
-            foreach (Type type in types)
+            foreach (Type type in asm.GetTypes())
             {
-                if (type.IsPublic)
+                if ((type.IsPublic) && ((type.Attributes & TypeAttributes.Abstract) != TypeAttributes.Abstract))
                 {
-                    if ((type.Attributes & TypeAttributes.Abstract) != TypeAttributes.Abstract)
+                    object[] attributes = type.GetCustomAttributes(typeof(CommandAttribute), false);
+                    if (attributes.Length > 0)
                     {
-                        attributes = type.GetCustomAttributes(typeof(CommandAttribute), false);
-                        if (attributes.Length > 0)
-                        {
-                            newCommand = new CommandInfo(asm.Location, type.FullName);
+                        CommandInfo newCommand = new CommandInfo(asm.Location, type.FullName);
 
-                            commands.Add(newCommand);
-                            Console.WriteLine("Added plugin at " + asm.Location);
-                        }
+                        commands.Add(newCommand);
+                        Trace.WriteLine("Added plugin at " + asm.Location);
                     }
                 }
             }
@@ -106,7 +98,7 @@
         /// <param name="line">The entire command line sent</param>
         public void ParseCommand(Server server, string line)
         {
-            if (server.Connection.Connected)
+            if (server.IsConnected)
             {
 
             }
