@@ -1,7 +1,7 @@
 ﻿namespace OrtzIRC
 {
-    using System.Collections.Generic;
     using FlamingIRC;
+    using System.Collections.Generic;
 
     public delegate void ChannelMessageEventHandler(User nick, string message);
     public delegate void TopicShowEventHandler(string topic);
@@ -17,13 +17,10 @@
     public class Channel
     {
         public Server Server { get; private set; }
-        //public List<Nick> BanList { get; private set; }
-        //public ModeCollection Mode { get; private set; }
         public string Key { get; private set; }
         public int Limit { get; private set; }
         public string Name { get; private set; }
         public List<User> NickList { get; private set; }
-        //public Topic Topic { get; private set; }
 
         public event ChannelMessageEventHandler OnMessage;
         public event ChannelMessageEventHandler OnAction;
@@ -45,14 +42,15 @@
 
         public void AddNick(User nick)
         {
-            //ChannelView.AddNick(nick);
             NickList.Add(nick);
         }
 
         public void ResetNicks()
         {
             if (OnReceivedNames != null)
+            {
                 OnReceivedNames(NickList);
+            }
         }
 
         public override string ToString()
@@ -143,6 +141,7 @@
         internal void UserKick(User nick, string kickee, string reason)
         {
             Server.Connection.Sender.Names(this.Name);
+
             if (OnKick != null)
                 OnKick(nick, kickee, reason);
         }
