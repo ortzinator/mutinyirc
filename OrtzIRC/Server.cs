@@ -122,7 +122,7 @@
             }
             catch (Exception ex)
             {
-                ConnectFailed(new DataEventArgs<string>(ex.Message));
+                OnConnectFailed(new DataEventArgs<string>(ex.Message));
             }
         }
 
@@ -190,7 +190,7 @@
 
         private void Connection_ConnectFailed(object sender, FlamingDataEventArgs<string> e)
         {
-            this.ConnectFailed(new DataEventArgs<string>(e.Data));
+            this.OnConnectFailed(new DataEventArgs<string>(e.Data));
         }
 
         private void Listener_OnPublic(User user, string channel, string message)
@@ -301,7 +301,7 @@
             JoinOther.Fire<DoubleDataEventArgs<User, Channel>>(this, e);
         }
 
-        protected virtual void ConnectFailed(DataEventArgs<string> e)
+        protected virtual void OnConnectFailed(DataEventArgs<string> e)
         {
             ConnectFailed.Fire<DataEventArgs<string>>(this, e);
         }
