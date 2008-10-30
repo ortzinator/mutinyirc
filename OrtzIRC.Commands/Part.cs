@@ -3,17 +3,17 @@
     using System;
     using OrtzIRC.Common;
 
-    [Command(CommandContext.Channel)]
+    [Command]
     public class Part
     {
         public void Execute(Channel channel)
         {
-
+            channel.Part("Goodbye!"); 
         }
 
         public void Execute(Channel channel, string message)
         {
-
+            channel.Part(message);
         }
     }
 }

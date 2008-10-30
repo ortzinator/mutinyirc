@@ -23,16 +23,9 @@
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class CommandAttribute : Attribute
     {
-        public CommandContext Context { get; private set; }
-
         public CommandAttribute()
         {
-            this.Context = CommandContext.All;
-        }
-
-        public CommandAttribute(CommandContext contexts)
-        {
-            this.Context = contexts;
+            //intentionally left blank
         }
     }
 
