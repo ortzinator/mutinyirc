@@ -2,6 +2,7 @@
 {
     using FlamingIRC;
     using System.Collections.Generic;
+    using System;
 
     public delegate void ChannelMessageEventHandler(User nick, string message);
     public delegate void TopicShowEventHandler(string topic);
@@ -92,6 +93,11 @@
         {
             if (OnJoin != null)
                 OnJoin(nick);
+        }
+
+        public void Part(string message)
+        {
+            throw new NotImplementedException();
         }
 
         public void UserPart(User nick, string message)
