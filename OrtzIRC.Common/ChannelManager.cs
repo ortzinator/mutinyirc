@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using FlamingIRC;
+    using OrtzIRC.Common;
 
     public sealed class ChannelManager
     {

@@ -1,6 +1,7 @@
-﻿namespace OrtzIRC
+﻿namespace OrtzIRC.Common
 {
     using System.Collections.Generic;
+    using OrtzIRC.Common;
 
     public class ServerManager
     {

@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC
+﻿namespace OrtzIRC.Common
 {
     using FlamingIRC;
     using System.Collections.Generic;
@@ -58,7 +58,7 @@
             return this.Name;
         }
 
-        internal void NewMessage(User nick, string message)
+        public void NewMessage(User nick, string message)
         {
             foreach (User n in NickList)
             {
@@ -70,7 +70,7 @@
             }
         }
 
-        internal void NewAction(User nick, string message)
+        public void NewAction(User nick, string message)
         {
             foreach (User n in NickList)
             {
@@ -82,25 +82,25 @@
             }
         }
 
-        internal void ShowTopic(string topic)
+        public void ShowTopic(string topic)
         {
             if (OnShowTopic != null)
                 OnShowTopic(topic);
         }
 
-        internal void UserJoin(User nick)
+        public void UserJoin(User nick)
         {
             if (OnJoin != null)
                 OnJoin(nick);
         }
 
-        internal void UserPart(User nick, string message)
+        public void UserPart(User nick, string message)
         {
             if (OnUserPart != null)
                 OnUserPart(nick, message);
         }
 
-        internal void UserQuit(User nick, string message)
+        public void UserQuit(User nick, string message)
         {
             foreach (User n in NickList)
             {
@@ -112,7 +112,7 @@
             }
         }
 
-        internal void NickChange(User nick, string newNick)
+        public void NickChange(User nick, string newNick)
         {
             foreach (User n in NickList)
             {
@@ -138,7 +138,7 @@
             return false;
         }
 
-        internal void UserKick(User nick, string kickee, string reason)
+        public void UserKick(User nick, string kickee, string reason)
         {
             Server.Connection.Sender.Names(this.Name);
 
