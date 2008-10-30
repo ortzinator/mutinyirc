@@ -4,6 +4,7 @@ namespace OrtzIRC
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Windows.Forms;
+    using OrtzIRC.Common;
 
     public partial class MainForm : Form
     {

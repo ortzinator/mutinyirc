@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1594A34C-9BB8-4334-880B-26671436D95E}</ProjectGuid>
+    <ProjectGuid>{30204C2A-1273-41CD-A0CB-39BBEF14B55C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OrtzIRC.Common</RootNamespace>
-    <AssemblyName>OrtzIRC.Common</AssemblyName>
+    <RootNamespace>OrtzIRC.Commands</RootNamespace>
+    <AssemblyName>OrtzIRC.Commands</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -45,27 +45,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Channel.cs" />
-    <Compile Include="ChannelManager.cs" />
-    <Compile Include="ChannelMessageEventArgs.cs" />
-    <Compile Include="ChannelModeChangeEventArgs.cs" />
-    <Compile Include="CommandAttribute.cs" />
-    <Compile Include="DataEventArgs.cs" />
-    <Compile Include="DoubleDataEventArgs.cs" />
-    <Compile Include="EventUtil.cs" />
-    <Compile Include="IrcSettings.cs" />
-    <Compile Include="KickEventArgs.cs" />
-    <Compile Include="PartEventArgs.cs" />
-    <Compile Include="PrivateMessageEventArgs.cs" />
-    <Compile Include="Server.cs" />
-    <Compile Include="ServerManager.cs" />
-    <Compile Include="StringUtil.cs" />
+    <Compile Include="Join.cs" />
+    <Compile Include="Part.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj">
-      <Project>{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}</Project>
-      <Name>FlamingIRC</Name>
+    <ProjectReference Include="..\OrtzIRC.Common\OrtzIRC.Common.csproj">
+      <Project>{1594A34C-9BB8-4334-880B-26671436D95E}</Project>
+      <Name>OrtzIRC.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
