@@ -7,6 +7,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using OrtzIRC.Common;
+    using OrtzIRC.Properties;
 
     /// <summary>
     /// Manages plugins and commands.
@@ -17,10 +18,22 @@
 
         public static PluginManager Instance { get; private set; }
 
+        public string UserPluginPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Settings.Default.UserPluginDirectory))
+                {
+                    Settings.Default.UserPluginDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"OrtzIRC\Plugins\");
+                }
+
+                return Settings.Default.UserPluginDirectory;
+            }
+        }
+
         private PluginManager()
         {
             commands = new List<CommandInfo>();
-
         }
 
         /// <summary>
@@ -40,7 +53,8 @@
         /// </summary>
         private static void FindPlugins()
         {
-            Trace.WriteLine("Loading plugins...");
+            Trace.WriteLine("Loading Plug-ins", TraceCategories.PluginSystem);
+
             Assembly dll;
 
             string[] files = Directory.GetFileSystemEntries(Path.Combine(
@@ -55,7 +69,7 @@
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine("Could not load " + file);
+                    Trace.WriteLine("Could not load " + file + Environment.NewLine + ex.ToString(), TraceCategories.PluginSystem);
                 }
             }
         }
