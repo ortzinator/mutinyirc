@@ -168,7 +168,7 @@ namespace FlamingIRC
             builder.Append(" :\x0001DCC SEND ");
             builder.Append(dccFileInfo.DccFileName);
             builder.Append(" ");
-            builder.Append(DccUtil.IPAddressToLong(sendAddress));
+            builder.Append(DccUtil.IPAddressToLong(sendAddress).ToString());
             builder.Append(" ");
             builder.Append(listenPort);
             builder.Append(" ");
