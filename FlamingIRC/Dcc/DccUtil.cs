@@ -84,7 +84,7 @@ namespace FlamingIRC
             long num = 0;
             if (ipAddress.ToString() == String.Empty)
             {
-                return 0.ToString();
+                return "0";
             }
             else
             {
