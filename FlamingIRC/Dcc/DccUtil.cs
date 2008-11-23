@@ -79,7 +79,6 @@ namespace FlamingIRC
         public static long IPAddressToLong(IPAddress ipAddress)
         {
             //TODO: Can't test right now, hope this works
-            
             long num = 0;
             if (ipAddress.ToString() == String.Empty)
             {
