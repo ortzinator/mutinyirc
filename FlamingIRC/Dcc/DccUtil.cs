@@ -74,26 +74,25 @@ namespace FlamingIRC
         /// Convert an IP address into the network order
         /// long required by the DCC protocol.
         /// </summary>
-        /// <param name="ipAddress">A valid IP address</param>
-        /// <returns>The long in string form</returns>
-        public static string IPAddressToLong(IPAddress ipAddress)
+        /// <param name="ipAddress">A valid IPAddress</param>
+        /// <returns>The IP as a long</returns>
+        public static long IPAddressToLong(IPAddress ipAddress)
         {
             //TODO: Can't test right now, hope this works
-            int i;
-            string[] arrDec;
+            
             long num = 0;
             if (ipAddress.ToString() == String.Empty)
             {
-                return "0";
+                return 0;
             }
             else
             {
-                arrDec = ipAddress.ToString().Split('.');
-                for (i = arrDec.Length - 1; i >= 0; --i)
+                string[] octets = ipAddress.ToString().Split('.');
+                for (int i = octets.Length - 1; i >= 0; --i)
                 {
-                    num += (long)((int.Parse(arrDec[i]) % 256) * Math.Pow(256, (3 - i)));
+                    num += (long)((int.Parse(octets[i]) % 256) * Math.Pow(256, (3 - i)));
                 }
-                return NetworkUnsignedLong(num).ToString();
+                return NetworkUnsignedLong(num);
             }
         }
         /// <summary>

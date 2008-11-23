@@ -123,7 +123,7 @@ namespace FlamingIRC
             StringBuilder builder = new StringBuilder("PRIVMSG ", 512);
             builder.Append(dccUser.Nick);
             builder.Append(" :\x0001DCC CHAT CHAT ");
-            builder.Append(DccUtil.IPAddressToLong(IPAddress.Parse(listenIPAddress)));
+            builder.Append(DccUtil.IPAddressToLong(IPAddress.Parse(listenIPAddress)).ToString());
             builder.Append(" ");
             builder.Append(listenPort);
             builder.Append("\x0001\n");
