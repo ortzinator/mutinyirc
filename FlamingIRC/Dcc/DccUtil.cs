@@ -78,11 +78,23 @@ namespace FlamingIRC
         /// <returns>The long in string form</returns>
         public static string IPAddressToLong(IPAddress ipAddress)
         {
-            if (ipAddress == null)
+            //TODO: Can't test right now, hope this works
+            int i;
+            string[] arrDec;
+            long num = 0;
+            if (ipAddress.ToString() == String.Empty)
             {
-                throw new ArgumentException("Address cannot be null");
+                return 0.ToString();
             }
-            return NetworkUnsignedLong(ipAddress.Address).ToString(CultureInfo.InvariantCulture);
+            else
+            {
+                arrDec = ipAddress.ToString().Split('.');
+                for (i = arrDec.Length - 1; i >= 0; --i)
+                {
+                    num += (long)((int.Parse(arrDec[i]) % 256) * Math.Pow(256, (3 - i)));
+                }
+                return NetworkUnsignedLong(num).ToString();
+            }
         }
         /// <summary>
         /// Convert the network order address received from a DCC

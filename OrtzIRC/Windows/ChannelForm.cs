@@ -25,9 +25,6 @@
 
             Channel.OnReceivedNames += new ReceivedNamesEventHandler(Channel_OnReceivedNames);
 
-            //var tempBinding = new Binding("Items", Channel.NickList, "NamesLiteral");
-            //nickListBox.DataBindings.Add(tempBinding);
-            //this.nickListBox.DataSource = channel.NickList;
             this.nickListBox.DisplayMember = "NamesLiteral";
 
             Channel.OnMessage += new ChannelMessageEventHandler(Channel_OnMessage);

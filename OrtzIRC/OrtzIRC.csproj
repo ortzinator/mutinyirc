@@ -18,7 +18,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3F50443A-7CC6-4490-9916-523D80DEE58F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -107,7 +107,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PluginManager.cs" />
     <Compile Include="Controls\IrcTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -126,7 +125,6 @@
     <Compile Include="Controls\NickListBox.Designer.cs">
       <DependentUpon>NickListBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="CommandInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -184,10 +182,12 @@
     <EmbeddedResource Include="Resources\CommonStrings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>CommonStrings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\ServerStrings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ServerStrings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\ChannelForm.resx">
       <DependentUpon>ChannelForm.cs</DependentUpon>

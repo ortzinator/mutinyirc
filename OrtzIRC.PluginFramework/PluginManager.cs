@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC.Plugins
+﻿namespace OrtzIRC.PluginFramework
 {
     using System;
     using System.Collections;
@@ -18,21 +18,11 @@
 
         public static PluginManager Instance { get; private set; }
 
-        public string UserPluginPath
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(Settings.Default.UserPluginDirectory))
-                {
-                    Settings.Default.UserPluginDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"OrtzIRC\Plugins\");
-                }
+        public string UserPluginPath { get; private set; }
 
-                return Settings.Default.UserPluginDirectory;
-            }
-        }
-
-        private PluginManager()
+        private PluginManager(string pluginPath)
         {
+            UserPluginPath = pluginPath;
             commands = new List<CommandInfo>();
         }
 
@@ -57,8 +47,7 @@
 
             Assembly dll;
 
-            string[] files = Directory.GetFileSystemEntries(Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OrtzIRC/Plugins"), "*.dll");
+            string[] files = Directory.GetFileSystemEntries(this.UserPluingPath, "*.dll");
 
             foreach (string file in files)
             {

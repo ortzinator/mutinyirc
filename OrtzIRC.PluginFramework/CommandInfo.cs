@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC.Plugins
+﻿namespace OrtzIRC.PluginFramework
 {
     internal class CommandInfo
     {

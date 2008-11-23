@@ -110,7 +110,7 @@ namespace FlamingIRC
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run()");
             try
             {
-                listener = new TcpListener(IdentdPort);
+                listener = new TcpListener(System.Net.IPAddress.Parse("127.0.0.1"), IdentdPort);
                 listener.Start();
 
             loop:
