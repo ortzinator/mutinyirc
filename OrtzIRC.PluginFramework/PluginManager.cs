@@ -7,7 +7,6 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using OrtzIRC.Common;
-    using OrtzIRC.Properties;
 
     /// <summary>
     /// Manages plugins and commands.
@@ -20,9 +19,8 @@
 
         public string UserPluginPath { get; private set; }
 
-        private PluginManager(string pluginPath)
+        private PluginManager()
         {
-            UserPluginPath = pluginPath;
             commands = new List<CommandInfo>();
         }
 
@@ -30,10 +28,12 @@
         /// Instantiates the PluginManager and loads any plugins found.
         /// </summary>
         /// <remarks>Must be called first</remarks>
-        internal static void LoadPlugins()
+        internal static void LoadPlugins(string pluginPath)
         {
             if (Instance == null)
                 Instance = new PluginManager();
+
+            Instance.UserPluginPath = pluginPath;
 
             FindPlugins();
         }
@@ -47,7 +47,7 @@
 
             Assembly dll;
 
-            string[] files = Directory.GetFileSystemEntries(this.UserPluingPath, "*.dll");
+            string[] files = Directory.GetFileSystemEntries(Instance.UserPluginPath, "*.dll");
 
             foreach (string file in files)
             {
