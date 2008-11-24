@@ -78,7 +78,6 @@ namespace FlamingIRC
         /// <returns>The IP as a long</returns>
         public static long IPAddressToLong(IPAddress ipAddress)
         {
-            //TODO: Can't test right now, hope this works
             long num = 0;
             if (ipAddress.ToString() == String.Empty)
             {
@@ -91,7 +90,7 @@ namespace FlamingIRC
                 {
                     num += (long)((int.Parse(octets[i]) % 256) * Math.Pow(256, (3 - i)));
                 }
-                return NetworkUnsignedLong(num);
+                return num;
             }
         }
         /// <summary>
@@ -134,7 +133,7 @@ namespace FlamingIRC
         /// </summary>
         /// <param name="hostOrderLong">A long in host order</param>
         /// <returns>The long as unsigned int in network order</returns>
-        private static long NetworkUnsignedLong(long hostOrderLong)
+        public static long NetworkUnsignedLong(long hostOrderLong)
         {
             long networkLong = IPAddress.HostToNetworkOrder(hostOrderLong);
             //Network order has the octets in reverse order starting with byte 7

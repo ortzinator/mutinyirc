@@ -5,7 +5,7 @@ namespace OrtzIRC
     using System.Windows.Forms;
     using FlamingIRC;
     using OrtzIRC.Common;
-    using OrtzIRC.Plugins;
+    using OrtzIRC.PluginFramework;
     using OrtzIRC.Resources;
 
     public partial class ServerForm : Form
