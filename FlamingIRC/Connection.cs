@@ -564,7 +564,7 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// TODO
+        /// Puts incomplete lines into the buffer and
         /// </summary>
         private void BuildBuffer(IAsyncResult a)
         {
@@ -594,7 +594,6 @@ namespace FlamingIRC
                         buffer += s;
                     }
                 }
-
                 //Loop back again
                 WaitforData();
             }
@@ -602,7 +601,6 @@ namespace FlamingIRC
             {
                 buffer += line;
             }
-
         }
 
         /// <summary>
@@ -678,8 +676,7 @@ namespace FlamingIRC
 		
 #else
         /// <summary>
-        /// Connect to the IRC server and start listening for messages
-        /// on a new thread.
+        /// Connect to the IRC server and start listening for messages asynchronously
         /// </summary>
         /// <exception cref="SocketException">If a connection cannot be established with the IRC server</exception>
         public void Connect()
@@ -690,8 +687,8 @@ namespace FlamingIRC
                 {
                     throw new Exception("Connection with IRC server already opened.");
                 }
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
 
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
 
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -704,6 +701,10 @@ namespace FlamingIRC
 
 
 #endif
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="asyn"></param>
         private void ConnectCallback(IAsyncResult asyn)
         {
             try
@@ -723,6 +724,9 @@ namespace FlamingIRC
             }
         }
 
+        /// <summary>
+        /// TODO
+        /// </summary>
         private void WaitforData()
         {
             if (asynReceive == null)
