@@ -105,7 +105,7 @@
 
         public void Disconnect()
         {
-            this.Connection.Disconnect("User exited...");
+            this.Connection.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/");
         }
 
         public void Disconnect(string reason)
@@ -113,7 +113,6 @@
             this.Connection.Disconnect(reason);
         }
 
-        // hack - needs to try connection in the background
         private void DoConnect()
         {
             try

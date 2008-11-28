@@ -55,7 +55,35 @@
                             SetFontStyle(FontStyle.Bold);
                         break;
                     case ((char)3): //color
+                        if (i + 1 == line.Length)
+                        {
+                            SetColor(ForeColor);
+                            SetBackColor(BackColor);
+                            break;
+                        }
 
+                        int forecolor = 1;
+                        int backcolor = 0;
+
+                        if (Char.IsDigit(line[i + 1]))
+                        {
+                            int offset = line.IndexOf(',', i, 5);
+                            forecolor = Int32.Parse(line.Substring(i + 1, Char.IsDigit(line[i + 2]) ? 2 : 1));
+                            if (offset != -1) // we have a back color as well
+                                backcolor = Int32.Parse(line.Substring(offset + 1, Char.IsDigit(line[i + 5]) ? 2 : 1));
+                            i += (forecolor >= 0 && forecolor < 10 ? 1 : 2);
+                            i += (offset == -1 ? 0 : (backcolor >= 0 && backcolor < 10 ? 2 : 3));
+                        }
+
+                        if (forecolor <= IrcColors.Length)
+                        {
+                            SetColor(IrcColors[forecolor]);
+                        }
+
+                        if (backcolor <= IrcColors.Length)
+                        {
+                            SetBackColor(IrcColors[backcolor]);
+                        }
                         break;
                     case ((char)31): //underline
                         if (SelectionFont.Style == FontStyle.Underline)
