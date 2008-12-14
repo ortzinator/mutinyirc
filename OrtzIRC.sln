@@ -18,7 +18,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Commands", "OrtzIRC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.PluginFramework", "OrtzIRC.PluginFramework\OrtzIRC.PluginFramework.csproj", "{D8266C38-E44E-4708-89AE-3E6CA72D5987}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIrcTest", "FlamingIrcTest\OrtzIrcTest.csproj", "{BADD5B62-D031-469A-8876-1701509AB9A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIrcTest", "OrtzIrcTest\OrtzIrcTest.csproj", "{BADD5B62-D031-469A-8876-1701509AB9A4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.AddInSideAdapters", "OrtzIRC.AddInSideAdapter\OrtzIRC.AddInSideAdapters.csproj", "{69B00829-4071-49B5-BD40-74A65E6D6848}"
 EndProject
