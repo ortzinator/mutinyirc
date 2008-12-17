@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FlamingIRC</RootNamespace>
+    <AssemblyName>FlamingIRC</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Output\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChannelModeInfo.cs" />
+    <Compile Include="CommandBuilder.cs" />
+    <Compile Include="Connection.cs" />
+    <Compile Include="ConnectionArgs.cs" />
+    <Compile Include="Ctcp\CtcpListener.cs" />
+    <Compile Include="Ctcp\CtcpResponder.cs" />
+    <Compile Include="Ctcp\CtcpSender.cs" />
+    <Compile Include="Ctcp\CtcpUtil.cs" />
+    <Compile Include="DataEventArgs.cs" />
+    <Compile Include="Dcc\DccChatSession.cs" />
+    <Compile Include="Dcc\DccFileInfo.cs" />
+    <Compile Include="Dcc\DccFileSession.cs" />
+    <Compile Include="Dcc\DccFileSessionManager.cs" />
+    <Compile Include="Dcc\DccListener.cs" />
+    <Compile Include="Dcc\DccUserInfo.cs" />
+    <Compile Include="Dcc\DccUtil.cs" />
+    <Compile Include="Delegates.cs" />
+    <Compile Include="DoubleDataEventArgs.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="Events\ErrorMessageEventArgs.cs" />
+    <Compile Include="Events\ReplyEventArgs.cs" />
+    <Compile Include="EventUtil.cs" />
+    <Compile Include="Identd.cs" />
+    <Compile Include="IParser.cs" />
+    <Compile Include="Listener.cs" />
+    <Compile Include="NameGenerator.cs" />
+    <Compile Include="User.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReplyCode.cs" />
+    <Compile Include="Rfc2812Util.cs" />
+    <Compile Include="Sender.cs" />
+    <Compile Include="ServerProperties.cs" />
+    <Compile Include="TextColor.cs" />
+    <Compile Include="WhoisInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
