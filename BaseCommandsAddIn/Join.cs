@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BaseCommandsAddIn
 {
-    public class Class1
+    public class Join : I
     {
     }
 }
