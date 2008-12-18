@@ -1,13 +1,11 @@
-﻿using System;
+﻿using System.AddIn.Contract;
 using System.Collections.Generic;
-using System.Text;
-using System.AddIn.Contract;
 
 namespace OrtzIRC.Contracts
 {
     [System.AddIn.Pipeline.AddInContract()]
     public interface ICommandContract : IContract
     {
-
+        bool Excecute(IListContract<string> parameters);
     }
 }
