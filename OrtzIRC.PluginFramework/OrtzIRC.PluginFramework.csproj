@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="AssemblyExaminer.cs" />
     <Compile Include="CommandAttribute.cs" />
+    <Compile Include="IPlugin.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="PluginAttribute.cs" />
