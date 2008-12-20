@@ -15,21 +15,17 @@
         /// Examine assembly for OrtzIRC plugins and commands
         /// </summary>
         /// <param name="asm">The assembly to examine</param>
-        public static PluginInfo ExamineAssembly(Assembly asm)
+        public static IEnumerable<PluginInfo> ExamineAssembly(Assembly asm)
         {
-            foreach (Type type in asm.GetTypes())
+            var query = asm.GetTypes().Where(o => o is ICommand)
+                .Where(o => o.IsPublic)
+                .Where(o => (o.Attributes & TypeAttributes.Abstract) != TypeAttributes.Abstract)
+                .Where(o => o.GetCustomAttributes(typeof(PluginAttribute), false).Length > 0);
+
+            foreach (Type type in query)
             {
-                if ((type.IsPublic) && ((type.Attributes & TypeAttributes.Abstract) != TypeAttributes.Abstract))
-                {
-                    object[] attributes = type.GetCustomAttributes(typeof(PluginAttribute), false);
-                    //TODO: Should check the interface!
-                    if (attributes.Length > 0)
-                    {
-                        return new PluginInfo(asm.Location, type.FullName, type);
-                    }
-                }
+                yield return new PluginInfo(asm.Location, type.FullName, type);
             }
-            return null;
         }
     }
 }

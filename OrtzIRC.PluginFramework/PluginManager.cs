@@ -51,8 +51,7 @@
             {
                 try
                 {
-                    PluginInfo info = AssemblyExaminer.ExamineAssembly(Assembly.LoadFrom(file));
-                    if (info != null)
+                    foreach (PluginInfo info in AssemblyExaminer.ExamineAssembly(Assembly.LoadFrom(file)))
                     {
                         plugins.Add(info);
                         Trace.WriteLine("Added plugin at " + info.AssemblyPath);
