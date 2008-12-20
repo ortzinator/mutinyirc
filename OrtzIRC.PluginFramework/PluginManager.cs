@@ -13,7 +13,7 @@
     /// </summary>
     public sealed class PluginManager
     {
-        private static List<CommandInfo> commands;
+        private static List<PluginInfo> plugins;
 
         public static PluginManager Instance { get; private set; }
 
@@ -21,7 +21,7 @@
 
         private PluginManager()
         {
-            commands = new List<CommandInfo>();
+            plugins = new List<PluginInfo>();
         }
 
         /// <summary>
@@ -45,16 +45,18 @@
         {
             Trace.WriteLine("Loading Plug-ins", TraceCategories.PluginSystem);
 
-            Assembly dll;
-
             string[] files = Directory.GetFileSystemEntries(Instance.UserPluginPath, "*.dll");
 
             foreach (string file in files)
             {
                 try
                 {
-                    dll = Assembly.LoadFrom(file);
-                    ExamineAssembly(dll);
+                    PluginInfo info = AssemblyExaminer.ExamineAssembly(Assembly.LoadFrom(file));
+                    if (info != null)
+                    {
+                        plugins.Add(info);
+                        Trace.WriteLine("Added plugin at " + info.AssemblyPath);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -63,26 +65,10 @@
             }
         }
 
-        /// <summary>
-        /// Examine assembly for OrtzIRC plugins and commands
-        /// </summary>
-        /// <param name="asm">The assembly to examine</param>
-        private static void ExamineAssembly(Assembly asm)
+        public static ICommand GetCommandInstance(string command)
         {
-            foreach (Type type in asm.GetTypes())
-            {
-                if ((type.IsPublic) && ((type.Attributes & TypeAttributes.Abstract) != TypeAttributes.Abstract))
-                {
-                    object[] attributes = type.GetCustomAttributes(typeof(CommandAttribute), false);
-                    if (attributes.Length > 0)
-                    {
-                        CommandInfo newCommand = new CommandInfo(asm.Location, type.FullName);
-
-                        commands.Add(newCommand);
-                        Trace.WriteLine("Added plugin at " + asm.Location);
-                    }
-                }
-            }
+            //TODO
+            return null;
         }
 
         /// <summary>
