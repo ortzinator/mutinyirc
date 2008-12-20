@@ -1,9 +1,6 @@
 ﻿namespace OrtzIRC.PluginFramework
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
-
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
     public class CommandAttribute : Attribute
