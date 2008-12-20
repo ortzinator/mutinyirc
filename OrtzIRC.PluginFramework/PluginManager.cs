@@ -1,11 +1,10 @@
 ﻿namespace OrtzIRC.PluginFramework
 {
     using System;
-    using System.Collections;
-    using System.IO;
-    using System.Reflection;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.IO;
+    using System.Reflection;
     using OrtzIRC.Common;
 
     /// <summary>
@@ -14,6 +13,7 @@
     public sealed class PluginManager
     {
         private static List<PluginInfo> plugins;
+        private static List<CommandInfo> commands;
 
         public static PluginManager Instance { get; private set; }
 
@@ -22,6 +22,7 @@
         private PluginManager()
         {
             plugins = new List<PluginInfo>();
+            commands = new List<CommandInfo>();
         }
 
         /// <summary>
@@ -64,9 +65,33 @@
             }
         }
 
-        public static ICommand GetCommandInstance(string command)
+        public static ICommand GetCommandInstance(Channel channel, string command, params string[] parameters)
         {
             //TODO
+            foreach (CommandInfo c in commands)
+            {
+                
+            }
+            return null;
+        }
+
+        public static ICommand GetCommandInstance(Server server, string command, params string[] parameters)
+        {
+            //TODO
+            foreach (CommandInfo c in commands)
+            {
+
+            }
+            return null;
+        }
+
+        public static ICommand GetCommandInstance(PrivateMessageSession pmSession, string command, params string[] parameters)
+        {
+            //TODO
+            foreach (CommandInfo c in commands)
+            {
+
+            }
             return null;
         }
 

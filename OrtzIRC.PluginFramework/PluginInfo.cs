@@ -4,14 +4,14 @@
 
     public class PluginInfo
     {
-        public string AssemblyPath { get; private set; }
+        public string AssemblyPath { get; protected set; }
 
-        public string ClassName { get; private set; }
+        public string ClassName { get; protected set; }
 
         /// <summary>
         /// The plugin interface it uses
         /// </summary>
-        public Type Type { get; private set; }
+        public Type Type { get; protected set; }
 
         public PluginInfo(string path, string name, Type type)
         {
