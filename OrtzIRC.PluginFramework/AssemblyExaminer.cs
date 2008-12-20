@@ -19,8 +19,10 @@
         {
             var query = asm.GetTypes().Where(o => o is ICommand)
                 .Where(o => o.IsPublic)
+                .Where(o => o.IsClass)
                 .Where(o => (o.Attributes & TypeAttributes.Abstract) != TypeAttributes.Abstract)
-                .Where(o => o.GetCustomAttributes(typeof(PluginAttribute), false).Length > 0);
+                .Where(o => o.GetCustomAttributes(typeof(PluginAttribute), false).Length > 0)
+                .Where(o => o.GetInterfaces().Contains<Type>(typeof(IPlugin)));
 
             foreach (Type type in query)
             {
