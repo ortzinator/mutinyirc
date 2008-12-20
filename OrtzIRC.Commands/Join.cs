@@ -2,27 +2,30 @@
 {
     using System;
     using OrtzIRC.Common;
+    using OrtzIRC.PluginFramework;
 
-    [Command]
-    public class Join
+    [Plugin("Join", 
+        "Ortzinator", 
+        "1.0", 
+        "Joins a channel")]
+    public class Join : ICommand
     {
-        /// <summary>
-        /// Joins a channel.
-        /// </summary>
-        /// <param name="channel">The channel to join.</param>
-        public void Execute(Channel channel, string channelToJoin)
+        [Command("Joins a channel", "#channel")]
+        public void Execute(Channel channel, params string[] parameters)
         {
-            channel.Server.JoinChannel(channelToJoin);
+            channel.Server.JoinChannel(parameters[0]);
         }
 
-        public void Execute(Server server, string channelToJoin)
+        [Command("Joins a channel", "#channel")]
+        public void Execute(Server server, params string[] parameters)
         {
-            server.JoinChannel(channelToJoin);
+            server.JoinChannel(parameters[0]);
         }
 
-        public void Execute(PrivateMessageSession privMessage, string channelToJoin)
+        [Command("Joins a channel", "#channel")]
+        public void Execute(PrivateMessageSession pmSession, params string[] parameters)
         {
-            privMessage.ParentServer.JoinChannel(channelToJoin);
+            privMessage.ParentServer.JoinChannel(parameters[0]);
         }
     }
 }
