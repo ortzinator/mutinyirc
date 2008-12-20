@@ -49,7 +49,6 @@
     <Compile Include="ChannelManager.cs" />
     <Compile Include="ChannelMessageEventArgs.cs" />
     <Compile Include="ChannelModeChangeEventArgs.cs" />
-    <Compile Include="CommandAttribute.cs" />
     <Compile Include="DataEventArgs.cs" />
     <Compile Include="DoubleDataEventArgs.cs" />
     <Compile Include="EventUtil.cs" />

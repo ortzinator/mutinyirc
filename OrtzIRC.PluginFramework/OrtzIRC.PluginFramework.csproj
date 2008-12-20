@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Output\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -46,7 +46,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyExaminer.cs" />
+    <Compile Include="CommandAttribute.cs" />
     <Compile Include="CommandInfo.cs" />
+    <Compile Include="ICommand.cs" />
+    <Compile Include="PluginAttribute.cs" />
     <Compile Include="PluginManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -71,7 +71,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\Output\</OutputPath>
+    <OutputPath>bin\x86\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -93,8 +93,10 @@
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.AddIn">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SQLite, Version=1.0.51.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -107,6 +109,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddInManager.cs" />
     <Compile Include="Controls\IrcTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -153,11 +156,23 @@
     <Compile Include="Windows\Dialogs\EditServerDialog.Designer.cs">
       <DependentUpon>EditServerDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Windows\Dialogs\PluginsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\Dialogs\PluginsDialog.Designer.cs">
+      <DependentUpon>PluginsDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Windows\Dialogs\ServerDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Windows\Dialogs\ServerDialog.Designer.cs">
       <DependentUpon>ServerDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\Dialogs\SettingsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\Dialogs\SettingsDialog.Designer.cs">
+      <DependentUpon>SettingsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Windows\ServerForm.cs">
       <SubType>Form</SubType>
@@ -197,9 +212,17 @@
       <SubType>Designer</SubType>
       <DependentUpon>EditServerDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Windows\Dialogs\PluginsDialog.resx">
+      <DependentUpon>PluginsDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Windows\Dialogs\ServerDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>ServerDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Windows\Dialogs\SettingsDialog.resx">
+      <DependentUpon>SettingsDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\MainForm.resx">
       <SubType>Designer</SubType>

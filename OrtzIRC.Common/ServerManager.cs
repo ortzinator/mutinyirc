@@ -18,7 +18,6 @@
                     _instance = new ServerManager();
                     ServerList = new List<Server>();
                 }
-
                 return _instance;
             }
         }
