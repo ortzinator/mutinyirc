@@ -17,15 +17,15 @@
         /// <returns>A collection of PluginInfo</returns>
         public static IEnumerable<PluginInfo> ExamineAssembly(Assembly asm)
         {
-            var query = asm.GetTypes().Where(o => o is IPlugin)
-                .Where(o => o.IsPublic)
+            var query = asm.GetTypes().Where(o => o.IsPublic)
                 .Where(o => o.IsClass)
                 .Where(o => (o.Attributes & TypeAttributes.Abstract) != TypeAttributes.Abstract)
-                .Where(o => o.GetCustomAttributes(typeof(PluginAttribute), false).Length > 0);
+                .Where(o => o.GetCustomAttributes(typeof(PluginAttribute), false).Length > 0)
+                .Where(o => o.GetInterfaces().Contains<Type>(typeof(IPlugin)));
 
             foreach (Type type in query)
             {
-                if (type is ICommand)
+                if (type.GetInterface(typeof(ICommand).FullName) != null)
                 {
                     List<CommandAutocompleteAttribute> aCompletes = new List<CommandAutocompleteAttribute>();
 
@@ -43,11 +43,11 @@
                         continue;
                     }
 
-                    yield return new CommandInfo(asm.Location, type.Name, type, aCompletes);
+                    yield return new CommandInfo(asm.Location, type.Name, typeof(ICommand), aCompletes);
                 }
                 else
                 {
-                    yield return new PluginInfo(asm.Location, type.Name, type);
+                    yield return new PluginInfo(asm.Location, type.Name, typeof(IPlugin));
                 }
             }
         }

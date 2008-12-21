@@ -62,7 +62,7 @@
                         {
                             plugins.Add(info);
                         }
-                        Trace.WriteLine("Added plugin at " + info.AssemblyPath);
+                        Trace.WriteLine("Added plugin " + info.ClassName + " at " + info.AssemblyPath);
                     }
                 }
                 catch (Exception ex)
@@ -77,7 +77,7 @@
             //TODO
             foreach (CommandInfo c in commands)
             {
-                
+
             }
             return null;
         }
