@@ -43,7 +43,7 @@
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
-            PluginManager.Instance.ParseCommand(this.Channel, e.Data);
+
         }
 
         private void Channel_OnKick(User nick, string kickee, string reason)

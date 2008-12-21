@@ -28,18 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.listView1 = new System.Windows.Forms.ListView();
+            this.pluginListView = new System.Windows.Forms.ListView();
             this.configureButton = new System.Windows.Forms.Button();
             this.aboutButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // listView1
+            // pluginListView
             // 
-            this.listView1.Location = new System.Drawing.Point(12, 12);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(664, 435);
-            this.listView1.TabIndex = 1;
-            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.pluginListView.Location = new System.Drawing.Point(12, 12);
+            this.pluginListView.Name = "pluginListView";
+            this.pluginListView.Size = new System.Drawing.Size(664, 435);
+            this.pluginListView.TabIndex = 1;
+            this.pluginListView.UseCompatibleStateImageBehavior = false;
             // 
             // configureButton
             // 
@@ -64,9 +64,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(688, 488);
+            this.Controls.Add(this.pluginListView);
             this.Controls.Add(this.aboutButton);
             this.Controls.Add(this.configureButton);
-            this.Controls.Add(this.listView1);
             this.Name = "PluginsDialog";
             this.Text = "Plugins - OrtzIRC";
             this.ResumeLayout(false);
@@ -75,7 +75,7 @@
 
         #endregion
 
-        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ListView pluginListView;
         private System.Windows.Forms.Button configureButton;
         private System.Windows.Forms.Button aboutButton;
 

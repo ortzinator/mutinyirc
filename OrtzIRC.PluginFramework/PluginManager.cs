@@ -17,7 +17,7 @@
 
         public static PluginManager Instance { get; private set; }
 
-        public string UserPluginPath { get; private set; }
+        private static string userPluginPath;
 
         private PluginManager()
         {
@@ -29,24 +29,24 @@
         /// Instantiates the PluginManager and loads any plugins found.
         /// </summary>
         /// <remarks>Must be called first</remarks>
-        internal static void LoadPlugins(string pluginPath)
+        public static void LoadPlugins(string pluginPath)
         {
             if (Instance == null)
                 Instance = new PluginManager();
 
-            Instance.UserPluginPath = pluginPath;
+            userPluginPath = pluginPath;
 
             FindPlugins();
         }
 
         /// <summary>
-        /// Searches the plugins directory for assemblies
+        /// Searches the plugins directory for assemblies, examines them for plugins and populates
         /// </summary>
         private static void FindPlugins()
         {
             Trace.WriteLine("Loading Plug-ins", TraceCategories.PluginSystem);
 
-            string[] files = Directory.GetFileSystemEntries(Instance.UserPluginPath, "*.dll");
+            string[] files = Directory.GetFileSystemEntries(userPluginPath, "*.dll");
 
             foreach (string file in files)
             {
@@ -54,7 +54,14 @@
                 {
                     foreach (PluginInfo info in AssemblyExaminer.ExamineAssembly(Assembly.LoadFrom(file)))
                     {
-                        plugins.Add(info);
+                        if (info is CommandInfo)
+                        {
+                            commands.Add(info as CommandInfo);
+                        }
+                        else
+                        {
+                            plugins.Add(info);
+                        }
                         Trace.WriteLine("Added plugin at " + info.AssemblyPath);
                     }
                 }
@@ -93,29 +100,6 @@
 
             }
             return null;
-        }
-
-        /// <summary>
-        /// Parse a command sent from a channel window
-        /// </summary>
-        /// <param name="channel">The channel object</param>
-        /// <param name="line">The entire command line sent</param>
-        public void ParseCommand(Channel channel, string line)
-        {
-
-        }
-
-        /// <summary>
-        /// Parse a command sent from a server window
-        /// </summary>
-        /// <param name="server">The server object</param>
-        /// <param name="line">The entire command line sent</param>
-        public void ParseCommand(Server server, string line)
-        {
-            if (server.IsConnected)
-            {
-
-            }
         }
     }
 }

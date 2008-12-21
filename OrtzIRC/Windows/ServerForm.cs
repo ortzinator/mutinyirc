@@ -25,10 +25,10 @@ namespace OrtzIRC
                 }
 
                 this.server = value;
-                
+
                 this.HookupEvents();
             }
-        }    
+        }
 
         delegate void SetTextCallback(string text);
         delegate void NewChannelCallback(string channel);
@@ -79,7 +79,7 @@ namespace OrtzIRC
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
-            PluginManager.Instance.ParseCommand(this.Server, e.Data);
+
         }
 
         private void Server_Connecting(object sender, CancelEventArgs e)
