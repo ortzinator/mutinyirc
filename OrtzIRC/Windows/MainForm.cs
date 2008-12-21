@@ -5,6 +5,9 @@ namespace OrtzIRC
     using System.ComponentModel;
     using System.Windows.Forms;
     using OrtzIRC.Common;
+    using OrtzIRC.PluginFramework;
+    using OrtzIRC.Properties;
+    using System.IO;
 
     public partial class MainForm : Form
     {
@@ -22,17 +25,24 @@ namespace OrtzIRC
 
         protected override void OnLoad(EventArgs e)
         {
+            //hack
+            //Settings.Default.UserPluginDirectory = Environment.CurrentDirectory;
+            Settings.Default.UserPluginDirectory = Path.Combine(Environment.CurrentDirectory, @"Plugins");
+            Settings.Default.Save();
+
+            if (!Directory.Exists(Settings.Default.UserPluginDirectory))
+                Directory.CreateDirectory(Settings.Default.UserPluginDirectory);
+
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                ServerSettings settings = new ServerSettings("irc.randomirc.com", "RandomIRC", 6667, false);
-                Server newServer = ServerManager.Instance.Create(settings);
+                Server newServer = ServerManager.Instance.Create("irc.randomirc.com", "RandomIRC", 6667, false);
                 ServerForm newServerForm = new ServerForm() { Server = newServer };
                 newServerForm.MdiParent = this;
-                newServerForm.Text = settings.Uri;
+                newServerForm.Text = "RandomIRC";
                 newServerForm.Show();
-
-                //Server server = new Server(settings, this);
             }
+
+            PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
 
             base.OnLoad(e);
         }

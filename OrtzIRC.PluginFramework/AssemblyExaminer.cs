@@ -14,6 +14,7 @@
         /// Examine assembly for OrtzIRC plugins and commands
         /// </summary>
         /// <param name="asm">The assembly to examine</param>
+        /// <returns>A collection of PluginInfo</returns>
         public static IEnumerable<PluginInfo> ExamineAssembly(Assembly asm)
         {
             var query = asm.GetTypes().Where(o => o is IPlugin)
@@ -42,13 +43,12 @@
                         continue;
                     }
 
-                    yield return new CommandInfo(asm.Location, type.FullName, type, aCompletes);
+                    yield return new CommandInfo(asm.Location, type.Name, type, aCompletes);
                 }
                 else
                 {
-                    yield return new PluginInfo(asm.Location, type.FullName, type);
+                    yield return new PluginInfo(asm.Location, type.Name, type);
                 }
-
             }
         }
     }

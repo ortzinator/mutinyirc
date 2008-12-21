@@ -14,5 +14,12 @@ namespace OrtzIRC.Windows.Dialogs
         {
             InitializeComponent();
         }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+
+        }
     }
 }

@@ -25,7 +25,7 @@
         [CommandAutocomplete("Joins a channel", "#channel")]
         public void Execute(PrivateMessageSession pmSession, params string[] parameters)
         {
-            privMessage.ParentServer.JoinChannel(parameters[0]);
+            pmSession.ParentServer.JoinChannel(parameters[0]);
         }
     }
 }
