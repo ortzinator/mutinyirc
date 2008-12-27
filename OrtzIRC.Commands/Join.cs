@@ -4,28 +4,30 @@
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
 
-    [Plugin("Join", 
-        "Ortzinator", 
-        "1.0", 
-        "Joins a channel")]
     public class Join : ICommand
     {
-        [CommandAutocomplete("Joins a channel", "#channel")]
-        public void Execute(Channel channel, params string[] parameters)
+        /// <summary>
+        /// Joins you to the specified channel.
+        /// </summary>
+        public void Execute(Channel context, ChannelInfo channelToJoin)
         {
-            channel.Server.JoinChannel(parameters[0]);
+            this.Execute(context.Server, channelToJoin);
         }
 
-        [CommandAutocomplete("Joins a channel", "#channel")]
-        public void Execute(Server server, params string[] parameters)
+        /// <summary>
+        /// Joins you to the specified channel.
+        /// </summary>
+        public void Execute(Server context, ChannelInfo channelToJoin)
         {
-            server.JoinChannel(parameters[0]);
+            context.JoinChannel(channelToJoin);
         }
 
-        [CommandAutocomplete("Joins a channel", "#channel")]
-        public void Execute(PrivateMessageSession pmSession, params string[] parameters)
+        /// <summary>
+        /// Joins you to the specified channel.
+        /// </summary>
+        public void Execute(PrivateMessageSession context, ChannelInfo channelToJoin)
         {
-            pmSession.ParentServer.JoinChannel(parameters[0]);
+            this.Execute(context.ParentServer, channelToJoin);
         }
     }
 }
