@@ -227,7 +227,8 @@
         {
             if (Registered != null)
                 Registered();
-            JoinChannel("#ortzirc");
+
+            this.JoinChannel(new ChannelInfo() { Name = "OrtzIRC" });
         }
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
@@ -243,10 +244,12 @@
                 ErrorMessageRecieved(sender, new ErrorMessageEventArgs(a.Code, a.Message));
         }
 
-        public Channel JoinChannel(string channel)
+        public Channel JoinChannel(ChannelInfo channelToJoin)
         {
-            Channel newChan = ChanManager.Create(channel);
-            Connection.Sender.Join(channel);
+            Channel newChan = ChanManager.Create(channelToJoin.ToString());
+            
+            Connection.Sender.Join(channelToJoin.ToString());
+            
             return newChan;
         }
 
