@@ -46,11 +46,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyExaminer.cs" />
-    <Compile Include="CommandAutocompleteAttribute.cs" />
     <Compile Include="CommandInfo.cs" />
+    <Compile Include="ICommand.cs" />
     <Compile Include="IPlugin.cs" />
     <Compile Include="PluginInfo.cs" />
-    <Compile Include="ICommand.cs" />
     <Compile Include="PluginAttribute.cs" />
     <Compile Include="PluginManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

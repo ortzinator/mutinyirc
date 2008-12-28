@@ -27,23 +27,8 @@
             {
                 if (type.GetInterface(typeof(ICommand).FullName) != null)
                 {
-                    List<CommandAutocompleteAttribute> aCompletes = new List<CommandAutocompleteAttribute>();
-
-                    foreach (MethodInfo info in type.GetMethods())
-                    {
-                        object[] att = info.GetCustomAttributes(typeof(CommandAutocompleteAttribute), false);
-                        if (att.Length > 0)
-                        {
-                            aCompletes.AddRange(att as IEnumerable<CommandAutocompleteAttribute>);
-                        }
-                    }
-
-                    if (aCompletes.Count < 1)
-                    {
-                        continue;
-                    }
-
-                    yield return new CommandInfo(asm.Location, type.Name, typeof(ICommand), aCompletes);
+                    //Do stuff for commands
+                    yield return new CommandInfo(asm.Location, type.Name, typeof(ICommand));
                 }
                 else
                 {

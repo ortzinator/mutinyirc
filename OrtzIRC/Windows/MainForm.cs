@@ -26,7 +26,6 @@ namespace OrtzIRC
         protected override void OnLoad(EventArgs e)
         {
             //hack
-            //Settings.Default.UserPluginDirectory = Environment.CurrentDirectory;
             Settings.Default.UserPluginDirectory = Path.Combine(Environment.CurrentDirectory, @"Plugins");
             Settings.Default.Save();
 
