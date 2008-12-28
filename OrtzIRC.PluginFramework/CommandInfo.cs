@@ -5,12 +5,9 @@
 
     public class CommandInfo : PluginInfo
     {
-        public List<CommandAutocompleteAttribute> Autocompletes { get; private set; }
-
-        public CommandInfo(string path, string name, Type type, List<CommandAutocompleteAttribute> autocompletes) 
+        public CommandInfo(string path, string name, Type type) 
             : base(path, name, type)
         {
-            Autocompletes = autocompletes;
         }
     }
 }

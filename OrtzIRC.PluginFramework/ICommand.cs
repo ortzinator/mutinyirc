@@ -4,6 +4,5 @@
 
     public interface ICommand : IPlugin
     {
-
     }
 }
