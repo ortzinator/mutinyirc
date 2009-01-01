@@ -7,12 +7,19 @@ namespace OrtzIRC.Common
 {
     public class ChannelInfo
     {
+        /// <summary>
+        /// Channel name, eg. #php
+        /// </summary>
         public string Name { get; set; }
-        public string Description { get; set; }
+        /// <summary>
+        /// The channel topic
+        /// </summary>
+        public string Topic { get; set; }
         
         public override string ToString()
         {
-            return string.Format("#{0}", this.Name);
+            //TODO: Work out how to handle prefixes. Not all channel names are prefixed with #
+            return this.Name;
         }
     }
 }
