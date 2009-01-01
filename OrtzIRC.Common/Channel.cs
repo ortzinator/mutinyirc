@@ -23,6 +23,14 @@
         public string Name { get; private set; }
         public List<User> NickList { get; private set; }
 
+        public ChannelInfo Info
+        {
+            get
+            {
+                return new ChannelInfo() { Name = this.Name };
+            }
+        }
+
         public event ChannelMessageEventHandler OnMessage;
         public event ChannelMessageEventHandler OnAction;
         public event TopicShowEventHandler OnShowTopic;

@@ -9,53 +9,30 @@
             get { return _instance ?? (_instance = new IRCSettingsManager()); }
         }
 
-        private IRCSettingsManager() 
-        { 
+        private IRCSettingsManager()
+        {
             //this is just here to make the class inconstructible
         }
     }
 
     public struct NetworkSettings
     {
-        private string _name;
+        public string Name { get; private set; }
     }
 
-    public struct ServerSettings
+    public class ServerSettings
     {
-        private string _uri;
-        public string Uri
-        {
-            get { return _uri; }
-            set { _uri = value; }
-        }
-
-        private string _description;
-        public string Description
-        {
-            get { return _description; }
-            set { _description = value; }
-        }
-
-        private int _port;
-        public int Port
-        {
-            get { return _port; }
-            set { _port = value; }
-        }
-
-        private bool _ssl;
-        public bool Ssl
-        {
-            get { return _ssl; }
-            set { _ssl = value; }
-        }
+        public string Uri { get; private set; }
+        public string Description { get; private set; }
+        public int Port { get; private set; }
+        public bool Ssl { get; private set; }
 
         public ServerSettings(string uri, string description, int port, bool ssl)
         {
-            _uri = uri;
-            _description = description;
-            _port = port;
-            _ssl = ssl;
+            Uri = uri;
+            Description = description;
+            Port = port;
+            Ssl = ssl;
         }
     }
 }

@@ -72,7 +72,7 @@
             }
         }
 
-        public static ICommand GetCommandInstance(Channel channel, string command, params string[] parameters)
+        public static ICommand GetCommandInstance(Channel channel, string command, string[] parameters)
         {
             //TODO
             foreach (CommandInfo c in commands)
@@ -82,7 +82,7 @@
             return null;
         }
 
-        public static ICommand GetCommandInstance(Server server, string command, params string[] parameters)
+        public static ICommand GetCommandInstance(Server server, string command, string[] parameters)
         {
             //TODO
             foreach (CommandInfo c in commands)
@@ -92,7 +92,7 @@
             return null;
         }
 
-        public static ICommand GetCommandInstance(PrivateMessageSession pmSession, string command, params string[] parameters)
+        public static ICommand GetCommandInstance(PrivateMessageSession pmSession, string command, string[] parameters)
         {
             //TODO
             foreach (CommandInfo c in commands)
