@@ -27,7 +27,7 @@
         {
             get
             {
-                return new ChannelInfo() { Name = this.Name };
+                return new ChannelInfo(this.Name);
             }
         }
 

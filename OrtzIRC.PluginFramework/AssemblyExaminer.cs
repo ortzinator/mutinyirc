@@ -27,7 +27,7 @@
             {
                 if (type.GetInterface(typeof(ICommand).FullName) != null)
                 {
-                    //Do stuff for commands
+                    //TODO: stuff for commands
                     yield return new CommandInfo(asm.Location, type.Name, typeof(ICommand));
                 }
                 else

@@ -7,72 +7,89 @@
     [Plugin("Part",
         "Ortzinator",
         "1.0",
-        "Parts a channel")]
+        "Parts a channel")] //What if the author wants one plugin that adds many features?
     public class Part : ICommand
     {
-        [CommandAutocomplete("Parts the current channel", "message")]
-        [CommandAutocomplete("Parts a channel", "#channel")]
-        [CommandAutocomplete("Parts a channel", "#channel", "message")]
-        public void Execute(Channel channel, params string[] parameters)
+        private string defaultMessage = "Goodbye!";
+
+        /// <summary>
+        /// Parts the current channel
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="message"></param>
+        public void Execute(Channel context, string message)
         {
-            if (parameters.Length == 0)
+            context.Part(message);
+        }
+
+        /// <summary>
+        /// Parts the specified channel
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="channel"></param>
+        public void Execute(Channel context, ChannelInfo channel)
+        {
+            this.Execute(context.Server, channel, defaultMessage);
+        }
+
+        /// <summary>
+        /// Parts the specified channel with the specified message
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="channel"></param>
+        /// <param name="message"></param>
+        public void Execute(Channel context, ChannelInfo channel, string message)
+        {
+            this.Execute(context.Server, channel, message);
+        }
+
+        /// <summary>
+        /// Parts the specified channel
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="channel"></param>
+        public void Execute(Server context, ChannelInfo channel)
+        {
+            this.Execute(context, channel, defaultMessage);
+        }
+
+        /// <summary>
+        /// Parts the specified channel with the specified message
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="channel"></param>
+        /// <param name="message"></param>
+        public void Execute(Server context, ChannelInfo channel, string message)
+        {
+            if (context.ChanManager.InChannel(channel.Name))
             {
-                channel.Part("Goodbye!");
+                context.ChanManager.GetChannel(channel.Name).Part(message);
             }
-            else if (parameters.Length == 1)
+            else
             {
-                if (channel.Server.ChanManager.InChannel(parameters[0]))
-                {
-                    channel.Server.ChanManager.GetChannel(parameters[0]).Part("Goodbye!");
-                }
-            }
-            else if (parameters.Length == 2)
-            {
-                if (channel.Server.ChanManager.InChannel(parameters[0]))
-                {
-                    channel.Server.ChanManager.GetChannel(parameters[0]).Part(parameters[1]);
-                }
+                //TODO: Error?
             }
         }
 
-        [CommandAutocomplete("Parts a channel", "#channel")]
-        [CommandAutocomplete("Parts a channel", "#channel", "message")]
-        public void Execute(Server server, params string[] parameters)
+        /// <summary>
+        /// Parts the specified channel
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="channel"></param>
+        public void Execute(PrivateMessageSession context, ChannelInfo channel)
         {
-            if (parameters.Length == 1)
-            {
-                if (server.ChanManager.InChannel(parameters[0]))
-                {
-                    server.ChanManager.GetChannel(parameters[0]).Part("Goodbye!");
-                }
-            }
-            else if (parameters.Length == 2)
-            {
-                if (server.ChanManager.InChannel(parameters[0]))
-                {
-                    server.ChanManager.GetChannel(parameters[0]).Part(parameters[1]);
-                }
-            }
+            this.Execute(context.ParentServer, channel, defaultMessage);
         }
 
-        [CommandAutocomplete("Parts a channel", "#channel")]
-        [CommandAutocomplete("Parts a channel", "#channel", "message")]
-        public void Execute(PrivateMessageSession pmSession, params string[] parameters)
+        /// <summary>
+        /// Parts the specified channel with the specified message
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="channel"></param>
+        /// <param name="message"></param>
+        public void Execute(PrivateMessageSession context, ChannelInfo channel, string message)
         {
-            if (parameters.Length == 1)
-            {
-                if (pmSession.ParentServer.ChanManager.InChannel(parameters[0]))
-                {
-                    pmSession.ParentServer.ChanManager.GetChannel(parameters[0]).Part("Goodbye!");
-                }
-            }
-            else if (parameters.Length == 2)
-            {
-                if (pmSession.ParentServer.ChanManager.InChannel(parameters[0]))
-                {
-                    pmSession.ParentServer.ChanManager.GetChannel(parameters[0]).Part(parameters[1]);
-                }
-            }
+            this.Execute(context.ParentServer, channel, message);
         }
     }
 }
