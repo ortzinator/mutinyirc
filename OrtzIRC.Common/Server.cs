@@ -228,7 +228,11 @@
             if (Registered != null)
                 Registered();
 
-            this.JoinChannel(new ChannelInfo() { Name = "OrtzIRC" });
+            //TODO: Handle a taken nick
+            //TODO: IIRC this isn't called if there's an error during registration. (The user's nick is taken)
+
+            //TODO: Get autojoin list for the network
+            this.JoinChannel(new ChannelInfo("#ortzirc"));
         }
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
@@ -247,9 +251,9 @@
         public Channel JoinChannel(ChannelInfo channelToJoin)
         {
             Channel newChan = ChanManager.Create(channelToJoin.ToString());
-            
+
             Connection.Sender.Join(channelToJoin.ToString());
-            
+
             return newChan;
         }
 
