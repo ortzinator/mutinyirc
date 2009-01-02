@@ -5,7 +5,7 @@
 
     public class CommandInfo : PluginInfo
     {
-        public CommandInfo(string path, string name, Type type) 
+        public CommandInfo(string path, string name, Type type)
             : base(path, name, type)
         {
         }
