@@ -78,5 +78,4 @@ namespace FlamingIrcTest
             long result = DccUtil.IPAddressToLong(comp);
             Assert.AreEqual<long>(DccUtil.NetworkUnsignedLong(comp.Address), result);
         }
-    }
 }
