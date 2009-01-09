@@ -4,10 +4,12 @@
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
 
-    [Plugin("Part",
-        "Ortzinator",
-        "1.0",
-        "Parts a channel")] //What if the author wants one plugin that adds many features?
+    //What if the author wants one plugin that adds many features?
+
+    /// <summary>
+    /// Parts a channel
+    /// </summary>
+    [Plugin] 
     public class Part : ICommand
     {
         private string defaultMessage = "Goodbye!";
