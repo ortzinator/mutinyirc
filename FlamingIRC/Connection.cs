@@ -410,7 +410,7 @@ namespace FlamingIRC
         /// </summary>
         /// <param name="badNick"></param>
         /// <param name="reason"></param>
-        private void OnNickError(string badNick, string reason)
+        private void OnNickError(object sender, NickErrorEventArgs ea)
         {
             //If this is our initial connection attempt
             if (!registered && handleNickFailure)
@@ -475,7 +475,7 @@ namespace FlamingIRC
         {
             listener.OnPing += new PingEventHandler(KeepAlive);
             listener.OnNick += new NickEventHandler(MyNickChanged);
-            listener.OnNickError += new NickErrorEventHandler(OnNickError);
+            listener.OnNickError += new EventHandler<NickErrorEventArgs>(OnNickError);
             listener.OnReply += new EventHandler<ReplyEventArgs>(OnReply);
             listener.OnRegistered += new RegisteredEventHandler(OnRegistered);
         }

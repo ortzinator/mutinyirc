@@ -48,15 +48,15 @@ namespace FlamingIRC
         /// <summary>
         ///A <see cref="Sender.PrivateNotice"/> or <see cref="Sender.PrivateMessage"/> message was sent to someone who is away.
         /// </summary>
-        public event AwayEventHandler OnAway;
+        public event EventHandler<AwayEventArgs> OnAway;
         /// <summary>
         /// An <see cref="Sender.Invite"/> message was successfully sent to another user. 
         /// </summary>
-        public event InviteSentEventHandler OnInviteSent;
+        public event EventHandler<InviteSentEventArgs> OnInviteSent;
         /// <summary>
         /// The user tried to change his nick but it failed.
         /// </summary>
-        public event NickErrorEventHandler OnNickError;
+        public event EventHandler<NickErrorEventArgs> OnNickError;
         /// <summary>
         /// A server keep-alive message.
         /// </summary>
@@ -562,7 +562,7 @@ namespace FlamingIRC
                     if (OnNickError != null)
                     {
                         tokens[4] = RemoveLeadingColon(tokens[4]);
-                        OnNickError(tokens[3], CondenseStrings(tokens, 4));
+                        OnNickError(this, new NickErrorEventArgs(tokens[3], CondenseStrings(tokens, 4)));
                     }
                     break;
                 case ReplyCode.RPL_NOTOPIC:
@@ -581,13 +581,13 @@ namespace FlamingIRC
                 case ReplyCode.RPL_INVITING:
                     if (OnInviteSent != null)
                     {
-                        OnInviteSent(tokens[3], tokens[4]);
+                        OnInviteSent(this, new InviteSentEventArgs(tokens[3], tokens[4]));
                     }
                     break;
                 case ReplyCode.RPL_AWAY:
                     if (OnAway != null)
                     {
-                        OnAway(tokens[3], RemoveLeadingColon(CondenseStrings(tokens, 4)));
+                        OnAway(this, new AwayEventArgs(tokens[3], RemoveLeadingColon(CondenseStrings(tokens, 4))));
                     }
                     break;
                 case ReplyCode.RPL_WHOREPLY:
