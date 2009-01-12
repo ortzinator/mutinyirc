@@ -19,8 +19,8 @@
         /// <para>Note that if the later arises then you will have to manually
         /// complete the regsitration process.</para> 
         /// </remarks>
-        /// <param name="badNick">The nick which caused the problem.</param>
-        /// <param name="reason">A message explaining the error.</param>
+        /// <param name="badNick">The nick which caused the problem</param>
+        /// <param name="reason">A message explaining the error</param>
         /// <seealso cref="Listener.OnNickError"/>
         public NickErrorEventArgs(string badNick, string reason)
         {
