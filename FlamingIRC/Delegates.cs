@@ -25,48 +25,6 @@
 namespace FlamingIRC
 {
     /// <summary>
-    /// Error messages from the IRC server.
-    /// </summary>
-    /// <param name="code">The RFC 2812 or custom numeric code.</param>
-    /// <param name="message">The error message text.</param>
-    /// <seealso cref="Listener.OnError"/>
-    public delegate void ErrorMessageEventHandler(ReplyCode code, string message);
-
-    /// <summary>
-    /// A Notice or Private message was sent to someone
-    /// whose status is away.
-    /// </summary>
-    /// <param name="nick">The nick of the user who is away.</param>
-    /// <param name="awayMessage">An away message, if any, set by the user. </param>
-    /// <seealso cref="Listener.OnAway"/>
-    public delegate void AwayEventHandler(string nick, string awayMessage);
-
-    /// <summary>
-    /// An Invite message was successfully sent to another user. 
-    /// </summary>
-    /// <param name="nick">The nick of the user who was invited</param>
-    /// <param name="channel">The name of the channel the user was invited to join</param>
-    /// <seealso cref="Listener.OnInviteSent"/>
-    public delegate void InviteSentEventHandler(string nick, string channel);
-
-    /// <summary>
-    /// Called when a nick change fails.
-    /// </summary>
-    /// <remarks>
-    /// <para>This method can be called under 2 conditions:
-    /// It can arise when the user is already 
-    /// registered with the IRC server and is trying change his nick.
-    /// Or when the user is trying to register for the first time with 
-    /// the IRC server and it fails.</para>
-    /// <para>Note that if the later arises then you will have to manually
-    /// complete the regsitration process.</para> 
-    /// </remarks>
-    /// <param name="badNick">The nick which caused the problem</param>
-    /// <param name="reason">A message explaining the error</param>
-    /// <seealso cref="Listener.OnNickError"/>
-    public delegate void NickErrorEventHandler(string badNick, string reason);
-
-    /// <summary>
     /// Called when a server sends a keep-alive Ping.
     /// </summary>
     /// <param name="message">The message that the IRC server wants echoed back to it.</param>

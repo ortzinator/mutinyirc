@@ -67,7 +67,10 @@
     <Compile Include="Delegates.cs" />
     <Compile Include="DoubleDataEventArgs.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="Events\AwayEventArgs.cs" />
     <Compile Include="Events\ErrorMessageEventArgs.cs" />
+    <Compile Include="Events\InviteSentEventArgs.cs" />
+    <Compile Include="Events\NickErrorEventArgs.cs" />
     <Compile Include="Events\ReplyEventArgs.cs" />
     <Compile Include="EventUtil.cs" />
     <Compile Include="Identd.cs" />
