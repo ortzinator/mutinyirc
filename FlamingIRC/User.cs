@@ -33,14 +33,19 @@ namespace FlamingIRC
     {
         /// <summary>The user's nickname.</summary>
         public string Nick { get; set; }
+
         /// <summary>The user's "real name", immediately before the @</summary>
         public string RealName { get; set; }
+
         /// <summary>The user's fully qualified host name</summary>
         public string HostMask { get; set; }
+
         /// <summary>The user's username on the local machine</summary>
         public string UserName { get; set; }
+
         /// <summary> Nickname plus mode symbol prefix </summary>
         public string NamesLiteral { get; private set; }
+
         /// <summary> The channel mode symbol prefix from NAMES</summary>
         public char Prefix { get; private set; }
 
@@ -49,10 +54,7 @@ namespace FlamingIRC
             get { return new User(); }
         }
 
-        public User()
-        {
-
-        }
+        public User() { }
 
         public User(string nick, string name, string host)
         {
@@ -88,7 +90,7 @@ namespace FlamingIRC
 
         public override string ToString()
         {
-            return String.Format("{0} ({1})", this.UserName, this.RealName); // todo - replace. this probably isn't how we want it formatted.
+            return this.NamesLiteral;
         }
     }
 }

@@ -111,5 +111,10 @@
         {
             channelOutputBox.AppendLine(line);
         }
+
+        private void commandTextBox_CommandEntered(object sender)
+        {
+
+        }
     }
 }
