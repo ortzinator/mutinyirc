@@ -3,9 +3,31 @@
     using System.Drawing;
     using System.Windows.Forms;
     using FlamingIRC;
+    using System.ComponentModel;
 
     public partial class NickListBox : ListBox
     {
+        /// <summary>
+        /// The Color Ops' nicks should be displayed as
+        /// </summary>
+        [Category("Appearance")]
+        [DefaultValue(typeof(Color), "Black")]
+        public Color OpColor { get; set; }
+
+        /// <summary>
+        /// The Color voices' nicks should be displayed as
+        /// </summary>
+        [Category("Appearance")]
+        [DefaultValue(typeof(Color), "Black")]
+        public Color VoiceColor { get; set; }
+
+        /// <summary>
+        /// The Color regular users' nicks should be displayed as
+        /// </summary>
+        [Category("Appearance")]
+        [DefaultValue(typeof(Color), "Black")]
+        public Color RegularUserColor { get; set; }
+
         public NickListBox()
         {
             InitializeComponent();
@@ -31,15 +53,18 @@
 
                 switch (cur.Prefix)
                 {
-                    case (char)0:
-                        fore = Brushes.Gray;
-                        break;
                     case '+':
-                        fore = Brushes.Blue;
+                        fore = SystemBrushes.FromSystemColor(VoiceColor);
+                        break;
+                    case '@':
+                        fore = SystemBrushes.FromSystemColor(OpColor);
+                        break;
+                    default:
+                        fore = SystemBrushes.FromSystemColor(RegularUserColor);
                         break;
                 }
 
-                e.Graphics.DrawString(cur.NamesLiteral, e.Font, fore, e.Bounds, StringFormat.GenericDefault);
+                e.Graphics.DrawString(cur.ToString(), e.Font, fore, e.Bounds, StringFormat.GenericDefault);
 
                 e.DrawFocusRectangle();
             }
