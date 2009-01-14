@@ -25,8 +25,6 @@
 
             Channel.OnReceivedNames += new ReceivedNamesEventHandler(Channel_OnReceivedNames);
 
-            this.nickListBox.DisplayMember = "NamesLiteral";
-
             Channel.OnMessage += new ChannelMessageEventHandler(Channel_OnMessage);
             Channel.OnAction += new ChannelMessageEventHandler(Channel_OnAction);
             Channel.OnShowTopic += new TopicShowEventHandler(Channel_OnShowTopic);
@@ -37,6 +35,8 @@
             Channel.OnKick += new ChannelKickEventHandler(Channel_OnKick);
 
             commandTextBox.CommandEntered += new EventHandler<DataEventArgs<string>>(commandTextBox_CommandEntered);
+
+            nickListBox.DataSource = Channel.NickList;
 
             this.commandTextBox.Focus();
         }

@@ -4,9 +4,8 @@
     using System.Collections.Generic;
     using System.Windows.Forms;
     using OrtzIRC.Common;
-using System.ComponentModel;
+    using System.ComponentModel;
 
-    [DefaultEvent("CommandEntered")]
     public partial class CommandTextBox : TextBox
     {
         public List<string> CmdHistory { get; private set; }
