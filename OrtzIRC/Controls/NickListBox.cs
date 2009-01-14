@@ -10,22 +10,16 @@
         /// <summary>
         /// The Color Ops' nicks should be displayed as
         /// </summary>
-        [Category("Appearance")]
-        [DefaultValue(typeof(Color), "Black")]
         public Color OpColor { get; set; }
 
         /// <summary>
         /// The Color voices' nicks should be displayed as
         /// </summary>
-        [Category("Appearance")]
-        [DefaultValue(typeof(Color), "Black")]
         public Color VoiceColor { get; set; }
 
         /// <summary>
         /// The Color regular users' nicks should be displayed as
         /// </summary>
-        [Category("Appearance")]
-        [DefaultValue(typeof(Color), "Black")]
         public Color RegularUserColor { get; set; }
 
         public NickListBox()
@@ -34,6 +28,9 @@
 
             this.Sorted = true;
             this.DrawMode = DrawMode.OwnerDrawFixed;
+            this.OpColor = Color.Black;
+            this.VoiceColor = Color.Black;
+            this.RegularUserColor = Color.Black;
         }
 
         protected override void OnPaint(PaintEventArgs pe)
