@@ -68,6 +68,9 @@ namespace FlamingIRC
         /// </summary>
         public static User FromNames(string nick)
         {
+            if (nick == String.Empty)
+                return null;
+
             var tempNick = new User();
             char firstChar = Char.Parse(nick.Substring(0, 1));
             char[] modes = new char[] { Char.Parse("@"), Char.Parse("+"), Char.Parse("%"), Char.Parse("&"), Char.Parse("~") };

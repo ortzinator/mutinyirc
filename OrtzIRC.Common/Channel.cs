@@ -9,7 +9,7 @@
     public delegate void ChannelJoinEventHandler(User nick);
     public delegate void ChannelPartOtherEventHandler(User nick, string message);
     public delegate void ChannelQuitEventHandler(User nick, string message);
-    public delegate void ReceivedNamesEventHandler(List<User> nickList);
+    public delegate void ReceivedNamesEventHandler(UserList nickList);
     public delegate void ChannelKickEventHandler(User nick, string kickee, string reason);
 
     /// <summary>
@@ -21,7 +21,12 @@
         public string Key { get; private set; }
         public int Limit { get; private set; }
         public string Name { get; private set; }
-        public List<User> NickList { get; private set; }
+        public UserList NickList { get; private set; }
+
+        /// <summary>
+        /// Returns true if the user is in the channel
+        /// </summary>
+        public bool Joined { get; private set; }
 
         public ChannelInfo Info
         {
@@ -46,20 +51,14 @@
             this.Server = parent;
             this.Name = name;
 
-            NickList = new List<User>();
+            NickList = new UserList();
+
+            this.Joined = true;
         }
 
         public void AddNick(User nick)
         {
             NickList.Add(nick);
-        }
-
-        public void ResetNicks()
-        {
-            if (OnReceivedNames != null)
-            {
-                OnReceivedNames(NickList);
-            }
         }
 
         public override string ToString()
@@ -105,12 +104,13 @@
 
         public void Part(string message)
         {
-            throw new NotImplementedException();
+            Server.Connection.Sender.Part(message, this.Name);
+            this.Joined = false;
         }
 
         public void UserPart(User nick, string message)
         {
-            if (OnUserPart != null)
+            if (nick.Nick != this.Server.UserNick && OnUserPart != null)
                 OnUserPart(nick, message);
         }
 

@@ -14,6 +14,7 @@
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
         public event EventHandler<CancelEventArgs> Connecting;
         public event EventHandler<DoubleDataEventArgs<User, Channel>> JoinOther;
+
         /// <summary>
         /// Informs the subscriber that a connect attempt fails.
         /// </summary>
@@ -44,6 +45,10 @@
         public bool SSL { get; set; }
         public Connection Connection { get; private set; }
         public bool IsConnected { get { return Connection.Connected; } }
+
+        /// <summary>
+        /// The nick of the connected user
+        /// </summary>
         public string UserNick { get; private set; }
 
         public ChannelManager ChanManager { get; private set; }

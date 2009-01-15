@@ -62,7 +62,6 @@
             this.commandTextBox.Name = "commandTextBox";
             this.commandTextBox.Size = new System.Drawing.Size(750, 23);
             this.commandTextBox.TabIndex = 0;
-            this.commandTextBox.CommandEntered += new System.EventHandler<OrtzIRC.Common.DataEventArgs<string>>(this.commandTextBox_CommandEntered);
             // 
             // channelOutputBox
             // 
@@ -89,6 +88,7 @@
             this.nickListBox.Size = new System.Drawing.Size(142, 485);
             this.nickListBox.Sorted = true;
             this.nickListBox.TabIndex = 2;
+            this.nickListBox.UserList = null;
             this.nickListBox.VoiceColor = System.Drawing.Color.Black;
             // 
             // ChannelForm

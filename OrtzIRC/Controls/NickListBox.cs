@@ -22,6 +22,33 @@
         /// </summary>
         public Color RegularUserColor { get; set; }
 
+        private UserList userList;
+
+        [Browsable(false)]
+        public UserList UserList
+        {
+            get { return userList; }
+            set
+            {
+                userList = value;
+                if (value != null)
+                    userList.Updated += new System.EventHandler(userList_Updated);
+            }
+        }
+
+        private void userList_Updated(object sender, System.EventArgs e)
+        {
+            this.BeginInvoke((MethodInvoker)delegate
+            {
+                Items.Clear();
+
+                foreach (User nick in userList)
+                {
+                    Items.Add(nick);
+                }
+            });
+        }
+
         public NickListBox()
         {
             InitializeComponent();
@@ -51,13 +78,13 @@
                 switch (cur.Prefix)
                 {
                     case '+':
-                        fore = SystemBrushes.FromSystemColor(VoiceColor);
+                        fore = new SolidBrush(VoiceColor);
                         break;
                     case '@':
-                        fore = SystemBrushes.FromSystemColor(OpColor);
+                        fore = new SolidBrush(OpColor);
                         break;
                     default:
-                        fore = SystemBrushes.FromSystemColor(RegularUserColor);
+                        fore = new SolidBrush(RegularUserColor);
                         break;
                 }
 
