@@ -23,8 +23,6 @@
 
             this.Text = channel.Name;
 
-            Channel.OnReceivedNames += new ReceivedNamesEventHandler(Channel_OnReceivedNames);
-
             Channel.OnMessage += new ChannelMessageEventHandler(Channel_OnMessage);
             Channel.OnAction += new ChannelMessageEventHandler(Channel_OnAction);
             Channel.OnShowTopic += new TopicShowEventHandler(Channel_OnShowTopic);
@@ -34,34 +32,14 @@
             Channel.OnNick += new Server_NickEventHandler(Channel_OnNick);
             Channel.OnKick += new ChannelKickEventHandler(Channel_OnKick);
 
-            commandTextBox.CommandEntered += new EventHandler<DataEventArgs<string>>(commandTextBox_CommandEntered);
-
-            nickListBox.DataSource = Channel.NickList;
+            nickListBox.UserList = Channel.NickList;
 
             this.commandTextBox.Focus();
-        }
-
-        private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
-        {
-
         }
 
         private void Channel_OnKick(User nick, string kickee, string reason)
         {
             this.AddLine("-- Kick: (" + nick.Nick + ") was kicked by (" + kickee + ") " + reason);
-        }
-
-        private void Channel_OnReceivedNames(List<User> nickList)
-        {
-            this.BeginInvoke((MethodInvoker)delegate
-            {
-                nickListBox.Items.Clear();
-
-                foreach (User nick in nickList)
-                {
-                    nickListBox.Items.Add(nick);
-                }
-            });
         }
 
         private void Channel_OnNick(User nick, string newNick)
@@ -104,17 +82,12 @@
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            Server.Connection.Sender.Part(ChannelName);
+            Channel.Part("Leaving"); //TODO: Get a default part message
         }
 
         public void AddLine(string line)
         {
             channelOutputBox.AppendLine(line);
-        }
-
-        private void commandTextBox_CommandEntered(object sender)
-        {
-
         }
     }
 }

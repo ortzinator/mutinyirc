@@ -33,21 +33,24 @@
 
         private void Server_OnNames(string channel, string[] nicks, bool last)
         {
-            if (!recievingNames)
+            if (InChannel(channel))
             {
-                GetChannel(channel).NickList.Clear();
-                recievingNames = true;
-            }
+                if (!recievingNames)
+                {
+                    GetChannel(channel).NickList.Clear();
+                    recievingNames = true;
+                }
 
-            foreach (string nick in nicks)
-            {
-                GetChannel(channel).NickList.Add(User.FromNames(nick));
-            }
+                foreach (string nick in nicks)
+                {
+                    GetChannel(channel).NickList.Add(User.FromNames(nick));
+                }
 
-            if (last)
-            {
-                recievingNames = false;
-                GetChannel(channel).ResetNicks();
+                if (last)
+                {
+                    recievingNames = false;
+                    GetChannel(channel).NickList.Refresh();
+                } 
             }
         }
 
@@ -58,7 +61,19 @@
 
         public bool InChannel(string channelName)
         {
-            return Channels.ContainsKey(channelName);
+            if (Channels.ContainsKey(channelName))
+            {
+                if (Channels[channelName].Joined)
+                {
+                    return true;
+                }
+                else
+                {
+                    Channels.Remove(channelName);
+                    //Is this all that needs to be done?
+                } 
+            }
+            return false;
         }
 
         public Channel Create(string channelName)
