@@ -50,7 +50,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(758, 518);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(762, 518);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // commandTextBox
@@ -60,7 +60,7 @@
             this.commandTextBox.Location = new System.Drawing.Point(4, 494);
             this.commandTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.commandTextBox.Name = "commandTextBox";
-            this.commandTextBox.Size = new System.Drawing.Size(750, 23);
+            this.commandTextBox.Size = new System.Drawing.Size(754, 23);
             this.commandTextBox.TabIndex = 0;
             // 
             // channelOutputBox
@@ -72,7 +72,7 @@
             this.channelOutputBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.channelOutputBox.Name = "channelOutputBox";
             this.channelOutputBox.ReadOnly = true;
-            this.channelOutputBox.Size = new System.Drawing.Size(602, 485);
+            this.channelOutputBox.Size = new System.Drawing.Size(606, 485);
             this.channelOutputBox.TabIndex = 1;
             this.channelOutputBox.Text = "";
             // 
@@ -81,7 +81,7 @@
             this.nickListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.nickListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.nickListBox.FormattingEnabled = true;
-            this.nickListBox.Location = new System.Drawing.Point(613, 3);
+            this.nickListBox.Location = new System.Drawing.Point(617, 3);
             this.nickListBox.Name = "nickListBox";
             this.nickListBox.OpColor = System.Drawing.Color.Black;
             this.nickListBox.RegularUserColor = System.Drawing.Color.Black;
@@ -95,7 +95,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(758, 518);
+            this.ClientSize = new System.Drawing.Size(762, 518);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);

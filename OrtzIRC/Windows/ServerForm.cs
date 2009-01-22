@@ -145,13 +145,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnJoinSelf(object sender, OrtzIRC.Common.DataEventArgs<Channel> e)
         {
-            this.Invoke((MethodInvoker)delegate
-            {
-                ChannelForm newChan = new ChannelForm(e.Data, this.server);
-                newChan.MdiParent = this.MdiParent;
-                newChan.Show();
-                newChan.AddLine("Joined: " + e.Data.Name);
-            });
+            ((MainForm)this.MdiParent).CreateChannelForm(e.Data as Channel);
         }
 
         private void ParentServer_OnPublicMessage(object sender, ChannelMessageEventArgs e)
@@ -165,7 +159,7 @@ namespace OrtzIRC
 
             if (this.server.IsConnected)
             {
-                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect, CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(this.Server.Description), CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
                 if (result == DialogResult.OK)
                 {

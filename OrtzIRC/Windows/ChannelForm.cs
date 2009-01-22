@@ -10,14 +10,14 @@
     public partial class ChannelForm : Form
     {
         private Server Server;
-        private Channel Channel;
+        public Channel Channel { get; private set; }
         private string ChannelName;
 
-        public ChannelForm(Channel channel, Server server)
+        public ChannelForm(Channel channel)
         {
             InitializeComponent();
 
-            Server = server;
+            Server = channel.Server;
             Channel = channel;
             ChannelName = channel.Name;
 

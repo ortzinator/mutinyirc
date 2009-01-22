@@ -321,5 +321,10 @@
         {
             ChannelModeChange.Fire<ChannelModeChangeEventArgs>(this, e);
         }
+
+        public override string ToString()
+        {
+            return this.Description;
+        }
     }
 }

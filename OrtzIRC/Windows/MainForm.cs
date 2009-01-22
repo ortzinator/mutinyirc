@@ -8,6 +8,7 @@ namespace OrtzIRC
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
     using System.IO;
+    using OrtzIRC.Controls;
 
     public partial class MainForm : Form
     {
@@ -35,10 +36,7 @@ namespace OrtzIRC
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 Server newServer = ServerManager.Instance.Create("irc.randomirc.com", "RandomIRC", 6667, false);
-                ServerForm newServerForm = new ServerForm() { Server = newServer };
-                newServerForm.MdiParent = this;
-                newServerForm.Text = "RandomIRC";
-                newServerForm.Show();
+                this.CreateServerForm(newServer);
             }
 
             PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
@@ -69,6 +67,54 @@ namespace OrtzIRC
             {
                 // Settings.Default.ServerList = new System.Collections.ArrayList();
             }
+        }
+
+        /// <summary>
+        /// Creates and displays a ServerForm and adds a node to the WindowManagerTreeView
+        /// </summary>
+        /// <param name="server"></param>
+        /// <returns>The ServerForm that was created</returns>
+        public ServerForm CreateServerForm(Server server)
+        {
+            ServerForm newServerForm = new ServerForm() { Server = server };
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                windowTreeView.AddServerNode(new OrtzIRC.Controls.ServerTreeNode(newServerForm));
+                newServerForm.MdiParent = this;
+            });
+
+            newServerForm.Text = server.Description;
+            newServerForm.Show();
+            //TODO: display topic
+
+            return newServerForm;
+        }
+
+        /// <summary>
+        /// Creates and displays a ChannelForm and adds a node to the WindowManagerTreeView under the appropriate server node
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <returns></returns>
+        public ChannelForm CreateChannelForm(Channel channel)
+        {
+            ChannelForm newChannelForm = new ChannelForm(channel);
+            ServerTreeNode node = windowTreeView.GetServerNode(channel.Server);
+
+            if (node == null)
+                throw new Exception("ServerTreeNode doesn't exist!"); //hack
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                node.AddChannelNode(new ChannelTreeNode(newChannelForm));
+                newChannelForm.MdiParent = this;
+            });
+
+            newChannelForm.Show();
+            newChannelForm.AddLine("Joined: " + channel.Name);
+            //TODO: display topic
+
+            return newChannelForm;
         }
     }
 }
