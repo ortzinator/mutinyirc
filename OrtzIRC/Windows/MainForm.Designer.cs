@@ -43,6 +43,7 @@ namespace OrtzIRC
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.windowTreeView = new OrtzIRC.Controls.WindowManagerTreeView();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -50,7 +51,7 @@ namespace OrtzIRC
             // 
             this.toolStrip.Location = new System.Drawing.Point(0, 24);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(504, 25);
+            this.toolStrip.Size = new System.Drawing.Size(837, 25);
             this.toolStrip.TabIndex = 1;
             this.toolStrip.Text = "mainToolbar";
             // 
@@ -64,7 +65,7 @@ namespace OrtzIRC
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.MdiWindowListItem = this.windowRootMenuItem;
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(504, 24);
+            this.menuStrip.Size = new System.Drawing.Size(837, 24);
             this.menuStrip.TabIndex = 2;
             this.menuStrip.Text = "mainMenu";
             // 
@@ -159,11 +160,20 @@ namespace OrtzIRC
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.aboutToolStripMenuItem.Text = "&About...";
             // 
+            // windowTreeView
+            // 
+            this.windowTreeView.Dock = System.Windows.Forms.DockStyle.Left;
+            this.windowTreeView.Location = new System.Drawing.Point(0, 49);
+            this.windowTreeView.Name = "windowTreeView";
+            this.windowTreeView.Size = new System.Drawing.Size(149, 436);
+            this.windowTreeView.TabIndex = 4;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(504, 319);
+            this.ClientSize = new System.Drawing.Size(837, 485);
+            this.Controls.Add(this.windowTreeView);
             this.Controls.Add(this.toolStrip);
             this.Controls.Add(this.menuStrip);
             this.IsMdiContainer = true;
@@ -195,6 +205,7 @@ namespace OrtzIRC
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private OrtzIRC.Controls.WindowManagerTreeView windowTreeView;
     }
 }
 

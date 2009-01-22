@@ -109,6 +109,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\ChannelTreeNode.cs" />
     <Compile Include="Controls\IrcTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -126,6 +127,13 @@
     </Compile>
     <Compile Include="Controls\NickListBox.Designer.cs">
       <DependentUpon>NickListBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ServerTreeNode.cs" />
+    <Compile Include="Controls\WindowManagerTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\WindowManagerTreeView.Designer.cs">
+      <DependentUpon>WindowManagerTreeView.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
