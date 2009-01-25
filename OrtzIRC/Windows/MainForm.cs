@@ -98,6 +98,14 @@ namespace OrtzIRC
         /// <returns></returns>
         public ChannelForm CreateChannelForm(Channel channel)
         {
+            ChannelDelegate del = CreateChannelFormOnUiThread;
+            return (ChannelForm)this.Invoke(del, channel);
+        }
+
+        private delegate ChannelForm ChannelDelegate(Channel channel);
+
+        private ChannelForm CreateChannelFormOnUiThread(Channel channel)
+        {
             ChannelForm newChannelForm = new ChannelForm(channel);
             ServerTreeNode node = windowTreeView.GetServerNode(channel.Server);
 
