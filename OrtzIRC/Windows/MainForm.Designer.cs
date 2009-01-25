@@ -44,6 +44,7 @@ namespace OrtzIRC
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowTreeView = new OrtzIRC.Controls.WindowManagerTreeView();
+            this.splitter1 = new System.Windows.Forms.Splitter();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -168,11 +169,20 @@ namespace OrtzIRC
             this.windowTreeView.Size = new System.Drawing.Size(149, 436);
             this.windowTreeView.TabIndex = 4;
             // 
+            // splitter1
+            // 
+            this.splitter1.Location = new System.Drawing.Point(149, 49);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(3, 436);
+            this.splitter1.TabIndex = 6;
+            this.splitter1.TabStop = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(837, 485);
+            this.Controls.Add(this.splitter1);
             this.Controls.Add(this.windowTreeView);
             this.Controls.Add(this.toolStrip);
             this.Controls.Add(this.menuStrip);
@@ -206,6 +216,7 @@ namespace OrtzIRC
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private OrtzIRC.Controls.WindowManagerTreeView windowTreeView;
+        private System.Windows.Forms.Splitter splitter1;
     }
 }
 
