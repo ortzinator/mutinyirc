@@ -124,5 +124,21 @@ namespace OrtzIRC
 
             return newChannelForm;
         }
+
+        private void windowTreeView_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (e.Action != TreeViewAction.Unknown)
+            {
+                if (e.Node is ServerTreeNode)
+                {
+                    ((ServerTreeNode)e.Node).ServerWindow.Focus();
+                }
+                else if (e.Node is ChannelTreeNode)
+                {
+                    ((ChannelTreeNode)e.Node).ChannelWindow.Focus();
+                }
+                //TODO: PM and other windows
+            }
+        }
     }
 }

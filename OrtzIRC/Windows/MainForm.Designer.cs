@@ -43,8 +43,8 @@ namespace OrtzIRC
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.windowTreeView = new OrtzIRC.Controls.WindowManagerTreeView();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.windowTreeView = new OrtzIRC.Controls.WindowManagerTreeView();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -161,14 +161,6 @@ namespace OrtzIRC
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.aboutToolStripMenuItem.Text = "&About...";
             // 
-            // windowTreeView
-            // 
-            this.windowTreeView.Dock = System.Windows.Forms.DockStyle.Left;
-            this.windowTreeView.Location = new System.Drawing.Point(0, 49);
-            this.windowTreeView.Name = "windowTreeView";
-            this.windowTreeView.Size = new System.Drawing.Size(149, 436);
-            this.windowTreeView.TabIndex = 4;
-            // 
             // splitter1
             // 
             this.splitter1.Location = new System.Drawing.Point(149, 49);
@@ -176,6 +168,15 @@ namespace OrtzIRC
             this.splitter1.Size = new System.Drawing.Size(3, 436);
             this.splitter1.TabIndex = 6;
             this.splitter1.TabStop = false;
+            // 
+            // windowTreeView
+            // 
+            this.windowTreeView.Dock = System.Windows.Forms.DockStyle.Left;
+            this.windowTreeView.Location = new System.Drawing.Point(0, 49);
+            this.windowTreeView.Name = "windowTreeView";
+            this.windowTreeView.Size = new System.Drawing.Size(149, 436);
+            this.windowTreeView.TabIndex = 4;
+            this.windowTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.windowTreeView_AfterSelect);
             // 
             // MainForm
             // 
