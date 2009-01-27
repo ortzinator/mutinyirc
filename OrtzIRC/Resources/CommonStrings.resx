@@ -120,4 +120,10 @@
   <data name="DialogCaption" xml:space="preserve">
     <value>OrtzIRC</value>
   </data>
+  <data name="MainExitPrompt" xml:space="preserve">
+    <value>Are you sure you wish to close OrtzIRC? This will disconnect you from all servers.</value>
+  </data>
+  <data name="MainExitPromptCaption" xml:space="preserve">
+    <value>Confirm Exit - OrtzIRC</value>
+  </data>
 </root>

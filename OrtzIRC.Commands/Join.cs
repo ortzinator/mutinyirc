@@ -4,10 +4,10 @@
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
 
-    [Plugin("Join",
-        "Ortzinator",
-        "1.0",
-        "Joins a channel")]
+    /// <summary>
+    /// Joins a channel
+    /// </summary>
+    [Plugin]
     public class Join : ICommand
     {
         /// <summary>
