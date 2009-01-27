@@ -9,6 +9,7 @@ namespace OrtzIRC
     using OrtzIRC.Properties;
     using System.IO;
     using OrtzIRC.Controls;
+    using OrtzIRC.Resources;
 
     public partial class MainForm : Form
     {
@@ -20,8 +21,6 @@ namespace OrtzIRC
             InitializeComponent();
 
             MainForm.ServerList = new List<Server>();
-
-            LoadServerList();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -44,10 +43,9 @@ namespace OrtzIRC
             base.OnLoad(e);
         }
 
-        protected override void OnClosing(CancelEventArgs e)
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            //Settings.Default.Save();
-            base.OnClosing(e);
+            base.OnFormClosing(e);
         }
 
         private void exitMenuItem_Click(object sender, EventArgs e)
@@ -58,15 +56,7 @@ namespace OrtzIRC
         private void newServerMenuItem_Click(object sender, EventArgs e)
         {
             Dialogs.ServerDialog servers = new Dialogs.ServerDialog();
-            servers.Show();
-        }
-
-        private void LoadServerList()
-        {
-            //if (Settings.Default.ServerList == null)
-            {
-                // Settings.Default.ServerList = new System.Collections.ArrayList();
-            }
+            servers.ShowDialog();
         }
 
         /// <summary>
@@ -115,6 +105,7 @@ namespace OrtzIRC
             this.Invoke((MethodInvoker)delegate
             {
                 node.AddChannelNode(new ChannelTreeNode(newChannelForm));
+                node.Expand();
                 newChannelForm.MdiParent = this;
             });
 

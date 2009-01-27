@@ -155,21 +155,29 @@ namespace OrtzIRC
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            base.OnFormClosing(e);
-
             if (this.server.IsConnected)
             {
-                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(this.Server.Description), CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-
-                if (result == DialogResult.OK)
+                if (e.CloseReason == CloseReason.UserClosing)
                 {
-                    this.server.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
+                    DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(this.Server.Description),
+                                CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+                    if (result == DialogResult.OK)
+                    {
+                        this.server.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
+                    }
+                    else
+                    {
+                        e.Cancel = true;
+                    } 
                 }
                 else
                 {
-                    e.Cancel = true;
+                    this.server.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/");
                 }
             }
+
+            base.OnFormClosing(e);
         }
     }
 }

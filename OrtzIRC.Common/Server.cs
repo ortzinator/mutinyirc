@@ -110,7 +110,7 @@
 
         public void Disconnect()
         {
-            this.Connection.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/");
+            this.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/"); //TODO: Get default d/c message
         }
 
         public void Disconnect(string reason)

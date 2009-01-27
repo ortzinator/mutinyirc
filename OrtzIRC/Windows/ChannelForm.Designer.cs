@@ -28,51 +28,42 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.commandTextBox = new OrtzIRC.Controls.CommandTextBox();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.channelOutputBox = new OrtzIRC.Controls.IrcTextBox();
             this.nickListBox = new OrtzIRC.Controls.NickListBox();
-            this.tableLayoutPanel1.SuspendLayout();
+            this.commandTextBox = new OrtzIRC.Controls.CommandTextBox();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // tableLayoutPanel1
+            // splitContainer1
             // 
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 148F));
-            this.tableLayoutPanel1.Controls.Add(this.commandTextBox, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.channelOutputBox, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.nickListBox, 1, 0);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(762, 518);
-            this.tableLayoutPanel1.TabIndex = 0;
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Name = "splitContainer1";
             // 
-            // commandTextBox
+            // splitContainer1.Panel1
             // 
-            this.tableLayoutPanel1.SetColumnSpan(this.commandTextBox, 2);
-            this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.commandTextBox.Location = new System.Drawing.Point(4, 494);
-            this.commandTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.commandTextBox.Name = "commandTextBox";
-            this.commandTextBox.Size = new System.Drawing.Size(754, 23);
-            this.commandTextBox.TabIndex = 0;
+            this.splitContainer1.Panel1.Controls.Add(this.channelOutputBox);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.nickListBox);
+            this.splitContainer1.Size = new System.Drawing.Size(1016, 590);
+            this.splitContainer1.SplitterDistance = 872;
+            this.splitContainer1.TabIndex = 4;
             // 
             // channelOutputBox
             // 
             this.channelOutputBox.BackColor = System.Drawing.SystemColors.Window;
             this.channelOutputBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.channelOutputBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.channelOutputBox.Location = new System.Drawing.Point(4, 3);
+            this.channelOutputBox.Location = new System.Drawing.Point(0, 0);
             this.channelOutputBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.channelOutputBox.Name = "channelOutputBox";
             this.channelOutputBox.ReadOnly = true;
-            this.channelOutputBox.Size = new System.Drawing.Size(606, 485);
+            this.channelOutputBox.Size = new System.Drawing.Size(872, 590);
             this.channelOutputBox.TabIndex = 1;
             this.channelOutputBox.Text = "";
             // 
@@ -81,37 +72,49 @@
             this.nickListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.nickListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.nickListBox.FormattingEnabled = true;
-            this.nickListBox.Location = new System.Drawing.Point(617, 3);
+            this.nickListBox.Location = new System.Drawing.Point(0, 0);
             this.nickListBox.Name = "nickListBox";
             this.nickListBox.OpColor = System.Drawing.Color.Black;
             this.nickListBox.RegularUserColor = System.Drawing.Color.Black;
-            this.nickListBox.Size = new System.Drawing.Size(142, 485);
+            this.nickListBox.Size = new System.Drawing.Size(140, 589);
             this.nickListBox.Sorted = true;
             this.nickListBox.TabIndex = 2;
             this.nickListBox.UserList = null;
             this.nickListBox.VoiceColor = System.Drawing.Color.Black;
             // 
+            // commandTextBox
+            // 
+            this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.commandTextBox.Location = new System.Drawing.Point(0, 590);
+            this.commandTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.commandTextBox.Name = "commandTextBox";
+            this.commandTextBox.Size = new System.Drawing.Size(1016, 23);
+            this.commandTextBox.TabIndex = 0;
+            // 
             // ChannelForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(762, 518);
-            this.Controls.Add(this.tableLayoutPanel1);
+            this.ClientSize = new System.Drawing.Size(1016, 613);
+            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.commandTextBox);
             this.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "ChannelForm";
             this.Text = "ChannelForm";
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel1.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private OrtzIRC.Controls.CommandTextBox commandTextBox;
         private OrtzIRC.Controls.IrcTextBox channelOutputBox;
         private OrtzIRC.Controls.NickListBox nickListBox;
+        private System.Windows.Forms.SplitContainer splitContainer1;
     }
 }
