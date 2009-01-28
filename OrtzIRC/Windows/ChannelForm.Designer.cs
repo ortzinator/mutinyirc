@@ -50,8 +50,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.nickListBox);
-            this.splitContainer1.Size = new System.Drawing.Size(1016, 590);
-            this.splitContainer1.SplitterDistance = 872;
+            this.splitContainer1.Size = new System.Drawing.Size(684, 541);
+            this.splitContainer1.SplitterDistance = 521;
             this.splitContainer1.TabIndex = 4;
             // 
             // channelOutputBox
@@ -63,7 +63,7 @@
             this.channelOutputBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.channelOutputBox.Name = "channelOutputBox";
             this.channelOutputBox.ReadOnly = true;
-            this.channelOutputBox.Size = new System.Drawing.Size(872, 590);
+            this.channelOutputBox.Size = new System.Drawing.Size(521, 541);
             this.channelOutputBox.TabIndex = 1;
             this.channelOutputBox.Text = "";
             // 
@@ -76,7 +76,7 @@
             this.nickListBox.Name = "nickListBox";
             this.nickListBox.OpColor = System.Drawing.Color.Black;
             this.nickListBox.RegularUserColor = System.Drawing.Color.Black;
-            this.nickListBox.Size = new System.Drawing.Size(140, 589);
+            this.nickListBox.Size = new System.Drawing.Size(159, 537);
             this.nickListBox.Sorted = true;
             this.nickListBox.TabIndex = 2;
             this.nickListBox.UserList = null;
@@ -85,17 +85,17 @@
             // commandTextBox
             // 
             this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.commandTextBox.Location = new System.Drawing.Point(0, 590);
+            this.commandTextBox.Location = new System.Drawing.Point(0, 541);
             this.commandTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.commandTextBox.Name = "commandTextBox";
-            this.commandTextBox.Size = new System.Drawing.Size(1016, 23);
+            this.commandTextBox.Size = new System.Drawing.Size(684, 23);
             this.commandTextBox.TabIndex = 0;
             // 
             // ChannelForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1016, 613);
+            this.ClientSize = new System.Drawing.Size(684, 564);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.commandTextBox);
             this.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

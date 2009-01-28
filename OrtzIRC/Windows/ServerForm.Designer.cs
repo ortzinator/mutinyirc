@@ -29,68 +29,49 @@ namespace OrtzIRC
         /// </summary>
         private void InitializeComponent()
         {
-            this.serverLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.serverOutputBox = new OrtzIRC.Controls.IrcTextBox();
             this.commandTextBox = new OrtzIRC.Controls.CommandTextBox();
-            this.serverLayoutPanel.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // serverLayoutPanel
-            // 
-            this.serverLayoutPanel.ColumnCount = 1;
-            this.serverLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.serverLayoutPanel.Controls.Add(this.serverOutputBox, 0, 0);
-            this.serverLayoutPanel.Controls.Add(this.commandTextBox, 0, 1);
-            this.serverLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.serverLayoutPanel.Location = new System.Drawing.Point(0, 0);
-            this.serverLayoutPanel.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.serverLayoutPanel.Name = "serverLayoutPanel";
-            this.serverLayoutPanel.RowCount = 2;
-            this.serverLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.serverLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
-            this.serverLayoutPanel.Size = new System.Drawing.Size(592, 367);
-            this.serverLayoutPanel.TabIndex = 1;
             // 
             // serverOutputBox
             // 
             this.serverOutputBox.BackColor = System.Drawing.SystemColors.Window;
             this.serverOutputBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.serverOutputBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.serverOutputBox.Location = new System.Drawing.Point(4, 3);
+            this.serverOutputBox.Location = new System.Drawing.Point(0, 0);
             this.serverOutputBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.serverOutputBox.Name = "serverOutputBox";
             this.serverOutputBox.ReadOnly = true;
-            this.serverOutputBox.Size = new System.Drawing.Size(584, 334);
+            this.serverOutputBox.Size = new System.Drawing.Size(684, 541);
             this.serverOutputBox.TabIndex = 0;
             this.serverOutputBox.Text = "";
             // 
             // commandTextBox
             // 
-            this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.commandTextBox.Location = new System.Drawing.Point(3, 343);
+            this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.commandTextBox.Location = new System.Drawing.Point(0, 541);
             this.commandTextBox.Name = "commandTextBox";
-            this.commandTextBox.Size = new System.Drawing.Size(586, 23);
+            this.commandTextBox.Size = new System.Drawing.Size(684, 23);
             this.commandTextBox.TabIndex = 1;
             // 
             // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(592, 367);
-            this.Controls.Add(this.serverLayoutPanel);
+            this.ClientSize = new System.Drawing.Size(684, 564);
+            this.Controls.Add(this.serverOutputBox);
+            this.Controls.Add(this.commandTextBox);
             this.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "ServerForm";
             this.Text = "Server";
-            this.serverLayoutPanel.ResumeLayout(false);
-            this.serverLayoutPanel.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TableLayoutPanel serverLayoutPanel;
         private IrcTextBox serverOutputBox;
         private CommandTextBox commandTextBox;
 

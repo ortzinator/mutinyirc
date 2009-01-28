@@ -1,26 +1,18 @@
 namespace OrtzIRC
 {
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
+    using System.IO;
     using System.Windows.Forms;
     using OrtzIRC.Common;
+    using OrtzIRC.Controls;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
-    using System.IO;
-    using OrtzIRC.Controls;
-    using OrtzIRC.Resources;
 
     public partial class MainForm : Form
     {
-        public static List<Server> ServerList { get; private set; }
-        //TODO: ServerManager
-
         public MainForm()
         {
             InitializeComponent();
-
-            MainForm.ServerList = new List<Server>();
         }
 
         protected override void OnLoad(EventArgs e)
