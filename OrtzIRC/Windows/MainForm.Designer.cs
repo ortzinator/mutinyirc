@@ -52,7 +52,7 @@ namespace OrtzIRC
             // 
             this.toolStrip.Location = new System.Drawing.Point(0, 24);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(837, 25);
+            this.toolStrip.Size = new System.Drawing.Size(784, 25);
             this.toolStrip.TabIndex = 1;
             this.toolStrip.Text = "mainToolbar";
             // 
@@ -66,7 +66,7 @@ namespace OrtzIRC
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.MdiWindowListItem = this.windowRootMenuItem;
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(837, 24);
+            this.menuStrip.Size = new System.Drawing.Size(784, 24);
             this.menuStrip.TabIndex = 2;
             this.menuStrip.Text = "mainMenu";
             // 
@@ -165,7 +165,7 @@ namespace OrtzIRC
             // 
             this.splitter1.Location = new System.Drawing.Point(149, 49);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 436);
+            this.splitter1.Size = new System.Drawing.Size(3, 515);
             this.splitter1.TabIndex = 6;
             this.splitter1.TabStop = false;
             // 
@@ -174,7 +174,7 @@ namespace OrtzIRC
             this.windowTreeView.Dock = System.Windows.Forms.DockStyle.Left;
             this.windowTreeView.Location = new System.Drawing.Point(0, 49);
             this.windowTreeView.Name = "windowTreeView";
-            this.windowTreeView.Size = new System.Drawing.Size(149, 436);
+            this.windowTreeView.Size = new System.Drawing.Size(149, 515);
             this.windowTreeView.TabIndex = 4;
             this.windowTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.windowTreeView_AfterSelect);
             // 
@@ -182,7 +182,7 @@ namespace OrtzIRC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(837, 485);
+            this.ClientSize = new System.Drawing.Size(784, 564);
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.windowTreeView);
             this.Controls.Add(this.toolStrip);
