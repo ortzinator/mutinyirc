@@ -57,7 +57,7 @@ namespace OrtzIRC
             this.server.ErrorMessageRecieved += ParentServer_OnError;
             this.server.Kick += ParentServer_OnKick;
             this.server.Connecting += Server_Connecting;
-
+            this.server.Disconnected += server_Disconnected;
         }
 
         private void UnhookEvents()
@@ -75,11 +75,18 @@ namespace OrtzIRC
             this.server.ErrorMessageRecieved -= ParentServer_OnError;
             this.server.Kick -= ParentServer_OnKick;
             this.server.Connecting -= Server_Connecting;
+            this.server.Disconnected -= server_Disconnected;
+        }
+
+        private void server_Disconnected()
+        {
+            //intentionally blank
+
         }
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
-
+            //intentionally blank
         }
 
         private void Server_Connecting(object sender, CancelEventArgs e)
@@ -109,7 +116,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnRawMessageReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
         {
-            //this.serverOutputBox.AddLine(message);
+            //intentionally blank
         }
 
         private void ParentServer_OnGotTopic(Channel chan, string topic)
@@ -165,11 +172,12 @@ namespace OrtzIRC
                     if (result == DialogResult.OK)
                     {
                         this.server.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
+                        
                     }
                     else
                     {
                         e.Cancel = true;
-                    } 
+                    }
                 }
                 else
                 {
@@ -178,6 +186,13 @@ namespace OrtzIRC
             }
 
             base.OnFormClosing(e);
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            //TODO: Close ChannelForms
+
+            base.OnFormClosed(e);
         }
     }
 }

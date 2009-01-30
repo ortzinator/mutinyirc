@@ -732,6 +732,9 @@ namespace FlamingIRC
             if (asynReceive == null)
                 asynReceive = new AsyncCallback(BuildBuffer);
 
+            if (!socket.Connected)
+                return;
+
             SocketPacket packet = new SocketPacket();
             packet.thisSocket = this.socket;
 
@@ -754,6 +757,8 @@ namespace FlamingIRC
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Disconnect()");
                 listener.Disconnecting();
                 sender.Quit(reason);
+                connected = false;
+                socket.Disconnect(true);
                 listener.Disconnected();
             }
         }

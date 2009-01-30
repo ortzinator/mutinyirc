@@ -100,7 +100,10 @@
         // hack - should call dispose
         ~Server()
         {
-            this.Disconnect();
+            if (Connection.Connected)
+            {
+                this.Disconnect(); 
+            }
         }
 
         public void Connect()
