@@ -20,9 +20,9 @@
             xdoc = new XDocument(path);
         }
 
-        public string GetMethodSummary(string methodName)
-        {
+        //public string GetMethodSummary(string methodName)
+        //{
 
-        }
+        //}
     }
 }
