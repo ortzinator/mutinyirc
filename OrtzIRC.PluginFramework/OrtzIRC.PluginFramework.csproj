@@ -53,6 +53,7 @@
     <Compile Include="PluginAttribute.cs" />
     <Compile Include="PluginManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmlDocsParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OrtzIRC.Common\OrtzIRC.Common.csproj">

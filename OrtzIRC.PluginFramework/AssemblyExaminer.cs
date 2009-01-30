@@ -4,14 +4,17 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.IO;
+    using System.Diagnostics;
+    using OrtzIRC.Common;
 
     /// <summary>
-    /// 
+    /// Provides functions for examining assemblies.
     /// </summary>
     public static class AssemblyExaminer
     {
         /// <summary>
-        /// Examine assembly for OrtzIRC plugins and commands
+        /// Examine assembly for OrtzIRC plugins
         /// </summary>
         /// <param name="asm">The assembly to examine</param>
         /// <returns>A collection of PluginInfo</returns>
@@ -27,6 +30,15 @@
             {
                 if (type.GetInterface(typeof(ICommand).FullName) != null)
                 {
+                    string docPath = asm.Location.Remove(asm.Location.Length - 4, 4) + ".xml";
+
+                    if (!File.Exists(docPath))
+                    {
+                        //Would be useful for plugin devs to know
+                        Trace.WriteLine("XML docs not found for the assembly: " + asm.ToString(), TraceCategories.PluginSystem);
+                        continue;
+                    }
+
                     //TODO: stuff for commands
                     yield return new CommandInfo(asm.Location, type.Name, typeof(ICommand));
                 }
