@@ -32,11 +32,22 @@
                 {
                     string docPath = asm.Location.Remove(asm.Location.Length - 4, 4) + ".xml";
 
-                    if (!File.Exists(docPath))
+                    XmlDocsParser parser = new XmlDocsParser(docPath);
+
+
+                    if (File.Exists(docPath))
+                    {
+                        foreach (MethodInfo method in type.GetMethods())
+                        {
+                            string summary = parser.GetMethodSummary(type, method);
+                            if (summary != null)
+                                Console.WriteLine(summary);
+                        }
+                    }
+                    else
                     {
                         //Would be useful for plugin devs to know
                         Trace.WriteLine("XML docs not found for the assembly: " + asm.ToString(), TraceCategories.PluginSystem);
-                        continue;
                     }
 
                     //TODO: stuff for commands
