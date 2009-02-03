@@ -1,10 +1,8 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+﻿using System.Linq;
+using System.Xml.Linq;
 using FlamingIRC;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Windows.Forms;
 
 namespace FlamingIrcTest
 {
@@ -78,4 +76,11 @@ namespace FlamingIrcTest
             long result = DccUtil.IPAddressToLong(comp);
             Assert.AreEqual<long>(DccUtil.NetworkUnsignedLong(comp.Address), result);
         }
+
+        [TestMethod]
+        public void XmlDocsTest()
+        {
+            //OrtzIRC.PluginFramework.XmlDocsParser.MethodNameString
+        }
+    }
 }
