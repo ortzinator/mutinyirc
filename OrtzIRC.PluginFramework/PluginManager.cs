@@ -13,7 +13,7 @@
     public sealed class PluginManager
     {
         private static List<PluginInfo> plugins;
-        private static List<CommandInfo> commands;
+        private static Dictionary<string, CommandInfo> commands;
 
         public static PluginManager Instance { get; private set; }
 
@@ -22,7 +22,7 @@
         private PluginManager()
         {
             plugins = new List<PluginInfo>();
-            commands = new List<CommandInfo>();
+            commands = new Dictionary<string, CommandInfo>();
         }
 
         /// <summary>
@@ -56,13 +56,23 @@
                     {
                         if (info is CommandInfo)
                         {
-                            commands.Add(info as CommandInfo);
+                            if (!commands.ContainsKey(info.Name))
+                            {
+                                commands.Add(info.Name, info as CommandInfo);
+                                Trace.WriteLine("Added command plugin " + info.Name + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
+                            }
+                            else
+                            {
+                                Trace.WriteLine("Could not load command " + info.Name + ". A command by that name already exists.",
+                                    TraceCategories.PluginSystem); //Hack: lousy error message :P
+                            }
                         }
                         else
                         {
                             plugins.Add(info);
+                            Trace.WriteLine("Added plugin " + info.Name + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
                         }
-                        Trace.WriteLine("Added plugin " + info.ClassName + " at " + info.AssemblyPath);
+
                     }
                 }
                 catch (Exception ex)
@@ -75,9 +85,12 @@
         public static ICommand GetCommandInstance(Channel channel, string command, string[] parameters)
         {
             //TODO
-            foreach (CommandInfo c in commands)
+            foreach (KeyValuePair<string, CommandInfo> item in commands)
             {
-
+                if (item.Key == command)
+                {
+                    //TODO: stuff like match up given parameters with the proper Execute method
+                }
             }
             return null;
         }
@@ -85,7 +98,7 @@
         public static ICommand GetCommandInstance(Server server, string command, string[] parameters)
         {
             //TODO
-            foreach (CommandInfo c in commands)
+            foreach (KeyValuePair<string, CommandInfo> item in commands)
             {
 
             }
@@ -95,7 +108,7 @@
         public static ICommand GetCommandInstance(PrivateMessageSession pmSession, string command, string[] parameters)
         {
             //TODO
-            foreach (CommandInfo c in commands)
+            foreach (KeyValuePair<string, CommandInfo> item in commands)
             {
 
             }
