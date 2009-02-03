@@ -6,7 +6,7 @@
     {
         public string AssemblyPath { get; protected set; }
 
-        public string ClassName { get; protected set; }
+        public string Name { get; protected set; }
 
         /// <summary>
         /// The plugin interface it uses
@@ -16,7 +16,7 @@
         public PluginInfo(string path, string name, Type type)
         {
             AssemblyPath = path;
-            ClassName = name;
+            Name = name;
             Type = type;
         }
     }

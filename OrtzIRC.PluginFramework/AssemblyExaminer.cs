@@ -31,9 +31,7 @@
                 if (type.GetInterface(typeof(ICommand).FullName) != null)
                 {
                     string docPath = asm.Location.Remove(asm.Location.Length - 4, 4) + ".xml";
-
                     XmlDocsParser parser = new XmlDocsParser(docPath);
-
 
                     if (File.Exists(docPath))
                     {
@@ -50,8 +48,17 @@
                         Trace.WriteLine("XML docs not found for the assembly: " + asm.ToString(), TraceCategories.PluginSystem);
                     }
 
+                    string name = ((PluginAttribute[])type.GetCustomAttributes(typeof(PluginAttribute), false))[0].Name;
+
                     //TODO: stuff for commands
-                    yield return new CommandInfo(asm.Location, type.Name, typeof(ICommand));
+                    if (name == null)
+                    {
+                        yield return new CommandInfo(asm.Location, type.Name, typeof(ICommand));
+                    }
+                    else
+                    {
+                        yield return new CommandInfo(asm.Location, name, typeof(ICommand));
+                    }
                 }
                 else
                 {
