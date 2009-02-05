@@ -30,9 +30,6 @@ namespace OrtzIRC
             }
         }
 
-        delegate void SetTextCallback(string text);
-        delegate void NewChannelCallback(string channel);
-
         public ServerForm()
         {
             InitializeComponent();

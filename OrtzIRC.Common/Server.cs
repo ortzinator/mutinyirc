@@ -87,8 +87,6 @@
             Connection.RawMessageReceived += new EventHandler<FlamingDataEventArgs<string>>(Connection_OnRawMessageReceived);
             //Connection.OnConnectSuccess += new ConnectEventHandler(Connection_OnConnectSuccess);
             Connection.ConnectFailed += new EventHandler<FlamingDataEventArgs<string>>(Connection_ConnectFailed);
-
-            DoConnect();
         }
 
         public Server(string uri, string description, int port, bool ssl)
@@ -123,6 +121,16 @@
 
         private void DoConnect()
         {
+            CancelEventArgs c = new CancelEventArgs();
+
+            this.Connecting.Fire(this, c);
+
+            if (c.Cancel == true)
+            {
+                OnConnectFailed(new DataEventArgs<string>("Connect cancelled."));
+                return;
+            }
+
             try
             {
                 Connection.Connect();
