@@ -31,10 +31,16 @@
             Channel.OnUserQuit += new ChannelQuitEventHandler(Channel_OnUserQuit);
             Channel.OnNick += new Server_NickEventHandler(Channel_OnNick);
             Channel.OnKick += new ChannelKickEventHandler(Channel_OnKick);
+            Server.Disconnected += new DisconnectedEventHandler(Server_Disconnected);
 
             nickListBox.UserList = Channel.NickList;
 
             this.commandTextBox.Focus();
+        }
+
+        private void Server_Disconnected()
+        {
+            this.Close();
         }
 
         private void Channel_OnKick(User nick, string kickee, string reason)

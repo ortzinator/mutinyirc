@@ -10,6 +10,12 @@
         {
             ChannelWindow = channelWindow;
             this.Text = channelWindow.Channel.Name;
+            channelWindow.FormClosed += new FormClosedEventHandler(channelWindow_FormClosed);
+        }
+
+        private void channelWindow_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Remove();
         }
     }
 }
