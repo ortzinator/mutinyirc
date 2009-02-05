@@ -28,6 +28,7 @@ namespace OrtzIRC
             {
                 Server newServer = ServerManager.Instance.Create("irc.randomirc.com", "RandomIRC", 6667, false);
                 this.CreateServerForm(newServer);
+                newServer.Connect();
             }
 
             PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
