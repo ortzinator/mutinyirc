@@ -33,7 +33,6 @@ namespace FlamingIRC
     /// </summary>
     public sealed class ChannelModeInfo
     {
-
         private ModeAction action;
         private ChannelMode mode;
         private string parameter;
@@ -108,14 +107,16 @@ namespace FlamingIRC
                         modeInfo.Action = ModeAction.Add;
                         j++;
                     }
+
                     while (j < tokens[i].Length && tokens[i][j] == '-')
                     {
                         modeInfo.Action = ModeAction.Remove;
                         j++;
                     }
+
                     if (j == 0)
                     {
-                        throw new Exception();
+                        break;
                     }
                     else if (j < tokens[i].Length)
                     {
