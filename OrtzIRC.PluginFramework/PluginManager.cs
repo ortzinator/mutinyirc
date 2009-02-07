@@ -56,21 +56,21 @@
                     {
                         if (info is CommandInfo)
                         {
-                            if (!commands.ContainsKey(info.Name))
+                            if (!commands.ContainsKey(info.ClassName))
                             {
-                                commands.Add(info.Name, info as CommandInfo);
-                                Trace.WriteLine("Added command plugin " + info.Name + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
+                                commands.Add(info.ClassName, info as CommandInfo);
+                                Trace.WriteLine("Added command plugin " + info.ClassName + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
                             }
                             else
                             {
-                                Trace.WriteLine("Could not load command " + info.Name + ". A command by that name already exists.",
+                                Trace.WriteLine("Could not load command " + info.ClassName + ". A command by that name already exists.",
                                     TraceCategories.PluginSystem); //Hack: lousy error message :P
                             }
                         }
                         else
                         {
                             plugins.Add(info);
-                            Trace.WriteLine("Added plugin " + info.Name + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
+                            Trace.WriteLine("Added plugin " + info.ClassName + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
                         }
 
                     }
@@ -89,7 +89,12 @@
             {
                 if (item.Key == command)
                 {
-                    //TODO: stuff like match up given parameters with the proper Execute method
+                    CommandInfo cmd = item.Value;
+
+                    foreach (MethodInfo method in cmd.Type.GetMethods())
+                    {
+
+                    }
                 }
             }
             return null;

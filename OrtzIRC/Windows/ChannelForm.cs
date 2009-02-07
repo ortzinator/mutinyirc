@@ -31,11 +31,35 @@
             Channel.OnUserQuit += new ChannelQuitEventHandler(Channel_OnUserQuit);
             Channel.OnNick += new Server_NickEventHandler(Channel_OnNick);
             Channel.OnKick += new ChannelKickEventHandler(Channel_OnKick);
+            Channel.MessagedChannel += new EventHandler<DataEventArgs<string>>(Channel_MessagedChannel);
             Server.Disconnected += new DisconnectedEventHandler(Server_Disconnected);
+
+            commandTextBox.CommandEntered += new EventHandler<DataEventArgs<string>>(commandTextBox_CommandEntered);
 
             nickListBox.UserList = Channel.NickList;
 
             this.commandTextBox.Focus();
+        }
+
+        private void Channel_MessagedChannel(object sender, DataEventArgs<string> e)
+        {
+            this.AddLine(this.Server.UserNick + ": " + e.Data);
+        }
+
+        private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
+        {
+            if (e.Data.StartsWith("/"))
+            {
+                string[] exploded = e.Data.Split(new Char[] { ' ' });
+                string name = exploded[0].TrimStart('/');
+                string[] parameters = new string[exploded.Length - 1];
+                Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
+                PluginManager.GetCommandInstance(this.Channel, name, parameters);
+            }
+            else
+            {
+                this.Channel.Say(e.Data);
+            }
         }
 
         private void Server_Disconnected()
