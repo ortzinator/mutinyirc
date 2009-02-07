@@ -36,6 +36,7 @@
             }
         }
 
+        //TODO: Update these to EventHandlers
         public event ChannelMessageEventHandler OnMessage;
         public event ChannelMessageEventHandler OnAction;
         public event TopicShowEventHandler OnShowTopic;
@@ -45,6 +46,7 @@
         public event Server_NickEventHandler OnNick;
         public event ReceivedNamesEventHandler OnReceivedNames;
         public event ChannelKickEventHandler OnKick;
+        public event EventHandler<DataEventArgs<string>> MessagedChannel;
 
         public Channel(Server parent, string name)
         {
@@ -158,6 +160,12 @@
 
             if (OnKick != null)
                 OnKick(nick, kickee, reason);
+        }
+
+        public void Say(string msg)
+        {
+            this.Server.Connection.Sender.PublicMessage(this.Name, msg);
+            this.MessagedChannel.Fire(this, new DataEventArgs<string>(msg));
         }
     }
 }
