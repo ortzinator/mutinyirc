@@ -50,6 +50,7 @@
         {
             if (e.Data.StartsWith("/"))
             {
+                string[] exploded = e.Data.Split(new Char[] { ' ' });
                 string name = exploded[0].TrimStart('/');
                 string[] parameters = new string[exploded.Length - 1];
                 Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
