@@ -44,8 +44,7 @@ namespace FlamingIRC
         /// <returns>An instance of IPAddress.</returns>
         public static IPAddress LocalHost()
         {
-            IPHostEntry localhost = Dns.GetHostEntry(Dns.GetHostName());
-            return localhost.AddressList[0];
+            return IPAddress.Loopback;
         }
         /// <summary>
         /// Convert a signed long into an unsigned int in
