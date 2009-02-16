@@ -78,9 +78,9 @@ namespace FlamingIrcTest
         }
 
         [TestMethod]
-        public void XmlDocsTest()
+        public void LoopbackTest()
         {
-            //OrtzIRC.PluginFramework.XmlDocsParser.MethodNameString
+            Assert.AreEqual<System.Net.IPAddress>(System.Net.IPAddress.Parse("127.0.0.1"), DccUtil.LocalHost());
         }
     }
 }
