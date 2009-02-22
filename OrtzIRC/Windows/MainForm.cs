@@ -1,3 +1,4 @@
+using OrtzIRC.Windows;
 namespace OrtzIRC
 {
     using System;
@@ -123,6 +124,12 @@ namespace OrtzIRC
                 }
                 //TODO: PM and other windows
             }
+        }
+
+        private void loggingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LogForm lf = new LogForm();
+            lf.Show();
         }
     }
 }

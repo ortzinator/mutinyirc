@@ -110,7 +110,7 @@ namespace FlamingIRC
                 byte[] quads = BitConverter.GetBytes(long.Parse(networkOrder, CultureInfo.InvariantCulture));
                 return IPAddress.Parse(quads[3] + "." + quads[2] + "." + quads[1] + "." + quads[0]);
             }
-            catch (FormatException fe)
+            catch (FormatException)
             {
                 throw new ArgumentException(networkOrder + " is not a valid network address.");
             }

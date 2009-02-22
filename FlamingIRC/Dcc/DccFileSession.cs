@@ -207,7 +207,7 @@ namespace FlamingIRC
                 {
                     socket.Close();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     //Ignore this exception
                 }
@@ -252,7 +252,7 @@ namespace FlamingIRC
                     UploadLegacy();
                 }
             }
-            catch (Exception se)
+            catch (Exception)
             {
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccFileSession::Listen() Connection broken");
                 Interrupted();

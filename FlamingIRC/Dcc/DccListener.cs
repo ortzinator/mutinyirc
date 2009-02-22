@@ -125,7 +125,7 @@ namespace FlamingIRC
 								Rfc2812Util.ParseUserLine( requestor ),
 								new IPEndPoint( DccUtil.LongToIPAddress( tokens[ Address ]), int.Parse( tokens[ Port], CultureInfo.InvariantCulture ) ) );
 						}
-						catch( ArgumentException ae ) 
+						catch( ArgumentException) 
 						{
 							connection.Listener.Error( ReplyCode.BadDccEndpoint, "Invalid TCP/IP connection information sent." );
 							return;
