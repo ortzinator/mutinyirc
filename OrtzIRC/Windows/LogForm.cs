@@ -1,10 +1,10 @@
-﻿using System;
-using System.Windows.Forms;
-using System.IO;
-using System.Diagnostics;
-
-namespace OrtzIRC.Windows
+﻿namespace OrtzIRC
 {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Windows.Forms;
+
     // Logs display and management class
     // Made by Guillaume 'gparent' Parent (gparent@gmail.com) 2009
     public partial class LogForm : Form
@@ -94,7 +94,7 @@ namespace OrtzIRC.Windows
         // Deletes a single log file or a directory (NYI)
         private void LogBTNDelete_Click(object sender, EventArgs e)
         {
-            FileNode fn = (FileNode) LogTVLogfiles.SelectedNode;
+            FileNode fn = (FileNode)LogTVLogfiles.SelectedNode;
 
             DialogResult dr = MessageBox.Show("Do you really want to delete " + fn.Text + "?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
 
@@ -128,7 +128,7 @@ namespace OrtzIRC.Windows
         private void LogBTNDeleteAll_Click(object sender, EventArgs e)
         {
             DialogResult dr = MessageBox.Show("WARNING: This will delete ALL logs files from the logs directory. This cannot be undone. Continue?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-            
+
             if (dr == DialogResult.Yes)
             {
                 DirectoryInfo di = new DirectoryInfo(RunningDir.FullName + "\\logs");
@@ -145,7 +145,7 @@ namespace OrtzIRC.Windows
         // Updates the controls depending on whether or not a file is selected or not
         private void LogTVLogfiles_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            FileNode fn = (FileNode) e.Node;
+            FileNode fn = (FileNode)e.Node;
 
             if (!fn.isDummy && fn.isFile)
             {

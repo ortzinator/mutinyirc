@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC.Windows
+﻿namespace OrtzIRC
 {
     partial class LogForm
     {
