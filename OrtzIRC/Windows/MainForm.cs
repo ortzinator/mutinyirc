@@ -1,4 +1,3 @@
-using OrtzIRC.Windows;
 namespace OrtzIRC
 {
     using System;
