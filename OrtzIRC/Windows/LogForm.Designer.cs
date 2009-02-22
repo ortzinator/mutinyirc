@@ -30,12 +30,12 @@
         {
             this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
-            this.LogBTNOpen = new System.Windows.Forms.Button();
-            this.LogBTNView = new System.Windows.Forms.Button();
-            this.LogBTNDelete = new System.Windows.Forms.Button();
+            this.openLogButton = new System.Windows.Forms.Button();
+            this.viewLogButton = new System.Windows.Forms.Button();
+            this.deleteLogButton = new System.Windows.Forms.Button();
             this.LogOpenTooltip = new System.Windows.Forms.ToolTip(this.components);
-            this.LogTVLogfiles = new System.Windows.Forms.TreeView();
-            this.LogBTNDeleteAll = new System.Windows.Forms.Button();
+            this.logFilesTreeView = new System.Windows.Forms.TreeView();
+            this.deleteAllLogButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -47,68 +47,68 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Note: Logging can be enabled or disabled within the options dialog";
             // 
-            // LogBTNOpen
+            // openLogButton
             // 
-            this.LogBTNOpen.Location = new System.Drawing.Point(295, 81);
-            this.LogBTNOpen.Name = "LogBTNOpen";
-            this.LogBTNOpen.Size = new System.Drawing.Size(135, 27);
-            this.LogBTNOpen.TabIndex = 1;
-            this.LogBTNOpen.Text = "Open";
-            this.LogBTNOpen.UseVisualStyleBackColor = true;
-            this.LogBTNOpen.Click += new System.EventHandler(this.LogBTNOpen_Click);
+            this.openLogButton.Location = new System.Drawing.Point(295, 81);
+            this.openLogButton.Name = "openLogButton";
+            this.openLogButton.Size = new System.Drawing.Size(135, 27);
+            this.openLogButton.TabIndex = 1;
+            this.openLogButton.Text = "Open";
+            this.openLogButton.UseVisualStyleBackColor = true;
+            this.openLogButton.Click += new System.EventHandler(this.LogBTNOpen_Click);
             // 
-            // LogBTNView
+            // viewLogButton
             // 
-            this.LogBTNView.Location = new System.Drawing.Point(295, 114);
-            this.LogBTNView.Name = "LogBTNView";
-            this.LogBTNView.Size = new System.Drawing.Size(135, 27);
-            this.LogBTNView.TabIndex = 2;
-            this.LogBTNView.Text = "View";
-            this.LogBTNView.UseVisualStyleBackColor = true;
-            this.LogBTNView.Click += new System.EventHandler(this.LogBTNView_Click);
+            this.viewLogButton.Location = new System.Drawing.Point(295, 114);
+            this.viewLogButton.Name = "viewLogButton";
+            this.viewLogButton.Size = new System.Drawing.Size(135, 27);
+            this.viewLogButton.TabIndex = 2;
+            this.viewLogButton.Text = "View";
+            this.viewLogButton.UseVisualStyleBackColor = true;
+            this.viewLogButton.Click += new System.EventHandler(this.LogBTNView_Click);
             // 
-            // LogBTNDelete
+            // deleteLogButton
             // 
-            this.LogBTNDelete.Location = new System.Drawing.Point(295, 147);
-            this.LogBTNDelete.Name = "LogBTNDelete";
-            this.LogBTNDelete.Size = new System.Drawing.Size(135, 27);
-            this.LogBTNDelete.TabIndex = 4;
-            this.LogBTNDelete.Text = "Delete";
-            this.LogBTNDelete.UseVisualStyleBackColor = true;
-            this.LogBTNDelete.Click += new System.EventHandler(this.LogBTNDelete_Click);
+            this.deleteLogButton.Location = new System.Drawing.Point(295, 147);
+            this.deleteLogButton.Name = "deleteLogButton";
+            this.deleteLogButton.Size = new System.Drawing.Size(135, 27);
+            this.deleteLogButton.TabIndex = 4;
+            this.deleteLogButton.Text = "Delete";
+            this.deleteLogButton.UseVisualStyleBackColor = true;
+            this.deleteLogButton.Click += new System.EventHandler(this.LogBTNDelete_Click);
             // 
             // LogOpenTooltip
             // 
             this.LogOpenTooltip.Tag = "Opens with the system\'s default text editor";
             // 
-            // LogTVLogfiles
+            // logFilesTreeView
             // 
-            this.LogTVLogfiles.Location = new System.Drawing.Point(12, 81);
-            this.LogTVLogfiles.Name = "LogTVLogfiles";
-            this.LogTVLogfiles.Size = new System.Drawing.Size(277, 316);
-            this.LogTVLogfiles.TabIndex = 5;
-            this.LogTVLogfiles.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.LogTVLogfiles_AfterSelect);
+            this.logFilesTreeView.Location = new System.Drawing.Point(12, 81);
+            this.logFilesTreeView.Name = "logFilesTreeView";
+            this.logFilesTreeView.Size = new System.Drawing.Size(277, 316);
+            this.logFilesTreeView.TabIndex = 5;
+            this.logFilesTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.LogTVLogfiles_AfterSelect);
             // 
-            // LogBTNDeleteAll
+            // deleteAllLogButton
             // 
-            this.LogBTNDeleteAll.Location = new System.Drawing.Point(295, 208);
-            this.LogBTNDeleteAll.Name = "LogBTNDeleteAll";
-            this.LogBTNDeleteAll.Size = new System.Drawing.Size(135, 27);
-            this.LogBTNDeleteAll.TabIndex = 6;
-            this.LogBTNDeleteAll.Text = "Delete all logs";
-            this.LogBTNDeleteAll.UseVisualStyleBackColor = true;
-            this.LogBTNDeleteAll.Click += new System.EventHandler(this.LogBTNDeleteAll_Click);
+            this.deleteAllLogButton.Location = new System.Drawing.Point(295, 208);
+            this.deleteAllLogButton.Name = "deleteAllLogButton";
+            this.deleteAllLogButton.Size = new System.Drawing.Size(135, 27);
+            this.deleteAllLogButton.TabIndex = 6;
+            this.deleteAllLogButton.Text = "Delete all logs";
+            this.deleteAllLogButton.UseVisualStyleBackColor = true;
+            this.deleteAllLogButton.Click += new System.EventHandler(this.LogBTNDeleteAll_Click);
             // 
             // LogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(433, 443);
-            this.Controls.Add(this.LogBTNDeleteAll);
-            this.Controls.Add(this.LogTVLogfiles);
-            this.Controls.Add(this.LogBTNDelete);
-            this.Controls.Add(this.LogBTNView);
-            this.Controls.Add(this.LogBTNOpen);
+            this.Controls.Add(this.deleteAllLogButton);
+            this.Controls.Add(this.logFilesTreeView);
+            this.Controls.Add(this.deleteLogButton);
+            this.Controls.Add(this.viewLogButton);
+            this.Controls.Add(this.openLogButton);
             this.Controls.Add(this.label1);
             this.Name = "LogForm";
             this.Text = "Logging";
@@ -122,11 +122,11 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button LogBTNOpen;
-        private System.Windows.Forms.Button LogBTNView;
-        private System.Windows.Forms.Button LogBTNDelete;
+        private System.Windows.Forms.Button openLogButton;
+        private System.Windows.Forms.Button viewLogButton;
+        private System.Windows.Forms.Button deleteLogButton;
         private System.Windows.Forms.ToolTip LogOpenTooltip;
-        private System.Windows.Forms.TreeView LogTVLogfiles;
-        private System.Windows.Forms.Button LogBTNDeleteAll;
+        private System.Windows.Forms.TreeView logFilesTreeView;
+        private System.Windows.Forms.Button deleteAllLogButton;
     }
 }

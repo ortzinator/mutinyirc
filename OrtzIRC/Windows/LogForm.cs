@@ -46,40 +46,40 @@
                         }
 
                         // Add network node to list
-                        LogTVLogfiles.Nodes.Add(dirNode);
+                        logFilesTreeView.Nodes.Add(dirNode);
                     }
                 }
                 else // Found no network subdirs
                 {
-                    LogTVLogfiles.Nodes.Add(new FileNode(true, "No logs found"));
+                    logFilesTreeView.Nodes.Add(new FileNode(true, "No logs found"));
                 }
             }
             else // Found no logs directory
             {
-                LogTVLogfiles.Nodes.Add(new FileNode(true, "Log directory doesn't exist."));
+                logFilesTreeView.Nodes.Add(new FileNode(true, "Log directory doesn't exist."));
             }
         }
 
         // Allows us to turn off the controls depending on context
         private void ToggleControls(bool enable)
         {
-            LogBTNOpen.Enabled = enable;
-            LogBTNView.Enabled = enable;
-            LogBTNDelete.Enabled = enable;
-            LogBTNDeleteAll.Enabled = enable;
+            openLogButton.Enabled = enable;
+            viewLogButton.Enabled = enable;
+            deleteLogButton.Enabled = enable;
+            deleteAllLogButton.Enabled = enable;
         }
 
         // Clear the tree on close so that we refill it with appropriate files on loading
         // (Will not show deleted logs)
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            LogTVLogfiles.Nodes.Clear();
+            logFilesTreeView.Nodes.Clear();
         }
 
         // Opens a log with the default text editor
         private void LogBTNOpen_Click(object sender, EventArgs e)
         {
-            Process.Start(LogTVLogfiles.SelectedNode.Name);
+            Process.Start(logFilesTreeView.SelectedNode.Name);
         }
 
         // This should open the log with our own log browser
@@ -94,7 +94,7 @@
         // Deletes a single log file or a directory (NYI)
         private void LogBTNDelete_Click(object sender, EventArgs e)
         {
-            FileNode fn = (FileNode)LogTVLogfiles.SelectedNode;
+            FileNode fn = (FileNode)logFilesTreeView.SelectedNode;
 
             DialogResult dr = MessageBox.Show("Do you really want to delete " + fn.Text + "?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
 
@@ -121,7 +121,7 @@
                 }
             }
 
-            LogTVLogfiles.Nodes.Remove(LogTVLogfiles.SelectedNode);
+            logFilesTreeView.Nodes.Remove(logFilesTreeView.SelectedNode);
         }
 
         // Clears the entire log directory
@@ -138,7 +138,7 @@
                     di.Delete(true);
                 }
 
-                LogTVLogfiles.Nodes.Clear();
+                logFilesTreeView.Nodes.Clear();
             }
         }
 
