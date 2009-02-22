@@ -170,7 +170,7 @@ namespace FlamingIRC
                 //Start listening for messages
                 ReceiveMessages();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Listen() Connection broken");
             }
@@ -233,7 +233,7 @@ namespace FlamingIRC
                 //Read loop broken. Remote user must have closed the socket
                 dccUser.Connection.Listener.Error(ReplyCode.ConnectionFailed, "Chat connection closed by remote user.");
             }
-            catch (ThreadAbortException tae)
+            catch (ThreadAbortException)
             {
                 Debug.WriteLineIf(DccUtil.DccTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccChatSession::ReceiveMessages() Thread manually stopped. ");
                 //Prevent the exception from being re-thrown in the Listen() method.

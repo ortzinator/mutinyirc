@@ -138,7 +138,7 @@ namespace FlamingIRC
                     goto loop;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run() Identd stopped");
             }
