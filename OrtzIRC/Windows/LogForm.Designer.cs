@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.label1 = new System.Windows.Forms.Label();
+            this.noteEnableLogLabel = new System.Windows.Forms.Label();
             this.openLogButton = new System.Windows.Forms.Button();
             this.viewLogButton = new System.Windows.Forms.Button();
             this.deleteLogButton = new System.Windows.Forms.Button();
@@ -38,14 +38,14 @@
             this.deleteAllLogButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // label1
+            // noteEnableLogLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 419);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(321, 13);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Note: Logging can be enabled or disabled within the options dialog";
+            this.noteEnableLogLabel.AutoSize = true;
+            this.noteEnableLogLabel.Location = new System.Drawing.Point(12, 419);
+            this.noteEnableLogLabel.Name = "noteEnableLogLabel";
+            this.noteEnableLogLabel.Size = new System.Drawing.Size(321, 13);
+            this.noteEnableLogLabel.TabIndex = 0;
+            this.noteEnableLogLabel.Text = "Note: Logging can be enabled or disabled within the options dialog";
             // 
             // openLogButton
             // 
@@ -109,7 +109,7 @@
             this.Controls.Add(this.deleteLogButton);
             this.Controls.Add(this.viewLogButton);
             this.Controls.Add(this.openLogButton);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.noteEnableLogLabel);
             this.Name = "LogForm";
             this.Text = "Logging";
             this.Load += new System.EventHandler(this.LogForm_Load);
@@ -121,7 +121,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label noteEnableLogLabel;
         private System.Windows.Forms.Button openLogButton;
         private System.Windows.Forms.Button viewLogButton;
         private System.Windows.Forms.Button deleteLogButton;
