@@ -1,17 +1,51 @@
 ﻿namespace OrtzIRC.Common
 {
     using System;
-    using System.IO;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
     using FlamingIRC;
+    using OrtzIRC;
+
+    /// <summary>
+    /// Purpose: Handle the environnement around the manager such as subscribing
+    ///          to program events and managing whether the logger is on or off.
+    ///          it also listens to the various events in the program in order
+    ///          to detect any text input and tell the logger what to do.
+    /// </summary>
+    public static class TextLoggerManager
+    {
+        // This should be changed to forms but I'm trying to grasp the codebase atm
+        // Doesn't look like there's a clean way to do it, and I don't want to refactor
+        // code that isn't mine too much.
+        public static void ServerWindowOpened(Server Network)
+        {
+            // Register to AddLine event
+        }
+
+        public static void ServerWindowClosed(Server Network)
+        {
+            // Unregister AddLine event (Might be unnecessary)
+        }
+
+        public static void ChannelWindowOpened(Channel Chan)
+        {
+            // Register to AddLine event            
+        }
+
+        public static void ChannelWindowClosed(Channel Chan)
+        {
+            // Unregister AddLine event (Might be unnecessary)
+        }    
+    }
 
     /// <summary>
     /// Purpose: Log text entry by registering to various channel and network/pmsg events
     ///          and writing their output to a text file.       
     /// </summary>
-    class TextLogger
+    public static class TextLogger
     {
-        /*       
+        /*    
               Network messages, channel text and private messages can be logged.
               
               By default the output is in ./logs/
@@ -22,9 +56,11 @@
          */
 
         // TEMP: Whether the logging facility is active. NYI.
-        public bool Active { get; private set; }
+        public static bool Active { get; private set; }
         // TEMP: Better way to do this? See below
-        public String LastError { get; private set; }
+        public static String LastError { get; private set; }
+
+        private static readonly string LogDir = Environment.CurrentDirectory + "\\logs";
 
         /************************************************************************/
         /* Small explanation for this:
@@ -44,120 +80,107 @@
          * 
          * If we want the network log, we do ' ' + Server.URI.
         /************************************************************************/
-        Dictionary<string, Dictionary<string, TextWriter>> LogFiles = 
-            new Dictionary<string, Dictionary<String, TextWriter>>();
-
-        #region Logging
+        private static Dictionary<string, Dictionary<string, FileStream>> LogFiles =
+            new Dictionary<string, Dictionary<String, FileStream>>();
 
         // ***** LOGGING HAPPENS HERE *****
 
-        void TextEntry(Server Network, String Text)
+        public static void TextEntry(Server Network, String Text)
         {
-            if (NtwLogExists(Network))
+            CheckWriteServer(Network);
+
+            try
             {
-                try
-                {
-                    LogFiles[Network.URI][' ' + Network.URI].WriteLine(Text);
-                }
-                catch (IOException ex)
-                {
-                    // TODO: Should we throw? I might see while implementing logging registration later.
-                    Active = false;
-                    LastError = ex.ToString();
-                }
+                byte[] WriteMe = GetBytes(Text);
+                LogFiles[Network.URI][' ' + Network.URI].Write(WriteMe, 0, WriteMe.Length);
+            }
+            catch (IOException)
+            {
+                ResetServer(Network);
+                TextEntry(Network, Text);
             }
         }
 
-        void TextEntry(Server Network, User Person, String Text)
+        public static void TextEntry(Server Network, User Person, String Text)
         {
-            if (PersonExists(Network, Person))
+            CheckWritePerson(Network, Person);
+
+            byte[] WriteMe = GetBytes(Text);
+
+            try
             {
-                try
-                {
-                    LogFiles[Network.URI][Person.Nick].WriteLine(Text);
-                }
-                catch (IOException ex)
-                {
-                    // TODO: Should we throw? I might see while implementing logging registration later.
-                    Active = false;
-                    LastError = ex.ToString();
-                }
+                LogFiles[Network.URI][Person.Nick].Write(WriteMe, 0, WriteMe.Length);
+            }
+            catch (IOException)
+            {
+                ResetPerson(Network, Person);
+                TextEntry(Network, Person, Text);
+            }
+    }
+
+        public static void TextEntry(Channel Chan, String Text)
+        {
+            CheckWriteChannel(Chan);
+
+            try
+            {
+                byte[] WriteMe = GetBytes(Text);
+                LogFiles[Chan.Server.URI][Chan.Name].Write(WriteMe, 0, WriteMe.Length);
+            }
+            catch (IOException)
+            {
+                ResetChannel(Chan);
+                TextEntry(Chan, Text);
             }
         }
 
-        void TextEntry(Channel Chan, String Text)
-        {
-            if (ChannelExists(Chan))
-            {
-                try
-                {
-                    LogFiles[Chan.Server.URI][Chan.Name].WriteLine(Text);
-                }
-                catch (IOException ex)
-                {
-                    // TODO: Should we throw? I might see while implementing logging registration later.
-                    Active = false;
-                    LastError = ex.ToString();
-                }
-            }
-            else
-            {
-                // Enforce API
-                throw new InvalidOperationException("Use log registration to write to log!");
-            }
-        }
-
-        #endregion
-
-        #region Exists
-
-        // ***** VERIFIES WHETHER THE REQUIRED ELEMENT IS IN THE LOGFILES STRUCTURE ******
-
-        bool NetworkExists(Server Network)
-        {
-            return LogFiles.ContainsKey(Network.URI);
-        }
-
-        bool ChannelExists(Channel Chan)
-        {
-            return (NetworkExists(Chan.Server) && LogFiles[Chan.Server.URI].ContainsKey(Chan.Name));
-        }
-
-        bool PersonExists(Server Network, User Person)
-        {
-            return (NetworkExists(Network) && LogFiles[Network.URI].ContainsKey(Person.Nick));
-        }
-
-        bool NtwLogExists(Server Network)
-        {
-            return (NetworkExists(Network) && LogFiles[Network.URI].ContainsKey(' ' + Network.URI));
-        }
-
-        #endregion
-
-        #region Add/Remove
 
         // ***** MANAGES DATASTRUCT *****
 
-        #region Server
-
-        void AddServer(Server Network)
+        public static void AddServer(Server Network)
         {
-            try
+            if (!NetworkExists(Network))
             {
-                // TODO: Figure out log files checks so we don't get IO exception
-                // -Is StreamWriter really the best way to do this? 
-                // -Need to do non-locking IO like mIRC.
-                // -Change default Capacity value to something like 10
-                LogFiles.Add(Network.URI, new Dictionary<string,TextWriter>());
-            }
-            catch (ArgumentException)
-            {
-                throw new ApplicationException("TextLogger Broken");
+                LogFiles.Add(Network.URI, new Dictionary<string, FileStream>());
+
+                // Create log file
+                String prepath = LogDir + "\\" + Network.URI;
+                CreateIfNotExists(prepath);
+
+                LogFiles[Network.URI].Add(' ' + Network.URI,
+                    new FileStream(prepath + "\\!" + Network.URI + ".log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
             }
         }
-        
-        void RemoveServer(Server Network)
+
+        public static void AddChannel(Channel Chan)
+        {
+            AddServer(Chan.Server);
+
+            if (!ChannelExists(Chan))
+            {
+                String prepath = LogDir + "\\" + Chan.Server.URI + "\\";
+                CreateIfNotExists(prepath);
+
+                LogFiles[Chan.Server.URI].Add(Chan.Name,
+                    new FileStream(prepath + Chan.Name + ".log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
+            }
+        }
+
+        public static void AddPerson(Server Network, User Person)
+        {
+            AddServer(Network);
+
+            if (!PersonExists(Network, Person))
+            {
+                String prepath = LogDir + "\\" + Network.URI + "\\";
+                CreateIfNotExists(prepath);
+
+                LogFiles[Network.URI].Add(Person.Nick,
+                    new FileStream(prepath + Person.Nick + ".log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
+            }
+        }
+
+        public static void RemoveServer(Server Network)
         {
             if (NetworkExists(Network))
             {
@@ -166,20 +189,7 @@
             }
         }
 
-        #endregion
-
-        #region Channel
-
-        void AddChannel(Channel Chan)
-        {
-            if (!NetworkExists(Chan.Server) && !ChannelExists(Chan))
-            {
-                // TODO: Text writer
-                LogFiles[Chan.Server.URI].Add(Chan.Name, null);
-            }
-        }
-
-        void RemoveChannel(Channel Chan)
+        public static void RemoveChannel(Channel Chan)
         {
             if (NetworkExists(Chan.Server))
             {
@@ -187,20 +197,7 @@
             }
         }
 
-        #endregion
-
-        #region Person
-
-        void AddPerson(Server Network, User Person)
-        {
-            if (NetworkExists(Network) && !PersonExists(Network, Person))
-            {
-                // TODO: Text writer
-                LogFiles[Network.URI].Add(Person.Nick, null);
-            }
-        }
-
-        void RemovePerson(Server Network, User Person)
+        public static void RemovePerson(Server Network, User Person)
         {
             if (NetworkExists(Network))
             {
@@ -208,8 +205,83 @@
             }
         }
 
-        #endregion
+        // ***** ERROR DETECTION / RECOVERY *****
 
-        #endregion
+        private static void ResetServer(Server Network)
+        {
+            RemoveServer(Network);
+            AddServer(Network);
+        }
+
+        private static void ResetChannel(Channel Chan)
+        {
+            RemoveChannel(Chan);
+            AddChannel(Chan);
+        }
+
+        private static void ResetPerson(Server Network, User Person)
+        {
+            RemovePerson(Network, Person);
+            AddPerson(Network, Person);
+        }
+
+        private static void CheckWriteServer(Server Network)
+        {
+            AddServer(Network);
+        }
+
+        private static void CheckWriteChannel(Channel Chan)
+        {
+            AddChannel(Chan);
+        }
+
+        private static void CheckWritePerson(Server Network, User Person)
+        {
+            AddPerson(Network, Person);
+        }
+
+        // ***** UTIL *****
+
+        private static String LogDirPath = Environment.CurrentDirectory + "\\logs" + '\\';
+        public static void CreateIfNotExists(String path)
+        {
+            if (!Directory.Exists(LogDirPath + path))
+            {
+                Directory.CreateDirectory(LogDirPath + path);
+            }
+        }
+
+        private static readonly ASCIIEncoding encoding = new ASCIIEncoding();
+        private static byte[] GetBytes(String Str)
+        {
+            return (encoding.GetBytes(Str));
+        }
+
+        private static string GetString(byte[] Array)
+        {
+            return (encoding.GetString(Array));
+        }
+
+        // ***** VERIFIES WHETHER THE REQUIRED ELEMENT IS IN THE LOGFILES STRUCTURE ******
+
+        private static bool NetworkExists(Server Network)
+        {
+            return LogFiles.ContainsKey(Network.URI);
+        }
+
+        private static bool ChannelExists(Channel Chan)
+        {
+            return (NetworkExists(Chan.Server) && LogFiles[Chan.Server.URI].ContainsKey(Chan.Name));
+        }
+
+        private static bool PersonExists(Server Network, User Person)
+        {
+            return (NetworkExists(Network) && LogFiles[Network.URI].ContainsKey(Person.Nick));
+        }
+
+        private static bool NtwLogExists(Server Network)
+        {
+            return (NetworkExists(Network) && LogFiles[Network.URI].ContainsKey(' ' + Network.URI));
+        }
     }
 }

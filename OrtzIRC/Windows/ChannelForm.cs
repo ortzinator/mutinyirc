@@ -7,11 +7,15 @@
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
 
+    public delegate void ChannelFormAddLineEventHandler(string Text);
+
     public partial class ChannelForm : Form
     {
         private Server Server;
         public Channel Channel { get; private set; }
         private string ChannelName;
+
+        public event ChannelFormAddLineEventHandler LineAdded;
 
         public ChannelForm(Channel channel)
         {
@@ -119,6 +123,9 @@
         public void AddLine(string line)
         {
             channelOutputBox.AppendLine(line);
+
+            if (LineAdded != null)
+                LineAdded(line);
         }
     }
 }

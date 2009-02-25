@@ -24,6 +24,9 @@
             else
             {
                 throw new Exception("Not a valid channel name."); //TODO: Make exception less lame
+                // TODO: P90: Do we really need to throw and generate a full stack trace and snapshot
+                //            just because of a potential mistake? Maybe a check for bool would be faster
+                //            but I'm not sure how good C# handles exceptions.
             }
         }
 
