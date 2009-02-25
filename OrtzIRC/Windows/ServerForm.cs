@@ -8,8 +8,12 @@ namespace OrtzIRC
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Resources;
 
+    public delegate void ServerFormAddLineEventHandler(string Text);
+
     public partial class ServerForm : Form
     {
+        public event ServerFormAddLineEventHandler LineAdded;
+
         private Server server;
 
         public Server Server
@@ -88,7 +92,7 @@ namespace OrtzIRC
 
         private void Server_Connecting(object sender, CancelEventArgs e)
         {
-            this.serverOutputBox.AppendLine(ServerStrings.ConnectingMessage.With(this.server.URI, this.server.Port));
+            AddLine(ServerStrings.ConnectingMessage.With(this.server.URI, this.server.Port));
         }
 
         private void ParentServer_OnKick(object sender, KickEventArgs e)
@@ -108,7 +112,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnError(object sender, ErrorMessageEventArgs a)
         {
-            this.serverOutputBox.AppendLine(a.Code.ToString() + " " + a.Message);
+            AddLine(a.Code.ToString() + " " + a.Message);
         }
 
         private void ParentServer_OnRawMessageReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
@@ -123,12 +127,12 @@ namespace OrtzIRC
 
         private void ParentServer_OnPrivateNotice(object sender, PrivateMessageEventArgs e)
         {
-            this.serverOutputBox.AppendLine("-" + e.User.Nick + ":" + e.Message + "-");
+            AddLine("-" + e.User.Nick + ":" + e.Message + "-");
         }
 
         private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<string> e)
         {
-            this.serverOutputBox.AppendLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
+            AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
         }
 
         private void ParentServer_OnAction(object sender, ChannelMessageEventArgs e)
@@ -190,6 +194,14 @@ namespace OrtzIRC
             //TODO: Close ChannelForms
 
             base.OnFormClosed(e);
+        }
+
+        private void AddLine(String Text)
+        {
+            this.serverOutputBox.AppendLine(Text);
+
+            if (LineAdded != null)
+                LineAdded(Text);
         }
     }
 }
