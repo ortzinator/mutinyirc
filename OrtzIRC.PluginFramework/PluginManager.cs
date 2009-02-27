@@ -12,10 +12,8 @@
     /// </summary>
     public sealed class PluginManager
     {
-        private static List<PluginInfo> plugins;
         private static Dictionary<string, CommandInfo> commands;
-
-        public static PluginManager Instance { get; private set; }
+        private static List<PluginInfo> plugins;
 
         private static string userPluginPath;
 
@@ -24,6 +22,8 @@
             plugins = new List<PluginInfo>();
             commands = new Dictionary<string, CommandInfo>();
         }
+
+        public static PluginManager Instance { get; private set; }
 
         /// <summary>
         /// Instantiates the PluginManager and loads any plugins found.
@@ -77,7 +77,7 @@
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine("Could not load " + file + Environment.NewLine + ex.ToString(), TraceCategories.PluginSystem);
+                    Trace.WriteLine("Could not load " + file + Environment.NewLine + ex, TraceCategories.PluginSystem);
                 }
             }
         }
@@ -87,14 +87,13 @@
             //TODO
             foreach (KeyValuePair<string, CommandInfo> item in commands)
             {
-                if (item.Key == command)
+                if (item.Key != command) continue;
+
+                CommandInfo cmd = item.Value;
+
+                foreach (MethodInfo method in cmd.Type.GetMethods())
                 {
-                    CommandInfo cmd = item.Value;
 
-                    foreach (MethodInfo method in cmd.Type.GetMethods())
-                    {
-
-                    }
                 }
             }
             return null;
@@ -118,6 +117,11 @@
 
             }
             return null;
+        }
+
+        public static CommandResultInfo ExecuteCommand(CommandExecutionInfo info)
+        {
+            return new CommandResultInfo(); //Hack: So it builds
         }
     }
 }

@@ -1,26 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using OrtzIRC.Properties;
-using System.Collections;
-
 namespace OrtzIRC.Dialogs
 {
+    using System;
+    using System.Windows.Forms;
+    using OrtzIRC.Common;
+
     public partial class ServerDialog : Form
     {
-        IRCSettingsManager _serverManager;
+        private IRCSettingsManager serverManager;
+
         public ServerDialog()
         {
-            _serverManager = IRCSettingsManager.Instance;
-            this.FormClosing += new FormClosingEventHandler(ServerDialog_FormClosing);
+            serverManager = IRCSettingsManager.Instance;
+            FormClosing += ServerDialog_FormClosing;
             InitializeComponent();
         }
 
-        void ServerDialog_FormClosing(object sender, FormClosingEventArgs e)
+        private void ServerDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
             //Settings.Default.Save();
         }

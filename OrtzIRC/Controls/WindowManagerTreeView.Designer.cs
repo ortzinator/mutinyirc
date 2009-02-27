@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC.Controls
+﻿namespace OrtzIRC
 {
     partial class WindowManagerTreeView
     {

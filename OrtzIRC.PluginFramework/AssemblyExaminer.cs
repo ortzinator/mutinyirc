@@ -24,7 +24,7 @@
                 .Where(o => o.IsClass)
                 .Where(o => (o.Attributes & TypeAttributes.Abstract) != TypeAttributes.Abstract)
                 .Where(o => o.GetCustomAttributes(typeof(PluginAttribute), false).Length > 0)
-                .Where(o => o.GetInterfaces().Contains<Type>(typeof(IPlugin)));
+                .Where(o => o.GetInterfaces().Contains(typeof(IPlugin)));
 
             foreach (Type type in query)
             {
@@ -45,7 +45,7 @@
                     else
                     {
                         //Would be useful for plugin devs to know
-                        Trace.WriteLine("XML docs not found for the assembly: " + asm.ToString(), TraceCategories.PluginSystem);
+                        Trace.WriteLine("XML docs not found for the assembly: " + asm, TraceCategories.PluginSystem);
                     }
 
                     string name = ((PluginAttribute[])type.GetCustomAttributes(typeof(PluginAttribute), false))[0].Name;

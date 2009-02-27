@@ -6,16 +6,16 @@
 
     public sealed class ChannelManager
     {
+        private bool recievingNames;
+
         public ChannelManager(Server server)
         {
-            this.Server = server;
-            this.Channels = new Dictionary<string, Channel>();
+            Server = server;
+            Channels = new Dictionary<string, Channel>();
 
-            Server.OnNames += new NamesEventHandler(Server_OnNames);
-            Server.OnNick += new Server_NickEventHandler(Server_OnNick);
+            Server.OnNames += Server_OnNames;
+            Server.OnNick += Server_OnNick;
         }
-
-        private bool recievingNames = false;
 
         public Dictionary<string, Channel> Channels { get; private set; }
         public Server Server { get; private set; }
@@ -67,11 +67,9 @@
                 {
                     return true;
                 }
-                else
-                {
-                    Channels.Remove(channelName);
-                    //Is this all that needs to be done?
-                } 
+
+                Channels.Remove(channelName);
+                //TODO: Is this all that needs to be done?
             }
             return false;
         }
@@ -82,12 +80,10 @@
             {
                 return Channels[channelName];
             }
-            else
-            {
-                Channel newChan = new Channel(this.Server, channelName);
-                Channels.Add(channelName, newChan);
-                return newChan;
-            }
+
+            Channel newChan = new Channel(Server, channelName);
+            Channels.Add(channelName, newChan);
+            return newChan;
         }
     }
 }

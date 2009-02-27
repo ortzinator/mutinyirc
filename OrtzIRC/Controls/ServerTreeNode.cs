@@ -1,26 +1,26 @@
-﻿namespace OrtzIRC.Controls
+﻿namespace OrtzIRC
 {
     using System.Windows.Forms;
 
     public class ServerTreeNode : TreeNode
     {
-        public ServerForm ServerWindow { get; private set; }
-
         public ServerTreeNode(ServerForm serverWindow)
         {
-            this.ServerWindow = serverWindow;
-            this.Text = serverWindow.Server.Description;
-            serverWindow.FormClosed += new FormClosedEventHandler(serverWindow_FormClosed);
+            ServerWindow = serverWindow;
+            Text = serverWindow.Server.Description;
+            serverWindow.FormClosed += serverWindow_FormClosed;
         }
+
+        public ServerForm ServerWindow { get; private set; }
 
         private void serverWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.Remove();
+            Remove();
         }
 
         public void AddChannelNode(ChannelTreeNode channelNode)
         {
-            this.Nodes.Add(channelNode);
+            Nodes.Add(channelNode);
         }
     }
 }

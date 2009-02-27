@@ -1,11 +1,10 @@
 ﻿namespace OrtzIRC.Common
 {
     using System.Collections.Generic;
-    using OrtzIRC.Common;
 
     public class ServerManager
     {
-        private static ServerManager _instance;
+        private static ServerManager instance;
 
         public static List<Server> ServerList { get; private set; }
 
@@ -13,12 +12,12 @@
         {
             get 
             {
-                if (_instance == null)
+                if (instance == null)
                 {
-                    _instance = new ServerManager();
+                    instance = new ServerManager();
                     ServerList = new List<Server>();
                 }
-                return _instance;
+                return instance;
             }
         }
 

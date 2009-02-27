@@ -4,11 +4,11 @@
 
     public class DataEventArgs<T> : EventArgs
     {
-        public T Data { get; private set; }
-
         public DataEventArgs(T data)
         {
-            this.Data = data;
+            Data = data;
         }
+
+        public T Data { get; private set; }
     }
 }
