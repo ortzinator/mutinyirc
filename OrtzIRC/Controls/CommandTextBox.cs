@@ -1,25 +1,23 @@
-﻿namespace OrtzIRC.Controls
+﻿namespace OrtzIRC
 {
     using System;
     using System.Collections.Generic;
     using System.Windows.Forms;
     using OrtzIRC.Common;
-    using System.ComponentModel;
 
     public partial class CommandTextBox : TextBox
     {
-        public List<string> CmdHistory { get; private set; }
         private int _historyIndex;
-
-        public event EventHandler<DataEventArgs<string>> CommandEntered;
 
         public CommandTextBox()
         {
             InitializeComponent();
 
-            CmdHistory = new List<string>();
-            CmdHistory.Capacity = 40;
+            CmdHistory = new List<string> { Capacity = 40 };
         }
+
+        public List<string> CmdHistory { get; private set; }
+        public event EventHandler<DataEventArgs<string>> CommandEntered;
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
@@ -29,50 +27,45 @@
                     if (_historyIndex > 0)
                     {
                         _historyIndex--;
-                        this.Text = CmdHistory[_historyIndex];
+                        Text = CmdHistory[_historyIndex];
                     }
                     break;
                 case Keys.Down:
-                    if (_historyIndex == CmdHistory.Count && this.Text.Trim() != string.Empty)
+                    if (_historyIndex == CmdHistory.Count && Text.Trim() != string.Empty)
                     {
-                        CmdHistory.Add(this.Text);
+                        CmdHistory.Add(Text);
                         _historyIndex = CmdHistory.Count;
-                        this.Clear();
+                        Clear();
                     }
                     else if (_historyIndex == CmdHistory.Count - 1)
                     {
                         _historyIndex++;
-                        this.Clear();
+                        Clear();
                     }
                     else if (_historyIndex < CmdHistory.Count)
                     {
                         _historyIndex++;
-                        this.Text = CmdHistory[_historyIndex];
+                        Text = CmdHistory[_historyIndex];
                     }
                     break;
                 case Keys.Enter:
-                    if (this.Text.Trim() != string.Empty)
+                    if (Text.Trim() != string.Empty)
                     {
                         if (_historyIndex != CmdHistory.Count)
                         {
                             CmdHistory.RemoveAt(_historyIndex);
                         }
-                        CmdHistory.Add(this.Text);
+                        CmdHistory.Add(Text);
 
-                        CommandEntered.Fire(this, new DataEventArgs<string>(this.Text.Trim()));
+                        CommandEntered.Fire(this, new DataEventArgs<string>(Text.Trim()));
 
-                        this.Clear();
+                        Clear();
                         _historyIndex = CmdHistory.Count;
                     }
                     break;
             }
 
             base.OnKeyDown(e);
-        }
-
-        protected override void OnPaint(PaintEventArgs pe)
-        {
-            base.OnPaint(pe);
         }
     }
 }

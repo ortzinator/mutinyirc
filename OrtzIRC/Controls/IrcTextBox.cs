@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC.Controls
+﻿namespace OrtzIRC
 {
     using System;
     using System.Windows.Forms;
@@ -29,19 +29,14 @@
         public IrcTextBox()
         {
             InitializeComponent();
-            this.ReadOnly = true;
-            this.BackColor = System.Drawing.SystemColors.Window;
-            this.Cursor = System.Windows.Forms.Cursors.Default;
-        }
-
-        protected override void OnPaint(PaintEventArgs pe)
-        {
-            base.OnPaint(pe);
+            ReadOnly = true;
+            BackColor = System.Drawing.SystemColors.Window;
+            Cursor = System.Windows.Forms.Cursors.Default;
         }
 
         private new void AppendText(string line)
         {
-            //TODO: Color parsing - http://www.mirc.co.uk/help/color.txt
+            //Color parsing - http://www.mirc.co.uk/help/color.txt
 
             for (int i = 0; i < line.Length; i++)
             {
@@ -115,13 +110,13 @@
 
         public void AppendLine(string line)
         {
-            this.Invoke((MethodInvoker)delegate
+            Invoke((MethodInvoker)delegate
             {
                 DateTime now = DateTime.Now;
 
-                this.AppendText("\n" + now.ToString("T",
+                AppendText("\n" + now.ToString("T",
                     System.Globalization.CultureInfo.CreateSpecificCulture("es-ES")) + " ");
-                this.AppendText(line.Trim());
+                AppendText(line.Trim());
                 ScrollToBottom();
             });
         }
@@ -149,15 +144,15 @@
 
         private void ScrollToBottom()
         {
-            this.SelectionStart = this.Text.Length;
-            this.SelectionLength = 0;
-            this.ScrollToCaret();
+            SelectionStart = Text.Length;
+            SelectionLength = 0;
+            ScrollToCaret();
         }
 
         private void ResetSelection()
         {
-            this.SelectionStart = this.Text.Length;
-            this.SelectionLength = 0;
+            SelectionStart = Text.Length;
+            SelectionLength = 0;
         }
 
         //hack - might be a better way than using OnMouseUp...
@@ -165,7 +160,7 @@
         {
             base.OnMouseUp(mevent);
 
-            string trimmed = this.SelectedText.Trim();
+            string trimmed = SelectedText.Trim();
 
             if (trimmed.Length > 1)
             {

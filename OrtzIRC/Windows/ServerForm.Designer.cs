@@ -1,4 +1,3 @@
-using OrtzIRC.Controls;
 namespace OrtzIRC
 {
     partial class ServerForm
@@ -29,8 +28,8 @@ namespace OrtzIRC
         /// </summary>
         private void InitializeComponent()
         {
-            this.serverOutputBox = new OrtzIRC.Controls.IrcTextBox();
-            this.commandTextBox = new OrtzIRC.Controls.CommandTextBox();
+            this.serverOutputBox = new OrtzIRC.IrcTextBox();
+            this.commandTextBox = new OrtzIRC.CommandTextBox();
             this.SuspendLayout();
             // 
             // serverOutputBox

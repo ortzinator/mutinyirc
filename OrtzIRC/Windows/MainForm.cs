@@ -4,7 +4,6 @@ namespace OrtzIRC
     using System.IO;
     using System.Windows.Forms;
     using OrtzIRC.Common;
-    using OrtzIRC.Controls;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
 
@@ -27,7 +26,7 @@ namespace OrtzIRC
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 Server newServer = ServerManager.Instance.Create("irc.randomirc.com", "RandomIRC", 6667, false);
-                this.CreateServerForm(newServer);
+                CreateServerForm(newServer);
                 newServer.Connect();
             }
 
@@ -36,14 +35,9 @@ namespace OrtzIRC
             base.OnLoad(e);
         }
 
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            base.OnFormClosing(e);
-        }
-
         private void exitMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void newServerMenuItem_Click(object sender, EventArgs e)
@@ -59,11 +53,11 @@ namespace OrtzIRC
         /// <returns>The ServerForm that was created</returns>
         public ServerForm CreateServerForm(Server server)
         {
-            ServerForm newServerForm = new ServerForm() { Server = server };
+            ServerForm newServerForm = new ServerForm { Server = server };
 
-            this.Invoke((MethodInvoker)delegate
+            Invoke((MethodInvoker)delegate
             {
-                windowTreeView.AddServerNode(new OrtzIRC.Controls.ServerTreeNode(newServerForm));
+                windowTreeView.AddServerNode(new ServerTreeNode(newServerForm));
                 newServerForm.MdiParent = this;
             });
 
@@ -82,7 +76,7 @@ namespace OrtzIRC
         public ChannelForm CreateChannelForm(Channel channel)
         {
             ChannelDelegate del = CreateChannelFormOnUiThread;
-            return (ChannelForm)this.Invoke(del, channel);
+            return (ChannelForm)Invoke(del, channel);
         }
 
         private delegate ChannelForm ChannelDelegate(Channel channel);
@@ -95,7 +89,7 @@ namespace OrtzIRC
             if (node == null)
                 throw new Exception("ServerTreeNode doesn't exist!"); //hack
 
-            this.Invoke((MethodInvoker)delegate
+            Invoke((MethodInvoker)delegate
             {
                 node.AddChannelNode(new ChannelTreeNode(newChannelForm));
                 node.Expand();
@@ -111,18 +105,17 @@ namespace OrtzIRC
 
         private void windowTreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            if (e.Action != TreeViewAction.Unknown)
+            if (e.Action == TreeViewAction.Unknown) return;
+
+            if (e.Node is ServerTreeNode)
             {
-                if (e.Node is ServerTreeNode)
-                {
-                    ((ServerTreeNode)e.Node).ServerWindow.Focus();
-                }
-                else if (e.Node is ChannelTreeNode)
-                {
-                    ((ChannelTreeNode)e.Node).ChannelWindow.Focus();
-                }
-                //TODO: PM and other windows
+                ((ServerTreeNode)e.Node).ServerWindow.Focus();
             }
+            else if (e.Node is ChannelTreeNode)
+            {
+                ((ChannelTreeNode)e.Node).ChannelWindow.Focus();
+            }
+            //TODO: PM and other windows
         }
 
         private void loggingToolStripMenuItem_Click(object sender, EventArgs e)

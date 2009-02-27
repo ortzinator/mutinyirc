@@ -4,15 +4,15 @@
 
     public class PrivateMessageSession
     {
-        public event EventHandler<DataEventArgs<string>> MessageReceived;
+        public PrivateMessageSession(Server parentServer, FlamingIRC.User user)
+        {
+            ParentServer = parentServer;
+            User = user;
+        }
 
         public Server ParentServer { get; private set; }
         public FlamingIRC.User User { get; private set; }
-
-        public PrivateMessageSession(Server parentServer, FlamingIRC.User user)
-        {
-            this.ParentServer = parentServer;
-        }
+        public event EventHandler<DataEventArgs<string>> MessageReceived;
 
         public void Send(string message)
         {
@@ -21,7 +21,7 @@
 
         protected virtual void OnMessageReceived(DataEventArgs<string> e)
         {
-            this.MessageReceived.Fire<DataEventArgs<string>>(this, e);
+            MessageReceived.Fire(this, e);
         }
     }
 }

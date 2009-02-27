@@ -44,7 +44,7 @@ namespace OrtzIRC
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.windowTreeView = new OrtzIRC.Controls.WindowManagerTreeView();
+            this.windowTreeView = new OrtzIRC.WindowManagerTreeView();
             this.loggingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -225,7 +225,7 @@ namespace OrtzIRC
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private OrtzIRC.Controls.WindowManagerTreeView windowTreeView;
+        private OrtzIRC.WindowManagerTreeView windowTreeView;
         private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.ToolStripMenuItem loggingToolStripMenuItem;
     }

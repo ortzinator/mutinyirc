@@ -1,7 +1,6 @@
 ﻿namespace OrtzIRC.Common
 {
     using FlamingIRC;
-    using System.Collections.Generic;
     using System;
 
     public delegate void ChannelMessageEventHandler(User nick, string message);
@@ -17,6 +16,16 @@
     /// </summary>
     public class Channel
     {
+        public Channel(Server parent, string name)
+        {
+            Server = parent;
+            Name = name;
+
+            NickList = new UserList();
+
+            Joined = true;
+        }
+
         public Server Server { get; private set; }
         public string Key { get; private set; }
         public int Limit { get; private set; }
@@ -32,7 +41,7 @@
         {
             get
             {
-                return new ChannelInfo(this.Name);
+                return new ChannelInfo(Name);
             }
         }
 
@@ -48,16 +57,6 @@
         public event ChannelKickEventHandler OnKick;
         public event EventHandler<DataEventArgs<string>> MessagedChannel;
 
-        public Channel(Server parent, string name)
-        {
-            this.Server = parent;
-            this.Name = name;
-
-            NickList = new UserList();
-
-            this.Joined = true;
-        }
-
         public void AddNick(User nick)
         {
             NickList.Add(nick);
@@ -65,7 +64,7 @@
 
         public override string ToString()
         {
-            return this.Name;
+            return Name;
         }
 
         public void NewMessage(User nick, string message)
@@ -106,13 +105,13 @@
 
         public void Part(string message)
         {
-            Server.Connection.Sender.Part(message, this.Name);
-            this.Joined = false;
+            Server.Connection.Sender.Part(message, Name);
+            Joined = false;
         }
 
         public void UserPart(User nick, string message)
         {
-            if (nick.Nick != this.Server.UserNick && OnUserPart != null)
+            if (nick.Nick != Server.UserNick && OnUserPart != null)
                 OnUserPart(nick, message);
         }
 
@@ -136,7 +135,7 @@
                 {
                     if (OnNick != null)
                         OnNick(n, newNick);
-                    Server.Connection.Sender.Names(this.Name);
+                    Server.Connection.Sender.Names(Name);
                 }
             }
         }
@@ -156,7 +155,7 @@
 
         public void UserKick(User nick, string kickee, string reason)
         {
-            Server.Connection.Sender.Names(this.Name);
+            Server.Connection.Sender.Names(Name);
 
             if (OnKick != null)
                 OnKick(nick, kickee, reason);
@@ -164,8 +163,8 @@
 
         public void Say(string msg)
         {
-            this.Server.Connection.Sender.PublicMessage(this.Name, msg);
-            this.MessagedChannel.Fire(this, new DataEventArgs<string>(msg));
+            Server.Connection.Sender.PublicMessage(Name, msg);
+            MessagedChannel.Fire(this, new DataEventArgs<string>(msg));
         }
     }
 }

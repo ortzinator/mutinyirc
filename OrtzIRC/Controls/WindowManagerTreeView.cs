@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC.Controls
+﻿namespace OrtzIRC
 {
     using System.Windows.Forms;
     using System.Collections;
@@ -6,6 +6,11 @@
 
     public partial class WindowManagerTreeView : TreeView
     {
+        public WindowManagerTreeView()
+        {
+            InitializeComponent();
+        }
+
         public IEnumerable ServerNodes
         {
             get
@@ -18,24 +23,14 @@
             }
         }
 
-        public WindowManagerTreeView()
-        {
-            InitializeComponent();
-        }
-
-        protected override void OnPaint(PaintEventArgs pe)
-        {
-            base.OnPaint(pe);
-        }
-
         public void AddServerNode(ServerTreeNode serverNode)
         {
-            this.Nodes.Add(serverNode);
+            Nodes.Add(serverNode);
         }
 
         public ServerTreeNode GetServerNode(Server server)
         {
-            foreach (ServerTreeNode serverNode in this.ServerNodes)
+            foreach (ServerTreeNode serverNode in ServerNodes)
             {
                 if (serverNode.ServerWindow.Server == server)
                     return serverNode;

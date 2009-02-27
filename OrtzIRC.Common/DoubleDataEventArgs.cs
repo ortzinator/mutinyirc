@@ -4,14 +4,14 @@
 
     public class DoubleDataEventArgs<TFirst, TSecond> : EventArgs
     {
+        public DoubleDataEventArgs(TFirst first, TSecond second)
+        {
+            First = first;
+            Second = second;
+        }
+
         public TFirst First { get; private set; }
 
         public TSecond Second { get; private set; }
-
-        public DoubleDataEventArgs(TFirst first, TSecond second)
-        {
-            this.First = first;
-            this.Second = second;
-        }
     }
 }

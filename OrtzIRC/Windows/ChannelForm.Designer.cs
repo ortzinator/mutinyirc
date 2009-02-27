@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.channelOutputBox = new OrtzIRC.Controls.IrcTextBox();
-            this.nickListBox = new OrtzIRC.Controls.NickListBox();
-            this.commandTextBox = new OrtzIRC.Controls.CommandTextBox();
+            this.channelOutputBox = new OrtzIRC.IrcTextBox();
+            this.nickListBox = new OrtzIRC.NickListBox();
+            this.commandTextBox = new OrtzIRC.CommandTextBox();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -112,9 +112,9 @@
 
         #endregion
 
-        private OrtzIRC.Controls.CommandTextBox commandTextBox;
-        private OrtzIRC.Controls.IrcTextBox channelOutputBox;
-        private OrtzIRC.Controls.NickListBox nickListBox;
+        private OrtzIRC.CommandTextBox commandTextBox;
+        private OrtzIRC.IrcTextBox channelOutputBox;
+        private OrtzIRC.NickListBox nickListBox;
         private System.Windows.Forms.SplitContainer splitContainer1;
     }
 }

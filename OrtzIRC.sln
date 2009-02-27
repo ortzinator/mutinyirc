@@ -10,7 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{998BC590-6C47-4FB7-8A05-A2F68DA34BA5}"
 	ProjectSection(SolutionItems) = preProject
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
-		OrtzIRC1.vsmdi = OrtzIRC1.vsmdi
 		OrtzIRC2.vsmdi = OrtzIRC2.vsmdi
 		OrtzIRC3.vsmdi = OrtzIRC3.vsmdi
 		Settings.StyleCop = Settings.StyleCop
@@ -24,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIrcTest", "OrtzIrcTest\
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = OrtzIRC3.vsmdi
+		CategoryFile = OrtzIRC2.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

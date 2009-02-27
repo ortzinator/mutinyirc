@@ -33,14 +33,14 @@
                     // For each network, add channel logs and private messages
                     foreach (DirectoryInfo di in LogSubDirs)
                     {
-                        FileNode dirNode = new FileNode(false, di.Name + '\\', di.FullName);
+                        FileTreeNode dirNode = new FileTreeNode(false, di.Name + '\\', di.FullName);
 
                         // Get the channel/pmsg logs
                         FileInfo[] SubFiles = di.GetFiles();
 
                         foreach (FileInfo file in SubFiles)
                         {
-                            FileNode fileNode = new FileNode(true, file.Name, file.FullName);
+                            FileTreeNode fileNode = new FileTreeNode(true, file.Name, file.FullName);
 
                             dirNode.Nodes.Add(fileNode);
                         }
@@ -51,12 +51,12 @@
                 }
                 else // Found no network subdirs
                 {
-                    logFilesTreeView.Nodes.Add(new FileNode(true, "No logs found"));
+                    logFilesTreeView.Nodes.Add(new FileTreeNode(true, "No logs found"));
                 }
             }
             else // Found no logs directory
             {
-                logFilesTreeView.Nodes.Add(new FileNode(true, "Log directory doesn't exist."));
+                logFilesTreeView.Nodes.Add(new FileTreeNode(true, "Log directory doesn't exist."));
             }
         }
 
@@ -94,7 +94,7 @@
         // Deletes a single log file or a directory (NYI)
         private void LogBTNDelete_Click(object sender, EventArgs e)
         {
-            FileNode fn = (FileNode)logFilesTreeView.SelectedNode;
+            FileTreeNode fn = (FileTreeNode)logFilesTreeView.SelectedNode;
 
             DialogResult dr = MessageBox.Show("Do you really want to delete " + fn.Text + "?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
 
@@ -102,7 +102,7 @@
                 return;
 
 
-            if (fn.isFile)
+            if (fn.IsFile)
             {
                 FileInfo fi = new FileInfo(fn.Path);
 
@@ -128,26 +128,24 @@
         private void LogBTNDeleteAll_Click(object sender, EventArgs e)
         {
             DialogResult dr = MessageBox.Show("WARNING: This will delete ALL logs files from the logs directory. This cannot be undone. Continue?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+            if (dr != DialogResult.Yes) return;
 
-            if (dr == DialogResult.Yes)
+            DirectoryInfo di = new DirectoryInfo(RunningDir.FullName + "\\logs");
+
+            if (di.Exists)
             {
-                DirectoryInfo di = new DirectoryInfo(RunningDir.FullName + "\\logs");
-
-                if (di.Exists)
-                {
-                    di.Delete(true);
-                }
-
-                logFilesTreeView.Nodes.Clear();
+                di.Delete(true);
             }
+
+            logFilesTreeView.Nodes.Clear();
         }
 
         // Updates the controls depending on whether or not a file is selected or not
         private void LogTVLogfiles_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            FileNode fn = (FileNode)e.Node;
+            FileTreeNode fn = (FileTreeNode)e.Node;
 
-            if (!fn.isDummy && fn.isFile)
+            if (!fn.IsDummy && fn.IsFile)
             {
                 ToggleControls(true);
             }
@@ -155,43 +153,6 @@
             {
                 ToggleControls(false);
             }
-        }
-    }
-
-    // This class is there to make treenode management easier
-    // By differencing between directories and files, it's a lot easier to
-    // work with the button's operators.
-    class FileNode : TreeNode
-    {
-        // Is file meant for text only display?
-        public bool isDummy;
-
-
-        public bool isFile;
-
-
-        string fileName;
-        public string Path; // Even if path == name, it's not very explicit.
-
-        public FileNode(bool isFile, string name, string Path)
-            : base()
-        {
-            this.isFile = isFile;
-            isDummy = false;
-            fileName = name;
-            this.Path = Path;
-
-            // Set base attributes
-            base.Name = Path;
-            base.Text = name;
-        }
-
-        // Dummies are used for displaying text in the node
-        public FileNode(bool isDummy, string text)
-            : base()
-        {
-            isDummy = true;
-            base.Text = text;
         }
     }
 }
