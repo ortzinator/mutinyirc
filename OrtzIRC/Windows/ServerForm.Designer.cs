@@ -41,26 +41,26 @@ namespace OrtzIRC
             this.serverOutputBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.serverOutputBox.Name = "serverOutputBox";
             this.serverOutputBox.ReadOnly = true;
-            this.serverOutputBox.Size = new System.Drawing.Size(684, 541);
+            this.serverOutputBox.Size = new System.Drawing.Size(684, 542);
             this.serverOutputBox.TabIndex = 0;
             this.serverOutputBox.Text = "";
             // 
             // commandTextBox
             // 
             this.commandTextBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.commandTextBox.Location = new System.Drawing.Point(0, 541);
+            this.commandTextBox.Location = new System.Drawing.Point(0, 542);
             this.commandTextBox.Name = "commandTextBox";
-            this.commandTextBox.Size = new System.Drawing.Size(684, 23);
+            this.commandTextBox.Size = new System.Drawing.Size(684, 22);
             this.commandTextBox.TabIndex = 1;
             // 
             // ServerForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(684, 564);
             this.Controls.Add(this.serverOutputBox);
             this.Controls.Add(this.commandTextBox);
-            this.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "ServerForm";
             this.Text = "Server";

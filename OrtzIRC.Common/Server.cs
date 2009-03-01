@@ -107,6 +107,8 @@
             {
                 Disconnect();
             }
+
+            ServerManager.Instance.Remove(this);
         }
 
         public void Connect()

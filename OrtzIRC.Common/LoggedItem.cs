@@ -77,7 +77,7 @@ namespace OrtzIRC.Common
                 byte[] Data= GetBytes(Text);
 
                 // Try to write to the stream once
-                Failed = TryWrite(Data);
+                Failed = !TryWrite(Data);
             }
         }
 
@@ -95,6 +95,8 @@ namespace OrtzIRC.Common
 
                 // Attempt writing the data
                 FileHandle.Write(Data, 0, Data.Length);
+                FileHandle.Flush();
+
                 return true; // Success
             }
             catch (IOException ex)
@@ -116,10 +118,9 @@ namespace OrtzIRC.Common
         }
 
         // Transform text to bytes for writing to stream
-        private static readonly ASCIIEncoding encoding = new ASCIIEncoding();
         private static byte[] GetBytes(String Str)
         {
-            return (encoding.GetBytes(Str));
+            return (Encoding.ASCII.GetBytes(Str));
         }
     }
 }

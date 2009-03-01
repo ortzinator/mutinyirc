@@ -2,42 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
-    using FlamingIRC;
     using OrtzIRC;
-
-    /// <summary>
-    /// Purpose: Handle the environnement around the manager such as subscribing
-    ///          to program events and managing whether the logger is on or off.
-    ///          it also listens to the various events in the program in order
-    ///          to detect any text input and tell the logger what to do.
-    /// </summary>
-    public static class TextLoggerManager
-    {
-        // This should be changed to forms but I'm trying to grasp the codebase atm
-        // Doesn't look like there's a clean way to do it, and I don't want to refactor
-        // code that isn't mine too much.
-        public static void ServerWindowOpened(Server Network)
-        {
-            // Register to AddLine event
-        }
-
-        public static void ServerWindowClosed(Server Network)
-        {
-            // Unregister AddLine event (Might be unnecessary)
-        }
-
-        public static void ChannelWindowOpened(Channel Chan)
-        {
-            // Register to AddLine event            
-        }
-
-        public static void ChannelWindowClosed(Channel Chan)
-        {
-            // Unregister AddLine event (Might be unnecessary)
-        }    
-    }
+    using FlamingIRC;
 
     public delegate void IOErrorEventHandler(String ex);
 
@@ -48,7 +14,7 @@
     public static class TextLogger
     {
         // TEMP: Whether the logging facility is active. NYI.
-        public static bool Active { get; private set; }
+        public static bool Active = true;
 
         // Indicate any IO errors that can't be fixed
         public static event IOErrorEventHandler WriteFailed;
@@ -61,12 +27,6 @@
 
         public static void TextEntry(Server Network, String Text)
         {
-            // Verify the network has been added
-            if (!NetworkExists(Network))
-            {
-                AddLoggable(Network);
-            }
-
             // Write to file
             LoggedItem Li = LogFiles[Network.URI]['!' + Network.URI];
             Li.Write(Text);
@@ -80,18 +40,6 @@
 
         public static void TextEntry(Server Network, User Person, String Text)
         {
-            // Verify the network has been added
-            if (!NetworkExists(Network))
-            {
-                AddLoggable(Network);
-            }
-
-            // Verify the person has been added
-            if (!PersonExists(Network, Person))
-            {
-                AddLoggable(Network, Person);
-            }
-
             // Write to file
             LoggedItem Li = LogFiles[Network.URI][Person.Nick];
             Li.Write(Text);
@@ -105,18 +53,6 @@
 
         public static void TextEntry(Channel Chan, String Text)
         {
-            // Verify the network has been added
-            if (!NetworkExists(Chan.Server))
-            {
-                AddLoggable(Chan.Server);
-            }
-
-            // Verify the channel has been added
-            if (!ChannelExists(Chan))
-            {
-                AddLoggable(Chan);
-            }
-
             // Write to file
             LoggedItem Li = LogFiles[Chan.Server.URI][Chan.Name];
             Li.Write(Text);
@@ -137,7 +73,7 @@
         }
 
         // Data structure management
-        private static void AddLoggable(Server Network)
+        public static void AddLoggable(Server Network)
         {
             // Add value to Network key to hold the different loggables
             LogFiles.Add(Network.URI, new Dictionary<string, LoggedItem>());
@@ -145,19 +81,19 @@
             LogFiles[Network.URI].Add('!' + Network.URI, new LoggedItem('!' + Network.URI, Network.URI));
         }
 
-        private static void AddLoggable(Channel Chan)
+        public static void AddLoggable(Channel Chan)
         {
             // Add channel log to the structure
-            LogFiles[Chan.Server.URI].Add(Chan.Name, new LoggedItem('#' + Chan.Name, Chan.Server.URI));
+            LogFiles[Chan.Server.URI].Add(Chan.Name, new LoggedItem(Chan.Name, Chan.Server.URI));
         }
 
-        private static void AddLoggable(Server Network, User Person)
+        public static void AddLoggable(Server Network, User Person)
         {
             // Add pmsg log to the data struture
             LogFiles[Network.URI].Add(Person.Nick, new LoggedItem(Person.Nick, Network.URI)); 
         }
 
-        private static void RemoveLoggable(Server Network)
+        public static void RemoveLoggable(Server Network)
         {
             if (NetworkExists(Network))
             {
@@ -171,14 +107,22 @@
             }
         }
 
-        private static void RemoveLoggable(Channel Chan)
+        public static void RemoveLoggable(Channel Chan)
         {
-            LogFiles[Chan.Server.URI].Remove(Chan.Name);
+            if (ChannelExists(Chan))
+            {
+                LogFiles[Chan.Server.URI][Chan.Name].Close();
+                LogFiles[Chan.Server.URI].Remove(Chan.Name);
+            }
         }
 
-        private static void RemoveLoggable(Server Network, User Person)
+        public static void RemoveLoggable(Server Network, User Person)
         {
-            LogFiles[Network.URI].Remove(Person.Nick);
+            if (PersonExists(Network, Person))
+            {
+                LogFiles[Network.URI][Person.Nick].Close();
+                LogFiles[Network.URI].Remove(Person.Nick);
+            }
         }
 
         private static bool NetworkExists(Server Network)
@@ -198,7 +142,7 @@
 
         private static bool NtwLogExists(Server Network)
         {
-            return (NetworkExists(Network) && LogFiles[Network.URI].ContainsKey(' ' + Network.URI));
+            return (NetworkExists(Network) && LogFiles[Network.URI].ContainsKey('!' + Network.URI));
         }
     }
 }
