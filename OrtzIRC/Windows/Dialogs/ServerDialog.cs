@@ -1,4 +1,4 @@
-namespace OrtzIRC.Dialogs
+namespace OrtzIRC
 {
     using System;
     using System.Windows.Forms;
