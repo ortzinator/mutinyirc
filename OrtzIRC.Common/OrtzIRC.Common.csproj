@@ -104,6 +104,7 @@
     <Compile Include="ServerManager.cs" />
     <Compile Include="StringUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextLoggerManager.cs" />
     <Compile Include="TraceCategories.cs" />
   </ItemGroup>
   <ItemGroup>

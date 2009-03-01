@@ -4,8 +4,14 @@
     using FlamingIRC;
     using OrtzIRC.Common;
 
+    public delegate void NewChannelEventHandler(Channel Chan);
+    public delegate void DelChannelEventHandler(Channel Chan);
+
     public sealed class ChannelManager
     {
+        public static event NewChannelEventHandler ChannelCreated;
+        public static event DelChannelEventHandler ChannelRemoved;
+
         private bool recievingNames;
 
         public ChannelManager(Server server)
@@ -68,8 +74,11 @@
                     return true;
                 }
 
+                TriggerChannelRemoved(Channels[channelName]);
                 Channels.Remove(channelName);
                 //TODO: Is this all that needs to be done?
+
+                
             }
             return false;
         }
@@ -83,7 +92,21 @@
 
             Channel newChan = new Channel(Server, channelName);
             Channels.Add(channelName, newChan);
+            TriggerChannelCreated(newChan);
+
             return newChan;
+        }
+
+        private void TriggerChannelCreated(Channel Chan)
+        {
+            if (ChannelCreated != null)
+                ChannelCreated(Chan);
+        }
+
+        private void TriggerChannelRemoved(Channel Chan)
+        {
+            if (ChannelRemoved != null)
+                ChannelRemoved(Chan);
         }
     }
 }

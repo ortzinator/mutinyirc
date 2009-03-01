@@ -8,12 +8,8 @@ namespace OrtzIRC
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Resources;
 
-    public delegate void ServerFormAddLineEventHandler(string Text);
-
     public partial class ServerForm : Form
     {
-        public event ServerFormAddLineEventHandler LineAdded;
-
         private Server server;
 
         public Server Server
@@ -82,7 +78,6 @@ namespace OrtzIRC
         private void server_Disconnected()
         {
             //intentionally blank
-
         }
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
@@ -142,6 +137,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnRegistered()
         {
+            // TODO: What?
             this.server.Connection.Sender.Join("#ortzirc");
 
             this.Invoke((MethodInvoker)delegate
@@ -172,7 +168,7 @@ namespace OrtzIRC
 
                     if (result == DialogResult.OK)
                     {
-                        this.server.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
+                        this.server.Disconnect("OrtzIRC (pre-alpha) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
                         
                     }
                     else
@@ -182,7 +178,7 @@ namespace OrtzIRC
                 }
                 else
                 {
-                    this.server.Disconnect("OrtzIRC (pre-alpa) - http://code.google.com/p/ortzirc/");
+                    this.server.Disconnect("OrtzIRC (pre-alpha) - http://code.google.com/p/ortzirc/");
                 }
             }
 
@@ -200,8 +196,7 @@ namespace OrtzIRC
         {
             this.serverOutputBox.AppendLine(Text);
 
-            if (LineAdded != null)
-                LineAdded(Text);
+            TextLoggerManager.TextEntry(Server, Text + '\n');
         }
     }
 }
