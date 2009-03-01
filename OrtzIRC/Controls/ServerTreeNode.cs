@@ -9,6 +9,9 @@
             ServerWindow = serverWindow;
             Text = serverWindow.Server.Description;
             serverWindow.FormClosed += serverWindow_FormClosed;
+
+            ContextMenuStrip = new ServerNodeContextMenu();
+            ((ServerNodeContextMenu)ContextMenuStrip).DisconnectClick += delegate { ServerWindow.Close(); };
         }
 
         public ServerForm ServerWindow { get; private set; }
