@@ -1,4 +1,4 @@
-namespace OrtzIRC.Dialogs
+namespace OrtzIRC
 {
     partial class EditServerDialog
     {

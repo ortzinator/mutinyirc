@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC.Windows.Dialogs
+﻿namespace OrtzIRC
 {
     partial class SettingsDialog
     {

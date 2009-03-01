@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-
 namespace OrtzIRC
 {
+    using System;
+    using System.Windows.Forms;
+
     public partial class NewServerDialog : Form
     {
         public NewServerDialog()
@@ -17,7 +12,7 @@ namespace OrtzIRC
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }

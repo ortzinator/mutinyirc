@@ -1,25 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-
-namespace OrtzIRC.Windows.Dialogs
+﻿namespace OrtzIRC
 {
+    using System.Windows.Forms;
+
     public partial class PluginsDialog : Form
     {
         public PluginsDialog()
         {
             InitializeComponent();
-        }
-
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-
-
         }
     }
 }
