@@ -9,6 +9,9 @@
             ChannelWindow = channelWindow;
             Text = channelWindow.Channel.Name;
             channelWindow.FormClosed += channelWindow_FormClosed;
+
+            ContextMenuStrip = new ChannelNodeContextMenu();
+            ((ChannelNodeContextMenu)ContextMenuStrip).LeaveClick += delegate { ChannelWindow.Close(); };
         }
 
         public ChannelForm ChannelWindow { get; private set; }

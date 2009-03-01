@@ -109,6 +109,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\ChannelNodeContextMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\ChannelTreeNode.cs" />
     <Compile Include="Controls\FileTreeNode.cs" />
     <Compile Include="Controls\IrcTextBox.cs">
@@ -128,6 +131,9 @@
     </Compile>
     <Compile Include="Controls\NickListBox.Designer.cs">
       <DependentUpon>NickListBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ServerNodeContextMenu.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\ServerTreeNode.cs" />
     <Compile Include="Controls\WindowManagerTreeView.cs">
