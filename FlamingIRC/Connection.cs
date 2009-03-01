@@ -52,6 +52,7 @@ namespace FlamingIRC
 
         public event EventHandler OnConnectSuccess;
         public event EventHandler<FlamingDataEventArgs<string>> ConnectFailed;
+        public event EventHandler<FlamingDataEventArgs<string>> ConnectionLost;
 
         private AsyncCallback asynConnect, asynReceive, asynSend;
 
