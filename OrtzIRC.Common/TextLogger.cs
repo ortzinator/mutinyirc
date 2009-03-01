@@ -39,230 +39,147 @@
         }    
     }
 
+    public delegate void IOErrorEventHandler(String ex);
+
     /// <summary>
     /// Purpose: Log text entry by registering to various channel and network/pmsg events
     ///          and writing their output to a text file.       
     /// </summary>
     public static class TextLogger
     {
-        /*    
-              Network messages, channel text and private messages can be logged.
-              
-              By default the output is in ./logs/
-              
-              /logs/server/$Network.log for network messages;
-              /logs/server/#channel.log for channel messages;
-              /logs/server/user.log     for user    messages.
-         */
-
         // TEMP: Whether the logging facility is active. NYI.
         public static bool Active { get; private set; }
-        // TEMP: Better way to do this? See below
-        public static String LastError { get; private set; }
 
-        private static readonly string LogDir = Environment.CurrentDirectory + "\\logs";
+        // Indicate any IO errors that can't be fixed
+        public static event IOErrorEventHandler WriteFailed;
 
-        /************************************************************************/
-        /* Small explanation for this:
-         * 
-         * Network --|-- Channel Log
-         *           |-- Channel Log
-         *           |-- User Log
-         *           |-- Network Log
-         * 
-         * According to RFC, channels may not contain any spaces. Therefore we add
-         * one space to the Network Log's index (the first character)
-         * 
-         * So if we want to access a channel, we know it starts by '#' or '&'
-         * (according to RFC). If it's a user, then there will be no '#', no '&'
-         * and no spaces as the first character. If those conditions are met,
-         * we're touching a user's logs.
-         * 
-         * If we want the network log, we do ' ' + Server.URI.
-        /************************************************************************/
-        private static Dictionary<string, Dictionary<string, FileStream>> LogFiles =
-            new Dictionary<string, Dictionary<String, FileStream>>();
+        // Main datastructure
+        private static Dictionary<string, Dictionary<string, LoggedItem>> LogFiles =
+            new Dictionary<string, Dictionary<String, LoggedItem>>();
 
-        // ***** LOGGING HAPPENS HERE *****
+        // Logging functions
 
         public static void TextEntry(Server Network, String Text)
         {
-            CheckWriteServer(Network);
-
-            try
+            // Verify the network has been added
+            if (!NetworkExists(Network))
             {
-                byte[] WriteMe = GetBytes(Text);
-                LogFiles[Network.URI][' ' + Network.URI].Write(WriteMe, 0, WriteMe.Length);
+                AddLoggable(Network);
             }
-            catch (IOException)
+
+            // Write to file
+            LoggedItem Li = LogFiles[Network.URI]['!' + Network.URI];
+            Li.Write(Text);
+
+            // Check for errors
+            if (Li.Failed)
             {
-                ResetServer(Network);
-                TextEntry(Network, Text);
+                Error(Li.LastError);
             }
         }
 
         public static void TextEntry(Server Network, User Person, String Text)
         {
-            CheckWritePerson(Network, Person);
-
-            byte[] WriteMe = GetBytes(Text);
-
-            try
+            // Verify the network has been added
+            if (!NetworkExists(Network))
             {
-                LogFiles[Network.URI][Person.Nick].Write(WriteMe, 0, WriteMe.Length);
+                AddLoggable(Network);
             }
-            catch (IOException)
+
+            // Verify the person has been added
+            if (!PersonExists(Network, Person))
             {
-                ResetPerson(Network, Person);
-                TextEntry(Network, Person, Text);
+                AddLoggable(Network, Person);
             }
-    }
+
+            // Write to file
+            LoggedItem Li = LogFiles[Network.URI][Person.Nick];
+            Li.Write(Text);
+
+            // Check for errors
+            if (Li.Failed)
+            {
+                Error(Li.LastError);
+            }
+        }
 
         public static void TextEntry(Channel Chan, String Text)
         {
-            CheckWriteChannel(Chan);
-
-            try
+            // Verify the network has been added
+            if (!NetworkExists(Chan.Server))
             {
-                byte[] WriteMe = GetBytes(Text);
-                LogFiles[Chan.Server.URI][Chan.Name].Write(WriteMe, 0, WriteMe.Length);
+                AddLoggable(Chan.Server);
             }
-            catch (IOException)
-            {
-                ResetChannel(Chan);
-                TextEntry(Chan, Text);
-            }
-        }
 
-
-        // ***** MANAGES DATASTRUCT *****
-
-        public static void AddServer(Server Network)
-        {
-            if (!NetworkExists(Network))
-            {
-                LogFiles.Add(Network.URI, new Dictionary<string, FileStream>());
-
-                // Create log file
-                String prepath = LogDir + "\\" + Network.URI;
-                CreateIfNotExists(prepath);
-
-                LogFiles[Network.URI].Add(' ' + Network.URI,
-                    new FileStream(prepath + "\\!" + Network.URI + ".log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
-            }
-        }
-
-        public static void AddChannel(Channel Chan)
-        {
-            AddServer(Chan.Server);
-
+            // Verify the channel has been added
             if (!ChannelExists(Chan))
             {
-                String prepath = LogDir + "\\" + Chan.Server.URI + "\\";
-                CreateIfNotExists(prepath);
-
-                LogFiles[Chan.Server.URI].Add(Chan.Name,
-                    new FileStream(prepath + Chan.Name + ".log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
+                AddLoggable(Chan);
             }
-        }
 
-        public static void AddPerson(Server Network, User Person)
-        {
-            AddServer(Network);
+            // Write to file
+            LoggedItem Li = LogFiles[Chan.Server.URI][Chan.Name];
+            Li.Write(Text);
 
-            if (!PersonExists(Network, Person))
+            // Check for errors
+            if (Li.Failed)
             {
-                String prepath = LogDir + "\\" + Network.URI + "\\";
-                CreateIfNotExists(prepath);
-
-                LogFiles[Network.URI].Add(Person.Nick,
-                    new FileStream(prepath + Person.Nick + ".log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
+                Error(Li.LastError);
             }
         }
 
-        public static void RemoveServer(Server Network)
+        // Error indication
+
+        private static void Error(String Err)
+        {
+            if (WriteFailed != null)
+                WriteFailed(Err);
+        }
+
+        // Data structure management
+        private static void AddLoggable(Server Network)
+        {
+            // Add value to Network key to hold the different loggables
+            LogFiles.Add(Network.URI, new Dictionary<string, LoggedItem>());
+            // Add the network log
+            LogFiles[Network.URI].Add('!' + Network.URI, new LoggedItem('!' + Network.URI, Network.URI));
+        }
+
+        private static void AddLoggable(Channel Chan)
+        {
+            // Add channel log to the structure
+            LogFiles[Chan.Server.URI].Add(Chan.Name, new LoggedItem('#' + Chan.Name, Chan.Server.URI));
+        }
+
+        private static void AddLoggable(Server Network, User Person)
+        {
+            // Add pmsg log to the data struture
+            LogFiles[Network.URI].Add(Person.Nick, new LoggedItem(Person.Nick, Network.URI)); 
+        }
+
+        private static void RemoveLoggable(Server Network)
         {
             if (NetworkExists(Network))
             {
+                foreach (LoggedItem Log in LogFiles[Network.URI].Values)
+                {
+                    Log.Close();
+                }
+
                 LogFiles[Network.URI].Clear();
                 LogFiles.Remove(Network.URI);
             }
         }
 
-        public static void RemoveChannel(Channel Chan)
+        private static void RemoveLoggable(Channel Chan)
         {
-            if (NetworkExists(Chan.Server))
-            {
-                LogFiles[Chan.Server.URI].Remove(Chan.Name);
-            }
+            LogFiles[Chan.Server.URI].Remove(Chan.Name);
         }
 
-        public static void RemovePerson(Server Network, User Person)
+        private static void RemoveLoggable(Server Network, User Person)
         {
-            if (NetworkExists(Network))
-            {
-                LogFiles[Network.URI].Remove(Person.Nick);
-            }
+            LogFiles[Network.URI].Remove(Person.Nick);
         }
-
-        // ***** ERROR DETECTION / RECOVERY *****
-
-        private static void ResetServer(Server Network)
-        {
-            RemoveServer(Network);
-            AddServer(Network);
-        }
-
-        private static void ResetChannel(Channel Chan)
-        {
-            RemoveChannel(Chan);
-            AddChannel(Chan);
-        }
-
-        private static void ResetPerson(Server Network, User Person)
-        {
-            RemovePerson(Network, Person);
-            AddPerson(Network, Person);
-        }
-
-        private static void CheckWriteServer(Server Network)
-        {
-            AddServer(Network);
-        }
-
-        private static void CheckWriteChannel(Channel Chan)
-        {
-            AddChannel(Chan);
-        }
-
-        private static void CheckWritePerson(Server Network, User Person)
-        {
-            AddPerson(Network, Person);
-        }
-
-        // ***** UTIL *****
-
-        private static String LogDirPath = Environment.CurrentDirectory + "\\logs" + '\\';
-        public static void CreateIfNotExists(String path)
-        {
-            if (!Directory.Exists(LogDirPath + path))
-            {
-                Directory.CreateDirectory(LogDirPath + path);
-            }
-        }
-
-        private static readonly ASCIIEncoding encoding = new ASCIIEncoding();
-        private static byte[] GetBytes(String Str)
-        {
-            return (encoding.GetBytes(Str));
-        }
-
-        private static string GetString(byte[] Array)
-        {
-            return (encoding.GetString(Array));
-        }
-
-        // ***** VERIFIES WHETHER THE REQUIRED ELEMENT IS IN THE LOGFILES STRUCTURE ******
 
         private static bool NetworkExists(Server Network)
         {
