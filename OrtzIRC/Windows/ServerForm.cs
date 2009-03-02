@@ -5,74 +5,71 @@ namespace OrtzIRC
     using System.Windows.Forms;
     using FlamingIRC;
     using OrtzIRC.Common;
-    using OrtzIRC.PluginFramework;
     using OrtzIRC.Resources;
 
     public partial class ServerForm : Form
     {
         private Server server;
 
-        public Server Server
-        {
-            get { return this.server; }
-            set
-            {
-                if (this.server != null)
-                {
-                    this.server.Disconnect();
-
-                    this.UnhookEvents();
-                }
-
-                this.server = value;
-
-                this.HookupEvents();
-            }
-        }
-
         public ServerForm()
         {
             InitializeComponent();
 
-            this.commandTextBox.Focus();
+            commandTextBox.Focus();
 
-            commandTextBox.CommandEntered += new EventHandler<DataEventArgs<string>>(commandTextBox_CommandEntered);
+            commandTextBox.CommandEntered += commandTextBox_CommandEntered;
+        }
+
+        public Server Server
+        {
+            get { return server; }
+            set
+            {
+                if (server != null)
+                {
+                    server.Disconnect();
+                    UnhookEvents();
+                }
+
+                server = value;
+                HookupEvents();
+            }
         }
 
         private void HookupEvents()
         {
-            this.server.Registered += ParentServer_OnRegistered;
-            this.server.PublicMessage += ParentServer_OnPublicMessage;
-            this.server.UserAction += ParentServer_OnAction;
-            this.server.JoinSelf += ParentServer_OnJoinSelf;
-            this.server.JoinOther += ParentServer_OnJoinOther;
-            this.server.Part += ParentServer_OnPart;
-            this.server.ConnectFailed += Server_OnConnectFail;
-            this.server.PrivateNotice += ParentServer_OnPrivateNotice;
-            this.server.GotTopic += ParentServer_OnGotTopic;
-            this.server.RawMessageReceived += ParentServer_OnRawMessageReceived;
-            this.server.ErrorMessageRecieved += ParentServer_OnError;
-            this.server.Kick += ParentServer_OnKick;
-            this.server.Connecting += Server_Connecting;
-            this.server.Disconnected += server_Disconnected;
+            server.Registered += ParentServer_OnRegistered;
+            server.PublicMessage += ParentServer_OnPublicMessage;
+            server.UserAction += ParentServer_OnAction;
+            server.JoinSelf += ParentServer_OnJoinSelf;
+            server.JoinOther += ParentServer_OnJoinOther;
+            server.Part += ParentServer_OnPart;
+            server.ConnectFailed += Server_OnConnectFail;
+            server.PrivateNotice += ParentServer_OnPrivateNotice;
+            server.GotTopic += ParentServer_OnGotTopic;
+            server.RawMessageReceived += ParentServer_OnRawMessageReceived;
+            server.ErrorMessageRecieved += ParentServer_OnError;
+            server.Kick += ParentServer_OnKick;
+            server.Connecting += Server_Connecting;
+            server.Disconnected += server_Disconnected;
         }
 
         private void UnhookEvents()
         {
-            this.server.Registered -= ParentServer_OnRegistered;
-            this.server.PublicMessage -= ParentServer_OnPublicMessage;
-            this.server.UserAction -= ParentServer_OnAction;
-            this.server.JoinSelf -= ParentServer_OnJoinSelf;
-            this.server.JoinOther -= ParentServer_OnJoinOther;
-            this.server.Part -= ParentServer_OnPart;
-            this.server.ConnectFailed -= Server_OnConnectFail;
-            this.server.PrivateNotice -= ParentServer_OnPrivateNotice;
-            this.server.GotTopic -= ParentServer_OnGotTopic;
-            this.server.RawMessageReceived -= ParentServer_OnRawMessageReceived;
-            this.server.ErrorMessageRecieved -= ParentServer_OnError;
-            this.server.Kick -= ParentServer_OnKick;
-            this.server.Connecting -= Server_Connecting;
-            this.server.Disconnected -= server_Disconnected;
+            server.Registered -= ParentServer_OnRegistered;
+            server.PublicMessage -= ParentServer_OnPublicMessage;
+            server.UserAction -= ParentServer_OnAction;
+            server.JoinSelf -= ParentServer_OnJoinSelf;
+            server.JoinOther -= ParentServer_OnJoinOther;
+            server.Part -= ParentServer_OnPart;
+            server.ConnectFailed -= Server_OnConnectFail;
+            server.PrivateNotice -= ParentServer_OnPrivateNotice;
+            server.GotTopic -= ParentServer_OnGotTopic;
+            server.RawMessageReceived -= ParentServer_OnRawMessageReceived;
+            server.ErrorMessageRecieved -= ParentServer_OnError;
+            server.Kick -= ParentServer_OnKick;
+            server.Connecting -= Server_Connecting;
+            server.Disconnected -= server_Disconnected;
         }
 
         private void server_Disconnected()
@@ -87,7 +84,7 @@ namespace OrtzIRC
 
         private void Server_Connecting(object sender, CancelEventArgs e)
         {
-            AddLine(ServerStrings.ConnectingMessage.With(this.server.URI, this.server.Port));
+            AddLine(ServerStrings.ConnectingMessage.With(server.URI, server.Port));
         }
 
         private void ParentServer_OnKick(object sender, KickEventArgs e)
@@ -107,7 +104,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnError(object sender, ErrorMessageEventArgs a)
         {
-            AddLine(a.Code.ToString() + " " + a.Message);
+            AddLine(a.Code + " " + a.Message);
         }
 
         private void ParentServer_OnRawMessageReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
@@ -137,19 +134,19 @@ namespace OrtzIRC
 
         private void ParentServer_OnRegistered()
         {
-            // TODO: What?
-            this.server.Connection.Sender.Join("#ortzirc");
+            // TODO: Join list of auto-join channels
+            server.Connection.Sender.Join("#ortzirc");
 
-            this.Invoke((MethodInvoker)delegate
+            Invoke((MethodInvoker)delegate
             {
-                this.Text = "Status: " + this.server.UserNick + " on " + this.server.Description +
-                " (" + this.server.URI + ":" + this.server.Port + ")";
+                Text = "Status: " + server.UserNick + " on " + server.Description +
+                " (" + server.URI + ":" + server.Port + ")";
             });
         }
 
         private void ParentServer_OnJoinSelf(object sender, OrtzIRC.Common.DataEventArgs<Channel> e)
         {
-            ((MainForm)this.MdiParent).CreateChannelForm(e.Data as Channel);
+            ((MainForm)MdiParent).CreateChannelForm(e.Data);
         }
 
         private void ParentServer_OnPublicMessage(object sender, ChannelMessageEventArgs e)
@@ -159,17 +156,16 @@ namespace OrtzIRC
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            if (this.server.IsConnected)
+            if (server.IsConnected)
             {
                 if (e.CloseReason == CloseReason.UserClosing)
                 {
-                    DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(this.Server.Description),
+                    DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Description),
                                 CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
                     if (result == DialogResult.OK)
                     {
-                        this.server.Disconnect("OrtzIRC (pre-alpha) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
-                        
+                        server.Disconnect();
                     }
                     else
                     {
@@ -178,25 +174,18 @@ namespace OrtzIRC
                 }
                 else
                 {
-                    this.server.Disconnect("OrtzIRC (pre-alpha) - http://code.google.com/p/ortzirc/");
+                    server.Disconnect();
                 }
             }
 
             base.OnFormClosing(e);
         }
 
-        protected override void OnFormClosed(FormClosedEventArgs e)
+        private void AddLine(String text)
         {
-            //TODO: Close ChannelForms
+            serverOutputBox.AppendLine(text);
 
-            base.OnFormClosed(e);
-        }
-
-        private void AddLine(String Text)
-        {
-            this.serverOutputBox.AppendLine(Text);
-
-            TextLoggerManager.TextEntry(Server, Text + '\n');
+            TextLoggerManager.TextEntry(Server, text + '\n');
         }
     }
 }

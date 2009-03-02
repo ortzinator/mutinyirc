@@ -48,7 +48,7 @@
         {
             if (e.Data.StartsWith("/"))
             {
-                string[] exploded = e.Data.Split(new Char[] {' '});
+                string[] exploded = e.Data.Split(new Char[] { ' ' });
                 string name = exploded[0].TrimStart('/');
                 string[] parameters = new string[exploded.Length - 1];
                 Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
@@ -56,7 +56,7 @@
             }
             else
             {
-                string[] parameters = e.Data.Split(new Char[] {' '});
+                string[] parameters = e.Data.Split(new Char[] { ' ' });
                 PluginManager.GetCommandInstance(Channel, "say", parameters);
             }
         }
@@ -111,7 +111,7 @@
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            Channel.Part("Leaving"); //TODO: Get a default part message
+            Channel.Part();
         }
 
         public void AddLine(string line)

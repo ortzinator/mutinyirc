@@ -118,7 +118,7 @@
 
         public void Disconnect()
         {
-            Disconnect("OrtzIRC (pre-alpha) - http://code.google.com/p/ortzirc/"); //TODO: Get default d/c message
+            Disconnect("OrtzIRC (pre-alpha) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
         }
 
         public void Disconnect(string reason)

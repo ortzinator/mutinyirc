@@ -14,10 +14,7 @@
     {
         public static bool LoggerActive
         {
-            get
-            {
-                return TextLogger.Active;
-            }
+            get { return TextLogger.Active; }
 
             set
             {
@@ -58,20 +55,20 @@
 
         public static void TurnOn()
         {
-            ChannelManager.ChannelCreated += new NewChannelEventHandler(ChannelManager_ElementCreated);
-            ChannelManager.ChannelRemoved += new DelChannelEventHandler(ChannelManager_ElementRemoved);
+            ChannelManager.ChannelCreated += ChannelManager_ElementCreated;
+            ChannelManager.ChannelRemoved += ChannelManager_ElementRemoved;
 
-            ServerManager.Instance.ServerCreated += new ServerCreatedEventHandler(ChannelManager_ElementCreated);
-            ServerManager.Instance.ServerRemoved += new ServerRemovedEventHandler(ChannelManager_ElementRemoved);
+            ServerManager.Instance.ServerCreated += ChannelManager_ElementCreated;
+            ServerManager.Instance.ServerRemoved += ChannelManager_ElementRemoved;
         }
 
         public static void TurnOff()
         {
-            ChannelManager.ChannelCreated -= new NewChannelEventHandler(ChannelManager_ElementCreated);
-            ChannelManager.ChannelRemoved -= new DelChannelEventHandler(ChannelManager_ElementRemoved);
+            ChannelManager.ChannelCreated -= ChannelManager_ElementCreated;
+            ChannelManager.ChannelRemoved -= ChannelManager_ElementRemoved;
 
-            ServerManager.Instance.ServerCreated -= new ServerCreatedEventHandler(ChannelManager_ElementCreated);
-            ServerManager.Instance.ServerRemoved -= new ServerRemovedEventHandler(ChannelManager_ElementRemoved);
+            ServerManager.Instance.ServerCreated -= ChannelManager_ElementCreated;
+            ServerManager.Instance.ServerRemoved -= ChannelManager_ElementRemoved;
         }
 
         private static void ChannelManager_ElementRemoved(Server Ntw, User Person)
@@ -84,24 +81,24 @@
             TextLogger.AddLoggable(Ntw, Person);
         }
 
-        private static void ChannelManager_ElementRemoved(Server Ntw)
+        private static void ChannelManager_ElementRemoved(object sender, ServerEventArgs args)
         {
-            TextLogger.RemoveLoggable(Ntw);
+            TextLogger.RemoveLoggable(args.Server);
         }
 
-        private static void ChannelManager_ElementCreated(Server Ntw)
+        private static void ChannelManager_ElementCreated(object sender, ServerEventArgs args)
         {
-            TextLogger.AddLoggable(Ntw);
+            TextLogger.AddLoggable(args.Server);
         }
 
-        private static void ChannelManager_ElementRemoved(Channel Chan)
+        private static void ChannelManager_ElementRemoved(object sender, ChannelEventArgs args)
         {
-            TextLogger.RemoveLoggable(Chan);
+            TextLogger.RemoveLoggable(args.Channel);
         }
 
-        private static void ChannelManager_ElementCreated(Channel Chan)
+        private static void ChannelManager_ElementCreated(object sender, ChannelEventArgs args)
         {
-            TextLogger.AddLoggable(Chan);
+            TextLogger.AddLoggable(args.Channel);
         }
     }
 }
