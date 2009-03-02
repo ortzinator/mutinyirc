@@ -1,8 +1,7 @@
-﻿namespace OrtzIRC
+﻿namespace OrtzIRC.Common
 {
     using System.Collections.Generic;
     using FlamingIRC;
-    using OrtzIRC.Common;
     using System;
 
     public sealed class ChannelManager

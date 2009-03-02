@@ -36,6 +36,7 @@
             this.LogOpenTooltip = new System.Windows.Forms.ToolTip(this.components);
             this.logFilesTreeView = new System.Windows.Forms.TreeView();
             this.deleteAllLogButton = new System.Windows.Forms.Button();
+            this.activateLoggerCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // noteEnableLogLabel
@@ -99,11 +100,23 @@
             this.deleteAllLogButton.UseVisualStyleBackColor = true;
             this.deleteAllLogButton.Click += new System.EventHandler(this.LogBTNDeleteAll_Click);
             // 
+            // activateLoggerCheckBox
+            // 
+            this.activateLoggerCheckBox.AutoSize = true;
+            this.activateLoggerCheckBox.Location = new System.Drawing.Point(12, 12);
+            this.activateLoggerCheckBox.Name = "activateLoggerCheckBox";
+            this.activateLoggerCheckBox.Size = new System.Drawing.Size(140, 17);
+            this.activateLoggerCheckBox.TabIndex = 6;
+            this.activateLoggerCheckBox.Text = "Activate Logger (TEMP)";
+            this.activateLoggerCheckBox.UseVisualStyleBackColor = true;
+            this.activateLoggerCheckBox.CheckStateChanged += new System.EventHandler(this.activateLoggerCheckBox_CheckStateChanged);
+            // 
             // LogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(433, 443);
+            this.Controls.Add(this.activateLoggerCheckBox);
             this.Controls.Add(this.deleteAllLogButton);
             this.Controls.Add(this.logFilesTreeView);
             this.Controls.Add(this.deleteLogButton);
@@ -128,5 +141,6 @@
         private System.Windows.Forms.ToolTip LogOpenTooltip;
         private System.Windows.Forms.TreeView logFilesTreeView;
         private System.Windows.Forms.Button deleteAllLogButton;
+        private System.Windows.Forms.CheckBox activateLoggerCheckBox;
     }
 }

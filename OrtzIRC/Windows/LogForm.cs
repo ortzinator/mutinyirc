@@ -5,6 +5,9 @@
     using System.IO;
     using System.Windows.Forms;
 
+    using OrtzIRC.Common;
+    using OrtzIRC.Properties;
+
     // Logs display and management class
     // Made by Guillaume 'gparent' Parent (gparent@gmail.com) 2009
     public partial class LogForm : Form
@@ -20,6 +23,8 @@
         {
             ToggleControls(false);
 
+            activateLoggerCheckBox.CheckState = (Settings.Default.LoggerActivated ? CheckState.Checked : CheckState.Unchecked);
+            
             // Figure out where our logs are
             DirectoryInfo LogDir = new DirectoryInfo(Environment.CurrentDirectory + "\\logs");
 
@@ -153,6 +158,17 @@
             {
                 ToggleControls(false);
             }
+        }
+
+        private void activateLoggerCheckBox_CheckStateChanged(object sender, EventArgs e)
+        {
+            changeLoggerState(activateLoggerCheckBox.Checked);
+        }
+
+        private void changeLoggerState(bool Active)
+        {
+            Settings.Default.LoggerActivated = Active;
+            Settings.Default.Save();
         }
     }
 }
