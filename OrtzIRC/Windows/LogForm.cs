@@ -13,6 +13,7 @@
     public partial class LogForm : Form
     {
         private static DirectoryInfo RunningDir = new DirectoryInfo(Environment.CurrentDirectory);
+        private static DateTime Time;
 
         public LogForm()
         {
@@ -22,11 +23,13 @@
         private void LogForm_Load(object sender, EventArgs e)
         {
             ToggleControls(false);
-
-            activateLoggerCheckBox.CheckState = (Settings.Default.LoggerActivated ? CheckState.Checked : CheckState.Unchecked);
             
             // Figure out where our logs are
             DirectoryInfo LogDir = new DirectoryInfo(Environment.CurrentDirectory + "\\logs");
+
+            // Store the time so we can show an example of the timestamp
+            Time = DateTime.Now;
+            timestampExampleTextLabel.Text = Time.ToString(timestampFormatTextbox.Text);
 
             if (LogDir.Exists)
             {
@@ -79,6 +82,12 @@
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             logFilesTreeView.Nodes.Clear();
+
+            TextLoggerManager.LoggerActive = activateLoggerCheckBox.Checked;
+            TextLoggerManager.AddTimestamp = addTimestampCheckbox.Checked;
+            TextLoggerManager.TimeFormat = timestampFormatTextbox.Text;
+
+            Settings.Default.Save();
         }
 
         // Opens a log with the default text editor
@@ -133,7 +142,9 @@
         private void LogBTNDeleteAll_Click(object sender, EventArgs e)
         {
             DialogResult dr = MessageBox.Show("WARNING: This will delete ALL logs files from the logs directory. This cannot be undone. Continue?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-            if (dr != DialogResult.Yes) return;
+            
+            if (dr != DialogResult.No)
+                return;
 
             DirectoryInfo di = new DirectoryInfo(RunningDir.FullName + "\\logs");
 
@@ -160,15 +171,20 @@
             }
         }
 
-        private void activateLoggerCheckBox_CheckStateChanged(object sender, EventArgs e)
+        private void addTimestampCheckbox_CheckedChanged(object sender, EventArgs e)
         {
-            changeLoggerState(activateLoggerCheckBox.Checked);
+            settingsChangedLabel.Visible = true;
         }
 
-        private void changeLoggerState(bool Active)
+        private void timestampFormatTextbox_TextChanged(object sender, EventArgs e)
         {
-            Settings.Default.LoggerActivated = Active;
-            Settings.Default.Save();
+            timestampExampleTextLabel.Text = Time.ToString(timestampFormatTextbox.Text);
+            settingsChangedLabel.Visible = true;
+        }
+
+        private void activateLoggerCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            settingsChangedLabel.Visible = true;
         }
     }
 }

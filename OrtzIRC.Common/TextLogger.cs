@@ -16,6 +16,12 @@
         // Indicate any IO errors that can't be fixed
         public static event IOErrorEventHandler WriteFailed;
 
+        // Whether we should add time or not
+        public static bool AddTimestamp;
+
+        // Timestamp
+        public static String TimeFormat;
+
         // Main datastructure
         private static Dictionary<string, Dictionary<string, LoggedItem>> LogFiles =
             new Dictionary<string, Dictionary<String, LoggedItem>>();
@@ -24,45 +30,31 @@
 
         public static void TextEntry(Server network, String text)
         {
-            // Write to file
-            LoggedItem Li = LogFiles[network.URI]['!' + network.URI];
-            Li.Write(text);
-
-            // Check for errors
-            if (Li.Failed)
-            {
-                Error(Li.LastError);
-            }
+            WriteText(LogFiles[network.URI]['!' + network.URI], text);
         }
 
         public static void TextEntry(Server network, User person, String text)
         {
-            // Write to file
-            LoggedItem Li = LogFiles[network.URI][person.Nick];
-            Li.Write(text);
-
-            // Check for errors
-            if (Li.Failed)
-            {
-                Error(Li.LastError);
-            }
+            WriteText(LogFiles[network.URI][person.Nick], text);
         }
 
         public static void TextEntry(Channel chan, String text)
         {
-            // Write to file
-            LoggedItem Li = LogFiles[chan.Server.URI][chan.Name];
-            Li.Write(text);
+            WriteText(LogFiles[chan.Server.URI][chan.Name], text);
+        }
+
+        private static void WriteText(LoggedItem logger, String text)
+        {
+            logger.Write(AddTimestamp ? DateTime.Now.ToString(TimeFormat) + ' ' + text : text);
 
             // Check for errors
-            if (Li.Failed)
+            if (logger.Failed)
             {
-                Error(Li.LastError);
+                Error(logger.LastError);
             }
         }
 
         // Error indication
-
         private static void Error(String err)
         {
             if (WriteFailed != null)
