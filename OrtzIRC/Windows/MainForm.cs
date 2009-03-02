@@ -16,8 +16,12 @@ namespace OrtzIRC
 
         protected override void OnLoad(EventArgs e)
         {
-            TextLoggerManager.TurnOn();
             //hack
+            if (Settings.Default.LoggerActivated)
+            {
+                TextLoggerManager.LoggerActive = true;
+            }
+
             Settings.Default.UserPluginDirectory = Path.Combine(Environment.CurrentDirectory, @"Plugins");
             Settings.Default.Save();
 

@@ -10,7 +10,7 @@
 
         private static ServerManager instance;
 
-        public static List<Server> ServerList { get; private set; }
+        public List<Server> ServerList { get; private set; }
 
         public static ServerManager Instance
         {
@@ -19,7 +19,7 @@
                 if (instance == null)
                 {
                     instance = new ServerManager();
-                    ServerList = new List<Server>();
+                    instance.ServerList = new List<Server>();
                 }
 
                 return instance;

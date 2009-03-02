@@ -12,12 +12,15 @@
     /// </summary>
     public static class TextLoggerManager
     {
+        private static bool loggerActive = false;
         public static bool LoggerActive
         {
-            get { return TextLogger.Active; }
+            get { return loggerActive; }
 
             set
             {
+                if (value == loggerActive) return;
+
                 if (value)
                 {
                     TurnOn();
@@ -26,6 +29,8 @@
                 {
                     TurnOff();
                 }
+
+                loggerActive = value;
             }
         }
 
@@ -60,6 +65,16 @@
 
             ServerManager.Instance.ServerCreated += ChannelManager_ElementCreated;
             ServerManager.Instance.ServerRemoved += ChannelManager_ElementRemoved;
+
+            foreach(Server Ntw in ServerManager.Instance.ServerList)
+            {
+                TextLogger.AddLoggable(Ntw);
+
+                foreach(Channel Chan in Ntw.ChanManager.Channels.Values)
+                {
+                    TextLogger.AddLoggable(Chan);
+                }
+            }
         }
 
         public static void TurnOff()
@@ -69,6 +84,8 @@
 
             ServerManager.Instance.ServerCreated -= ChannelManager_ElementCreated;
             ServerManager.Instance.ServerRemoved -= ChannelManager_ElementRemoved;
+
+            TextLogger.RemoveAllLoggables();
         }
 
         private static void ChannelManager_ElementRemoved(Server Ntw, User Person)

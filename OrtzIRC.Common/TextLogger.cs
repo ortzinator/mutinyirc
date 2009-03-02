@@ -13,9 +13,6 @@
     /// </summary>
     public static class TextLogger
     {
-        // TEMP: Whether the logging facility is active. NYI.
-        public static bool Active = true;
-
         // Indicate any IO errors that can't be fixed
         public static event IOErrorEventHandler WriteFailed;
 
@@ -96,6 +93,7 @@
         public static void RemoveLoggable(Server network)
         {
             if (!NetworkExists(network)) return;
+
             foreach (LoggedItem Log in LogFiles[network.URI].Values)
             {
                 Log.Close();
@@ -108,6 +106,7 @@
         public static void RemoveLoggable(Channel chan)
         {
             if (!ChannelExists(chan)) return;
+
             LogFiles[chan.Server.URI][chan.Name].Close();
             LogFiles[chan.Server.URI].Remove(chan.Name);
         }
@@ -115,8 +114,24 @@
         public static void RemoveLoggable(Server network, User person)
         {
             if (!PersonExists(network, person)) return;
+
             LogFiles[network.URI][person.Nick].Close();
             LogFiles[network.URI].Remove(person.Nick);
+        }
+
+        public static void RemoveAllLoggables()
+        {
+            foreach(Dictionary<string, LoggedItem> InnerDict in LogFiles.Values)
+            {
+                foreach (LoggedItem Li in InnerDict.Values)
+                {
+                    Li.Close();
+                }
+
+                InnerDict.Clear();
+            }
+
+            LogFiles.Clear();
         }
 
         private static bool NetworkExists(Server network)
