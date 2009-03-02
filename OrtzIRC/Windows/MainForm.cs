@@ -17,10 +17,9 @@ namespace OrtzIRC
         protected override void OnLoad(EventArgs e)
         {
             //hack
-            if (Settings.Default.LoggerActivated)
-            {
-                TextLoggerManager.LoggerActive = true;
-            }
+            TextLoggerManager.LoggerActive = Settings.Default.LoggerActivated;
+            TextLoggerManager.AddTimestamp = Settings.Default.LoggerTimestampsActivated;
+            TextLoggerManager.TimeFormat = Settings.Default.LoggerTimestampFormat;
 
             Settings.Default.UserPluginDirectory = Path.Combine(Environment.CurrentDirectory, @"Plugins");
             Settings.Default.Save();

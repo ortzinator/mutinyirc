@@ -34,6 +34,18 @@
             }
         }
 
+        public static bool AddTimestamp
+        {
+            get { return TextLogger.AddTimestamp; }
+            set { TextLogger.AddTimestamp = value; }
+        }
+
+        public static string TimeFormat
+        {
+            get { return TextLogger.TimeFormat; }
+            set { TextLogger.TimeFormat = value; }
+        }
+
         public static void TextEntry(Server Network, String Text)
         {
             if (LoggerActive)

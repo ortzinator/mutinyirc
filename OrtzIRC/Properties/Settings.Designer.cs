@@ -67,5 +67,29 @@ namespace OrtzIRC.Properties {
                 this["LoggerActivated"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LoggerTimestampsActivated {
+            get {
+                return ((bool)(this["LoggerTimestampsActivated"]));
+            }
+            set {
+                this["LoggerTimestampsActivated"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("[hh:mm:ss]")]
+        public string LoggerTimestampFormat {
+            get {
+                return ((string)(this["LoggerTimestampFormat"]));
+            }
+            set {
+                this["LoggerTimestampFormat"] = value;
+            }
+        }
     }
 }

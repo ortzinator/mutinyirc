@@ -14,5 +14,11 @@
     <Setting Name="LoggerActivated" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="LoggerTimestampsActivated" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="LoggerTimestampFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">[hh:mm:ss]</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
