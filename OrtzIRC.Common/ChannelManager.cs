@@ -3,15 +3,10 @@
     using System.Collections.Generic;
     using FlamingIRC;
     using OrtzIRC.Common;
-
-    public delegate void NewChannelEventHandler(Channel Chan);
-    public delegate void DelChannelEventHandler(Channel Chan);
+    using System;
 
     public sealed class ChannelManager
     {
-        public static event NewChannelEventHandler ChannelCreated;
-        public static event DelChannelEventHandler ChannelRemoved;
-
         private bool recievingNames;
 
         public ChannelManager(Server server)
@@ -25,6 +20,9 @@
 
         public Dictionary<string, Channel> Channels { get; private set; }
         public Server Server { get; private set; }
+
+        public static event EventHandler<ChannelEventArgs> ChannelCreated;
+        public static event EventHandler<ChannelEventArgs> ChannelRemoved;
 
         private void Server_OnNick(User nick, string newNick)
         {
@@ -77,8 +75,6 @@
                 TriggerChannelRemoved(Channels[channelName]);
                 Channels.Remove(channelName);
                 //TODO: Is this all that needs to be done?
-
-                
             }
             return false;
         }
@@ -97,16 +93,14 @@
             return newChan;
         }
 
-        private void TriggerChannelCreated(Channel Chan)
+        private void TriggerChannelCreated(Channel chan)
         {
-            if (ChannelCreated != null)
-                ChannelCreated(Chan);
+            ChannelCreated.Fire(this, new ChannelEventArgs(chan));
         }
 
-        private void TriggerChannelRemoved(Channel Chan)
+        private void TriggerChannelRemoved(Channel chan)
         {
-            if (ChannelRemoved != null)
-                ChannelRemoved(Chan);
+            ChannelRemoved.Fire(this, new ChannelEventArgs(chan));
         }
     }
 }

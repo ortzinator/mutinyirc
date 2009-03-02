@@ -25,11 +25,11 @@
 
         // Logging functions
 
-        public static void TextEntry(Server Network, String Text)
+        public static void TextEntry(Server network, String text)
         {
             // Write to file
-            LoggedItem Li = LogFiles[Network.URI]['!' + Network.URI];
-            Li.Write(Text);
+            LoggedItem Li = LogFiles[network.URI]['!' + network.URI];
+            Li.Write(text);
 
             // Check for errors
             if (Li.Failed)
@@ -38,11 +38,11 @@
             }
         }
 
-        public static void TextEntry(Server Network, User Person, String Text)
+        public static void TextEntry(Server network, User person, String text)
         {
             // Write to file
-            LoggedItem Li = LogFiles[Network.URI][Person.Nick];
-            Li.Write(Text);
+            LoggedItem Li = LogFiles[network.URI][person.Nick];
+            Li.Write(text);
 
             // Check for errors
             if (Li.Failed)
@@ -51,11 +51,11 @@
             }
         }
 
-        public static void TextEntry(Channel Chan, String Text)
+        public static void TextEntry(Channel chan, String text)
         {
             // Write to file
-            LoggedItem Li = LogFiles[Chan.Server.URI][Chan.Name];
-            Li.Write(Text);
+            LoggedItem Li = LogFiles[chan.Server.URI][chan.Name];
+            Li.Write(text);
 
             // Check for errors
             if (Li.Failed)
@@ -66,83 +66,77 @@
 
         // Error indication
 
-        private static void Error(String Err)
+        private static void Error(String err)
         {
             if (WriteFailed != null)
-                WriteFailed(Err);
+                WriteFailed(err);
         }
 
         // Data structure management
-        public static void AddLoggable(Server Network)
+        public static void AddLoggable(Server network)
         {
             // Add value to Network key to hold the different loggables
-            LogFiles.Add(Network.URI, new Dictionary<string, LoggedItem>());
+            LogFiles.Add(network.URI, new Dictionary<string, LoggedItem>());
             // Add the network log
-            LogFiles[Network.URI].Add('!' + Network.URI, new LoggedItem('!' + Network.URI, Network.URI));
+            LogFiles[network.URI].Add('!' + network.URI, new LoggedItem('!' + network.URI, network.URI));
         }
 
-        public static void AddLoggable(Channel Chan)
+        public static void AddLoggable(Channel chan)
         {
             // Add channel log to the structure
-            LogFiles[Chan.Server.URI].Add(Chan.Name, new LoggedItem(Chan.Name, Chan.Server.URI));
+            LogFiles[chan.Server.URI].Add(chan.Name, new LoggedItem(chan.Name, chan.Server.URI));
         }
 
-        public static void AddLoggable(Server Network, User Person)
+        public static void AddLoggable(Server network, User person)
         {
             // Add pmsg log to the data struture
-            LogFiles[Network.URI].Add(Person.Nick, new LoggedItem(Person.Nick, Network.URI)); 
+            LogFiles[network.URI].Add(person.Nick, new LoggedItem(person.Nick, network.URI)); 
         }
 
-        public static void RemoveLoggable(Server Network)
+        public static void RemoveLoggable(Server network)
         {
-            if (NetworkExists(Network))
+            if (!NetworkExists(network)) return;
+            foreach (LoggedItem Log in LogFiles[network.URI].Values)
             {
-                foreach (LoggedItem Log in LogFiles[Network.URI].Values)
-                {
-                    Log.Close();
-                }
-
-                LogFiles[Network.URI].Clear();
-                LogFiles.Remove(Network.URI);
+                Log.Close();
             }
+
+            LogFiles[network.URI].Clear();
+            LogFiles.Remove(network.URI);
         }
 
-        public static void RemoveLoggable(Channel Chan)
+        public static void RemoveLoggable(Channel chan)
         {
-            if (ChannelExists(Chan))
-            {
-                LogFiles[Chan.Server.URI][Chan.Name].Close();
-                LogFiles[Chan.Server.URI].Remove(Chan.Name);
-            }
+            if (!ChannelExists(chan)) return;
+            LogFiles[chan.Server.URI][chan.Name].Close();
+            LogFiles[chan.Server.URI].Remove(chan.Name);
         }
 
-        public static void RemoveLoggable(Server Network, User Person)
+        public static void RemoveLoggable(Server network, User person)
         {
-            if (PersonExists(Network, Person))
-            {
-                LogFiles[Network.URI][Person.Nick].Close();
-                LogFiles[Network.URI].Remove(Person.Nick);
-            }
+            if (!PersonExists(network, person)) return;
+            LogFiles[network.URI][person.Nick].Close();
+            LogFiles[network.URI].Remove(person.Nick);
         }
 
-        private static bool NetworkExists(Server Network)
+        private static bool NetworkExists(Server network)
         {
-            return LogFiles.ContainsKey(Network.URI);
+            return LogFiles.ContainsKey(network.URI);
         }
 
-        private static bool ChannelExists(Channel Chan)
+        private static bool ChannelExists(Channel chan)
         {
-            return (NetworkExists(Chan.Server) && LogFiles[Chan.Server.URI].ContainsKey(Chan.Name));
+            return (NetworkExists(chan.Server) && LogFiles[chan.Server.URI].ContainsKey(chan.Name));
         }
 
-        private static bool PersonExists(Server Network, User Person)
+        private static bool PersonExists(Server network, User person)
         {
-            return (NetworkExists(Network) && LogFiles[Network.URI].ContainsKey(Person.Nick));
+            return (NetworkExists(network) && LogFiles[network.URI].ContainsKey(person.Nick));
         }
 
-        private static bool NtwLogExists(Server Network)
+        private static bool NtwLogExists(Server network)
         {
-            return (NetworkExists(Network) && LogFiles[Network.URI].ContainsKey('!' + Network.URI));
+            return (NetworkExists(network) && LogFiles[network.URI].ContainsKey('!' + network.URI));
         }
     }
 }

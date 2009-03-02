@@ -1,14 +1,12 @@
 ﻿namespace OrtzIRC.Common
 {
     using System.Collections.Generic;
-
-    public delegate void ServerCreatedEventHandler(Server Ntw);
-    public delegate void ServerRemovedEventHandler(Server Ntw);
+    using System;
 
     public class ServerManager
     {
-        public event ServerCreatedEventHandler ServerCreated;
-        public event ServerRemovedEventHandler ServerRemoved;
+        public event EventHandler<ServerEventArgs> ServerCreated;
+        public event EventHandler<ServerEventArgs> ServerRemoved;
 
         private static ServerManager instance;
 
@@ -33,18 +31,16 @@
             Server newServer = new Server(uri, description, port, ssl);
             ServerList.Add(newServer);
 
-            if (ServerCreated != null)
-                ServerCreated(newServer);
+            ServerCreated.Fire(this, new ServerEventArgs(newServer));
 
             return newServer;
         }
 
-        public void Remove(Server Ntw)
+        public void Remove(Server ntw)
         {
-            ServerList.Remove(Ntw);
+            ServerList.Remove(ntw);
 
-            if (ServerRemoved != null)
-                ServerRemoved(Ntw);
+            ServerRemoved.Fire(this, new ServerEventArgs(ntw));
         }
     }
 }

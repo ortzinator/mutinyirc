@@ -109,6 +109,11 @@
             Joined = false;
         }
 
+        public void Part()
+        {
+            Part("Leaving"); //TODO: Get default part message
+        }
+
         public void UserPart(User nick, string message)
         {
             if (nick.Nick != Server.UserNick && OnUserPart != null)
