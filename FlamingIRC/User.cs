@@ -95,5 +95,20 @@ namespace FlamingIRC
         {
             return this.NamesLiteral;
         }
+		
+		public override bool Equals(Object obj)
+		{
+			User user = obj as User;
+			
+			if (user == null)
+				return false;
+				
+			return (Nick == user.Nick && RealName == user.RealName && HostMask == user.HostMask && UserName == user.UserName);
+		}
+		
+		public override int GetHashCode()
+		{
+			return (HostMask.GetHashCode() >> 16 | Nick.GetHashCode());
+		}
     }
 }
