@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class PrivateMessageSession
+    public class PrivateMessageSession : MessageContext
     {
         public PrivateMessageSession(Server parentServer, FlamingIRC.User user)
         {

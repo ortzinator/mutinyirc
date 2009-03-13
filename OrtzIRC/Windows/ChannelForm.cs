@@ -52,12 +52,12 @@
                 string name = exploded[0].TrimStart('/');
                 string[] parameters = new string[exploded.Length - 1];
                 Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
-                PluginManager.GetCommandInstance(Channel, name, parameters);
+                //TODO: Excecute command
             }
             else
             {
                 string[] parameters = e.Data.Split(new Char[] { ' ' });
-                PluginManager.GetCommandInstance(Channel, "say", parameters);
+                //TODO: Excecute "say" command
             }
         }
 

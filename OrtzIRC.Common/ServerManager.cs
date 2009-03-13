@@ -18,8 +18,7 @@
             {
                 if (instance == null)
                 {
-                    instance = new ServerManager();
-                    instance.ServerList = new List<Server>();
+                    instance = new ServerManager {ServerList = new List<Server>()};
                 }
 
                 return instance;
