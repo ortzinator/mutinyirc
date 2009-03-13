@@ -80,9 +80,10 @@
                     Trace.WriteLine("Could not load " + file + Environment.NewLine + ex, TraceCategories.PluginSystem);
                 }
             }
+            Trace.WriteLine("Finished loading Plug-ins", TraceCategories.PluginSystem);
         }
 
-        public static ICommand GetCommandInstance(Channel channel, string command, string[] parameters)
+        private static ICommand GetCommandInstance(MessageContext context, string command, string[] parameters)
         {
             //TODO
             foreach (KeyValuePair<string, CommandInfo> item in commands)
@@ -95,26 +96,6 @@
                 {
 
                 }
-            }
-            return null;
-        }
-
-        public static ICommand GetCommandInstance(Server server, string command, string[] parameters)
-        {
-            //TODO
-            foreach (KeyValuePair<string, CommandInfo> item in commands)
-            {
-
-            }
-            return null;
-        }
-
-        public static ICommand GetCommandInstance(PrivateMessageSession pmSession, string command, string[] parameters)
-        {
-            //TODO
-            foreach (KeyValuePair<string, CommandInfo> item in commands)
-            {
-
             }
             return null;
         }

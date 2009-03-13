@@ -37,12 +37,12 @@
             this.logFilesTreeView = new System.Windows.Forms.TreeView();
             this.deleteAllLogButton = new System.Windows.Forms.Button();
             this.timestampFormatLabel = new System.Windows.Forms.Label();
-            this.timestampFormatTextbox = new System.Windows.Forms.TextBox();
-            this.addTimestampCheckbox = new System.Windows.Forms.CheckBox();
-            this.activateLoggerCheckBox = new System.Windows.Forms.CheckBox();
             this.settingsChangedLabel = new System.Windows.Forms.Label();
             this.timestampExampleLabel = new System.Windows.Forms.Label();
             this.timestampExampleTextLabel = new System.Windows.Forms.Label();
+            this.timestampFormatTextbox = new System.Windows.Forms.TextBox();
+            this.addTimestampCheckbox = new System.Windows.Forms.CheckBox();
+            this.activateLoggerCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // noteEnableLogLabel
@@ -115,6 +115,33 @@
             this.timestampFormatLabel.TabIndex = 8;
             this.timestampFormatLabel.Text = "Timestamp Format:";
             // 
+            // settingsChangedLabel
+            // 
+            this.settingsChangedLabel.AutoSize = true;
+            this.settingsChangedLabel.Location = new System.Drawing.Point(12, 103);
+            this.settingsChangedLabel.Name = "settingsChangedLabel";
+            this.settingsChangedLabel.Size = new System.Drawing.Size(239, 13);
+            this.settingsChangedLabel.TabIndex = 10;
+            this.settingsChangedLabel.Text = "Settings will be saved when you close this dialog.";
+            this.settingsChangedLabel.Visible = false;
+            // 
+            // timestampExampleLabel
+            // 
+            this.timestampExampleLabel.AutoSize = true;
+            this.timestampExampleLabel.Location = new System.Drawing.Point(29, 78);
+            this.timestampExampleLabel.Name = "timestampExampleLabel";
+            this.timestampExampleLabel.Size = new System.Drawing.Size(104, 13);
+            this.timestampExampleLabel.TabIndex = 11;
+            this.timestampExampleLabel.Text = "Timestamp Example:";
+            // 
+            // timestampExampleTextLabel
+            // 
+            this.timestampExampleTextLabel.AutoSize = true;
+            this.timestampExampleTextLabel.Location = new System.Drawing.Point(139, 78);
+            this.timestampExampleTextLabel.Name = "timestampExampleTextLabel";
+            this.timestampExampleTextLabel.Size = new System.Drawing.Size(0, 13);
+            this.timestampExampleTextLabel.TabIndex = 12;
+            // 
             // timestampFormatTextbox
             // 
             this.timestampFormatTextbox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::OrtzIRC.Properties.Settings.Default, "LoggerTimestampFormat", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
@@ -151,33 +178,6 @@
             this.activateLoggerCheckBox.Text = "Activate Logger (SETTINGS HERE WILL BE MOVED TO AN OPTIONS PANEL)";
             this.activateLoggerCheckBox.UseVisualStyleBackColor = true;
             this.activateLoggerCheckBox.CheckedChanged += new System.EventHandler(this.activateLoggerCheckBox_CheckedChanged);
-            // 
-            // settingsChangedLabel
-            // 
-            this.settingsChangedLabel.AutoSize = true;
-            this.settingsChangedLabel.Location = new System.Drawing.Point(12, 103);
-            this.settingsChangedLabel.Name = "settingsChangedLabel";
-            this.settingsChangedLabel.Size = new System.Drawing.Size(239, 13);
-            this.settingsChangedLabel.TabIndex = 10;
-            this.settingsChangedLabel.Text = "Settings will be saved when you close this dialog.";
-            this.settingsChangedLabel.Visible = false;
-            // 
-            // timestampExampleLabel
-            // 
-            this.timestampExampleLabel.AutoSize = true;
-            this.timestampExampleLabel.Location = new System.Drawing.Point(29, 78);
-            this.timestampExampleLabel.Name = "timestampExampleLabel";
-            this.timestampExampleLabel.Size = new System.Drawing.Size(104, 13);
-            this.timestampExampleLabel.TabIndex = 11;
-            this.timestampExampleLabel.Text = "Timestamp Example:";
-            // 
-            // timestampExampleTextLabel
-            // 
-            this.timestampExampleTextLabel.AutoSize = true;
-            this.timestampExampleTextLabel.Location = new System.Drawing.Point(139, 78);
-            this.timestampExampleTextLabel.Name = "timestampExampleTextLabel";
-            this.timestampExampleTextLabel.Size = new System.Drawing.Size(0, 13);
-            this.timestampExampleTextLabel.TabIndex = 12;
             // 
             // LogForm
             // 

@@ -87,6 +87,7 @@
   <ItemGroup>
     <Compile Include="ChannelEventArgs.cs" />
     <Compile Include="LoggedItem.cs" />
+    <Compile Include="MessageContext.cs" />
     <Compile Include="ServerEventArgs.cs" />
     <Compile Include="TextLogger.cs" />
     <Compile Include="Channel.cs" />

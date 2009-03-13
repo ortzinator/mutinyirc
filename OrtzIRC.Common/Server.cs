@@ -9,7 +9,7 @@
 
     public delegate void Server_NickEventHandler(User nick, string newNick);
 
-    public class Server
+    public class Server : MessageContext
     {
         public Server(ServerSettings settings)
         {

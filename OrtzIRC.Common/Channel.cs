@@ -14,7 +14,7 @@
     /// <summary>
     /// Represents a specific channel on a network
     /// </summary>
-    public class Channel
+    public class Channel : MessageContext
     {
         public Channel(Server parent, string name)
         {
