@@ -17,7 +17,7 @@
         /// <param name="message">The message to send.</param>
         public void Execute(MessageContext context, UserInfo user, string message)
         {
-            // todo - implement message command; MessageContext needs to have a Send method (it can be abstract if necessary)
+            // todo - implement message command; MessageContext needs to have a way of getting at the Server (a abstract Server property would work)
         }
     }
 }
