@@ -6,6 +6,7 @@
     using System.IO;
     using System.Reflection;
     using OrtzIRC.Common;
+    using System.Linq;
 
     /// <summary>
     /// Manages plugins and commands.
@@ -56,21 +57,21 @@
                     {
                         if (info is CommandInfo)
                         {
-                            if (!commands.ContainsKey(info.ClassName))
+                            if (!commands.ContainsKey(info.FullName))
                             {
-                                commands.Add(info.ClassName, info as CommandInfo);
-                                Trace.WriteLine("Added command plugin " + info.ClassName + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
+                                commands.Add(info.FullName, info as CommandInfo);
+                                Trace.WriteLine("Added command plugin " + info.FullName + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
                             }
                             else
                             {
-                                Trace.WriteLine("Could not load command " + info.ClassName + ". A command by that name already exists.",
+                                Trace.WriteLine("Could not load command " + info.FullName + ". A command by that name already exists.",
                                     TraceCategories.PluginSystem); //Hack: lousy error message :P
                             }
                         }
                         else
                         {
                             plugins.Add(info);
-                            Trace.WriteLine("Added plugin " + info.ClassName + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
+                            Trace.WriteLine("Added plugin " + info.FullName + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
                         }
 
                     }
@@ -83,25 +84,33 @@
             Trace.WriteLine("Finished loading Plug-ins", TraceCategories.PluginSystem);
         }
 
-        private static ICommand GetCommandInstance(MessageContext context, string command, string[] parameters)
+        private static ICommand GetCommandInstance(string name)
         {
             //TODO
             foreach (KeyValuePair<string, CommandInfo> item in commands)
             {
-                if (item.Key != command) continue;
-
-                CommandInfo cmd = item.Value;
-
-                foreach (MethodInfo method in cmd.Type.GetMethods())
+                if (item.Value.CommandName == name)
                 {
-
+                    return (ICommand)CreateInstance(item.Value);
                 }
             }
             return null;
         }
 
+        private static IPlugin CreateInstance(PluginInfo pluginInfo)
+        {
+            Assembly asm = Assembly.LoadFile(pluginInfo.AssemblyPath);
+
+            return (IPlugin)asm.CreateInstance(pluginInfo.FullName);
+        }
+
         public static CommandResultInfo ExecuteCommand(CommandExecutionInfo info)
         {
+            //TODO: This should handle errors
+            GetCommandInstance(info.Name).GetType().GetMethods(System.Reflection.BindingFlags.Instance)
+            .Where(o => o.Name == "Execute")
+            .Where(o => o.GetParameters()[0].ParameterType == typeof(MessageContext));
+
             return new CommandResultInfo(); //Hack: So it builds
         }
     }
