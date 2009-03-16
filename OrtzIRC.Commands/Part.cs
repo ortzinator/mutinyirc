@@ -31,7 +31,7 @@
         /// <param name="channel"></param>
         public void Execute(Channel context, ChannelInfo channel)
         {
-            this.Execute(context.Server, channel, defaultMessage);
+            Execute(context.Server, channel, defaultMessage);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@
         /// <param name="message"></param>
         public void Execute(Channel context, ChannelInfo channel, string message)
         {
-            this.Execute(context.Server, channel, message);
+            Execute(context.Server, channel, message);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@
         /// <param name="channel"></param>
         public void Execute(Server context, ChannelInfo channel)
         {
-            this.Execute(context, channel, defaultMessage);
+            Execute(context, channel, defaultMessage);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@
         /// <param name="channel"></param>
         public void Execute(PrivateMessageSession context, ChannelInfo channel)
         {
-            this.Execute(context.ParentServer, channel, defaultMessage);
+            Execute(context.ParentServer, channel, defaultMessage);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@
         /// <param name="message"></param>
         public void Execute(PrivateMessageSession context, ChannelInfo channel, string message)
         {
-            this.Execute(context.ParentServer, channel, message);
+            Execute(context.ParentServer, channel, message);
         }
     }
 }

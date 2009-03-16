@@ -15,7 +15,7 @@
         /// </summary>
         public void Execute(Channel context, ChannelInfo channelToJoin)
         {
-            this.Execute(context.Server, channelToJoin);
+            Execute(context.Server, channelToJoin);
         }
 
         /// <summary>
@@ -31,7 +31,7 @@
         /// </summary>
         public void Execute(PrivateMessageSession context, ChannelInfo channelToJoin)
         {
-            this.Execute(context.ParentServer, channelToJoin);
+            Execute(context.ParentServer, channelToJoin);
         }
     }
 }
