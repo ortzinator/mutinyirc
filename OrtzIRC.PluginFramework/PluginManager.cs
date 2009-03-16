@@ -60,11 +60,11 @@
                             if (!commands.ContainsKey(info.FullName))
                             {
                                 commands.Add(info.FullName, info as CommandInfo);
-                                Trace.WriteLine("Added command plugin " + info.FullName + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
+                                Trace.WriteLine(string.Format("Added command plugin {0} at {1}", info.FullName, info.AssemblyPath), TraceCategories.PluginSystem);
                             }
                             else
                             {
-                                Trace.WriteLine("Could not load command " + info.FullName + ". A command by that name already exists.",
+                                Trace.WriteLine(string.Format("Could not load command {0}. A command by that name already exists.", info.FullName),
                                     TraceCategories.PluginSystem); //Hack: lousy error message :P
                             }
                         }
@@ -78,7 +78,7 @@
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine("Could not load " + file + Environment.NewLine + ex, TraceCategories.PluginSystem);
+                    Trace.WriteLine(string.Format("Could not load {0}{1}{2}", file, Environment.NewLine, ex), TraceCategories.PluginSystem);
                 }
             }
             Trace.WriteLine("Finished loading Plug-ins", TraceCategories.PluginSystem);
@@ -90,9 +90,7 @@
             foreach (KeyValuePair<string, CommandInfo> item in commands)
             {
                 if (item.Value.CommandName == name)
-                {
                     return (ICommand)CreateInstance(item.Value);
-                }
             }
             return null;
         }
@@ -107,9 +105,52 @@
         public static CommandResultInfo ExecuteCommand(CommandExecutionInfo info)
         {
             //TODO: This should handle errors
-            GetCommandInstance(info.Name).GetType().GetMethods(System.Reflection.BindingFlags.Instance)
-            .Where(o => o.Name == "Execute")
-            .Where(o => o.GetParameters()[0].ParameterType == typeof(MessageContext));
+            IEnumerable<MethodInfo> methods = GetCommandInstance(info.Name).GetType().GetMethods(BindingFlags.Instance)
+                .Where(o => o.Name == "Execute")
+                .Where(o => o.GetParameters()[0].ParameterType == typeof(MessageContext));
+
+            MethodInfo[] methodInfos = methods.ToArray();
+
+            for (int i = 0; i < methodInfos.Length; i++)
+            {
+                //Loop through the methods
+                ParameterInfo[] methodParameters = methodInfos[i].GetParameters();
+
+                for (int j = 0; j < methodParameters.Length; j++)
+                {
+                    //Loop throught the method's parameters
+                    ParameterInfo methodParameter = methodParameters[j];
+
+                    if (j == 0 && methodParameter.ParameterType != info.Context.GetType())
+                        break;
+
+                    object sentParameter = info.ParameterList[j - 1]; //Offset by 1 because the first command method parameter is always a MessageContext
+
+                    if (FlamingIRC.Rfc2812Util.IsValidChannelName(sentParameter as string))
+                    {
+                        sentParameter = new ChannelInfo(sentParameter as string);
+                    }
+
+                    if (methodParameter.ParameterType != sentParameter.GetType())
+                        break; //Parameter mismatch. Break paramter loop and go the the next method
+
+                    if (j == methodParameters.Length - 1 && methodParameter.ParameterType == typeof(string))
+                    {
+                        bool allStrings = true;
+                        for (int k = j; k < info.ParameterList.Count; k++)
+                        {
+                            if (info.ParameterList[k].GetType() == typeof(string)) continue;
+                            allStrings = false;
+                            break;
+                        }
+
+                        if (allStrings)
+                        {
+                            //TODO: Compress the rest of the arguments into one argument before calling.
+                        }
+                    }
+                }
+            }
 
             return new CommandResultInfo(); //Hack: So it builds
         }
