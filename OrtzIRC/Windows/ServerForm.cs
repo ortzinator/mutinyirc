@@ -6,6 +6,8 @@ namespace OrtzIRC
     using FlamingIRC;
     using OrtzIRC.Common;
     using OrtzIRC.Resources;
+    using OrtzIRC.PluginFramework;
+    using System.Collections.Generic;
 
     public partial class ServerForm : Form
     {
@@ -79,7 +81,7 @@ namespace OrtzIRC
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
-            //intentionally blank
+            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Server, e.Data));
         }
 
         private void Server_Connecting(object sender, CancelEventArgs e)

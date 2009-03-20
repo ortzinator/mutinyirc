@@ -35,17 +35,13 @@
 
                     if (File.Exists(docPath))
                     {
-                        foreach (MethodInfo method in type.GetMethods())
-                        {
-                            string summary = parser.GetMethodSummary(type, method);
-                            if (summary != null)
-                                Console.WriteLine(summary);
-                        }
+                        Trace.WriteLine(string.Format("XML docs found for the assembly: {0}", asm), TraceCategories.PluginSystem);
+                        //TODO: Parse XML docs?
                     }
                     else
                     {
                         //Would be useful for plugin devs to know
-                        Trace.WriteLine("XML docs not found for the assembly: " + asm, TraceCategories.PluginSystem);
+                        Trace.WriteLine(string.Format("XML docs not found for the assembly: {0}", asm), TraceCategories.PluginSystem);
                     }
 
                     string name = ((PluginAttribute[])type.GetCustomAttributes(typeof(PluginAttribute), false))[0].Name;

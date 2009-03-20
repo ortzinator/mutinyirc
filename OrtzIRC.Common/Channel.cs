@@ -169,7 +169,7 @@
         public void Say(string msg)
         {
             Server.Connection.Sender.PublicMessage(Name, msg);
-            MessagedChannel.Fire(this, new DataEventArgs<string>(msg));
+            MessagedChannel.Fire(this, new DataEventArgs<string>(msg)); //TODO: necessary?
         }
     }
 }

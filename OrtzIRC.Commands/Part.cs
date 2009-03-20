@@ -15,13 +15,22 @@
         private string defaultMessage = "Goodbye!";
 
         /// <summary>
-        /// Parts the current channel
+        /// Parts the current channel with a message
         /// </summary>
         /// <param name="context"></param>
         /// <param name="message"></param>
         public void Execute(Channel context, string message)
         {
             context.Part(message);
+        }
+
+        /// <summary>
+        /// Parts the current channel
+        /// </summary>
+        /// <param name="context"></param>
+        public void Execute(Channel context)
+        {
+            context.Part();
         }
 
         /// <summary>

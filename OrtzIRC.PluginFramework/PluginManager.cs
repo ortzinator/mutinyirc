@@ -1,4 +1,6 @@
-﻿namespace OrtzIRC.PluginFramework
+﻿using System.Text;
+
+namespace OrtzIRC.PluginFramework
 {
     using System;
     using System.Collections.Generic;
@@ -86,12 +88,12 @@
 
         private static ICommand GetCommandInstance(string name)
         {
-            //TODO
             foreach (KeyValuePair<string, CommandInfo> item in commands)
             {
-                if (item.Value.CommandName == name)
+                if (item.Value.CommandName.ToUpper() == name.ToUpper())
                     return (ICommand)CreateInstance(item.Value);
             }
+            Trace.WriteLine(String.Format("No command called {0} found", name.ToUpper()), TraceCategories.PluginSystem);
             return null;
         }
 
@@ -105,9 +107,15 @@
         public static CommandResultInfo ExecuteCommand(CommandExecutionInfo info)
         {
             //TODO: This should handle errors
-            IEnumerable<MethodInfo> methods = GetCommandInstance(info.Name).GetType().GetMethods(BindingFlags.Instance)
-                .Where(o => o.Name == "Execute")
-                .Where(o => o.GetParameters()[0].ParameterType == typeof(MessageContext));
+            ICommand commandInstance = GetCommandInstance(info.Name);
+            if (commandInstance == null)
+            {
+                return new CommandResultInfo { Message = String.Format("{0} is an invalid command", info.Name.ToUpper()), Result = CommandResult.Fail }; //Hack
+            }
+
+            var methods = commandInstance.GetType().GetMethods()
+            .Where(o => o.Name == "Execute")
+            .Where(o => o.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext));
 
             MethodInfo[] methodInfos = methods.ToArray();
 
@@ -124,35 +132,84 @@
                     if (j == 0 && methodParameter.ParameterType != info.Context.GetType())
                         break;
 
-                    object sentParameter = info.ParameterList[j - 1]; //Offset by 1 because the first command method parameter is always a MessageContext
-
-                    if (FlamingIRC.Rfc2812Util.IsValidChannelName(sentParameter as string))
+                    if (info.ParameterList.Count == 0)
                     {
-                        sentParameter = new ChannelInfo(sentParameter as string);
-                    }
-
-                    if (methodParameter.ParameterType != sentParameter.GetType())
-                        break; //Parameter mismatch. Break paramter loop and go the the next method
-
-                    if (j == methodParameters.Length - 1 && methodParameter.ParameterType == typeof(string))
-                    {
-                        bool allStrings = true;
-                        for (int k = j; k < info.ParameterList.Count; k++)
-                        {
-                            if (info.ParameterList[k].GetType() == typeof(string)) continue;
-                            allStrings = false;
+                        if (methodParameters.Length - 1 > 0)
                             break;
+                    }
+                    else
+                    {
+                        if (FlamingIRC.Rfc2812Util.IsValidChannelName(info.ParameterList[j - 1] as string))
+                        {
+                            info.ParameterList[j - 1] = new ChannelInfo(info.ParameterList[j - 1] as string);
                         }
 
-                        if (allStrings)
+                        if (methodParameter.ParameterType != info.ParameterList[j - 1].GetType())
+                            break; //Parameter mismatch. Break paramter loop and go the the next method
+
+                        if (j == methodParameters.Length - 1)
                         {
-                            //TODO: Compress the rest of the arguments into one argument before calling.
+                            if (methodParameter.ParameterType == typeof(string))
+                            {
+                                bool allStrings = true;
+                                System.Text.StringBuilder openString = new StringBuilder();
+                                openString.Append(info.ParameterList[j - 1] + " ");
+
+                                int k;
+                                for (k = j; k < info.ParameterList.Count; k++)
+                                {
+                                    if (info.ParameterList[k].GetType() != typeof(string))
+                                    {
+                                        allStrings = false;
+                                        break;
+                                    }
+
+                                    openString.Append(info.ParameterList[k] + " ");
+                                }
+
+                                if (allStrings && j != info.ParameterList.Count)
+                                {
+                                    openString.Remove(openString.Length - 1, 1);
+                                    info.ParameterList.RemoveRange(j - 1, k - 1);
+                                    info.ParameterList.Add(openString.ToString());
+                                }
+                            }
                         }
                     }
+                    info.ParameterList.Insert(0, info.Context);
+                    return (CommandResultInfo)methodInfos[i].Invoke(commandInstance, info.ParameterList.ToArray());
                 }
             }
+            return null;
+        }
 
-            return new CommandResultInfo(); //Hack: So it builds
+        public static CommandExecutionInfo ParseCommand(MessageContext context, string line)
+        {
+            if (line.StartsWith("/"))
+            {
+                string[] exploded = line.Split(new Char[] { ' ' });
+                string name = exploded[0].TrimStart('/');
+                string[] parameters = new string[exploded.Length - 1];
+                Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
+                return new CommandExecutionInfo
+                {
+                    Context = context,
+                    Name = name,
+                    ParameterList = new List<object>(parameters)
+                };
+            }
+            else
+            {
+                string[] exploded = line.Split(new Char[] { ' ' });
+                string[] parameters = new string[exploded.Length - 1];
+                Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
+                return new CommandExecutionInfo
+                {
+                    Context = context,
+                    Name = "say",
+                    ParameterList = new List<object>(parameters)
+                };
+            }
         }
     }
 }
