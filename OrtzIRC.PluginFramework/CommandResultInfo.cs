@@ -5,7 +5,7 @@
     /// </summary>
     public class CommandResultInfo
     {
-        public CommandResult Result { get; private set; }
-        public string Message { get; private set; }
+        public CommandResult Result { get; set; }
+        public string Message { get; set; }
     }
 }

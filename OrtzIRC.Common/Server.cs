@@ -339,6 +339,11 @@
             ChannelModeChange.Fire(this, e);
         }
 
+        public void MessageUser(string nick, string msg)
+        {
+            Connection.Sender.PrivateMessage(nick, msg);
+        }
+
         public override string ToString()
         {
             return Description;

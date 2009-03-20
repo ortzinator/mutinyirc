@@ -1,4 +1,6 @@
-﻿namespace OrtzIRC
+﻿using System.Collections.Generic;
+
+namespace OrtzIRC
 {
     using System;
     using System.Windows.Forms;
@@ -41,24 +43,12 @@
 
         private void Channel_MessagedChannel(object sender, DataEventArgs<string> e)
         {
-            AddLine(Server.UserNick + ": " + e.Data);
+            AddLine(string.Format("{0}: {1}", Server.UserNick, e.Data));
         }
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
-            if (e.Data.StartsWith("/"))
-            {
-                string[] exploded = e.Data.Split(new Char[] { ' ' });
-                string name = exploded[0].TrimStart('/');
-                string[] parameters = new string[exploded.Length - 1];
-                Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
-                //TODO: Excecute command
-            }
-            else
-            {
-                string[] parameters = e.Data.Split(new Char[] { ' ' });
-                //TODO: Excecute "say" command
-            }
+            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, e.Data));
         }
 
         private void Server_Disconnected()
@@ -68,45 +58,45 @@
 
         private void Channel_OnKick(User nick, string kickee, string reason)
         {
-            AddLine("-- Kick: (" + nick.Nick + ") was kicked by (" + kickee + ") " + reason);
+            AddLine(string.Format("-- Kick: ({0}) was kicked by ({1}) {2}", nick.Nick, kickee, reason));
         }
 
         private void Channel_OnNick(User nick, string newNick)
         {
-            AddLine("-- Nick: (" + nick.Nick + ") is now known as (" + newNick + ")");
+            AddLine(string.Format("-- Nick: ({0}) is now known as ({1})", nick.Nick, newNick));
         }
 
         private void Channel_OnUserQuit(User nick, string message)
         {
-            AddLine("-- Quit: (" + nick.Nick + ") (" + nick.HostMask + ") " + message);
+            AddLine(string.Format("-- Quit: ({0}) ({1}) {2}", nick.Nick, nick.HostMask, message));
         }
 
         private void Channel_OnPartOther(User nick, string message)
         {
             if (message != String.Empty)
-                AddLine("-- Parted: (" + nick.Nick + ") (" + nick.HostMask + ") " + message);
+                AddLine(string.Format("-- Parted: ({0}) ({1}) {2}", nick.Nick, nick.HostMask, message));
             else
-                AddLine("-- Parted: (" + nick.Nick + ") (" + nick.HostMask + ")");
+                AddLine(string.Format("-- Parted: ({0}) ({1})", nick.Nick, nick.HostMask));
         }
 
         private void Channel_OnJoin(User nick)
         {
-            AddLine("-- Joined: (" + nick.Nick + ") (" + nick.HostMask + ")");
+            AddLine(string.Format("-- Joined: ({0}) ({1})", nick.Nick, nick.HostMask));
         }
 
         private void Channel_OnShowTopic(string topic)
         {
-            AddLine("topic: (" + topic + ")");
+            AddLine(string.Format("topic: ({0})", topic));
         }
 
         private void Channel_OnAction(User nick, string message)
         {
-            AddLine("-- " + nick.Nick + " " + message);
+            AddLine(string.Format("-- {0} {1}", nick.Nick, message));
         }
 
         private void Channel_OnMessage(User nick, string message)
         {
-            AddLine(nick.NamesLiteral + ": " + message);
+            AddLine(string.Format("{0}: {1}", nick.NamesLiteral, message));
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
