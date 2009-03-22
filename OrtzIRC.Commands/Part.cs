@@ -1,10 +1,7 @@
 ﻿namespace OrtzIRC.Commands
 {
-    using System;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
-
-    //What if the author wants one plugin that adds many features?
 
     /// <summary>
     /// Parts a channel
@@ -12,7 +9,7 @@
     [Plugin] 
     public class Part : ICommand
     {
-        private string defaultMessage = "Goodbye!";
+        private const string defaultMessage = "Goodbye!";
 
         /// <summary>
         /// Parts the current channel with a message

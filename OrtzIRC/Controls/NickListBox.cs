@@ -51,11 +51,14 @@
         {
             BeginInvoke((MethodInvoker)delegate
             {
-                Items.Clear();
-
-                foreach (User nick in userList)
+                lock (userList)
                 {
-                    Items.Add(nick);
+                    Items.Clear();
+
+                    foreach (User nick in userList)
+                    {
+                        Items.Add(nick);
+                    }
                 }
             });
         }
