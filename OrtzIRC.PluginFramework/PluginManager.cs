@@ -129,8 +129,11 @@ namespace OrtzIRC.PluginFramework
                     //Loop throught the method's parameters
                     ParameterInfo methodParameter = methodParameters[j];
 
-                    if (j == 0 && methodParameter.ParameterType != info.Context.GetType())
-                        break;
+                    if (j == 0)
+                        if (methodParameter.ParameterType != info.Context.GetType())
+                            break;
+                        else
+                            continue;
 
                     if (info.ParameterList.Count == 0)
                     {
@@ -151,10 +154,9 @@ namespace OrtzIRC.PluginFramework
                             {
                                 bool allStrings = true;
                                 System.Text.StringBuilder openString = new StringBuilder();
-                                openString.Append(info.ParameterList[j - 1] + " ");
 
-                                int k;
-                                for (k = j; k < info.ParameterList.Count; k++)
+                                int numberOpenEnded = 0;
+                                for (int k = j - 1; k < info.ParameterList.Count; k++)
                                 {
                                     if (info.ParameterList[k].GetType() != typeof(string))
                                     {
@@ -163,19 +165,20 @@ namespace OrtzIRC.PluginFramework
                                     }
 
                                     openString.Append(info.ParameterList[k] + " ");
+                                    numberOpenEnded++;
                                 }
 
                                 if (allStrings && j != info.ParameterList.Count)
                                 {
                                     openString.Remove(openString.Length - 1, 1);
-                                    info.ParameterList.RemoveRange(j - 1, k - 1);
+                                    info.ParameterList.RemoveRange(j - 1, numberOpenEnded);
                                     info.ParameterList.Add(openString.ToString());
                                 }
                             }
+                            info.ParameterList.Insert(0, info.Context);
+                            return (CommandResultInfo)methodInfos[i].Invoke(commandInstance, info.ParameterList.ToArray());
                         }
                     }
-                    info.ParameterList.Insert(0, info.Context);
-                    return (CommandResultInfo)methodInfos[i].Invoke(commandInstance, info.ParameterList.ToArray());
                 }
             }
             return null;
@@ -198,9 +201,7 @@ namespace OrtzIRC.PluginFramework
             }
             else
             {
-                string[] exploded = line.Split(new Char[] { ' ' });
-                string[] parameters = new string[exploded.Length - 1];
-                Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
+                string[] parameters = line.Split(new Char[] { ' ' });
                 return new CommandExecutionInfo
                 {
                     Context = context,
