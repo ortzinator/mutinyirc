@@ -1,13 +1,9 @@
 ﻿namespace OrtzIRC.Common
 {
-    using FlamingIRC;
     using System;
+    using FlamingIRC;
 
-    public delegate void ChannelMessageEventHandler(User nick, string message);
-    public delegate void TopicShowEventHandler(string topic);
     public delegate void ChannelJoinEventHandler(User nick);
-    public delegate void ChannelPartOtherEventHandler(User nick, string message);
-    public delegate void ChannelQuitEventHandler(User nick, string message);
     public delegate void ReceivedNamesEventHandler(UserList nickList);
     public delegate void ChannelKickEventHandler(User nick, string kickee, string reason);
 
@@ -46,13 +42,14 @@
         }
 
         //TODO: Update these to EventHandlers
-        public event ChannelMessageEventHandler OnMessage;
-        public event ChannelMessageEventHandler OnAction;
-        public event TopicShowEventHandler OnShowTopic;
+        public event EventHandler<UserMessageEventArgs> OnMessage;
+        public event EventHandler<UserMessageEventArgs> OnAction;
+        public event EventHandler<DataEventArgs<string>> TopicReceived;
         public event ChannelJoinEventHandler OnJoin;
-        public event ChannelPartOtherEventHandler OnUserPart;
-        public event ChannelQuitEventHandler OnUserQuit;
-        public event Server_NickEventHandler OnNick;
+        public event EventHandler<UserMessageEventArgs> OtherUserParted;
+        public event EventHandler<UserMessageEventArgs> UserQuitted;
+        public event EventHandler UserParted;
+        public event Server_NickEventHandler NickChanged;
         public event ReceivedNamesEventHandler OnReceivedNames;
         public event ChannelKickEventHandler OnKick;
         public event EventHandler<DataEventArgs<string>> MessagedChannel;
@@ -73,8 +70,7 @@
             {
                 if (nick.Nick == n.Nick)
                 {
-                    if (OnMessage != null)
-                        OnMessage(n, message);
+                    OnMessage.Fire(this, new UserMessageEventArgs(n, message));
                 }
             }
         }
@@ -85,16 +81,14 @@
             {
                 if (nick.Nick == n.Nick)
                 {
-                    if (OnAction != null)
-                        OnAction(n, message);
+                    OnAction.Fire(this, new UserMessageEventArgs(n, message));
                 }
             }
         }
 
         public void ShowTopic(string topic)
         {
-            if (OnShowTopic != null)
-                OnShowTopic(topic);
+            TopicReceived.Fire(this, new DataEventArgs<string>(topic));
         }
 
         public void UserJoin(User nick)
@@ -114,21 +108,21 @@
             Part("Leaving"); //TODO: Get default part message
         }
 
-        public void UserPart(User nick, string message)
+        public void UserPart(User user, string message)
         {
-            if (nick.Nick != Server.UserNick && OnUserPart != null)
-                OnUserPart(nick, message);
+            if (user.Nick != Server.UserNick)
+                OtherUserParted.Fire(this, new UserMessageEventArgs(user, message));
+            else
+                UserParted.Fire(this, new EventArgs());
         }
 
-        public void UserQuit(User nick, string message)
+        public void UserQuit(User user, string message)
         {
+            //Make sure the user is in the channel
             foreach (User n in NickList)
             {
-                if (nick.Nick == n.Nick)
-                {
-                    if (OnUserQuit != null)
-                        OnUserQuit(n, message);
-                }
+                if (user.Nick != n.Nick) continue;
+                UserQuitted.Fire(this, new UserMessageEventArgs(n, message));
             }
         }
 
@@ -138,8 +132,8 @@
             {
                 if (nick.Nick == n.Nick)
                 {
-                    if (OnNick != null)
-                        OnNick(n, newNick);
+                    if (NickChanged != null)
+                        NickChanged(n, newNick);
                     Server.Connection.Sender.Names(Name);
                 }
             }

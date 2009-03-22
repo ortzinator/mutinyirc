@@ -94,7 +94,7 @@
         public event DisconnectingEventHandler Disconnecting;
         public event DisconnectedEventHandler Disconnected;
         public event EventHandler<ChannelMessageEventArgs> UserAction;
-        public event EventHandler<PrivateMessageEventArgs> PrivateNotice;
+        public event EventHandler<UserMessageEventArgs> PrivateNotice;
         public event Server_TopicRequestEventHandler GotTopic;
         public event Server_NickEventHandler OnNick;
         public event NamesEventHandler OnNames;
@@ -179,7 +179,7 @@
 
         private void Listener_OnPrivateNotice(User user, string notice)
         {
-            OnPrivateNotice(new PrivateMessageEventArgs(user, notice));
+            OnPrivateNotice(new UserMessageEventArgs(user, notice));
         }
 
         private void Listener_OnAction(User user, string channel, string description)
@@ -294,7 +294,7 @@
             UserAction.Fire(this, e);
         }
 
-        protected virtual void OnPrivateNotice(PrivateMessageEventArgs e)
+        protected virtual void OnPrivateNotice(UserMessageEventArgs e)
         {
             PrivateNotice.Fire(this, e);
         }

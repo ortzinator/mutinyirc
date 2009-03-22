@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace OrtzIRC
+﻿namespace OrtzIRC
 {
     using System;
     using System.Windows.Forms;
@@ -23,11 +21,12 @@ namespace OrtzIRC
 
             Channel.OnMessage += Channel_OnMessage;
             Channel.OnAction += Channel_OnAction;
-            Channel.OnShowTopic += Channel_OnShowTopic;
+            Channel.TopicReceived += Channel_TopicReceived;
             Channel.OnJoin += Channel_OnJoin;
-            Channel.OnUserPart += Channel_OnPartOther;
-            Channel.OnUserQuit += Channel_OnUserQuit;
-            Channel.OnNick += Channel_OnNick;
+            Channel.UserParted += Channel_UserParted;
+            Channel.OtherUserParted += Channel_OtherUserParted;
+            Channel.UserQuitted += Channel_OnUserQuitted;
+            Channel.NickChanged += Channel_OnNick;
             Channel.OnKick += Channel_OnKick;
             Channel.MessagedChannel += Channel_MessagedChannel;
             Server.Disconnected += Server_Disconnected;
@@ -66,17 +65,22 @@ namespace OrtzIRC
             AddLine(string.Format("-- Nick: ({0}) is now known as ({1})", nick.Nick, newNick));
         }
 
-        private void Channel_OnUserQuit(User nick, string message)
+        private void Channel_OnUserQuitted(object sender, UserMessageEventArgs e)
         {
-            AddLine(string.Format("-- Quit: ({0}) ({1}) {2}", nick.Nick, nick.HostMask, message));
+            AddLine(string.Format("-- Quit: ({0}) ({1}) {2}", e.User.Nick, e.User.HostMask, e.Message));
         }
 
-        private void Channel_OnPartOther(User nick, string message)
+        private void Channel_UserParted(object sender, EventArgs e)
         {
-            if (message != String.Empty)
-                AddLine(string.Format("-- Parted: ({0}) ({1}) {2}", nick.Nick, nick.HostMask, message));
+            Close();
+        }
+
+        private void Channel_OtherUserParted(object sender, UserMessageEventArgs e)
+        {
+            if (e.Message == String.Empty)
+                AddLine(string.Format("-- Parted: ({0}) ({1})", e.User.Nick, e.User.HostMask));
             else
-                AddLine(string.Format("-- Parted: ({0}) ({1})", nick.Nick, nick.HostMask));
+                AddLine(string.Format("-- Parted: ({0}) ({1}) {2}", e.User.Nick, e.User.HostMask, e.Message));
         }
 
         private void Channel_OnJoin(User nick)
@@ -84,19 +88,19 @@ namespace OrtzIRC
             AddLine(string.Format("-- Joined: ({0}) ({1})", nick.Nick, nick.HostMask));
         }
 
-        private void Channel_OnShowTopic(string topic)
+        private void Channel_TopicReceived(object sender, DataEventArgs<string> e)
         {
-            AddLine(string.Format("topic: ({0})", topic));
+            AddLine(string.Format("topic: ({0})", e.Data));
         }
 
-        private void Channel_OnAction(User nick, string message)
+        private void Channel_OnAction(object sender, UserMessageEventArgs e)
         {
-            AddLine(string.Format("-- {0} {1}", nick.Nick, message));
+            AddLine(string.Format("-- {0} {1}", e.User.Nick, e.Message));
         }
 
-        private void Channel_OnMessage(User nick, string message)
+        private void Channel_OnMessage(object sender, UserMessageEventArgs e)
         {
-            AddLine(string.Format("{0}: {1}", nick.NamesLiteral, message));
+            AddLine(string.Format("{0}: {1}", e.User.NamesLiteral, e.Message));
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

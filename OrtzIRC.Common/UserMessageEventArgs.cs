@@ -3,9 +3,9 @@
     using System;
     using FlamingIRC;
 
-    public class PrivateMessageEventArgs : EventArgs
+    public class UserMessageEventArgs : EventArgs
     {
-        public PrivateMessageEventArgs(User user, string message)
+        public UserMessageEventArgs(User user, string message)
         {
             User = user;
             Message = message;

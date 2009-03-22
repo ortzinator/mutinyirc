@@ -30,7 +30,7 @@
         /// <param name="context"></param>
         public void Execute(Channel context)
         {
-            context.Part();
+            Execute(context, defaultMessage);
         }
 
         /// <summary>

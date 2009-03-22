@@ -102,7 +102,6 @@
     <Compile Include="KickEventArgs.cs" />
     <Compile Include="PartEventArgs.cs" />
     <Compile Include="PrivateMessageSession.cs" />
-    <Compile Include="PrivateMessageEventArgs.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="ServerManager.cs" />
     <Compile Include="StringUtil.cs" />
@@ -110,6 +109,7 @@
     <Compile Include="TextLoggerManager.cs" />
     <Compile Include="TraceCategories.cs" />
     <Compile Include="UserInfo.cs" />
+    <Compile Include="UserMessageEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj">

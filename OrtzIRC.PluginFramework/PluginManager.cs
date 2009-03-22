@@ -140,9 +140,7 @@ namespace OrtzIRC.PluginFramework
                     else
                     {
                         if (FlamingIRC.Rfc2812Util.IsValidChannelName(info.ParameterList[j - 1] as string))
-                        {
                             info.ParameterList[j - 1] = new ChannelInfo(info.ParameterList[j - 1] as string);
-                        }
 
                         if (methodParameter.ParameterType != info.ParameterList[j - 1].GetType())
                             break; //Parameter mismatch. Break paramter loop and go the the next method
