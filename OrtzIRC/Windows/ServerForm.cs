@@ -7,7 +7,6 @@ namespace OrtzIRC
     using OrtzIRC.Common;
     using OrtzIRC.Resources;
     using OrtzIRC.PluginFramework;
-    using System.Collections.Generic;
 
     public partial class ServerForm : Form
     {
@@ -119,7 +118,7 @@ namespace OrtzIRC
             chan.ShowTopic(topic);
         }
 
-        private void ParentServer_OnPrivateNotice(object sender, PrivateMessageEventArgs e)
+        private void ParentServer_OnPrivateNotice(object sender, UserMessageEventArgs e)
         {
             AddLine("-" + e.User.Nick + ":" + e.Message + "-");
         }
