@@ -26,6 +26,14 @@
         public string Key { get; private set; }
         public int Limit { get; private set; }
         public string Name { get; private set; }
+
+        /// <summary>
+        /// A UserList of the users in the channel
+        /// </summary>
+        /// <remarks>
+        /// At the moment, this is kept up to date by requesting a NAMES list for the channel 
+        /// whenever someone joins, parts, quits, or their mode is changed (and thus their prefix symbol).
+        /// </remarks>
         public UserList NickList { get; private set; }
 
         /// <summary>
@@ -33,6 +41,9 @@
         /// </summary>
         public bool Joined { get; private set; }
 
+        /// <summary>
+        /// Returns a ChannelInfo class to represent the channel.
+        /// </summary>
         public ChannelInfo Info
         {
             get
@@ -42,16 +53,50 @@
         }
 
         //TODO: Update these to EventHandlers
+
+        /// <summary>
+        /// A user messaged the channel
+        /// </summary>
         public event EventHandler<UserMessageEventArgs> OnMessage;
+        /// <summary>
+        /// A user sent a message to the channel as an action
+        /// </summary>
         public event EventHandler<UserMessageEventArgs> OnAction;
+        /// <summary>
+        /// The channel's topic was received.
+        /// </summary>
         public event EventHandler<DataEventArgs<string>> TopicReceived;
+        /// <summary>
+        /// A user joined the channel
+        /// </summary>
         public event ChannelJoinEventHandler OnJoin;
+        /// <summary>
+        /// A user parted the channel
+        /// </summary>
         public event EventHandler<UserMessageEventArgs> OtherUserParted;
+        /// <summary>
+        /// A user in the channel quit from the server
+        /// </summary>
         public event EventHandler<UserMessageEventArgs> UserQuitted;
+        /// <summary>
+        /// The client parted the channel
+        /// </summary>
         public event EventHandler UserParted;
+        /// <summary>
+        /// A user in the channel changed his nickname
+        /// </summary>
         public event Server_NickEventHandler NickChanged;
+        /// <summary>
+        /// A NAMES list was recieved for the channel.
+        /// </summary>
         public event ReceivedNamesEventHandler OnReceivedNames;
+        /// <summary>
+        /// A user was kicked from the channel
+        /// </summary>
         public event ChannelKickEventHandler OnKick;
+        /// <summary>
+        /// The client messaged the channel
+        /// </summary>
         public event EventHandler<DataEventArgs<string>> MessagedChannel;
 
         public void AddNick(User nick)

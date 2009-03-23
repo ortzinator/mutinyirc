@@ -48,13 +48,9 @@
 
                     //TODO: stuff for commands
                     if (name == null)
-                    {
                         yield return new CommandInfo(asm.Location, type.FullName, type.Name, typeof(ICommand));
-                    }
                     else
-                    {
                         yield return new CommandInfo(asm.Location, type.FullName, name, typeof(ICommand));
-                    }
                 }
                 else
                 {
