@@ -71,7 +71,7 @@
 
                 Brush fore = Brushes.Black;
 
-                var cur = Items[e.Index] as User;
+                User cur = (User)Items[e.Index];
 
                 switch (cur.Prefix)
                 {

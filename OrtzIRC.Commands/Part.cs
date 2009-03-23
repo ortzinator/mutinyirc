@@ -6,7 +6,7 @@
     /// <summary>
     /// Parts a channel
     /// </summary>
-    [Plugin] 
+    [Plugin]
     public class Part : ICommand
     {
         private const string defaultMessage = "Goodbye!";

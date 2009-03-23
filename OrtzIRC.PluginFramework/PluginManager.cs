@@ -146,7 +146,7 @@ namespace OrtzIRC.PluginFramework
                             info.ParameterList[j - 1] = new ChannelInfo(info.ParameterList[j - 1] as string);
 
                         if (methodParameter.ParameterType != info.ParameterList[j - 1].GetType())
-                            break; //Parameter mismatch. Break paramter loop and go the the next method
+                            break; //Parameter mismatch. Break parameter loop and go the the next method
 
                         if (j == methodParameters.Length - 1)
                         {
