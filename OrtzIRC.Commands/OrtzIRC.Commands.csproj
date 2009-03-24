@@ -88,6 +88,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Action.cs" />
     <Compile Include="Join.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Part.cs" />
