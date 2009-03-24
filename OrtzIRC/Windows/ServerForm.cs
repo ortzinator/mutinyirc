@@ -40,8 +40,8 @@ namespace OrtzIRC
         private void HookupEvents()
         {
             server.Registered += ParentServer_OnRegistered;
-            server.PublicMessage += ParentServer_OnPublicMessage;
-            server.UserAction += ParentServer_OnAction;
+            server.ChannelMessaged += ParentServer_ChannelMessaged;
+            server.UserAction += ParentServer_UserAction;
             server.JoinSelf += ParentServer_OnJoinSelf;
             server.JoinOther += ParentServer_OnJoinOther;
             server.Part += ParentServer_OnPart;
@@ -58,8 +58,8 @@ namespace OrtzIRC
         private void UnhookEvents()
         {
             server.Registered -= ParentServer_OnRegistered;
-            server.PublicMessage -= ParentServer_OnPublicMessage;
-            server.UserAction -= ParentServer_OnAction;
+            server.ChannelMessaged -= ParentServer_ChannelMessaged;
+            server.UserAction -= ParentServer_UserAction;
             server.JoinSelf -= ParentServer_OnJoinSelf;
             server.JoinOther -= ParentServer_OnJoinOther;
             server.Part -= ParentServer_OnPart;
@@ -128,7 +128,7 @@ namespace OrtzIRC
             AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
         }
 
-        private void ParentServer_OnAction(object sender, ChannelMessageEventArgs e)
+        private void ParentServer_UserAction(object sender, ChannelMessageEventArgs e)
         {
             e.Channel.NewAction(e.User, e.Message);
         }
@@ -150,7 +150,7 @@ namespace OrtzIRC
             ((MainForm)MdiParent).CreateChannelForm(e.Data);
         }
 
-        private void ParentServer_OnPublicMessage(object sender, ChannelMessageEventArgs e)
+        private void ParentServer_ChannelMessaged(object sender, ChannelMessageEventArgs e)
         {
             e.Channel.NewMessage(e.User, e.Message);
         }

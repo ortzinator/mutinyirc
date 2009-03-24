@@ -210,5 +210,11 @@
             Server.Connection.Sender.PublicMessage(Name, msg);
             MessagedChannel.Fire(this, new DataEventArgs<string>(msg)); //TODO: necessary?
         }
+
+        public void Act(string message)
+        {
+            Server.Connection.Sender.Action(Name, message);
+            MessagedChannel.Fire(this, new DataEventArgs<string>(message));
+        }
     }
 }

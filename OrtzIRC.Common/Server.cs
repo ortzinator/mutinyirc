@@ -84,7 +84,7 @@
         public event EventHandler<DataEventArgs<string>> ConnectFailed;
 
         public event EventHandler<DataEventArgs<string>> RawMessageReceived;
-        public event EventHandler<ChannelMessageEventArgs> PublicMessage;
+        public event EventHandler<ChannelMessageEventArgs> ChannelMessaged;
         public event EventHandler<EventArgs> Connected;
         public event EventHandler<ErrorMessageEventArgs> ErrorMessageRecieved;
         public event RegisteredEventHandler Registered;
@@ -118,7 +118,7 @@
 
         public void Disconnect()
         {
-            Disconnect("OrtzIRC (pre-alpha) - http://code.google.com/p/ortzirc/"); //TODO: Pick random message from user-defined list of quit messages
+            Disconnect("OrtzIRC (pre-alpha) - http://www.ortzirc.com/"); //TODO: Pick random message from user-defined list of quit messages
         }
 
         public void Disconnect(string reason)
@@ -286,7 +286,7 @@
 
         protected virtual void OnPublicMessage(ChannelMessageEventArgs e)
         {
-            PublicMessage.Fire(this, e);
+            ChannelMessaged.Fire(this, e);
         }
 
         protected virtual void OnAction(ChannelMessageEventArgs e)
