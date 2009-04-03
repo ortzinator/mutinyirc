@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections;
-using System.ComponentModel;
-
-namespace FlamingIRC
+﻿namespace FlamingIRC
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+
     public class UserList : IList<User>, INotifyUpdate
     {
         private List<User> List;
@@ -118,6 +116,15 @@ namespace FlamingIRC
         {
             if (onUpdate != null)
                 onUpdate(this, new EventArgs());
+        }
+
+        public User GetUser(string nick)
+        {
+            foreach (var user in List)
+                if (user.Nick.ToUpper() == nick.ToUpper())
+                    return user;
+
+            return null;
         }
 
         /// <summary>

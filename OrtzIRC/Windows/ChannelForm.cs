@@ -40,9 +40,9 @@
 
         public Channel Channel { get; private set; }
 
-        private void Channel_MessagedChannel(object sender, DataEventArgs<string> e)
+        private void Channel_MessagedChannel(object sender, UserMessageEventArgs e)
         {
-            AddLine(string.Format("{0}: {1}", Server.UserNick, e.Data));
+            AddLine(string.Format("{0}: {1}", e.User.NamesLiteral, e.Message));
         }
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
