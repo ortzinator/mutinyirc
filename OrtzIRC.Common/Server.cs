@@ -21,9 +21,7 @@
 
             ChanManager = new ChannelManager(this);
 
-            UserNick = "OrtzIRC";
-
-            ConnectionArgs args = new ConnectionArgs(UserNick, settings.Uri);
+            var args = new ConnectionArgs("OrtzIRC", settings.Uri);
             Connection = new Connection(args, true, false);
 
             Connection.Listener.OnJoin += Listener_OnJoin;
@@ -67,7 +65,10 @@
         /// <summary>
         /// The nick of the connected user
         /// </summary>
-        public string UserNick { get; private set; }
+        public string UserNick
+        {
+            get { return Connection.ConnectionData.Nick; }
+        }
 
         public ChannelManager ChanManager { get; private set; }
 
@@ -347,6 +348,11 @@
         public override string ToString()
         {
             return Description;
+        }
+
+        public void Nick(string nick)
+        {
+            Connection.Sender.Nick(nick);
         }
     }
 }

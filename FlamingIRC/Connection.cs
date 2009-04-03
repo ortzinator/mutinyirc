@@ -358,7 +358,7 @@ namespace FlamingIRC
         /// A read-only collection of string key/value pairs
         /// representing IRC server proprties.
         /// </summary>
-        /// <value>This connection's ServerProperties obejct or null if it 
+        /// <value>This connection's ServerProperties object is null if it 
         /// has not been created.</value>
         public ServerProperties ServerProperties
         {

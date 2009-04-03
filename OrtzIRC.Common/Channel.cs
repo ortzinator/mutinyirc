@@ -97,7 +97,7 @@
         /// <summary>
         /// The client messaged the channel
         /// </summary>
-        public event EventHandler<DataEventArgs<string>> MessagedChannel;
+        public event EventHandler<UserMessageEventArgs> MessagedChannel;
 
         public void AddNick(User nick)
         {
@@ -114,9 +114,7 @@
             foreach (User n in NickList)
             {
                 if (nick.Nick == n.Nick)
-                {
                     OnMessage.Fire(this, new UserMessageEventArgs(n, message));
-                }
             }
         }
 
@@ -125,9 +123,7 @@
             foreach (User n in NickList)
             {
                 if (nick.Nick == n.Nick)
-                {
                     OnAction.Fire(this, new UserMessageEventArgs(n, message));
-                }
             }
         }
 
@@ -187,12 +183,8 @@
         public bool HasUser(string nick)
         {
             foreach (User n in NickList)
-            {
                 if (nick == n.Nick)
-                {
                     return true;
-                }
-            }
 
             return false;
         }
@@ -205,16 +197,16 @@
                 OnKick(nick, kickee, reason);
         }
 
-        public void Say(string msg)
+        public void Say(string message)
         {
-            Server.Connection.Sender.PublicMessage(Name, msg);
-            MessagedChannel.Fire(this, new DataEventArgs<string>(msg)); //TODO: necessary?
+            Server.Connection.Sender.PublicMessage(Name, message);
+            MessagedChannel.Fire(this, new UserMessageEventArgs(NickList.GetUser(Server.UserNick), message)); //TODO: necessary?
         }
 
         public void Act(string message)
         {
             Server.Connection.Sender.Action(Name, message);
-            MessagedChannel.Fire(this, new DataEventArgs<string>(message));
+            MessagedChannel.Fire(this, new UserMessageEventArgs(NickList.GetUser(Server.UserNick), message));
         }
     }
 }

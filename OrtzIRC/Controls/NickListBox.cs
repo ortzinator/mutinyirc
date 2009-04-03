@@ -56,9 +56,7 @@
                     Items.Clear();
 
                     foreach (User nick in userList)
-                    {
                         Items.Add(nick);
-                    }
                 }
             });
         }
