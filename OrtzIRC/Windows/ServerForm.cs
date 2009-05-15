@@ -165,13 +165,9 @@ namespace OrtzIRC
                                 CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
                     if (result == DialogResult.OK)
-                    {
                         server.Disconnect();
-                    }
                     else
-                    {
                         e.Cancel = true;
-                    }
                 }
                 else
                 {

@@ -6,7 +6,6 @@
     using FlamingIRC;
 
     public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
-
     public delegate void Server_NickEventHandler(User nick, string newNick);
 
     public class Server : MessageContext
@@ -17,7 +16,6 @@
             Description = settings.Description;
             Port = settings.Port;
             SSL = settings.Ssl;
-            //network.AddServer(this);
 
             ChanManager = new ChannelManager(this);
 
@@ -160,10 +158,9 @@
         {
             if (UserModeChanged != null)
                 UserModeChanged(action, mode);
+
             foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
-            {
                 Connection.Sender.Names(item.Key);
-            }
         }
 
         private void Listener_OnNick(User user, string newNick)

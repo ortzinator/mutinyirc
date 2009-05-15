@@ -17,9 +17,7 @@
             get 
             {
                 if (instance == null)
-                {
                     instance = new ServerManager {ServerList = new List<Server>()};
-                }
 
                 return instance;
             }
