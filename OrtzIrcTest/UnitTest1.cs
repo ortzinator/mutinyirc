@@ -3,6 +3,9 @@ using System.Xml.Linq;
 using FlamingIRC;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Windows.Forms;
+using OrtzIRC.Common;
+using System;
+using System.Diagnostics;
 
 namespace FlamingIrcTest
 {
@@ -81,6 +84,30 @@ namespace FlamingIrcTest
         public void LoopbackTest()
         {
             Assert.AreEqual<System.Net.IPAddress>(System.Net.IPAddress.Parse("127.0.0.1"), DccUtil.LocalHost());
+        }
+
+        [TestMethod]
+        public void SqliteSettingsTest()
+        {
+            var networks = IRCSettingsManager.Instance.GetNetworks();
+
+            if (networks.Count > 0)
+            {
+                foreach (var network in IRCSettingsManager.Instance.GetNetworks())
+                {
+                    Debug.WriteLine(network);
+                } 
+            }
+            else
+            {
+                Debug.WriteLine("No networks");
+            }
+        }
+
+        [TestMethod]
+        public void SqliteTesting2()
+        {
+            Assert.IsTrue(IRCSettingsManager.Instance.AddNetwork("Gamesurge"));
         }
     }
 }

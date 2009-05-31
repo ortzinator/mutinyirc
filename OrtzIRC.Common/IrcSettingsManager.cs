@@ -2,11 +2,12 @@
 {
     using System.Collections.Generic;
     using System.Data.SqlClient;
+    using System.Data.Common;
 
     public sealed class IRCSettingsManager
     {
         private static IRCSettingsManager instance;
-        private static SqlConnection db;
+        private static DbConnection db;
 
         private IRCSettingsManager()
         {
@@ -20,16 +21,45 @@
                 if (instance == null)
                 {
                     instance = new IRCSettingsManager();
-                    db = new SqlConnection("Data Source=ircsettings.db;Version=3;");
+
+                    DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
+                    db = fact.CreateConnection();
+                    
+                    db.ConnectionString = "Data Source=ircsettings.db;";
                     db.Open();
+                    
+                    CheckDatabase();
                 }
                 return instance;
             }
         }
 
+        private static void CheckDatabase()
+        {
+            var cmd = db.CreateCommand();
+            
+            cmd.CommandText = @"CREATE TABLE IF NOT EXISTS networks (
+                                id integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                                name varchar(50) UNIQUE COLLATE NOCASE NOT NULL)";
+
+            cmd.ExecuteNonQuery();
+
+            cmd.CommandText = @"CREATE TABLE IF NOT EXISTS networks (
+                                id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+                                uri varchar(50) NOT NULL,
+                                ports varchar(50),
+                                network_id integer NOT NULL,
+                                CONSTRAINT fk_servers FOREIGN KEY (network_id) REFERENCES networks (id))";
+
+            cmd.ExecuteNonQuery();
+            //TODO: Better way to execute multiple queries?
+        }
+
         public bool AddNetwork(string networkName)
         {
-            var cmd = new SqlCommand(string.Format("INSERT INTO networks (Name) VALUES ({0})", networkName), db);
+            var cmd = db.CreateCommand();
+            
+            cmd.CommandText = string.Format("INSERT INTO networks (Name) VALUES ('{0}')", networkName); //TODO: Sanitize?
 
             return cmd.ExecuteNonQuery() > 0;
         }
@@ -37,9 +67,10 @@
         public List<NetworkSettings> GetNetworks()
         {
             var set = new List<NetworkSettings>();
-            var cmd = new SqlCommand("SELECT * FROM networks", db);
+            var cmd = db.CreateCommand();
+            cmd.CommandText = "SELECT * FROM networks";
 
-            SqlDataReader rdr = cmd.ExecuteReader();
+            DbDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
             {
@@ -52,14 +83,14 @@
 
         public NetworkSettings GetNetwork(int id)
         {
-            var cmd = new SqlCommand(string.Format("SELECT * FROM networks WHERE id = {0}", id), db);
+            var cmd = db.CreateCommand();
+            cmd.CommandText = string.Format("SELECT * FROM networks WHERE id = {0}", id);
 
-            SqlDataReader rdr = cmd.ExecuteReader();
+            DbDataReader rdr = cmd.ExecuteReader();
 
             rdr.Read();
 
-            return new NetworkSettings {Name = (string)rdr["Name"]};
+            return new NetworkSettings { Name = (string)rdr["Name"] };
         }
-
     }
 }
