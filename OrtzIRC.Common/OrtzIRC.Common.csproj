@@ -107,11 +107,6 @@
     </Compile>
     <Compile Include="ServerEventArgs.cs" />
     <Compile Include="ServerSettings.cs" />
-    <Compile Include="SettingsModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SettingsModel.edmx</DependentUpon>
-    </Compile>
     <Compile Include="TextLogger.cs" />
     <Compile Include="Channel.cs" />
     <Compile Include="ChannelInfo.cs" />
@@ -145,10 +140,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <EntityDeploy Include="SettingsModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>SettingsModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

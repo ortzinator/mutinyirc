@@ -1,12 +1,12 @@
 ﻿namespace OrtzIRC.Common
 {
-    using System.Data.Linq;
-    using System.Data.Objects;
+    using System.Collections.Generic;
+    using System.Data.SqlClient;
 
     public sealed class IRCSettingsManager
     {
         private static IRCSettingsManager instance;
-        private static serversEntities db;
+        private static SqlConnection db;
 
         private IRCSettingsManager()
         {
@@ -20,23 +20,45 @@
                 if (instance == null)
                 {
                     instance = new IRCSettingsManager();
-                    db = new serversEntities();
+                    db = new SqlConnection("Data Source=ircsettings.db;Version=3;");
+                    db.Open();
                 }
                 return instance;
             }
         }
 
-        public void AddNetwork(string networkName)
+        public bool AddNetwork(string networkName)
         {
-            Networks net = new Networks {Name = networkName};
-            db.AddToNetworks(net);
-            db.SaveChanges();
+            var cmd = new SqlCommand(string.Format("INSERT INTO networks (Name) VALUES ({0})", networkName), db);
+
+            return cmd.ExecuteNonQuery() > 0;
         }
 
-        public void GetNetworks()
+        public List<NetworkSettings> GetNetworks()
         {
-            //var nets = from net in db.Networks where net.
+            var set = new List<NetworkSettings>();
+            var cmd = new SqlCommand("SELECT * FROM networks", db);
 
+            SqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                var network = new NetworkSettings();
+                network.Name = (string)rdr["Name"];
+                set.Add(network);
+            }
+            return set;
+        }
+
+        public NetworkSettings GetNetwork(int id)
+        {
+            var cmd = new SqlCommand(string.Format("SELECT * FROM networks WHERE id = {0}", id), db);
+
+            SqlDataReader rdr = cmd.ExecuteReader();
+
+            rdr.Read();
+
+            return new NetworkSettings {Name = (string)rdr["Name"]};
         }
 
     }

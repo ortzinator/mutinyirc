@@ -1,7 +1,7 @@
 ﻿namespace OrtzIRC.Common
 {
-    public struct NetworkSettings
+    public class NetworkSettings
     {
-        public string Name { get; private set; }
+        public string Name { get; set; }
     }
 }
