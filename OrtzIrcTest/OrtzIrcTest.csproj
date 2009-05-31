@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BADD5B62-D031-469A-8876-1701509AB9A4}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -93,6 +93,10 @@
     <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj">
       <Project>{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}</Project>
       <Name>FlamingIRC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OrtzIRC.Common\OrtzIRC.Common.csproj">
+      <Project>{1594A34C-9BB8-4334-880B-26671436D95E}</Project>
+      <Name>OrtzIRC.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\OrtzIRC.PluginFramework\OrtzIRC.PluginFramework.csproj">
       <Project>{D8266C38-E44E-4708-89AE-3E6CA72D5987}</Project>
