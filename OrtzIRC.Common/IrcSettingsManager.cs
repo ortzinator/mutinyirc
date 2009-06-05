@@ -59,7 +59,12 @@
         {
             var cmd = db.CreateCommand();
             
-            cmd.CommandText = string.Format("INSERT INTO networks (Name) VALUES ('{0}')", networkName); //TODO: Sanitize?
+            cmd.CommandText = "INSERT INTO networks (Name) VALUES ('@NetworkName')"; //TODO: Sanitize?
+            DbParameter p = cmd.CreateParameter();
+            p.ParameterName = "@NetworkName";
+            p.Value = networkName;
+
+            cmd.Parameters.Add(p);
 
             return cmd.ExecuteNonQuery() > 0;
         }
@@ -84,7 +89,11 @@
         public NetworkSettings GetNetwork(int id)
         {
             var cmd = db.CreateCommand();
-            cmd.CommandText = string.Format("SELECT * FROM networks WHERE id = {0}", id);
+            cmd.CommandText = "SELECT * FROM networks WHERE id = @Id";
+
+            DbParameter p = cmd.CreateParameter();
+            p.ParameterName = "@Id";
+            p.Value = id;
 
             DbDataReader rdr = cmd.ExecuteReader();
 
