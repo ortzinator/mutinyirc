@@ -1,7 +1,6 @@
 ﻿namespace OrtzIRC.Common
 {
     using System.Collections.Generic;
-    using System.Data.SqlClient;
     using System.Data.Common;
 
     public sealed class IRCSettingsManager
@@ -24,10 +23,10 @@
 
                     DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
                     db = fact.CreateConnection();
-                    
+
                     db.ConnectionString = "Data Source=ircsettings.db;";
                     db.Open();
-                    
+
                     CheckDatabase();
                 }
                 return instance;
@@ -37,7 +36,7 @@
         private static void CheckDatabase()
         {
             var cmd = db.CreateCommand();
-            
+
             cmd.CommandText = @"CREATE TABLE IF NOT EXISTS networks (
                                 id integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
                                 name varchar(50) UNIQUE COLLATE NOCASE NOT NULL)";
@@ -58,8 +57,8 @@
         public bool AddNetwork(string networkName)
         {
             var cmd = db.CreateCommand();
-            
-            cmd.CommandText = "INSERT INTO networks (Name) VALUES ('@NetworkName')"; //TODO: Sanitize?
+
+            cmd.CommandText = "INSERT INTO networks (name) VALUES ('@NetworkName')"; //TODO: Sanitize?
             DbParameter p = cmd.CreateParameter();
             p.ParameterName = "@NetworkName";
             p.Value = networkName;
@@ -80,7 +79,8 @@
             while (rdr.Read())
             {
                 var network = new NetworkSettings();
-                network.Name = (string)rdr["Name"];
+                network.Name = (string)rdr["name"];
+                network.Id = (int)rdr["id"];
                 set.Add(network);
             }
             return set;
@@ -99,7 +99,32 @@
 
             rdr.Read();
 
-            return new NetworkSettings { Name = (string)rdr["Name"] };
+            return new NetworkSettings { Name = (string)rdr["name"], Id = (int)rdr["id"] };
+        }
+
+        public List<ServerSettings> GetServers(int id)
+        {
+            var set = new List<ServerSettings>();
+            var cmd = db.CreateCommand();
+            cmd.CommandText = "SELECT * FROM servers WHERE network_id = @NetworkId";
+
+            DbParameter p = cmd.CreateParameter();
+            p.ParameterName = "@NetworkId";
+            p.Value = id;
+
+            DbDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                var server = new ServerSettings();
+                server.Description = (string)rdr["description"];
+                server.Uri = (string)rdr["uri"];
+                server.Ports = (int)rdr["ports"];
+                server.Ssl = (bool)rdr["ssl"];
+                server.Id = (int)rdr["id"];
+                set.Add(server);
+            }
+            return set;
         }
     }
 }

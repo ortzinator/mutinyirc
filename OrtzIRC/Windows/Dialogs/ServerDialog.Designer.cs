@@ -28,10 +28,6 @@ namespace OrtzIRC
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Node0");
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Node2");
-            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Node1", new System.Windows.Forms.TreeNode[] {
-            treeNode2});
             this.serverTree = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
             // 
@@ -39,15 +35,6 @@ namespace OrtzIRC
             // 
             this.serverTree.Location = new System.Drawing.Point(12, 12);
             this.serverTree.Name = "serverTree";
-            treeNode1.Name = "Node0";
-            treeNode1.Text = "Node0";
-            treeNode2.Name = "Node2";
-            treeNode2.Text = "Node2";
-            treeNode3.Name = "Node1";
-            treeNode3.Text = "Node1";
-            this.serverTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1,
-            treeNode3});
             this.serverTree.Size = new System.Drawing.Size(147, 436);
             this.serverTree.TabIndex = 0;
             // 
@@ -59,7 +46,6 @@ namespace OrtzIRC
             this.Controls.Add(this.serverTree);
             this.Name = "ServerDialog";
             this.Text = "ServerDialog";
-            this.Load += new System.EventHandler(this.ServerDialog_Load);
             this.ResumeLayout(false);
 
         }
