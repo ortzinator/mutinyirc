@@ -85,7 +85,7 @@ namespace OrtzIRC
             this.serversMenuItem.Name = "serversMenuItem";
             this.serversMenuItem.Size = new System.Drawing.Size(120, 22);
             this.serversMenuItem.Text = "Servers...";
-            this.serversMenuItem.Click += new System.EventHandler(this.newServerMenuItem_Click);
+            this.serversMenuItem.Click += new System.EventHandler(this.serversMenuItem_Click);
             // 
             // exitMenuItem
             // 

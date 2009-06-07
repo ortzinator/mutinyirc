@@ -14,7 +14,7 @@
         {
             URI = settings.Uri;
             Description = settings.Description;
-            Port = settings.Port;
+            Port = settings.Ports;
             SSL = settings.Ssl;
 
             ChanManager = new ChannelManager(this);

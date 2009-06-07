@@ -44,7 +44,7 @@ namespace OrtzIRC
             Close();
         }
 
-        private void newServerMenuItem_Click(object sender, EventArgs e)
+        private void serversMenuItem_Click(object sender, EventArgs e)
         {
             ServerDialog servers = new ServerDialog();
             servers.ShowDialog();

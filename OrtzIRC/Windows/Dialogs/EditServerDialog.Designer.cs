@@ -85,7 +85,7 @@ namespace OrtzIRC
             this.portLabel.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.portLabel.Size = new System.Drawing.Size(29, 13);
             this.portLabel.TabIndex = 4;
-            this.portLabel.Text = "Port:";
+            this.portLabel.Text = "Ports:";
             // 
             // editButton
             // 

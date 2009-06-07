@@ -6,13 +6,16 @@
         {
             Uri = uri;
             Description = description;
-            Port = port;
+            Ports = port;
             Ssl = ssl;
         }
 
-        public string Uri { get; private set; }
-        public string Description { get; private set; }
-        public int Port { get; private set; }
-        public bool Ssl { get; private set; }
+        public ServerSettings() { }
+
+        public string Uri { get; set; }
+        public string Description { get; set; }
+        public int Ports { get; set; }
+        public bool Ssl { get; set; }
+        public int Id { get; set; }
     }
 }

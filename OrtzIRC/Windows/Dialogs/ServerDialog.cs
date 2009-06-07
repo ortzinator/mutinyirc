@@ -6,29 +6,32 @@ namespace OrtzIRC
 
     public partial class ServerDialog : Form
     {
-        private IRCSettingsManager serverManager;
-
         public ServerDialog()
         {
-            serverManager = IRCSettingsManager.Instance;
-            FormClosing += ServerDialog_FormClosing;
             InitializeComponent();
         }
 
-        private void ServerDialog_FormClosing(object sender, FormClosingEventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
-            //Settings.Default.Save();
-        }
+            var networks = IRCSettingsManager.Instance.GetNetworks();
 
-        private void ServerDialog_Load(object sender, EventArgs e)
-        {
-            //foreach (Server server in Settings.Default.ServerList)
+            if (networks.Count > 0)
             {
-                //serverListBox.Items.Add(server.Description);
+                foreach (NetworkSettings network in networks)
+                {
+                    var net = serverTree.Nodes.Add(network.Name);
+                    foreach (var server in IRCSettingsManager.Instance.GetServers(network.Id))
+                    {
+                        net.Nodes.Add(new TreeNode { Text = server.Description });
+                    }
+                }
             }
-            //serverListBox.Items.Add("goo");
-            //serverListBox.Items.Add("goo");
-
+            else
+            {
+                MessageBox.Show("There are no networks. (Get a list somehow)");
+            }
+            
+            base.OnLoad(e);
         }
 
         private void button1_Click(object sender, EventArgs e)
