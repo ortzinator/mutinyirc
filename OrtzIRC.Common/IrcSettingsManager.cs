@@ -8,10 +8,7 @@
         private static IRCSettingsManager instance;
         private static DbConnection db;
 
-        private IRCSettingsManager()
-        {
-            //this is just here to make the class inconstructible
-        }
+        private IRCSettingsManager() { } //this is just here to make the class inconstructible
 
         public static IRCSettingsManager Instance
         {
