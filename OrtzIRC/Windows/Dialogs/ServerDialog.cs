@@ -13,24 +13,30 @@ namespace OrtzIRC
 
         protected override void OnLoad(EventArgs e)
         {
-            var networks = IRCSettingsManager.Instance.GetNetworks();
-
-            if (networks.Count > 0)
+            try
             {
-                foreach (NetworkSettings network in networks)
+                var networks = IRCSettingsManager.Instance.GetNetworks();
+
+                if (networks.Count > 0)
                 {
-                    var net = serverTree.Nodes.Add(network.Name);
-                    foreach (var server in IRCSettingsManager.Instance.GetServers(network.Id))
+                    foreach (NetworkSettings network in networks)
                     {
-                        net.Nodes.Add(new TreeNode { Text = server.Description });
+                        var net = serverTree.Nodes.Add(network.Name);
+                        foreach (var server in IRCSettingsManager.Instance.GetServers(network.Id))
+                        {
+                            net.Nodes.Add(new TreeNode { Text = server.Description });
+                        }
                     }
                 }
+                else
+                {
+                    MessageBox.Show("There are no networks. (Get a list somehow)");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("There are no networks. (Get a list somehow)");
+                MessageBox.Show(ex.ToString());
             }
-            
             base.OnLoad(e);
         }
 
