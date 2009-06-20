@@ -10,16 +10,21 @@
 
     public class Server : MessageContext
     {
-        public Server(ServerSettings settings)
+        public Server(ServerSettings settings) : this(settings.Uri, settings.Description, 6667, settings.Ssl) //TODO: Select port from port list
         {
-            URI = settings.Uri;
-            Description = settings.Description;
-            Port = settings.Ports;
-            SSL = settings.Ssl;
+            //intentionally left blank
+        }
 
+        public Server(string uri, string description, int port, bool ssl)
+        {
+            URI = uri;
+            Description = description;
+            Port = port;
+            SSL = ssl;
+            
             ChanManager = new ChannelManager(this);
 
-            var args = new ConnectionArgs("OrtzIRC", settings.Uri);
+            var args = new ConnectionArgs("OrtzIRC", uri);
             Connection = new Connection(args, true, false);
 
             Connection.Listener.OnJoin += Listener_OnJoin;
@@ -41,12 +46,6 @@
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
             Connection.OnConnectSuccess += Connection_OnConnectSuccess;
             Connection.ConnectFailed += Connection_ConnectFailed;
-        }
-
-        public Server(string uri, string description, int port, bool ssl)
-            : this(new ServerSettings(uri, description, port, ssl))
-        {
-            //intentionally left blank
         }
 
         public string URI { get; set; }

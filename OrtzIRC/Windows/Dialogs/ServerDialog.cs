@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace OrtzIRC
 {
     using System;
@@ -15,7 +17,7 @@ namespace OrtzIRC
         {
             try
             {
-                var networks = IRCSettingsManager.Instance.GetNetworks();
+                List<NetworkSettings> networks = IRCSettingsManager.Instance.GetNetworks();
 
                 if (networks.Count > 0)
                 {
@@ -30,21 +32,15 @@ namespace OrtzIRC
                 }
                 else
                 {
-                    MessageBox.Show("There are no networks. (Get a list somehow)");
+                    MessageBox.Show("There are no networks. (Get a list somehow)"); //TODO
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
+
             base.OnLoad(e);
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            //Server temp = new Server("irc.gamesurge.net", "Hello new server", 6667);
-
-            //Settings.Default.ServerList.Add(temp);
         }
     }
 }
