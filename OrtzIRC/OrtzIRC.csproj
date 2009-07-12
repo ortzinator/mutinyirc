@@ -112,6 +112,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\ChannelTreeNode.cs" />
+    <Compile Include="Controls\NetworkSettingsTreeNode.cs" />
+    <Compile Include="Controls\ServerSettingsTreeNode.cs" />
     <Compile Include="Controls\FileTreeNode.cs" />
     <Compile Include="Controls\IrcTextBox.cs">
       <SubType>Component</SubType>
@@ -181,11 +183,11 @@
     <Compile Include="Windows\Dialogs\PluginsDialog.Designer.cs">
       <DependentUpon>PluginsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Windows\Dialogs\ServerDialog.cs">
+    <Compile Include="Windows\Dialogs\ServerSettingsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Windows\Dialogs\ServerDialog.Designer.cs">
-      <DependentUpon>ServerDialog.cs</DependentUpon>
+    <Compile Include="Windows\Dialogs\ServerSettingsDialog.Designer.cs">
+      <DependentUpon>ServerSettingsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Windows\Dialogs\SettingsDialog.cs">
       <SubType>Form</SubType>
@@ -245,9 +247,9 @@
       <DependentUpon>PluginsDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Windows\Dialogs\ServerDialog.resx">
+    <EmbeddedResource Include="Windows\Dialogs\ServerSettingsDialog.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>ServerDialog.cs</DependentUpon>
+      <DependentUpon>ServerSettingsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\Dialogs\SettingsDialog.resx">
       <DependentUpon>SettingsDialog.cs</DependentUpon>
