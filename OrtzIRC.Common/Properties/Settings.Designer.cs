@@ -32,5 +32,16 @@ namespace OrtzIRC.Common.Properties {
                 return ((string)(this["serversConnectionString"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("data source=C:\\Users\\Brian\\Documents\\SVN\\OrtzIRC\\OrtzIRC\\bin\\x86\\Debug\\ircsetting" +
+            "s.db")]
+        public string ircsettingsConnectionString {
+            get {
+                return ((string)(this["ircsettingsConnectionString"]));
+            }
+        }
     }
 }
