@@ -1,11 +1,11 @@
-using System.Collections.Generic;
-using System.Drawing;
-
 namespace OrtzIRC
 {
     using System;
     using System.Windows.Forms;
     using OrtzIRC.Common;
+    using OrtzIRC.Common.ServerDataSetTableAdapters;
+    using System.Collections.Generic;
+    using System.Drawing;
 
     public partial class ServerSettingsDialog : Form
     {
@@ -36,32 +36,7 @@ namespace OrtzIRC
 
         protected override void OnLoad(EventArgs e)
         {
-            try
-            {
-                List<NetworkSettings> networks = IRCSettingsManager.Instance.GetNetworks();
-
-                if (networks.Count > 0)
-                {
-                    foreach (NetworkSettings network in networks)
-                    {
-                        var net = new NetworkSettingsTreeNode(network);
-                        settingsTree.Nodes.Add(net);
-
-                        foreach (var server in IRCSettingsManager.Instance.GetServers(network.Id))
-                        {
-                            net.AddServerNode(new ServerSettingsTreeNode(server));
-                        }
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("There are no networks. (Get a list somehow)"); //TODO
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString()); //hack: debugging
-            }
+            Console.Write(System.Data.Common.DbProviderFactories.GetFactory("System.Data.SQLite").ToString());
 
             HideBothPanes();
 
