@@ -1,19 +1,53 @@
 namespace OrtzIRC
 {
     using System;
+    using System.Drawing;
     using System.Windows.Forms;
     using OrtzIRC.Common;
-    using OrtzIRC.Common.ServerDataSetTableAdapters;
-    using System.Collections.Generic;
-    using System.Drawing;
 
     public partial class ServerSettingsDialog : Form
     {
+        //private ServerDataSet set = new ServerDataSet();
         public ServerSettingsDialog()
         {
             InitializeComponent();
 
             settingsTree.NodeMouseClick += settingsTree_NodeMouseClick;
+            networkNameTextBox.Validating += networkNameTextBox_Validating;
+
+            serverDescriptionTextBox.Validating += serverDescriptionTextBox_Validating;
+            serverUriTextBox.Validating += serverUriTextBox_Validating;
+            serverPortsTextBox.Validating += serverPortsTextBox_Validating;
+        }
+
+        private void serverPortsTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (settingsTree.SelectedNode == null) return;
+            var node = (ServerSettingsTreeNode)settingsTree.SelectedNode;
+            node.Row.Ports = serverPortsTextBox.Text;
+        }
+
+        private void serverUriTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (settingsTree.SelectedNode == null) return;
+            var node = (ServerSettingsTreeNode)settingsTree.SelectedNode;
+            node.Row.Url = serverUriTextBox.Text;
+        }
+
+        private void serverDescriptionTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (settingsTree.SelectedNode == null) return;
+            var node = (ServerSettingsTreeNode)settingsTree.SelectedNode;
+            node.Row.Description = serverDescriptionTextBox.Text;
+            node.Text = node.Row.Description;
+        }
+
+        private void networkNameTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (settingsTree.SelectedNode == null) return;
+            var node = (NetworkSettingsTreeNode)settingsTree.SelectedNode;
+            node.Row.Name = networkNameTextBox.Text;
+            node.Text = node.Row.Name;
         }
 
         private void settingsTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -22,25 +56,55 @@ namespace OrtzIRC
             {
                 var node = (ServerSettingsTreeNode)e.Node;
                 ShowServerPane();
-                serverUriTextBox.Text = node.Settings.Uri;
-                serverPortsTextBox.Text = node.Settings.Ports;
-                serverDescriptionTextBox.Text = node.Settings.Description;
+                serverUriTextBox.Text = node.Row.Url;
+                serverPortsTextBox.Text = node.Row.Ports;
+                serverDescriptionTextBox.Text = node.Row.Description;
             }
             else if (e.Node.GetType() == typeof(NetworkSettingsTreeNode))
             {
                 var node = (NetworkSettingsTreeNode)e.Node;
                 ShowNetworkPane();
-                networkNameTextBox.Text = node.Settings.Name;
+                networkNameTextBox.Text = node.Row.Name;
             }
         }
 
         protected override void OnLoad(EventArgs e)
         {
-            Console.Write(System.Data.Common.DbProviderFactories.GetFactory("System.Data.SQLite").ToString());
+            try
+            {
+                networkDataAdapter.Fill(ircSettingsDataSet1);
+                //var set = new ServerDataSet();
+                serverDataAdapter.Fill(ircSettingsDataSet1);
+
+                foreach (var row in ircSettingsDataSet1.Servers)
+                {
+                    MessageBox.Show(row.Url);
+                }
+                
+                foreach (IrcSettingsDataSet.NetworksRow row in ircSettingsDataSet1.Networks)
+                {
+                    var net = new NetworkSettingsTreeNode(row);
+                    foreach (var serversRow in net.Row.GetServersRows())
+                    {
+                        net.AddServerNode(new ServerSettingsTreeNode(serversRow));
+                    }
+                    settingsTree.Nodes.Add(net);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ircSettingsDataSet1.Servers.Rows[1].RowError);
+                throw;
+            }
 
             HideBothPanes();
 
             base.OnLoad(e);
+        }
+
+        void networkDataAdapter_FillError(object sender, System.Data.FillErrorEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void ShowServerPane()
@@ -72,6 +136,12 @@ namespace OrtzIRC
 
             networkGroupBox.Enabled = false;
             networkGroupBox.Visible = false;
+        }
+
+        private void okButton_Click(object sender, EventArgs e)
+        {
+            networkDataAdapter.Update(ircSettingsDataSet1);
+            Close();
         }
     }
 }
