@@ -152,6 +152,11 @@
     <Compile Include="Intellisense\AutoCompleteForm.Designer.cs">
       <DependentUpon>AutoCompleteForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="IrcSettingsDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>IrcSettingsDataSet.xsd</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -285,6 +290,17 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <None Include="IrcSettingsDataSet.xsc">
+      <DependentUpon>IrcSettingsDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="IrcSettingsDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>IrcSettingsDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="IrcSettingsDataSet.xss">
+      <DependentUpon>IrcSettingsDataSet.xsd</DependentUpon>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -320,9 +336,6 @@
       <Project>{D8266C38-E44E-4708-89AE-3E6CA72D5987}</Project>
       <Name>OrtzIRC.PluginFramework</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="System.Data.SQLite.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

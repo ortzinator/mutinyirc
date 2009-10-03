@@ -5,13 +5,13 @@
 
     public class NetworkSettingsTreeNode : TreeNode
     {
-        public NetworkSettingsTreeNode(NetworkSettings settings)
+        public NetworkSettingsTreeNode(IrcSettingsDataSet.NetworksRow row)
         {
-            Settings = settings;
-            Text = settings.Name;
+            Text = row.Name;
+            Row = row;
         }
 
-        public NetworkSettings Settings { get; private set; }
+        public IrcSettingsDataSet.NetworksRow Row { get; private set; }
 
         public void AddServerNode(ServerSettingsTreeNode node)
         {

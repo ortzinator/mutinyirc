@@ -5,12 +5,12 @@
 
     public class ServerSettingsTreeNode : TreeNode
     {
-        public ServerSettingsTreeNode(ServerSettings settings)
+        public ServerSettingsTreeNode(IrcSettingsDataSet.ServersRow row)
         {
-            Settings = settings;
-            Text = settings.Description;
+            Text = row.Description;
+            Row = row;
         }
 
-        public ServerSettings Settings { get; private set; }
+        public IrcSettingsDataSet.ServersRow Row { get; private set; }
     }
 }

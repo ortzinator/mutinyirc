@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="IrcSettingsDataSet" targetNamespace="http://tempuri.org/IrcSettingsDataSet.xsd" xmlns:mstns="http://tempuri.org/IrcSettingsDataSet.xsd" xmlns="http://tempuri.org/IrcSettingsDataSet.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="IrcSettingsDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="IrcSettingsDataSet" msprop:Generator_DataSetName="IrcSettingsDataSet">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="Networks" msprop:Generator_UserTableName="Networks" msprop:Generator_RowDeletedName="NetworksRowDeleted" msprop:Generator_RowChangedName="NetworksRowChanged" msprop:Generator_RowClassName="NetworksRow" msprop:Generator_RowChangingName="NetworksRowChanging" msprop:Generator_RowEvArgName="NetworksRowChangeEvent" msprop:Generator_RowEvHandlerName="NetworksRowChangeEventHandler" msprop:Generator_TableClassName="NetworksDataTable" msprop:Generator_TableVarName="tableNetworks" msprop:Generator_RowDeletingName="NetworksRowDeleting" msprop:Generator_TablePropName="Networks">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Id" msdata:AutoIncrement="true" msprop:Generator_UserColumnName="Id" msprop:Generator_ColumnVarNameInTable="columnId" msprop:Generator_ColumnPropNameInRow="Id" msprop:Generator_ColumnPropNameInTable="IdColumn" type="xs:long" />
+              <xs:element name="Name" msprop:Generator_UserColumnName="Name" msprop:Generator_ColumnVarNameInTable="columnName" msprop:Generator_ColumnPropNameInRow="Name" msprop:Generator_ColumnPropNameInTable="NameColumn">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Servers" msprop:Generator_UserTableName="Servers" msprop:Generator_RowDeletedName="ServersRowDeleted" msprop:Generator_TableClassName="ServersDataTable" msprop:Generator_RowChangedName="ServersRowChanged" msprop:Generator_RowClassName="ServersRow" msprop:Generator_RowChangingName="ServersRowChanging" msprop:Generator_RowEvArgName="ServersRowChangeEvent" msprop:Generator_RowEvHandlerName="ServersRowChangeEventHandler" msprop:Generator_TablePropName="Servers" msprop:Generator_TableVarName="tableServers" msprop:Generator_RowDeletingName="ServersRowDeleting">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Id" msdata:AutoIncrement="true" msprop:Generator_UserColumnName="Id" msprop:Generator_ColumnPropNameInRow="Id" msprop:Generator_ColumnVarNameInTable="columnId" msprop:Generator_ColumnPropNameInTable="IdColumn" type="xs:long" />
+              <xs:element name="Description" msprop:Generator_UserColumnName="Description" msprop:Generator_ColumnPropNameInRow="Description" msprop:Generator_ColumnVarNameInTable="columnDescription" msprop:Generator_ColumnPropNameInTable="DescriptionColumn">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Url" msprop:Generator_UserColumnName="Url" msprop:Generator_ColumnPropNameInRow="Url" msprop:Generator_ColumnVarNameInTable="columnUrl" msprop:Generator_ColumnPropNameInTable="UrlColumn">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Ports" msprop:Generator_UserColumnName="Ports" msprop:Generator_ColumnPropNameInRow="Ports" msprop:Generator_ColumnVarNameInTable="columnPorts" msprop:Generator_ColumnPropNameInTable="PortsColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="NetworkId" msprop:Generator_UserColumnName="NetworkId" msprop:Generator_ColumnPropNameInRow="NetworkId" msprop:Generator_ColumnVarNameInTable="columnNetworkId" msprop:Generator_ColumnPropNameInTable="NetworkIdColumn" type="xs:long" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+    <xs:unique name="Constraint1">
+      <xs:selector xpath=".//mstns:Networks" />
+      <xs:field xpath="mstns:Name" />
+    </xs:unique>
+    <xs:unique name="Constraint2" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:Networks" />
+      <xs:field xpath="mstns:Id" />
+    </xs:unique>
+    <xs:unique name="Servers_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:Servers" />
+      <xs:field xpath="mstns:Id" />
+    </xs:unique>
+  </xs:element>
+  <xs:annotation>
+    <xs:appinfo>
+      <msdata:Relationship name="Networks_Servers" msdata:parent="Networks" msdata:child="Servers" msdata:parentkey="Id" msdata:childkey="NetworkId" msprop:Generator_UserRelationName="Networks_Servers" msprop:Generator_RelationVarName="relationNetworks_Servers" msprop:Generator_UserChildTable="Servers" msprop:Generator_UserParentTable="Networks" msprop:Generator_ParentPropName="NetworksRow" msprop:Generator_ChildPropName="GetServersRows" />
+    </xs:appinfo>
+  </xs:annotation>
+</xs:schema>

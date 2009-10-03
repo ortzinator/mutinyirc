@@ -107,15 +107,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="ServerDataSet.cs">
-      <DependentUpon>ServerDataSet.xsd</DependentUpon>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ServerDataSet.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ServerDataSet.xsd</DependentUpon>
-    </Compile>
     <Compile Include="ServerEventArgs.cs" />
     <Compile Include="ServerSettings.cs" />
     <Compile Include="TextLogger.cs" />
@@ -150,17 +141,6 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Include="ServerDataSet.xsc">
-      <DependentUpon>ServerDataSet.xsd</DependentUpon>
-    </None>
-    <None Include="ServerDataSet.xsd">
-      <SubType>Designer</SubType>
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>ServerDataSet.Designer.cs</LastGenOutput>
-    </None>
-    <None Include="ServerDataSet.xss">
-      <DependentUpon>ServerDataSet.xsd</DependentUpon>
     </None>
   </ItemGroup>
   <ItemGroup>
