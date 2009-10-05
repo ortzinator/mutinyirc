@@ -24,30 +24,30 @@ namespace OrtzIRC
         {
             if (settingsTree.SelectedNode == null) return;
             var node = (ServerSettingsTreeNode)settingsTree.SelectedNode;
-            node.Row.Ports = serverPortsTextBox.Text;
+            node.Settings.Ports = serverPortsTextBox.Text;
         }
 
         private void serverUriTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (settingsTree.SelectedNode == null) return;
             var node = (ServerSettingsTreeNode)settingsTree.SelectedNode;
-            node.Row.Url = serverUriTextBox.Text;
+            node.Settings.Url = serverUriTextBox.Text;
         }
 
         private void serverDescriptionTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (settingsTree.SelectedNode == null) return;
             var node = (ServerSettingsTreeNode)settingsTree.SelectedNode;
-            node.Row.Description = serverDescriptionTextBox.Text;
-            node.Text = node.Row.Description;
+            node.Settings.Description = serverDescriptionTextBox.Text;
+            node.Text = node.Settings.Description;
         }
 
         private void networkNameTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (settingsTree.SelectedNode == null) return;
             var node = (NetworkSettingsTreeNode)settingsTree.SelectedNode;
-            node.Row.Name = networkNameTextBox.Text;
-            node.Text = node.Row.Name;
+            node.Settings.Name = networkNameTextBox.Text;
+            node.Text = node.Settings.Name;
         }
 
         private void settingsTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -56,55 +56,34 @@ namespace OrtzIRC
             {
                 var node = (ServerSettingsTreeNode)e.Node;
                 ShowServerPane();
-                serverUriTextBox.Text = node.Row.Url;
-                serverPortsTextBox.Text = node.Row.Ports;
-                serverDescriptionTextBox.Text = node.Row.Description;
+                serverUriTextBox.Text = node.Settings.Url;
+                serverPortsTextBox.Text = node.Settings.Ports;
+                serverDescriptionTextBox.Text = node.Settings.Description;
             }
             else if (e.Node.GetType() == typeof(NetworkSettingsTreeNode))
             {
                 var node = (NetworkSettingsTreeNode)e.Node;
                 ShowNetworkPane();
-                networkNameTextBox.Text = node.Row.Name;
+                networkNameTextBox.Text = node.Settings.Name;
             }
         }
 
         protected override void OnLoad(EventArgs e)
         {
-            try
+            
+            foreach (var network in IRCSettingsManager.Instance.Networks)
             {
-                networkDataAdapter.Fill(ircSettingsDataSet1);
-                //var set = new ServerDataSet();
-                serverDataAdapter.Fill(ircSettingsDataSet1);
-
-                foreach (var row in ircSettingsDataSet1.Servers)
+                var net = new NetworkSettingsTreeNode(network);
+                foreach (var server in network.Servers)
                 {
-                    MessageBox.Show(row.Url);
+                    net.AddServerNode(new ServerSettingsTreeNode(server));
                 }
-                
-                foreach (IrcSettingsDataSet.NetworksRow row in ircSettingsDataSet1.Networks)
-                {
-                    var net = new NetworkSettingsTreeNode(row);
-                    foreach (var serversRow in net.Row.GetServersRows())
-                    {
-                        net.AddServerNode(new ServerSettingsTreeNode(serversRow));
-                    }
-                    settingsTree.Nodes.Add(net);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ircSettingsDataSet1.Servers.Rows[1].RowError);
-                throw;
+                settingsTree.Nodes.Add(net);
             }
 
             HideBothPanes();
 
             base.OnLoad(e);
-        }
-
-        void networkDataAdapter_FillError(object sender, System.Data.FillErrorEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         private void ShowServerPane()
@@ -140,7 +119,7 @@ namespace OrtzIRC
 
         private void okButton_Click(object sender, EventArgs e)
         {
-            networkDataAdapter.Update(ircSettingsDataSet1);
+            IRCSettingsManager.Instance.Save();
             Close();
         }
     }

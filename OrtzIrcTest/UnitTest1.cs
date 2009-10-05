@@ -85,29 +85,5 @@ namespace FlamingIrcTest
         {
             Assert.AreEqual<System.Net.IPAddress>(System.Net.IPAddress.Parse("127.0.0.1"), DccUtil.LocalHost());
         }
-
-        [TestMethod]
-        public void SqliteSettingsTest()
-        {
-            var networks = IRCSettingsManager.Instance.GetNetworks();
-
-            if (networks.Count > 0)
-            {
-                foreach (var network in IRCSettingsManager.Instance.GetNetworks())
-                {
-                    Debug.WriteLine(network);
-                } 
-            }
-            else
-            {
-                Debug.WriteLine("No networks");
-            }
-        }
-
-        [TestMethod]
-        public void SqliteTesting2()
-        {
-            Assert.IsTrue(IRCSettingsManager.Instance.AddNetwork("Gamesurge"));
-        }
     }
 }

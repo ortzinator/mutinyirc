@@ -1,115 +1,79 @@
-﻿namespace OrtzIRC.Common
+﻿using System.Windows.Forms;
+
+namespace OrtzIRC.Common
 {
+    using System;
     using System.Collections.Generic;
-    using System.Data.SQLite;
+    using System.IO;
+    using System.Xml.Serialization;
 
     public sealed class IRCSettingsManager
     {
         private static IRCSettingsManager instance;
-        private static SQLiteConnection db;
 
-        private IRCSettingsManager() { } //this is just here to make the class inconstructible
+        public NetworkSettingsList Networks { get; private set; }
+
+        private IRCSettingsManager()
+        {
+            Networks = new NetworkSettingsList();
+        }
 
         public static IRCSettingsManager Instance
         {
             get
             {
-                if (instance == null)
-                {
-                    instance = new IRCSettingsManager();
-
-                    db = new SQLiteConnection("Data Source=ircsettings.db;");
-                    db.Open();
-
-                    CheckDatabase();
-                }
+                if (instance != null) return instance;
+                instance = new IRCSettingsManager();
+                instance.Load();
                 return instance;
             }
         }
 
-        private static void CheckDatabase()
+        public NetworkSettings AddNetwork(string networkName)
         {
-            var cmd = db.CreateCommand();
-
-            cmd.CommandText = @"CREATE TABLE IF NOT EXISTS networks (
-                                id integer PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                                name varchar(50) UNIQUE COLLATE NOCASE NOT NULL)";
-
-            cmd.ExecuteNonQuery();
-
-            cmd.CommandText = @"CREATE TABLE IF NOT EXISTS servers (
-                                id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-                                description varchar(50) NOT NULL,
-                                uri varchar(50) NOT NULL,
-                                ports varchar(50),
-                                network_id integer NOT NULL,
-                                CONSTRAINT fk_servers FOREIGN KEY (network_id) REFERENCES networks (id))";
-
-            cmd.ExecuteNonQuery();
-            //TODO: Better way to execute multiple queries?
+            return Networks.AddNetwork(networkName);
         }
 
-        public bool AddNetwork(string networkName)
+        public NetworkSettings GetNetwork(string name)
         {
-            var cmd = db.CreateCommand();
+            foreach (var network in Networks)
+                if (network.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
+                    return network;
 
-            cmd.CommandText = "INSERT INTO networks (name) VALUES ('@NetworkName')"; //TODO: Sanitize?
-            cmd.Parameters.AddWithValue("@NetworkName", networkName);
-
-            return cmd.ExecuteNonQuery() > 0;
+            return null;
         }
 
-        public List<NetworkSettings> GetNetworks()
+        public void Save()
         {
-            var set = new List<NetworkSettings>();
-            var cmd = db.CreateCommand(); 
-            cmd.CommandText = "SELECT * FROM networks";
-
-            SQLiteDataReader rdr = cmd.ExecuteReader();
-
-            while (rdr.Read())
+            try
             {
-                var network = new NetworkSettings();
-                network.Name = (string)rdr["name"];
-                network.Id = rdr.GetInt32(0);
-                set.Add(network);
+                var serializer = new XmlSerializer(typeof(NetworkSettingsList), new XmlRootAttribute("EpicServerList"));
+                var fs = new FileStream("servers.xml", FileMode.Create); //TODO: App setting
+                TextWriter writer = new StreamWriter(fs, new System.Text.UTF8Encoding());
+                serializer.Serialize(writer, Networks);
+                writer.Close();
+                fs.Close();
             }
-            return set;
-        }
-
-        public NetworkSettings GetNetwork(int id)
-        {
-            var cmd = db.CreateCommand();
-            cmd.CommandText = "SELECT * FROM networks WHERE id = @Id";
-            cmd.Parameters.AddWithValue("@Id", id);
-
-            SQLiteDataReader rdr = cmd.ExecuteReader();
-
-            rdr.Read();
-
-            return new NetworkSettings { Name = (string)rdr["name"], Id = (int)rdr["id"] };
-        }
-
-        public List<ServerSettings> GetServers(int id)
-        {
-            var set = new List<ServerSettings>();
-            var cmd = db.CreateCommand();
-            cmd.CommandText = "SELECT * FROM servers WHERE network_id = @NetworkId";
-            cmd.Parameters.AddWithValue("@NetworkId", id);
-
-            SQLiteDataReader rdr = cmd.ExecuteReader();
-
-            while (rdr.Read())
+            catch(Exception ex)
             {
-                var server = new ServerSettings();
-                server.Description = (string)rdr["description"];
-                server.Uri = (string)rdr["uri"];
-                server.Ports = (string)rdr["ports"];
-                //server.Ssl = (bool)rdr["ssl"];
-                server.Id = rdr.GetInt32(0);
-                set.Add(server);
+                MessageBox.Show("Could not save IRC settings to disk", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //TODO: Log, or something.
             }
-            return set;
+        }
+
+        private void Load()
+        {
+            try
+            {
+                var serializer = new XmlSerializer(typeof(NetworkSettingsList), new XmlRootAttribute("EpicServerList"));
+                var fs = new FileStream("servers.xml", FileMode.Open); //TODO: App setting
+                Networks = (NetworkSettingsList)serializer.Deserialize(fs);
+                fs.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
     }
 }

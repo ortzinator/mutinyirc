@@ -1,13 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace OrtzIRC.Common
+﻿namespace OrtzIRC.Common
 {
-    public class ServerSettings
+    using System;
+    using System.Collections.Generic;
+    using System.Xml.Serialization;
+    using System.Xml.Schema;
+    using System.Xml;
+
+    public class ServerSettings : IXmlSerializable
     {
-        public ServerSettings(string uri, string description, string ports, bool ssl)
+        public ServerSettings(string url, string description, string ports, bool ssl)
         {
-            Uri = uri;
+            Url = url;
             Description = description;
             Ports = ports;
             Ssl = ssl;
@@ -15,11 +18,10 @@ namespace OrtzIRC.Common
 
         public ServerSettings() { }
 
-        public string Uri { get; set; }
+        public string Url { get; set; }
         public string Description { get; set; }
         public string Ports { get; set; }
         public bool Ssl { get; set; }
-        public int Id { get; set; }
 
         private int[] PortList
         {
@@ -33,7 +35,7 @@ namespace OrtzIRC.Common
         {
             string[] portListChunk = ports.Split(',');
 
-            List<int> portList = new List<int>(portListChunk.Length); // Maximum performance if there are no ranges
+            var portList = new List<int>(portListChunk.Length); // Maximum performance if there are no ranges
 
             foreach (string chunk in portListChunk)
             {
@@ -86,6 +88,25 @@ namespace OrtzIRC.Common
             }
 
             return portList.ToArray();
+        }
+
+        public XmlSchema GetSchema()
+        {
+            return null;
+        }
+
+        public void ReadXml(XmlReader reader)
+        {
+            Description = reader.GetAttribute("Description");
+            Url = reader.GetAttribute("Url");
+            Ports = reader.GetAttribute("Ports");
+        }
+
+        public void WriteXml(XmlWriter writer)
+        {
+            writer.WriteAttributeString("Description", Description);
+            writer.WriteAttributeString("Url", Url);
+            writer.WriteAttributeString("Ports", Ports);
         }
     }
 }

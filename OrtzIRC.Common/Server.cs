@@ -10,7 +10,7 @@
 
     public class Server : MessageContext
     {
-        public Server(ServerSettings settings) : this(settings.Uri, settings.Description, 6667, settings.Ssl) //TODO: Select port from port list
+        public Server(ServerSettings settings) : this(settings.Url, settings.Description, 6667, settings.Ssl) //TODO: Select port from port list
         {
             //intentionally left blank
         }
