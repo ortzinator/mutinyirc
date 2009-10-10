@@ -33,6 +33,9 @@
 
         private static int[] PortsStringToArray(string ports)
         {
+            if (ports == string.Empty)
+                return null;
+
             string[] portListChunk = ports.Split(',');
 
             var portList = new List<int>(portListChunk.Length); // Maximum performance if there are no ranges

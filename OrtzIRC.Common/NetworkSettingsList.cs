@@ -30,17 +30,11 @@
             reader.Read();
             while (reader.IsStartElement("Network"))
             {
-                //reader.ReadStartElement("Network");
                 var net = new NetworkSettings();
                 net.ReadXml(reader);
                 Add(net);
                 reader.ReadEndElement();
             }
-
-            //foreach (NetworkSettings settings in list)
-            //{
-            //    Add(settings);
-            //}
         }
 
         public void WriteXml(System.Xml.XmlWriter writer)

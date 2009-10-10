@@ -33,6 +33,13 @@ namespace OrtzIRC.Common
             Servers.Add(server);
         }
 
+        public ServerSettings AddServer()
+        {
+            var server = new ServerSettings();
+            Servers.Add(server);
+            return server;
+        }
+
         public override string ToString()
         {
             return Name;
@@ -69,6 +76,11 @@ namespace OrtzIRC.Common
                 server.WriteXml(writer);
                 writer.WriteEndElement();
             }
+        }
+
+        public bool RemoveServer(ServerSettings serverSettings)
+        {
+            return Servers.Remove(serverSettings);
         }
     }
 }
