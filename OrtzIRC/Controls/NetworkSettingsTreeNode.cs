@@ -5,10 +5,11 @@
 
     public class NetworkSettingsTreeNode : TreeNode
     {
-        public NetworkSettingsTreeNode(NetworkSettings settings)
+        public NetworkSettingsTreeNode(NetworkSettings settings, ContextMenuStrip menu)
         {
             Text = settings.Name;
             Settings = settings;
+            ContextMenuStrip = menu;
         }
 
         public NetworkSettings Settings { get; private set; }

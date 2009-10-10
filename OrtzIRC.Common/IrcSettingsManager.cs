@@ -34,6 +34,11 @@ namespace OrtzIRC.Common
             return Networks.AddNetwork(networkName);
         }
 
+        public bool RemoveNetwork(NetworkSettings network)
+        {
+            return Networks.Remove(network);
+        }
+
         public NetworkSettings GetNetwork(string name)
         {
             foreach (var network in Networks)
@@ -54,7 +59,7 @@ namespace OrtzIRC.Common
                 writer.Close();
                 fs.Close();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("Could not save IRC settings to disk", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 //TODO: Log, or something.
@@ -69,6 +74,10 @@ namespace OrtzIRC.Common
                 var fs = new FileStream("servers.xml", FileMode.Open); //TODO: App setting
                 Networks = (NetworkSettingsList)serializer.Deserialize(fs);
                 fs.Close();
+            }
+            catch (FileNotFoundException ex)
+            {
+                MessageBox.Show("Your IRC settings could not be found."); //TODO: Download default
             }
             catch (Exception ex)
             {
