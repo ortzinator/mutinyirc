@@ -80,7 +80,7 @@ namespace FlamingIrcTest
             Assert.AreEqual<long>(DccUtil.NetworkUnsignedLong(comp.Address), result);
         }
 
-        [TestMethod]
+        [TestMethod()]
         public void LoopbackTest()
         {
             Assert.AreEqual<System.Net.IPAddress>(System.Net.IPAddress.Parse("127.0.0.1"), DccUtil.LocalHost());
