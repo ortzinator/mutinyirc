@@ -72,38 +72,35 @@ namespace OrtzIRC
             return newServerForm;
         }
 
+        private delegate void CreateChannelFormDlg(Channel channel);
+
         /// <summary>
         /// Creates and displays a ChannelForm and adds a node to the WindowManagerTreeView under the appropriate server node
         /// </summary>
         /// <param name="channel"></param>
         /// <returns></returns>
-        public ChannelForm CreateChannelForm(Channel channel)
+        public void CreateChannelForm(Channel channel)
         {
-            ChannelDelegate del = CreateChannelFormOnUiThread;
-            return (ChannelForm)Invoke(del, channel);
-        }
-
-        private delegate ChannelForm ChannelDelegate(Channel channel);
-
-        private ChannelForm CreateChannelFormOnUiThread(Channel channel)
-        {
-            ChannelForm newChannelForm = new ChannelForm(channel);
-            ServerTreeNode node = windowTreeView.GetServerNode(channel.Server);
-
-            if (node == null)
-                throw new Exception("ServerTreeNode doesn't exist!"); //hack
-            Invoke((MethodInvoker)delegate
+            if (InvokeRequired)
             {
+                BeginInvoke((CreateChannelFormDlg)CreateChannelForm, new object[] { channel });
+            }
+            else
+            {
+                ChannelForm newChannelForm = new ChannelForm(channel);
+                ServerTreeNode node = windowTreeView.GetServerNode(channel.Server);
+
+                if (node == null)
+                    throw new Exception("ServerTreeNode doesn't exist!"); //hack
+
                 node.AddChannelNode(new ChannelTreeNode(newChannelForm));
                 node.Expand();
                 newChannelForm.MdiParent = this;
-            });
 
-            newChannelForm.Show();
-            newChannelForm.AddLine("Joined: " + channel.Name);
-            //TODO: display topic
-
-            return newChannelForm;
+                newChannelForm.Show();
+                newChannelForm.AddLine("Joined: " + channel.Name);
+                //TODO: display topic
+            }
         }
 
         private void windowTreeView_AfterSelect(object sender, TreeViewEventArgs e)
