@@ -6,6 +6,7 @@ namespace OrtzIRC
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
+    using System.Diagnostics;
 
     public partial class MainForm : Form
     {
@@ -67,7 +68,6 @@ namespace OrtzIRC
 
             newServerForm.Text = server.Description;
             newServerForm.Show();
-            //TODO: display topic
 
             return newServerForm;
         }
@@ -92,7 +92,6 @@ namespace OrtzIRC
 
             if (node == null)
                 throw new Exception("ServerTreeNode doesn't exist!"); //hack
-
             Invoke((MethodInvoker)delegate
             {
                 node.AddChannelNode(new ChannelTreeNode(newChannelForm));

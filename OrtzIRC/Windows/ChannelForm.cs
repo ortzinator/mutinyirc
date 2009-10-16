@@ -5,6 +5,7 @@
     using FlamingIRC;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
+    using System.Diagnostics;
 
     public partial class ChannelForm : Form
     {
@@ -47,7 +48,7 @@
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
-            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, e.Data));
+            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, e.Data)); //TODO: Do something with the result
         }
 
         private void Server_Disconnected()
