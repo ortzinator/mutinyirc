@@ -5,7 +5,6 @@
     using FlamingIRC;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
-    using System.Diagnostics;
 
     public partial class ChannelForm : Form
     {
@@ -18,7 +17,10 @@
             Server = channel.Server;
             Channel = channel;
 
-            Text = channel.Name;
+            Load += delegate
+            {
+                Text = Channel.Name;
+            };
 
             Channel.OnMessage += Channel_OnMessage;
             Channel.OnAction += Channel_OnAction;
