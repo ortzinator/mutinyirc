@@ -28,7 +28,7 @@ namespace OrtzIRC
         /// </summary>
         private void InitializeComponent()
         {
-            this.toolStrip = new System.Windows.Forms.ToolStrip();
+            this.components = new System.ComponentModel.Container();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileRootMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serversMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,17 +45,14 @@ namespace OrtzIRC
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.windowTreeView = new OrtzIRC.WindowManagerTreeView();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.dockToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.windowManagerTreeView = new OrtzIRC.WindowManagerTreeView();
             this.menuStrip.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // toolStrip
-            // 
-            this.toolStrip.Location = new System.Drawing.Point(0, 24);
-            this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(784, 25);
-            this.toolStrip.TabIndex = 1;
-            this.toolStrip.Text = "mainToolbar";
             // 
             // menuStrip
             // 
@@ -119,7 +116,7 @@ namespace OrtzIRC
             // loggingToolStripMenuItem
             // 
             this.loggingToolStripMenuItem.Name = "loggingToolStripMenuItem";
-            this.loggingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loggingToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.loggingToolStripMenuItem.Text = "&Logging";
             this.loggingToolStripMenuItem.Click += new System.EventHandler(this.loggingToolStripMenuItem_Click);
             // 
@@ -172,20 +169,50 @@ namespace OrtzIRC
             // 
             // splitter1
             // 
-            this.splitter1.Location = new System.Drawing.Point(149, 49);
+            this.splitter1.Location = new System.Drawing.Point(146, 24);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 515);
-            this.splitter1.TabIndex = 6;
+            this.splitter1.Size = new System.Drawing.Size(3, 540);
+            this.splitter1.TabIndex = 9;
             this.splitter1.TabStop = false;
             // 
-            // windowTreeView
+            // contextMenuStrip1
             // 
-            this.windowTreeView.Dock = System.Windows.Forms.DockStyle.Left;
-            this.windowTreeView.Location = new System.Drawing.Point(0, 49);
-            this.windowTreeView.Name = "windowTreeView";
-            this.windowTreeView.Size = new System.Drawing.Size(149, 515);
-            this.windowTreeView.TabIndex = 4;
-            this.windowTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.windowTreeView_AfterSelect);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dockToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 48);
+            // 
+            // dockToolStripMenuItem
+            // 
+            this.dockToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.leftToolStripMenuItem,
+            this.rightToolStripMenuItem});
+            this.dockToolStripMenuItem.Name = "dockToolStripMenuItem";
+            this.dockToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.dockToolStripMenuItem.Text = "Dock...";
+            // 
+            // leftToolStripMenuItem
+            // 
+            this.leftToolStripMenuItem.Name = "leftToolStripMenuItem";
+            this.leftToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.leftToolStripMenuItem.Text = "Left";
+            this.leftToolStripMenuItem.Click += new System.EventHandler(this.leftToolStripMenuItem_Click);
+            // 
+            // rightToolStripMenuItem
+            // 
+            this.rightToolStripMenuItem.Name = "rightToolStripMenuItem";
+            this.rightToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rightToolStripMenuItem.Text = "Right";
+            this.rightToolStripMenuItem.Click += new System.EventHandler(this.rightToolStripMenuItem_Click);
+            // 
+            // windowManagerTreeView
+            // 
+            this.windowManagerTreeView.ContextMenuStrip = this.contextMenuStrip1;
+            this.windowManagerTreeView.Dock = System.Windows.Forms.DockStyle.Left;
+            this.windowManagerTreeView.Location = new System.Drawing.Point(0, 24);
+            this.windowManagerTreeView.Name = "windowManagerTreeView";
+            this.windowManagerTreeView.Size = new System.Drawing.Size(146, 540);
+            this.windowManagerTreeView.TabIndex = 6;
             // 
             // MainForm
             // 
@@ -193,8 +220,7 @@ namespace OrtzIRC
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 564);
             this.Controls.Add(this.splitter1);
-            this.Controls.Add(this.windowTreeView);
-            this.Controls.Add(this.toolStrip);
+            this.Controls.Add(this.windowManagerTreeView);
             this.Controls.Add(this.menuStrip);
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip;
@@ -203,6 +229,7 @@ namespace OrtzIRC
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -210,7 +237,6 @@ namespace OrtzIRC
 
         #endregion
 
-        private System.Windows.Forms.ToolStrip toolStrip;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem fileRootMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitMenuItem;
@@ -225,9 +251,13 @@ namespace OrtzIRC
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private OrtzIRC.WindowManagerTreeView windowTreeView;
-        private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.ToolStripMenuItem loggingToolStripMenuItem;
+        private WindowManagerTreeView windowManagerTreeView;
+        private System.Windows.Forms.Splitter splitter1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem dockToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem leftToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem rightToolStripMenuItem;
     }
 }
 

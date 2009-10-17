@@ -6,7 +6,6 @@ namespace OrtzIRC
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
-    using System.Diagnostics;
 
     public partial class MainForm : Form
     {
@@ -21,6 +20,8 @@ namespace OrtzIRC
             TextLoggerManager.LoggerActive = Settings.Default.LoggerActivated;
             TextLoggerManager.AddTimestamp = Settings.Default.LoggerTimestampsActivated;
             TextLoggerManager.TimeFormat = Settings.Default.LoggerTimestampFormat;
+
+            windowManagerTreeView.AfterSelect += windowManagerTreeView_AfterSelect;
 
             Settings.Default.UserPluginDirectory = Path.Combine(Environment.CurrentDirectory, @"Plugins");
             Settings.Default.Save();
@@ -39,6 +40,8 @@ namespace OrtzIRC
 
             base.OnLoad(e);
         }
+
+        
 
         private void exitMenuItem_Click(object sender, EventArgs e)
         {
@@ -62,7 +65,7 @@ namespace OrtzIRC
 
             Invoke((MethodInvoker)delegate
             {
-                windowTreeView.AddServerNode(new ServerTreeNode(newServerForm));
+                windowManagerTreeView.AddServerNode(new ServerTreeNode(newServerForm));
                 newServerForm.MdiParent = this;
             });
 
@@ -88,7 +91,7 @@ namespace OrtzIRC
             else
             {
                 ChannelForm newChannelForm = new ChannelForm(channel);
-                ServerTreeNode node = windowTreeView.GetServerNode(channel.Server);
+                ServerTreeNode node = windowManagerTreeView.GetServerNode(channel.Server);
 
                 if (node == null)
                     throw new Exception("ServerTreeNode doesn't exist!"); //hack
@@ -103,7 +106,7 @@ namespace OrtzIRC
             }
         }
 
-        private void windowTreeView_AfterSelect(object sender, TreeViewEventArgs e)
+        private void windowManagerTreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (e.Action == TreeViewAction.Unknown) return;
 
@@ -122,6 +125,18 @@ namespace OrtzIRC
         {
             LogForm lf = new LogForm();
             lf.Show();
+        }
+
+        private void leftToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            windowManagerTreeView.Dock = DockStyle.Left;
+            splitter1.Dock = DockStyle.Left;
+        }
+
+        private void rightToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            windowManagerTreeView.Dock = DockStyle.Right;
+            splitter1.Dock = DockStyle.Right;
         }
     }
 }
