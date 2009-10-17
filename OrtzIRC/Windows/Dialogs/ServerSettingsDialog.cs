@@ -73,7 +73,9 @@ namespace OrtzIRC
             if (ircSettingsTree.SelectedNode == null) return;
             var node = (ServerSettingsTreeNode)ircSettingsTree.SelectedNode;
             node.Settings.Description = serverDescriptionTextBox.Text;
-            node.Text = node.Settings.Description;
+            
+            // P90: Fix empty server description
+            node.Text = node.Settings.Description.Length == 0 ? node.Settings.Url : node.Settings.Description;
         }
 
         private void networkNameTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
@@ -101,6 +103,7 @@ namespace OrtzIRC
                     var serverSettings = new ServerSettingsTreeNode(server, serverContextMenuStrip);
                     net.AddServerNode(serverSettings);
                 }
+
                 ircSettingsTree.Nodes.Add(net);
             }
 
@@ -142,6 +145,14 @@ namespace OrtzIRC
 
         private void okButton_Click(object sender, EventArgs e)
         {
+            // P90: Empty server descriptions make it a pain to select a server from the list.
+            /*
+            if (serverDescriptionTextBox.Text.Length == 0)
+            {
+                serverDescriptionTextBox.Text = serverUriTextBox.Text;
+            }
+            */
+
             IRCSettingsManager.Instance.Save();
             Close();
         }
