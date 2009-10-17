@@ -84,5 +84,21 @@ namespace OrtzIRC.Common
                 MessageBox.Show(ex.ToString());
             }
         }
+
+        public List<ServerSettings> GetAutoConnectServers()
+        {
+            var tmp = new List<ServerSettings>();
+            foreach (var network in Networks)
+            {
+                foreach (var server in network.Servers)
+                {
+                    if (server.AutoConnect)
+                    {
+                        tmp.Add(server);
+                    }
+                }
+            }
+            return tmp;
+        }
     }
 }

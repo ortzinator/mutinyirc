@@ -23,9 +23,9 @@
             }
         }
 
-        public Server Create(string uri, string description, int port, bool ssl)
+        public Server Create(ServerSettings settings)
         {
-            var newServer = new Server(uri, description, port, ssl);
+            var newServer = new Server(settings);
             ServerList.Add(newServer);
 
             ServerCreated.Fire(this, new ServerEventArgs(newServer));

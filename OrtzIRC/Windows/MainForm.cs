@@ -26,14 +26,21 @@ namespace OrtzIRC
             Settings.Default.UserPluginDirectory = Path.Combine(Environment.CurrentDirectory, @"Plugins");
             Settings.Default.Save();
 
+            IRCSettingsManager.Instance.GetAutoConnectServers();
+
+            
+
             if (!Directory.Exists(Settings.Default.UserPluginDirectory))
                 Directory.CreateDirectory(Settings.Default.UserPluginDirectory);
 
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                Server newServer = ServerManager.Instance.Create("irc.randomirc.com", "RandomIRC", 6667, false);
-                CreateServerForm(newServer);
-                newServer.Connect();
+                foreach (var server in IRCSettingsManager.Instance.GetAutoConnectServers())
+                {
+                    Server newServer = ServerManager.Instance.Create(server);
+                    CreateServerForm(newServer);
+                    newServer.Connect();
+                }
             }
 
             PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);

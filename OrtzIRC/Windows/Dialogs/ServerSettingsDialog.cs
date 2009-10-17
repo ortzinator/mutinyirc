@@ -30,6 +30,7 @@ namespace OrtzIRC
                 serverUriTextBox.Text = node.Settings.Url;
                 serverPortsTextBox.Text = node.Settings.Ports;
                 serverDescriptionTextBox.Text = node.Settings.Description;
+                autoConnectCheckBox.Checked = node.Settings.AutoConnect;
             }
             else if (e.Node.GetType() == typeof(NetworkSettingsTreeNode))
             {
@@ -81,6 +82,13 @@ namespace OrtzIRC
             var node = (NetworkSettingsTreeNode)ircSettingsTree.SelectedNode;
             node.Settings.Name = networkNameTextBox.Text;
             node.Text = node.Settings.Name;
+        }
+
+        private void autoConnectCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ircSettingsTree.SelectedNode == null) return;
+            var node = (ServerSettingsTreeNode)ircSettingsTree.SelectedNode;
+            node.Settings.AutoConnect = autoConnectCheckBox.Checked;
         }
 
         protected override void OnLoad(EventArgs e)

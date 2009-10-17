@@ -10,22 +10,15 @@
 
     public class Server : MessageContext
     {
-        public Server(ServerSettings settings) : this(settings.Url, settings.Description, 6667, settings.Ssl) //TODO: Select port from port list
+        public Server(ServerSettings settings)
         {
-            //intentionally left blank
-        }
-
-        public Server(string uri, string description, int port, bool ssl)
-        {
-            URI = uri;
-            Description = description;
-            Port = port;
-            SSL = ssl;
-            
+            Settings = settings;
             ChanManager = new ChannelManager(this);
 
-            var args = new ConnectionArgs("OrtzIRC", uri);
-            Connection = new Connection(args, true, false);
+            //TODO: Select port
+            //TODO: Select nick
+            var args = new ConnectionArgs("OrtzIRC", settings.Url);
+            Connection = new Connection(args, true, false); 
 
             Connection.Listener.OnJoin += Listener_OnJoin;
             Connection.Listener.OnPart += Listener_OnPart;
@@ -48,10 +41,32 @@
             Connection.ConnectFailed += Connection_ConnectFailed;
         }
 
-        public string URI { get; set; }
-        public string Description { get; set; }
-        public int Port { get; set; }
-        public bool SSL { get; set; }
+        public string URL 
+        { 
+            get
+            {
+                return Settings.Url;
+            }
+        }
+
+        public string Description
+        {
+            get
+            {
+                return Settings.Description;
+            }
+        }
+
+        public int Port
+        {
+            get
+            {
+                return Connection.ConnectionData.Port;
+            }
+        }
+
+        public ServerSettings Settings { get; private set; }
+
         public Connection Connection { get; private set; }
 
         public bool IsConnected
@@ -248,10 +263,17 @@
                 Registered();
 
             //TODO: Handle a taken nick
-            //TODO: IIRC this isn't called if there's an error during registration. (The user's nick is taken)
+            //TODO: IIRC this isn't called if there's an error during registration, such as the user's nick being taken
 
             //TODO: Get autojoin list for the network
-            JoinChannel(new ChannelInfo("#ortzirc"));
+
+            if (Settings.Channels != null)
+                foreach (var channel in Settings.Channels)
+                {
+                    JoinChannel(new ChannelInfo(channel));
+                }
+
+            //JoinChannel(new ChannelInfo("#ortzirc"));
         }
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)

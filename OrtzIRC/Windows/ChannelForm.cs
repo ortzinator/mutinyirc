@@ -75,7 +75,14 @@
 
         private void Channel_UserParted(object sender, EventArgs e)
         {
-            Close();
+            if (InvokeRequired)
+            {
+                Invoke(new Action(Close));
+            }
+            else
+            {
+                Close();
+            }
         }
 
         private void Channel_OtherUserParted(object sender, UserMessageEventArgs e)
