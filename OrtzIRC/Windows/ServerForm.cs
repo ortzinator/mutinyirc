@@ -85,7 +85,7 @@ namespace OrtzIRC
 
         private void Server_Connecting(object sender, CancelEventArgs e)
         {
-            AddLine(ServerStrings.ConnectingMessage.With(server.URI, server.Port));
+            AddLine(ServerStrings.ConnectingMessage.With(server.URL, server.Port));
         }
 
         private void ParentServer_OnKick(object sender, KickEventArgs e)
@@ -136,12 +136,12 @@ namespace OrtzIRC
         private void ParentServer_OnRegistered()
         {
             // TODO: Join list of auto-join channels
-            server.Connection.Sender.Join("#ortzirc");
+            //server.Connection.Sender.Join("#ortzirc");
 
             Invoke((MethodInvoker)delegate
             {
                 Text = "Status: " + server.UserNick + " on " + server.Description +
-                " (" + server.URI + ":" + server.Port + ")";
+                " (" + server.URL + ":" + server.Port + ")";
             });
         }
 

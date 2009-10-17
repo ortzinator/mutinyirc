@@ -22,6 +22,19 @@
         public string Description { get; set; }
         public string Ports { get; set; }
         public bool Ssl { get; set; }
+        public bool AutoConnect { get; set; }
+        
+        //TODO: Make ChannelSettings objects with "name" and "autojoin" properties. For now, these are all assumed to be autojoin
+        public List<string> Channels { get; set; } 
+
+        public int RandomPort
+        {
+            get
+            {
+                Random r = new Random();
+                return PortList[r.Next(0, PortList.Length - 1)];
+            }
+        }
 
         private int[] PortList
         {
@@ -78,7 +91,7 @@
 
                     try
                     {
-                        tempNum = Int32.Parse( chunk );
+                        tempNum = Int32.Parse(chunk);
                     }
                     catch (Exception)
                     {
@@ -103,6 +116,7 @@
             Description = reader.GetAttribute("Description");
             Url = reader.GetAttribute("Url");
             Ports = reader.GetAttribute("Ports");
+            AutoConnect = reader.GetAttribute("AutoConnect") == "True";
         }
 
         public void WriteXml(XmlWriter writer)
@@ -110,6 +124,7 @@
             writer.WriteAttributeString("Description", Description);
             writer.WriteAttributeString("Url", Url);
             writer.WriteAttributeString("Ports", Ports);
+            writer.WriteAttributeString("AutoConnect", AutoConnect.ToString());
         }
     }
 }
