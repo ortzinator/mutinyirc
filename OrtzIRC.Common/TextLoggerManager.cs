@@ -1,6 +1,7 @@
 ﻿namespace OrtzIRC.Common
 {
     using System;
+
     using OrtzIRC;
     using FlamingIRC;
 
@@ -98,16 +99,6 @@
             ServerManager.Instance.ServerRemoved -= ChannelManager_ElementRemoved;
 
             TextLogger.RemoveAllLoggables();
-        }
-
-        private static void ChannelManager_ElementRemoved(Server Ntw, User Person)
-        {
-            TextLogger.RemoveLoggable(Ntw, Person);
-        }
-
-        private static void ChannelManager_ElementCreated(Server Ntw, User Person)
-        {
-            TextLogger.AddLoggable(Ntw, Person);
         }
 
         private static void ChannelManager_ElementRemoved(object sender, ServerEventArgs args)

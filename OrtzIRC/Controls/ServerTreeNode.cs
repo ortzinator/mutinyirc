@@ -7,7 +7,8 @@
         public ServerTreeNode(ServerForm serverWindow)
         {
             ServerWindow = serverWindow;
-            Text = serverWindow.Server.Description;
+            // P90: Fix empty server description
+            Text = serverWindow.Server.Description.Length == 0 ? serverWindow.Server.URL : serverWindow.Server.Description;
             serverWindow.FormClosed += serverWindow_FormClosed;
 
             ContextMenuStrip = new ServerNodeContextMenu();

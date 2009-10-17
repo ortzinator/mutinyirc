@@ -140,8 +140,10 @@ namespace OrtzIRC
 
             Invoke((MethodInvoker)delegate
             {
-                Text = "Status: " + server.UserNick + " on " + server.Description +
-                " (" + server.URL + ":" + server.Port + ")";
+                // P90: Fix empty server description
+                Text = String.Format("Status: {0} on {1} ({2}:{3})", server.UserNick,
+                                     server.Description.Length == 0 ? server.URL : server.Description, server.URL,
+                                     server.Port);
             });
         }
 
