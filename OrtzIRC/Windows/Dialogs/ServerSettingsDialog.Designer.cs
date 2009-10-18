@@ -40,6 +40,8 @@ namespace OrtzIRC
             this.serverDescriptionTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.serverGroupBox = new System.Windows.Forms.GroupBox();
+            this.autoConnectCheckBox = new System.Windows.Forms.CheckBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.networkGroupBox = new System.Windows.Forms.GroupBox();
             this.networkNameTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -49,8 +51,6 @@ namespace OrtzIRC
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.deleteToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.label6 = new System.Windows.Forms.Label();
-            this.autoConnectCheckBox = new System.Windows.Forms.CheckBox();
             this.addNetworkMenuStrip.SuspendLayout();
             this.serverGroupBox.SuspendLayout();
             this.networkGroupBox.SuspendLayout();
@@ -67,6 +67,8 @@ namespace OrtzIRC
             this.ircSettingsTree.Name = "ircSettingsTree";
             this.ircSettingsTree.Size = new System.Drawing.Size(147, 249);
             this.ircSettingsTree.TabIndex = 0;
+            this.ircSettingsTree.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.ircSettingsTree_AfterLabelEdit);
+            this.ircSettingsTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.ircSettingsTree_AfterSelect);
             // 
             // addNetworkMenuStrip
             // 
@@ -115,6 +117,7 @@ namespace OrtzIRC
             this.serverPortsTextBox.Name = "serverPortsTextBox";
             this.serverPortsTextBox.Size = new System.Drawing.Size(155, 20);
             this.serverPortsTextBox.TabIndex = 2;
+            this.serverPortsTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.serverPortsTextBox_Validating);
             // 
             // serverUriTextBox
             // 
@@ -122,6 +125,7 @@ namespace OrtzIRC
             this.serverUriTextBox.Name = "serverUriTextBox";
             this.serverUriTextBox.Size = new System.Drawing.Size(155, 20);
             this.serverUriTextBox.TabIndex = 1;
+            this.serverUriTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.serverUriTextBox_Validating);
             // 
             // serverDescriptionTextBox
             // 
@@ -129,6 +133,7 @@ namespace OrtzIRC
             this.serverDescriptionTextBox.Name = "serverDescriptionTextBox";
             this.serverDescriptionTextBox.Size = new System.Drawing.Size(155, 20);
             this.serverDescriptionTextBox.TabIndex = 0;
+            this.serverDescriptionTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.serverDescriptionTextBox_Validating);
             // 
             // label1
             // 
@@ -157,6 +162,25 @@ namespace OrtzIRC
             this.serverGroupBox.TabStop = false;
             this.serverGroupBox.Text = "Server";
             // 
+            // autoConnectCheckBox
+            // 
+            this.autoConnectCheckBox.AutoSize = true;
+            this.autoConnectCheckBox.Location = new System.Drawing.Point(125, 122);
+            this.autoConnectCheckBox.Name = "autoConnectCheckBox";
+            this.autoConnectCheckBox.Size = new System.Drawing.Size(15, 14);
+            this.autoConnectCheckBox.TabIndex = 7;
+            this.autoConnectCheckBox.UseVisualStyleBackColor = true;
+            this.autoConnectCheckBox.CheckedChanged += new System.EventHandler(this.autoConnectCheckBox_CheckedChanged);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(51, 123);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(71, 13);
+            this.label6.TabIndex = 6;
+            this.label6.Text = "Autoconnect:";
+            // 
             // networkGroupBox
             // 
             this.networkGroupBox.Controls.Add(this.networkNameTextBox);
@@ -174,6 +198,7 @@ namespace OrtzIRC
             this.networkNameTextBox.Name = "networkNameTextBox";
             this.networkNameTextBox.Size = new System.Drawing.Size(133, 20);
             this.networkNameTextBox.TabIndex = 1;
+            this.networkNameTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.networkNameTextBox_Validating);
             // 
             // label5
             // 
@@ -229,25 +254,6 @@ namespace OrtzIRC
             this.deleteToolStripMenuItem1.Size = new System.Drawing.Size(107, 22);
             this.deleteToolStripMenuItem1.Text = "Delete";
             this.deleteToolStripMenuItem1.Click += new System.EventHandler(this.deleteToolStripMenuItem1_Click);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(51, 123);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 13);
-            this.label6.TabIndex = 6;
-            this.label6.Text = "Autoconnect:";
-            // 
-            // autoConnectCheckBox
-            // 
-            this.autoConnectCheckBox.AutoSize = true;
-            this.autoConnectCheckBox.Location = new System.Drawing.Point(125, 122);
-            this.autoConnectCheckBox.Name = "autoConnectCheckBox";
-            this.autoConnectCheckBox.Size = new System.Drawing.Size(15, 14);
-            this.autoConnectCheckBox.TabIndex = 7;
-            this.autoConnectCheckBox.UseVisualStyleBackColor = true;
-            this.autoConnectCheckBox.CheckedChanged += new System.EventHandler(this.autoConnectCheckBox_CheckedChanged);
             // 
             // ServerSettingsDialog
             // 

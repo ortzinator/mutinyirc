@@ -11,14 +11,6 @@ namespace OrtzIRC
         public ServerSettingsDialog()
         {
             InitializeComponent();
-
-            ircSettingsTree.AfterLabelEdit += ircSettingsTree_AfterLabelEdit;
-            ircSettingsTree.AfterSelect += ircSettingsTree_AfterSelect;
-            networkNameTextBox.Validating += networkNameTextBox_Validating;
-
-            serverDescriptionTextBox.Validating += serverDescriptionTextBox_Validating;
-            serverUriTextBox.Validating += serverUriTextBox_Validating;
-            serverPortsTextBox.Validating += serverPortsTextBox_Validating;
         }
 
         private void ircSettingsTree_AfterSelect(object sender, TreeViewEventArgs e)
