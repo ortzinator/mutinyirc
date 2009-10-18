@@ -18,8 +18,16 @@
             //TODO: Select port
             //TODO: Select nick
             var args = new ConnectionArgs("OrtzIRC", settings.Url);
-            Connection = new Connection(args, true, false); 
+            Connection = new Connection(args, true, false);
 
+            Connection.OnConnectSuccess += Connection_OnConnectSuccess;
+            Connection.ConnectFailed += Connection_ConnectFailed;
+
+            HookEvents();
+        }
+
+        private void HookEvents()
+        {
             Connection.Listener.OnJoin += Listener_OnJoin;
             Connection.Listener.OnPart += Listener_OnPart;
             Connection.Listener.OnPublic += Listener_OnPublic;
@@ -37,8 +45,27 @@
             Connection.Listener.OnKick += Listener_OnKick;
 
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
-            Connection.OnConnectSuccess += Connection_OnConnectSuccess;
-            Connection.ConnectFailed += Connection_ConnectFailed;
+        }
+
+        private void UnhookEvents()
+        {
+            Connection.Listener.OnJoin -= Listener_OnJoin;
+            Connection.Listener.OnPart -= Listener_OnPart;
+            Connection.Listener.OnPublic -= Listener_OnPublic;
+            Connection.Listener.OnRegistered -= Listener_OnRegistered;
+            Connection.Listener.OnNames -= Listener_OnNames;
+            Connection.Listener.OnChannelModeChange -= Listener_OnChannelModeChange;
+            Connection.Listener.OnUserModeChange -= Listener_OnUserModeChange;
+            Connection.Listener.OnError -= Listener_OnError;
+            Connection.Listener.OnDisconnecting -= Listener_OnDisconnecting;
+            Connection.Listener.OnDisconnected -= Listener_OnDisconnected;
+            Connection.Listener.OnAction -= Listener_OnAction;
+            Connection.Listener.OnPrivateNotice -= Listener_OnPrivateNotice;
+            Connection.Listener.OnTopicRequest -= Listener_OnTopicRequest;
+            Connection.Listener.OnNick -= Listener_OnNick;
+            Connection.Listener.OnKick -= Listener_OnKick;
+
+            Connection.RawMessageReceived -= Connection_OnRawMessageReceived;
         }
 
         public string URL 
@@ -120,6 +147,10 @@
             {
                 Disconnect();
             }
+            else
+            {
+                UnhookEvents();
+            }
 
             ServerManager.Instance.Remove(this);
         }
@@ -136,6 +167,7 @@
 
         public void Disconnect(string reason)
         {
+            UnhookEvents(); // P90: Fix RAW message callback firing after connection was closed.
             Connection.Disconnect(reason);
         }
 
