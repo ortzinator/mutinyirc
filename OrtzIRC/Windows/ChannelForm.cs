@@ -17,6 +17,15 @@
             Server = channel.Server;
             Channel = channel;
 
+            HookEvents();
+
+            nickListBox.UserList = Channel.NickList;
+
+            commandTextBox.Focus();
+        }
+
+        private void HookEvents()
+        {
             Load += delegate
             {
                 Text = Channel.Name;
@@ -32,13 +41,33 @@
             Channel.NickChanged += Channel_OnNick;
             Channel.OnKick += Channel_OnKick;
             Channel.MessagedChannel += Channel_MessagedChannel;
+
             Server.Disconnected += Server_Disconnected;
 
             commandTextBox.CommandEntered += commandTextBox_CommandEntered;
+        }
 
-            nickListBox.UserList = Channel.NickList;
+        private void UnhookEvents()
+        {
+            Load -= delegate
+            {
+                Text = Channel.Name;
+            };
 
-            commandTextBox.Focus();
+            Channel.OnMessage -= Channel_OnMessage;
+            Channel.OnAction -= Channel_OnAction;
+            Channel.TopicReceived -= Channel_TopicReceived;
+            Channel.OnJoin -= Channel_OnJoin;
+            Channel.UserParted -= Channel_UserParted;
+            Channel.OtherUserParted -= Channel_OtherUserParted;
+            Channel.UserQuitted -= Channel_OnUserQuitted;
+            Channel.NickChanged -= Channel_OnNick;
+            Channel.OnKick -= Channel_OnKick;
+            Channel.MessagedChannel -= Channel_MessagedChannel;
+
+            Server.Disconnected -= Server_Disconnected;
+
+            commandTextBox.CommandEntered -= commandTextBox_CommandEntered;
         }
 
         public Channel Channel { get; private set; }
@@ -115,6 +144,7 @@
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            UnhookEvents();
             Channel.Part();
         }
 
