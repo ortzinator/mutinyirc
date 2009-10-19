@@ -109,7 +109,6 @@ namespace OrtzIRC
 
                 newChannelForm.Show();
                 newChannelForm.AddLine("Joined: " + channel.Name);
-                //TODO: display topic
             }
         }
 

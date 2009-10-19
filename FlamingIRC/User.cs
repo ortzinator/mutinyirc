@@ -44,7 +44,7 @@ namespace FlamingIRC
         public string UserName { get; set; }
 
         /// <summary> Nickname plus mode symbol prefix </summary>
-        public string NamesLiteral { get; private set; }
+        public string NamesLiteral { get { return Prefix != '\0' ? Prefix + Nick : Nick; } }
 
         /// <summary> The channel mode symbol prefix from NAMES</summary>
         public char Prefix { get; private set; }
@@ -56,10 +56,23 @@ namespace FlamingIRC
 
         public User() { }
 
-        public User(string nick, string name, string host)
+        /// <summary>
+        /// This constructors assumes nick contains no prefix (as in the rest of the library).
+        /// Params: nick!user@host
+        /// </summary>
+        /// <param name="nick">nick</param>
+        /// <param name="user">user</param>
+        /// <param name="host">host</param>
+        public User(string nick, string user, string host)
+            : this('\0', nick, user, host)
         {
+        }
+
+        public User(char prefix, string nick, string user, string host)
+        {
+            Prefix = prefix;
             Nick = nick;
-            UserName = name;
+            UserName = user;
             HostMask = host;
         }
 
@@ -71,44 +84,41 @@ namespace FlamingIRC
             if (nick == String.Empty)
                 return null;
 
-            var tempNick = new User();
-            char firstChar = Char.Parse(nick.Substring(0, 1));
-            char[] modes = new char[] { Char.Parse("@"), Char.Parse("+"), Char.Parse("%"), Char.Parse("&"), Char.Parse("~") };
+            char firstChar = nick[0];
+            char[] modes = new char[] { '@', '+', '%', '&', '~' };
 
             foreach (char c in modes)
-            {
                 if (firstChar == c)
-                {
-                    tempNick.Prefix = Char.Parse(nick.Substring(0, 1));
-                    tempNick.Nick = nick.Substring(1);
-                    tempNick.NamesLiteral = nick;
-                    return tempNick;
-                }
-            }
+                    return new User(firstChar, nick.Substring(1), String.Empty, String.Empty);
 
-            tempNick.Nick = nick;
-            tempNick.NamesLiteral = nick;
-            return tempNick;
+            return new User(nick, String.Empty, String.Empty);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (User)) return false;
+
+            return Equals((User) obj);
+        }
+
+        public bool Equals(User other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+
+            return Equals(other.Nick, Nick);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Nick != null ? Nick.GetHashCode() : 0);
         }
 
         public override string ToString()
         {
             return NamesLiteral;
-        }
-
-        public override bool Equals(Object obj)
-        {
-            User user = obj as User;
-
-            if (user == null)
-                return false;
-
-            return (Nick == user.Nick && RealName == user.RealName && HostMask == user.HostMask && UserName == user.UserName);
-        }
-
-        public override int GetHashCode()
-        {
-            return (HostMask.GetHashCode() >> 16 | Nick.GetHashCode());
         }
     }
 }

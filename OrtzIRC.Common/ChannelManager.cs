@@ -88,6 +88,9 @@
                 return Channels[channelName];
             }
 
+            if (!Rfc2812Util.IsValidChannelName(channelName))
+                return null;
+
             Channel newChan = new Channel(Server, channelName);
             Channels.Add(channelName, newChan);
             TriggerChannelCreated(newChan);
