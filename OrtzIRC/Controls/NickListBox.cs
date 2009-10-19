@@ -49,12 +49,12 @@
 
         private void userList_Updated(object sender, System.EventArgs e)
         {
-            BeginInvoke((MethodInvoker)delegate
+            Invoke((MethodInvoker)delegate
             {
                 lock (userList)
                 {
                     Items.Clear();
-
+                    
                     foreach (User nick in userList)
                         Items.Add(nick);
                 }

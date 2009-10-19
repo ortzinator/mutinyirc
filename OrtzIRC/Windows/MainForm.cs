@@ -93,7 +93,7 @@ namespace OrtzIRC
         {
             if (InvokeRequired)
             {
-                BeginInvoke((CreateChannelFormDlg)CreateChannelForm, new object[] { channel });
+                Invoke((CreateChannelFormDlg)CreateChannelForm, new object[] { channel });
             }
             else
             {
