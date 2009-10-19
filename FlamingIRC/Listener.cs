@@ -529,9 +529,7 @@ namespace FlamingIRC
                         int numberOfUsers = tokens.Length - 5;
                         string[] users = new string[numberOfUsers];
                         Array.Copy(tokens, 5, users, 0, numberOfUsers);
-                        OnNames(tokens[4],
-                            users,
-                            false);
+                        OnNames(tokens[4], users, false);
                     }
                     break;
                 case ReplyCode.RPL_ENDOFNAMES:

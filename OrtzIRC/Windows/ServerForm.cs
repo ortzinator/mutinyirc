@@ -111,6 +111,7 @@ namespace OrtzIRC
         private void ParentServer_OnRawMessageReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
         {
             //intentionally blank
+            //AddLine(e.Data);
         }
 
         private void ParentServer_OnGotTopic(Channel chan, string topic)

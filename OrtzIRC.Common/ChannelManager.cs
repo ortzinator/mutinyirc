@@ -38,21 +38,24 @@
         {
             if (InChannel(channel))
             {
+                Channel chan = GetChannel(channel);
                 if (!recievingNames)
                 {
-                    GetChannel(channel).NickList.Clear();
+                    chan.NickList.Clear();
                     recievingNames = true;
                 }
 
+                chan.NickList.NotifyUpdate = false;
                 foreach (string nick in nicks)
                 {
-                    GetChannel(channel).NickList.Add(User.FromNames(nick));
+                    chan.NickList.Add(User.FromNames(nick));
                 }
+                chan.NickList.NotifyUpdate = true;
 
                 if (last)
                 {
                     recievingNames = false;
-                    GetChannel(channel).NickList.Refresh();
+                    chan.NickList.Refresh();
                 } 
             }
         }
