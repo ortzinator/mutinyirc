@@ -596,7 +596,10 @@ namespace FlamingIRC
                     }
                 }
                 //Loop back again
-                WaitforData();
+                if (theSockId.thisSocket.Connected)
+                {
+                    WaitforData();
+                }
             }
             else
             {

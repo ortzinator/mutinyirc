@@ -188,11 +188,7 @@
 
         public bool HasUser(string nick)
         {
-            foreach (User n in NickList)
-                if (nick == n.Nick)
-                    return true;
-
-            return false;
+            return NickList.Contains(User.FromNames(nick));
         }
 
         public void UserKick(User nick, string kickee, string reason)

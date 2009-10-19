@@ -75,7 +75,7 @@ namespace OrtzIRC.Common
                 Networks = (NetworkSettingsList)serializer.Deserialize(fs);
                 fs.Close();
             }
-            catch (FileNotFoundException ex)
+            catch (FileNotFoundException)
             {
                 MessageBox.Show("Your IRC settings could not be found."); //TODO: Download default
             }
