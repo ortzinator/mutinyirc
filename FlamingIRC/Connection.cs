@@ -554,7 +554,7 @@ namespace FlamingIRC
                     listener.Parse(line);
                 }
 
-                this.RawMessageReceived.Fire<FlamingDataEventArgs<string>>(this, new FlamingDataEventArgs<string>(line));
+                RawMessageReceived.Fire(this, new FlamingDataEventArgs<string>(line));
             }
             catch (IOException e)
             {
@@ -587,7 +587,7 @@ namespace FlamingIRC
                 {
                     if (s.EndsWith("\r"))
                     {
-                        this.ReceiveIRCMessages(buffer + s.Trim());
+                        ReceiveIRCMessages(buffer + s.Trim());
                         buffer = String.Empty;
                     }
                     else
@@ -624,7 +624,7 @@ namespace FlamingIRC
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() exception=" + ex);
             }
 
-            this.OnRawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
+            OnRawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
 
             command.Remove(0, command.Length);
         }

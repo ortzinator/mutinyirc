@@ -9,9 +9,17 @@
         private List<User> List;
         private EventHandler onUpdate;
 
+        /// <summary>
+        /// Specifies whether or not to trigger the Updated event.
+        /// </summary>
+        /// <remarks>Useful when adding a large number of User objects. 
+        /// Be sure to call Refresh to trigger Updated manually.</remarks>
+        public bool NotifyUpdate { get; set; }
+
         public UserList()
         {
             List = new List<User>();
+            NotifyUpdate = true;
         }
 
         #region IList<User> Members
@@ -24,11 +32,13 @@
         public void Insert(int index, User item)
         {
             List.Insert(index, item);
+            OnUpdate();
         }
 
         public void RemoveAt(int index)
         {
             List.RemoveAt(index);
+            OnUpdate();
         }
 
         public User this[int index]
@@ -40,6 +50,7 @@
             set
             {
                 List[index] = value;
+                OnUpdate();
             }
         }
 
@@ -50,11 +61,13 @@
         public void Add(User item)
         {
             List.Add(item);
+            OnUpdate();
         }
 
         public void Clear()
         {
             List.Clear();
+            OnUpdate();
         }
 
         public bool Contains(User item)
@@ -79,7 +92,9 @@
 
         public bool Remove(User item)
         {
-            return List.Remove(item);
+            var a = List.Remove(item);
+            OnUpdate();
+            return a;
         }
 
         #endregion
@@ -114,7 +129,7 @@
 
         private void OnUpdate()
         {
-            if (onUpdate != null)
+            if (onUpdate != null && NotifyUpdate == true)
                 onUpdate(this, new EventArgs());
         }
 
