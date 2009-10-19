@@ -76,8 +76,8 @@
             ChannelManager.ChannelCreated += ChannelManager_ElementCreated;
             ChannelManager.ChannelRemoved += ChannelManager_ElementRemoved;
 
-            ServerManager.Instance.ServerCreated += ChannelManager_ElementCreated;
-            ServerManager.Instance.ServerRemoved += ChannelManager_ElementRemoved;
+            ServerManager.Instance.ServerCreated += ServerManager_ElementCreated;
+            ServerManager.Instance.ServerRemoved += ServerManager_ElementRemoved;
 
             foreach(Server Ntw in ServerManager.Instance.ServerList)
             {
@@ -95,18 +95,18 @@
             ChannelManager.ChannelCreated -= ChannelManager_ElementCreated;
             ChannelManager.ChannelRemoved -= ChannelManager_ElementRemoved;
 
-            ServerManager.Instance.ServerCreated -= ChannelManager_ElementCreated;
-            ServerManager.Instance.ServerRemoved -= ChannelManager_ElementRemoved;
+            ServerManager.Instance.ServerCreated -= ServerManager_ElementCreated;
+            ServerManager.Instance.ServerRemoved -= ServerManager_ElementRemoved;
 
             TextLogger.RemoveAllLoggables();
         }
 
-        private static void ChannelManager_ElementRemoved(object sender, ServerEventArgs args)
+        private static void ServerManager_ElementRemoved(object sender, ServerEventArgs args)
         {
             TextLogger.RemoveLoggable(args.Server);
         }
 
-        private static void ChannelManager_ElementCreated(object sender, ServerEventArgs args)
+        private static void ServerManager_ElementCreated(object sender, ServerEventArgs args)
         {
             TextLogger.AddLoggable(args.Server);
         }

@@ -1,5 +1,7 @@
 ﻿namespace OrtzIRC.Common
 {
+    using System.Text;
+
     public static class StringUtil
     {
         /// <summary>
@@ -15,6 +17,16 @@
         public static string With(this string format, params object[] args)
         {
             return string.Format(format, args);
+        }
+
+        public static byte[] GetBytes(this string str)
+        {
+            return Encoding.ASCII.GetBytes(str);
+        }
+
+        public static string FromBytes(this string str, byte[] array)
+        {
+            return Encoding.ASCII.GetString(array);
         }
     }
 }

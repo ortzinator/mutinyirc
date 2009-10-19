@@ -62,6 +62,7 @@ namespace OrtzIRC.Common
         public void Close()
         {
             FileHandle.Close();
+            FileHandle = null;
         }
 
         /// <summary>
@@ -74,10 +75,10 @@ namespace OrtzIRC.Common
             if (!Failed)
             {
                 // Convert data
-                byte[] Data= GetBytes(Text);
+                byte[] data = Text.GetBytes();
 
                 // Try to write to the stream once
-                Failed = !TryWrite(Data);
+                Failed = !TryWrite(data);
             }
         }
 
@@ -115,12 +116,6 @@ namespace OrtzIRC.Common
             {
                 Directory.CreateDirectory(path);
             }
-        }
-
-        // Transform text to bytes for writing to stream
-        private static byte[] GetBytes(String Str)
-        {
-            return (Encoding.ASCII.GetBytes(Str));
         }
     }
 }
