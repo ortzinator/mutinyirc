@@ -114,7 +114,10 @@
             foreach (User n in NickList)
             {
                 if (nick.Nick == n.Nick)
+                {
                     OnMessage.Fire(this, new UserMessageEventArgs(n, message));
+                    break;
+                }
             }
         }
 
@@ -123,7 +126,10 @@
             foreach (User n in NickList)
             {
                 if (nick.Nick == n.Nick)
+                {
                     OnAction.Fire(this, new UserMessageEventArgs(n, message));
+                    break;
+                }
             }
         }
 
