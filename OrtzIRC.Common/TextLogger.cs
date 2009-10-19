@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using OrtzIRC;
+
     using FlamingIRC;
 
     public delegate void IOErrorEventHandler(String ex);
@@ -139,11 +139,6 @@
         private static bool PersonExists(Server network, User person)
         {
             return (NetworkExists(network) && LogFiles[network.URL].ContainsKey(person.Nick));
-        }
-
-        private static bool NtwLogExists(Server network)
-        {
-            return (NetworkExists(network) && LogFiles[network.URL].ContainsKey('!' + network.URL));
         }
     }
 }
