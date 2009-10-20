@@ -294,10 +294,8 @@
             if (Registered != null)
                 Registered();
 
-            //TODO: Handle a taken nick
-            //TODO: IIRC this isn't called if there's an error during registration, such as the user's nick being taken
-
-            //TODO: Get autojoin list for the network
+            // TODO: Handle a taken nick
+            // TODO: Get autojoin list for the network
 
             if (Settings.Channels != null)
                 foreach (var channel in Settings.Channels)

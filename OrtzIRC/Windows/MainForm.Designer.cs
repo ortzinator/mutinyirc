@@ -227,6 +227,7 @@ namespace OrtzIRC
             this.Name = "MainForm";
             this.Text = "OrtzIRC";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
