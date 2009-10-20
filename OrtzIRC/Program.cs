@@ -14,15 +14,7 @@ namespace OrtzIRC
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            try //hack
-            {
-                Application.Run(new MainForm());
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-
+            Application.Run(new MainForm());
         }
     }
 }

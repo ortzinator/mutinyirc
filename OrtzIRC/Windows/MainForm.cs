@@ -28,8 +28,6 @@ namespace OrtzIRC
 
             IRCSettingsManager.Instance.GetAutoConnectServers();
 
-            
-
             if (!Directory.Exists(Settings.Default.UserPluginDirectory))
                 Directory.CreateDirectory(Settings.Default.UserPluginDirectory);
 
@@ -44,11 +42,10 @@ namespace OrtzIRC
             }
 
             PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
+            RandomMessages.Load();
 
             base.OnLoad(e);
         }
-
-        
 
         private void exitMenuItem_Click(object sender, EventArgs e)
         {
@@ -144,5 +141,32 @@ namespace OrtzIRC
             windowManagerTreeView.Dock = DockStyle.Right;
             splitter1.Dock = DockStyle.Right;
         }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+#if !DEBUG
+    // TODO: Stuff we should do on exit.
+            if (ConfirmExit())
+            {
+                RandomMessages.Save();
+            }
+            else
+            {
+                e.Cancel = true;
+            }
+#endif
+        }
+
+#if !DEBUG
+        private bool ConfirmExit()
+        {
+            DialogResult dr = DialogResult.No;
+
+            dr = MessageBox.Show("Are you sure you wish to close this application?", "Question", MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+
+            return (dr == DialogResult.Yes);
+        }
+#endif
     }
 }

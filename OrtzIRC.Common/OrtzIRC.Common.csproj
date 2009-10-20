@@ -99,6 +99,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="RandomMessages.cs" />
+    <Compile Include="SerializableDictionary.cs" />
     <Compile Include="ServerEventArgs.cs" />
     <Compile Include="ServerSettings.cs" />
     <Compile Include="TextLogger.cs" />
