@@ -37,6 +37,8 @@
         private new void AppendText(string line)
         {
             //Color parsing - http://www.mirc.co.uk/help/color.txt
+            base.AppendText(line);
+            return; //HACK: Bypassing formatting
 
             for (int i = 0; i < line.Length; i++)
             {
@@ -110,7 +112,11 @@
 
         public void AppendLine(string line)
         {
-            Invoke((MethodInvoker)delegate
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string>(AppendLine), line);
+            }
+            else
             {
                 DateTime now = DateTime.Now;
 
@@ -118,7 +124,7 @@
                     System.Globalization.CultureInfo.CreateSpecificCulture("es-ES")) + " ");
                 AppendText(line.Trim());
                 ScrollToBottom();
-            });
+            }
         }
 
         private void SetColor(Color c)

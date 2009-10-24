@@ -137,14 +137,13 @@ namespace OrtzIRC
         private void ParentServer_OnRegistered()
         {
             // TODO: Join list of auto-join channels
-            //server.Connection.Sender.Join("#ortzirc");
 
             Invoke((MethodInvoker)delegate
             {
                 // P90: Fix empty server description
                 Text = String.Format("Status: {0} on {1} ({2}:{3})", server.UserNick,
                                      server.Description.Length == 0 ? server.URL : server.Description, server.URL,
-                                     server.Port);
+                                     server.Port); //TODO: This should actually be the network name, not the server
             });
         }
 

@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using FlamingIRC;
     using System;
+    using System.Diagnostics;
 
     public sealed class ChannelManager
     {
@@ -34,6 +35,7 @@
             }
         }
 
+        private List<User> tempNicks = new List<User>();
         private void Server_OnNames(string channel, string[] nicks, bool last)
         {
             if (InChannel(channel))
@@ -41,21 +43,30 @@
                 Channel chan = GetChannel(channel);
                 if (!recievingNames)
                 {
-                    chan.NickList.Clear();
                     recievingNames = true;
                 }
 
-                chan.NickList.NotifyUpdate = false;
+                
                 foreach (string nick in nicks)
                 {
-                    chan.NickList.Add(User.FromNames(nick));
+                    tempNicks.Add(User.FromNames(nick));
                 }
-                chan.NickList.NotifyUpdate = true;
+
+                Trace.WriteLine("Added chunk of " + nicks.Length + " names", "Names");
 
                 if (last)
                 {
-                    recievingNames = false;
+                    chan.NickList.NotifyUpdate = false;
+                    chan.NickList.Clear();
+                    foreach (User nick in tempNicks)
+                    {
+                        chan.NickList.Add(nick);
+                    }
+                    chan.NickList.NotifyUpdate = true;
                     chan.NickList.Refresh();
+                    //Trace.WriteLine("Refreshed channel nick list", "Names");
+                    recievingNames = false;
+                    tempNicks.Clear();
                 } 
             }
         }

@@ -197,7 +197,7 @@
         {
             OnKick(new KickEventArgs(user, ChanManager.GetChannel(channel), kickee, reason));
 
-            Connection.Sender.Names(channel);
+            //Connection.Sender.Names(channel);
         }
 
         private void Listener_OnUserModeChange(ModeAction action, UserMode mode)
@@ -205,8 +205,8 @@
             if (UserModeChanged != null)
                 UserModeChanged(action, mode);
 
-            foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
-                Connection.Sender.Names(item.Key);
+            //foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
+                //Connection.Sender.Names(item.Key);
         }
 
         private void Listener_OnNick(User user, string newNick)
@@ -286,7 +286,7 @@
         {
             OnPart(new PartEventArgs(user, ChanManager.GetChannel(channel), reason));
 
-            Connection.Sender.Names(channel);
+            //Connection.Sender.Names(channel);
         }
 
         private void Listener_OnRegistered()
@@ -295,8 +295,8 @@
                 Registered();
 
             // TODO: Handle a taken nick
-            // TODO: Get autojoin list for the network
-
+            //TODO: Get autojoin list for the network
+            //HACK: This is for testing. It just gets a list and joins it all. Should be moved to ServerForm when implemented correctly
             if (Settings.Channels != null)
                 foreach (var channel in Settings.Channels)
                 {
@@ -310,7 +310,7 @@
         {
             OnChannelModeChange(new ChannelModeChangeEventArgs(who, ChanManager.GetChannel(channel), modes, raw));
 
-            Connection.Sender.Names(channel);
+            //Connection.Sender.Names(channel);
         }
 
         private void Listener_OnError(object sender, ErrorMessageEventArgs a)

@@ -336,6 +336,7 @@ namespace FlamingIRC
                                 Rfc2812Util.UserFromString(tokens[0]),
                                 tokens[2],
                                 CondenseStrings(tokens, 3));
+                            //Trace.WriteLine("Public notice", "IRC");
                         }
                     }
                     else
@@ -345,6 +346,7 @@ namespace FlamingIRC
                             OnPrivateNotice(
                                 Rfc2812Util.UserFromString(tokens[0]),
                                 CondenseStrings(tokens, 3));
+                            //Trace.WriteLine("Private notice", "IRC");
                         }
                     }
                     break;
@@ -352,6 +354,7 @@ namespace FlamingIRC
                     if (OnJoin != null)
                     {
                         OnJoin(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
+                        //Trace.WriteLine("Join", "IRC");
                     }
                     break;
                 case PRIVMSG:
@@ -365,6 +368,7 @@ namespace FlamingIRC
                                 int last = tokens.Length - 1;
                                 tokens[last] = RemoveTrailingQuote(tokens[last]);
                                 OnAction(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 4));
+                                //Trace.WriteLine("Channel action", "IRC");
                             }
                         }
                         else
@@ -374,6 +378,7 @@ namespace FlamingIRC
                                 int last = tokens.Length - 1;
                                 tokens[last] = RemoveTrailingQuote(tokens[last]);
                                 OnPrivateAction(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 4));
+                                //Trace.WriteLine("Private action", "IRC");
                             }
                         }
                     }
@@ -382,6 +387,7 @@ namespace FlamingIRC
                         if (OnPublic != null)
                         {
                             OnPublic(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3));
+                            //Trace.WriteLine("Public msg", "IRC");
                         }
                     }
                     else
@@ -389,6 +395,7 @@ namespace FlamingIRC
                         if (OnPrivate != null)
                         {
                             OnPrivate(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 3));
+                            //Trace.WriteLine("Private msg", "IRC");
                         }
                     }
                     break;
@@ -396,6 +403,7 @@ namespace FlamingIRC
                     if (OnNick != null)
                     {
                         OnNick(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
+                        //Trace.WriteLine("Nick", "IRC");
                     }
                     break;
                 case TOPIC:
@@ -404,6 +412,7 @@ namespace FlamingIRC
                         tokens[3] = RemoveLeadingColon(tokens[3]);
                         OnTopicChanged(
                             Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3));
+                        //Trace.WriteLine("Topic changed", "IRC");
                     }
                     break;
                 case PART:
@@ -413,6 +422,7 @@ namespace FlamingIRC
                             Rfc2812Util.UserFromString(tokens[0]),
                             tokens[2],
                             tokens.Length >= 4 ? RemoveLeadingColon(CondenseStrings(tokens, 3)) : "");
+                        //Trace.WriteLine("Part", "IRC");
                     }
                     break;
                 case QUIT:
@@ -420,6 +430,7 @@ namespace FlamingIRC
                     {
                         tokens[2] = RemoveLeadingColon(tokens[2]);
                         OnQuit(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 2));
+                        //Trace.WriteLine("Quit", "IRC");
                     }
                     break;
                 case INVITE:
@@ -427,6 +438,7 @@ namespace FlamingIRC
                     {
                         OnInvite(
                             Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[3]));
+                        //Trace.WriteLine("Invite", "IRC");
                     }
                     break;
                 case KICK:
@@ -434,6 +446,7 @@ namespace FlamingIRC
                     {
                         tokens[4] = RemoveLeadingColon(tokens[4]);
                         OnKick(Rfc2812Util.UserFromString(tokens[0]), tokens[2], tokens[3], CondenseStrings(tokens, 4));
+                        //Trace.WriteLine("Kick", "IRC");
                     }
                     break;
                 case MODE:
@@ -447,6 +460,7 @@ namespace FlamingIRC
                                 ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 3);
                                 string raw = CondenseStrings(tokens, 3);
                                 OnChannelModeChange(who, tokens[2], modes, raw);
+                                Trace.WriteLine("Channel mode change", "IRC");
                             }
                             catch (Exception)
                             {
@@ -465,6 +479,7 @@ namespace FlamingIRC
                             tokens[3] = RemoveLeadingColon(tokens[3]);
                             OnUserModeChange(Rfc2812Util.CharToModeAction(tokens[3][0]),
                                 Rfc2812Util.CharToUserMode(tokens[3][1]));
+                            //Trace.WriteLine("User mode change", "IRC");
                         }
                     }
                     break;
@@ -486,9 +501,11 @@ namespace FlamingIRC
                         OnError(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0)));
                     }
                     Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Unknown IRC command=" + tokens[1]);
+                    //Trace.WriteLine("Unknown command", "IRC");
                     break;
             }
         }
+
         private void ParseReply(string[] tokens)
         {
             ReplyCode code = (ReplyCode)int.Parse(tokens[1], CultureInfo.InvariantCulture);
@@ -530,12 +547,14 @@ namespace FlamingIRC
                         string[] users = new string[numberOfUsers];
                         Array.Copy(tokens, 5, users, 0, numberOfUsers);
                         OnNames(tokens[4], users, false);
+                        //Trace.WriteLine("Names", "IRC");
                     }
                     break;
                 case ReplyCode.RPL_ENDOFNAMES:
                     if (OnNames != null)
                     {
                         OnNames(tokens[3], new string[0], true);
+                        //Trace.WriteLine("Names end", "IRC");
                     }
                     break;
                 case ReplyCode.RPL_LIST:
@@ -561,6 +580,7 @@ namespace FlamingIRC
                     {
                         tokens[4] = RemoveLeadingColon(tokens[4]);
                         OnNickError(this, new NickErrorEventArgs(tokens[3], CondenseStrings(tokens, 4)));
+                        //Trace.WriteLine("Nick collision", "IRC");
                     }
                     break;
                 case ReplyCode.RPL_NOTOPIC:

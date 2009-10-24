@@ -55,8 +55,10 @@
                 {
                     Items.Clear();
                     
+                    SuspendLayout();
                     foreach (User nick in userList)
                         Items.Add(nick);
+                    ResumeLayout();
                 }
             });
         }
