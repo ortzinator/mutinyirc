@@ -68,6 +68,7 @@ namespace OrtzIRC.PluginFramework
                             {
                                 Trace.WriteLine(string.Format("Could not load command {0}. A command by that name already exists.", info.FullName),
                                     TraceCategories.PluginSystem); //Hack: lousy error message :P
+                                //TODO: Should let user know about this.
                             }
                         }
                         else
@@ -107,11 +108,15 @@ namespace OrtzIRC.PluginFramework
         public static CommandResultInfo ExecuteCommand(CommandExecutionInfo info)
         {
             //TODO: This should handle errors
+            //TODO: Pretty complex, maybe could use some commenting
+
             ICommand commandInstance = GetCommandInstance(info.Name);
             if (commandInstance == null)
-            {
-                return new CommandResultInfo { Message = String.Format("{0} is an invalid command", info.Name.ToUpper()), Result = CommandResult.Fail }; //Hack
-            }
+                return new CommandResultInfo
+                           {
+                               Message = String.Format("{0} is an invalid command", info.Name.ToUpper()),
+                               Result = CommandResult.Fail
+                           };
 
             var methods = commandInstance.GetType().GetMethods()
             .Where(o => o.Name == "Execute")
@@ -177,6 +182,7 @@ namespace OrtzIRC.PluginFramework
                             }
                             info.ParameterList.Insert(0, info.Context);
                             return (CommandResultInfo)methodInfos[i].Invoke(commandInstance, info.ParameterList.ToArray());
+                            //TODO: Should maybe log or something before returning
                         }
                     }
                 }

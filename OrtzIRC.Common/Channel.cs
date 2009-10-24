@@ -181,7 +181,7 @@
                 {
                     if (NickChanged != null)
                         NickChanged(n, newNick);
-                    Server.Connection.Sender.Names(Name);
+                    //Server.Connection.Sender.Names(Name);
                 }
             }
         }
@@ -193,7 +193,7 @@
 
         public void UserKick(User nick, string kickee, string reason)
         {
-            Server.Connection.Sender.Names(Name);
+            //Server.Connection.Sender.Names(Name);
 
             if (OnKick != null)
                 OnKick(nick, kickee, reason);

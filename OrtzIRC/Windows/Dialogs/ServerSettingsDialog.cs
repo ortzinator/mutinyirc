@@ -137,14 +137,6 @@ namespace OrtzIRC
 
         private void okButton_Click(object sender, EventArgs e)
         {
-            // P90: Empty server descriptions make it a pain to select a server from the list.
-            /*
-            if (serverDescriptionTextBox.Text.Length == 0)
-            {
-                serverDescriptionTextBox.Text = serverUriTextBox.Text;
-            }
-            */
-
             IRCSettingsManager.Instance.Save();
             Close();
         }

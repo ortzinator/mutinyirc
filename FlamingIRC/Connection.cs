@@ -22,7 +22,6 @@
  * the archive of this library for complete text of license.
 */
 
-[assembly: System.CLSCompliant(true)] //TODO: Should these be here?
 namespace FlamingIRC
 {
     using System;
@@ -54,7 +53,7 @@ namespace FlamingIRC
         public event EventHandler<FlamingDataEventArgs<string>> ConnectFailed;
         public event EventHandler<FlamingDataEventArgs<string>> ConnectionLost;
 
-        private AsyncCallback asynConnect, asynReceive, asynSend;
+        private AsyncCallback asynConnect, asynReceive;
 
         private string buffer;
 
@@ -409,8 +408,6 @@ namespace FlamingIRC
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="badNick"></param>
-        /// <param name="reason"></param>
         private void OnNickError(object sender, NickErrorEventArgs ea)
         {
             //If this is our initial connection attempt
@@ -431,8 +428,6 @@ namespace FlamingIRC
         /// Listen for the 005 info messages sent during registration so that the maximum lengths
         /// of certain items (Nick, Away, Topic) can be determined dynamically.
         /// </summary>
-        /// <param name="code">Reply code enum</param>
-        /// <param name="info">An info line</param>
         private void OnReply(object sender, ReplyEventArgs a)
         {
             if (a.ReplyCode == ReplyCode.RPL_BOUNCE) //Code 005
@@ -571,15 +566,14 @@ namespace FlamingIRC
         {
             SocketPacket theSockId = (SocketPacket)a.AsyncState;
 
-            char[] chars = new char[theSockId.dataBuffer.Length + 1];
-            System.Text.Decoder d = System.Text.Encoding.UTF8.GetDecoder();
-            int charLen = d.GetChars(theSockId.dataBuffer, 0, theSockId.dataBuffer.Length, chars, 0);
-            string line = new string(chars);
-            line = line.TrimEnd("\0".ToCharArray());
+            string line = Encoding.ASCII.GetString(theSockId.Buffer, 0, theSockId.Buffer.Length);
+            line = line.TrimEnd('\0');
 
             if (line.Contains("\r\n"))
             {
-                socket.EndReceive(a);
+                SocketError err;
+                socket.EndReceive(a, out err);
+                Debug.Print(err.ToString());
 
                 string[] segments = line.Split("\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
@@ -587,7 +581,8 @@ namespace FlamingIRC
                 {
                     if (s.EndsWith("\r"))
                     {
-                        ReceiveIRCMessages(buffer + s.Trim());
+                        string content = buffer + s.Trim();
+                        ReceiveIRCMessages(content);
                         buffer = String.Empty;
                     }
                     else
@@ -596,7 +591,7 @@ namespace FlamingIRC
                     }
                 }
                 //Loop back again
-                if (theSockId.thisSocket.Connected)
+                if (theSockId.Socket.Connected)
                 {
                     WaitforData();
                 }
@@ -628,9 +623,11 @@ namespace FlamingIRC
             }
 
             OnRawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
+            Trace.WriteLine("Sent command", "IRC");
 
             command.Remove(0, command.Length);
         }
+
         /// <summary>
         /// Send a message to the IRC server which does
         /// not affect the socket's idle time. Used for automatic replies
@@ -713,7 +710,7 @@ namespace FlamingIRC
         {
             try
             {
-                this.OnConnectSuccess.Fire<EventArgs>(this, EventArgs.Empty);
+                OnConnectSuccess.Fire(this, EventArgs.Empty);
 
                 WaitforData();
                 sender.RegisterConnection(connectionArgs);
@@ -724,7 +721,7 @@ namespace FlamingIRC
             }
             catch (SocketException e)
             {
-                if (this.ConnectFailed != null) this.ConnectFailed(this, new FlamingDataEventArgs<string>(e.Message));
+                if (ConnectFailed != null) ConnectFailed(this, new FlamingDataEventArgs<string>(e.Message));
             }
         }
 
@@ -739,10 +736,11 @@ namespace FlamingIRC
             if (!socket.Connected)
                 return;
 
-            SocketPacket packet = new SocketPacket();
-            packet.thisSocket = this.socket;
+            SocketPacket packet = new SocketPacket { Socket = socket };
 
-            socket.BeginReceive(packet.dataBuffer, 0, packet.dataBuffer.Length, SocketFlags.None, asynReceive, packet);
+            SocketError err;
+            socket.BeginReceive(packet.Buffer, 0, packet.Buffer.Length, SocketFlags.None, out err, asynReceive, packet);
+            //Trace.WriteLine(err);
         }
 
         /// <summary>
@@ -772,7 +770,7 @@ namespace FlamingIRC
         /// <returns>The Name property</returns>
         public override string ToString()
         {
-            return this.Name;
+            return Name;
         }
 
         /// <summary>
@@ -800,7 +798,9 @@ namespace FlamingIRC
 
     public class SocketPacket
     {
-        public System.Net.Sockets.Socket thisSocket;
-        public byte[] dataBuffer = new byte[512];
+        public System.Net.Sockets.Socket Socket;
+        public const int BUFFER_SIZE = 1024;
+        public byte[] Buffer = new byte[BUFFER_SIZE];
+        public StringBuilder Sb = new StringBuilder();
     }
 }

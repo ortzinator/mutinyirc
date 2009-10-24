@@ -92,7 +92,8 @@
             if (File.Exists(Environment.CurrentDirectory + "\\list.xml"))
             {
                 XmlSerializer s = new XmlSerializer(typeof(SerializableDictionary<string, List<string>>));
-                TextReader r = new StreamReader(Environment.CurrentDirectory + "\\list.xml");
+                //TextReader r = new StreamReader(Environment.CurrentDirectory + "\\list.xml");
+                TextReader r = new StreamReader("C:\\list.xml");
                 try
                 {
                     _messagesStore = (SerializableDictionary<string, List<string>>)s.Deserialize(r);
@@ -116,7 +117,8 @@
         public static void Save()
         {
             XmlSerializer s = new XmlSerializer(typeof(SerializableDictionary<string, List<string>>));
-            TextWriter w = new StreamWriter(Environment.CurrentDirectory + "\\list.xml");
+            //TextWriter w = new StreamWriter(Environment.CurrentDirectory + "\\list.xml");
+            TextWriter w = new StreamWriter("C:\\list.xml");
 
             try
             {

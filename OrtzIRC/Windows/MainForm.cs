@@ -144,8 +144,7 @@ namespace OrtzIRC
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-#if !DEBUG
-    // TODO: Stuff we should do on exit.
+            // TODO: Stuff we should do on exit.
             if (ConfirmExit())
             {
                 RandomMessages.Save();
@@ -154,19 +153,14 @@ namespace OrtzIRC
             {
                 e.Cancel = true;
             }
-#endif
         }
 
-#if !DEBUG
         private bool ConfirmExit()
         {
-            DialogResult dr = DialogResult.No;
-
-            dr = MessageBox.Show("Are you sure you wish to close this application?", "Question", MessageBoxButtons.YesNo,
+            DialogResult dr = MessageBox.Show("Are you sure you wish to close this application?", "Question", MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
 
             return (dr == DialogResult.Yes);
         }
-#endif
     }
 }

@@ -11,10 +11,6 @@
     {
         private XDocument xdoc;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="path"></param>
         public XmlDocsParser(string path)
         {
             xdoc = XDocument.Load(path);
