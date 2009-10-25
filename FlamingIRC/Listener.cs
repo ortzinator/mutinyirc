@@ -387,7 +387,7 @@ namespace FlamingIRC
                         if (OnPublic != null)
                         {
                             OnPublic(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3));
-                            //Trace.WriteLine("Public msg", "IRC");
+                            Trace.WriteLine("Public msg", "IRC");
                         }
                     }
                     else
