@@ -4,6 +4,7 @@
     using System.Windows.Forms;
     using FlamingIRC;
     using System.ComponentModel;
+    using System;
 
     public partial class NickListBox : ListBox
     {
@@ -49,18 +50,23 @@
 
         private void userList_Updated(object sender, System.EventArgs e)
         {
-            Invoke((MethodInvoker)delegate
+            if (InvokeRequired)
+                Invoke(new Action(UpdateUserList));
+            else
+                UpdateUserList();
+        }
+
+        private void UpdateUserList()
+        {
+            lock (userList)
             {
-                lock (userList)
-                {
-                    Items.Clear();
-                    
-                    SuspendLayout();
-                    foreach (User nick in userList)
-                        Items.Add(nick);
-                    ResumeLayout();
-                }
-            });
+                Items.Clear();
+
+                SuspendLayout();
+                foreach (User nick in userList)
+                    Items.Add(nick);
+                ResumeLayout();
+            }
         }
 
         protected override void OnDrawItem(DrawItemEventArgs e)

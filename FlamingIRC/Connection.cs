@@ -53,8 +53,6 @@ namespace FlamingIRC
         public event EventHandler<FlamingDataEventArgs<string>> ConnectFailed;
         public event EventHandler<FlamingDataEventArgs<string>> ConnectionLost;
 
-        private AsyncCallback asynConnect, asynReceive;
-
         private string buffer;
 
 
@@ -571,9 +569,7 @@ namespace FlamingIRC
 
             if (line.Contains("\r\n"))
             {
-                SocketError err;
-                socket.EndReceive(a, out err);
-                Debug.Print(err.ToString());
+                socket.EndReceive(a);
 
                 string[] segments = line.Split("\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
@@ -593,7 +589,14 @@ namespace FlamingIRC
                 //Loop back again
                 if (theSockId.Socket.Connected)
                 {
-                    WaitforData();
+                    try
+                    {
+                        WaitforData();
+                    }
+                    catch (Exception)
+                    {
+                        Debug.WriteLine("Failed to read socket");
+                    }
                 }
             }
             else
@@ -607,6 +610,18 @@ namespace FlamingIRC
         /// </summary>
         internal void SendCommand(StringBuilder command)
         {
+            try
+            {
+                if (!socket.Poll(10, SelectMode.SelectWrite))
+                {
+                    Debug.WriteLine("Socket error");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }
+
             try
             {
                 NetworkStream networkStream = new NetworkStream(socket);
@@ -623,7 +638,7 @@ namespace FlamingIRC
             }
 
             OnRawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
-            Trace.WriteLine("Sent command", "IRC");
+            Trace.WriteLine("Sent command: " + command.ToString(), "IRC");
 
             command.Remove(0, command.Length);
         }
@@ -693,10 +708,7 @@ namespace FlamingIRC
 
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                if (asynConnect == null)
-                    asynConnect = new AsyncCallback(ConnectCallback);
-
-                socket.BeginConnect(connectionArgs.Hostname, connectionArgs.Port, asynConnect, null);
+                socket.BeginConnect(connectionArgs.Hostname, connectionArgs.Port, ConnectCallback, null);
             }
         }
 
@@ -730,16 +742,21 @@ namespace FlamingIRC
         /// </summary>
         private void WaitforData()
         {
-            if (asynReceive == null)
-                asynReceive = new AsyncCallback(BuildBuffer);
 
             if (!socket.Connected)
                 return;
 
-            SocketPacket packet = new SocketPacket { Socket = socket };
+            var packet = new SocketPacket { Socket = socket };
 
             SocketError err;
-            socket.BeginReceive(packet.Buffer, 0, packet.Buffer.Length, SocketFlags.None, out err, asynReceive, packet);
+            try
+            {
+                socket.BeginReceive(packet.Buffer, 0, packet.Buffer.Length, SocketFlags.None, out err, BuildBuffer, packet);
+            }
+            catch (Exception)
+            {
+                Debug.WriteLine("Failed to read socket");
+            }
             //Trace.WriteLine(err);
         }
 
@@ -764,6 +781,7 @@ namespace FlamingIRC
                 listener.Disconnected();
             }
         }
+
         /// <summary>
         /// A friendly name for this connection.
         /// </summary>
@@ -785,6 +803,7 @@ namespace FlamingIRC
         {
             parsers.Insert(0, parser);
         }
+
         /// <summary>
         /// Remove a custom parser class.
         /// </summary>

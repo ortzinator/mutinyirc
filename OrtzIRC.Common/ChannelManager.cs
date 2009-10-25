@@ -38,41 +38,42 @@
         private List<User> tempNicks = new List<User>();
         private void Server_OnNames(string channel, string[] nicks, bool last)
         {
-            if (InChannel(channel))
+            //if (!InChannel(channel)) return;
+
+            Channel chan = GetChannel(channel);
+            if (!recievingNames)
             {
-                Channel chan = GetChannel(channel);
-                if (!recievingNames)
-                {
-                    recievingNames = true;
-                }
+                recievingNames = true;
+            }
 
                 
-                foreach (string nick in nicks)
-                {
-                    tempNicks.Add(User.FromNames(nick));
-                }
-
-                Trace.WriteLine("Added chunk of " + nicks.Length + " names", "Names");
-
-                if (last)
-                {
-                    chan.NickList.NotifyUpdate = false;
-                    chan.NickList.Clear();
-                    foreach (User nick in tempNicks)
-                    {
-                        chan.NickList.Add(nick);
-                    }
-                    chan.NickList.NotifyUpdate = true;
-                    chan.NickList.Refresh();
-                    //Trace.WriteLine("Refreshed channel nick list", "Names");
-                    recievingNames = false;
-                    tempNicks.Clear();
-                } 
+            foreach (string nick in nicks)
+            {
+                tempNicks.Add(User.FromNames(nick));
             }
+
+            Trace.WriteLine("Added chunk of " + nicks.Length + " names", "Names");
+
+            if (!last) return;
+
+            chan.NickList.NotifyUpdate = false;
+            chan.NickList.Clear();
+            foreach (User nick in tempNicks)
+            {
+                chan.NickList.Add(nick);
+            }
+            chan.NickList.NotifyUpdate = true;
+            chan.NickList.Refresh();
+            //Trace.WriteLine("Refreshed channel nick list", "Names");
+            recievingNames = false;
+            tempNicks.Clear();
         }
 
         public Channel GetChannel(string channelName)
         {
+            //if (!InChannel(channelName))
+            //   return null;
+
             return Channels[channelName];
         }
 
