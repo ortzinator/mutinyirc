@@ -567,11 +567,11 @@ namespace FlamingIRC
             string line = Encoding.ASCII.GetString(theSockId.Buffer, 0, theSockId.Buffer.Length);
             line = line.TrimEnd('\0');
 
+            socket.EndReceive(a);
+
             if (line.Contains("\r\n"))
             {
-                socket.EndReceive(a);
-
-                string[] segments = line.Split("\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                string[] segments = line.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (string s in segments)
                 {
@@ -586,22 +586,16 @@ namespace FlamingIRC
                         buffer += s;
                     }
                 }
-                //Loop back again
-                if (theSockId.Socket.Connected)
-                {
-                    try
-                    {
-                        WaitforData();
-                    }
-                    catch (Exception)
-                    {
-                        Debug.WriteLine("Failed to read socket");
-                    }
-                }
             }
             else
             {
                 buffer += line;
+                Debug.WriteLine("WHAT IS THIS!! " + line);
+            }
+
+            if (theSockId.Socket.Connected)
+            {
+                WaitforData();
             }
         }
 
@@ -742,7 +736,6 @@ namespace FlamingIRC
         /// </summary>
         private void WaitforData()
         {
-
             if (!socket.Connected)
                 return;
 
@@ -818,8 +811,7 @@ namespace FlamingIRC
     public class SocketPacket
     {
         public System.Net.Sockets.Socket Socket;
-        public const int BUFFER_SIZE = 1024;
-        public byte[] Buffer = new byte[BUFFER_SIZE];
+        public byte[] Buffer = new byte[1024];
         public StringBuilder Sb = new StringBuilder();
     }
 }

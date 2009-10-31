@@ -265,7 +265,6 @@
 
         private void Listener_OnNames(string channel, string[] nicks, bool last)
         {
-            //ChanManager.OnNames(channel, nicks, last);
             if (OnNames != null)
                 OnNames(channel, nicks, last);
         }

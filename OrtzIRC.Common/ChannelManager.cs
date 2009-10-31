@@ -87,7 +87,8 @@
                 }
 
                 TriggerChannelRemoved(Channels[channelName]);
-                Channels.Remove(channelName);
+                if(!Channels.Remove(channelName))
+                    Debug.WriteLine("Failed to remove channel");
                 //TODO: Is this all that needs to be done?
             }
             return false;
@@ -103,11 +104,22 @@
             if (!Rfc2812Util.IsValidChannelName(channelName))
                 return null;
 
-            Channel newChan = new Channel(Server, channelName);
+            var newChan = new Channel(Server, channelName);
             Channels.Add(channelName, newChan);
+            newChan.UserParted += channelUserParted;
             TriggerChannelCreated(newChan);
 
             return newChan;
+        }
+
+        private void channelUserParted(object sender, EventArgs e)
+        {
+            var chan = (Channel)sender;
+
+            Channels.Remove(chan.Name);
+            TriggerChannelRemoved(chan);
+
+            chan.UserParted -= channelUserParted;
         }
 
         private void TriggerChannelCreated(Channel chan)

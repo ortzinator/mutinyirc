@@ -22,6 +22,7 @@
  * the archive of this library for complete text of license.
 */
 
+
 namespace FlamingIRC
 {
     using System;
@@ -30,6 +31,7 @@ namespace FlamingIRC
     using System.Globalization;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using System.Collections.Generic;
 
     /// <summary>
     /// This class parses messages received from the IRC server and
@@ -249,40 +251,45 @@ namespace FlamingIRC
         /// 
         /// </summary>
         /// <param name="message"></param>
-        internal void Parse(string message)
+        public void Parse(string message) //Hack: Made public for unit testing, should be internal
         {
             string[] tokens = message.Split(Separator);
-            if (tokens[0] == PING)
+
+
+            switch (tokens[0])
             {
-                if (OnPing != null)
-                {
+                case PING:
+                    if (OnPing != null)
+                    {
+                        tokens[1] = RemoveLeadingColon(tokens[1]);
+                        OnPing(CondenseStrings(tokens, 1));
+                    }
+                    break;
+                case NOTICE:
+                    if (OnPrivateNotice != null)
+                    {
+                        OnPrivateNotice(
+                            User.Empty,
+                            CondenseStrings(tokens, 2));
+                    }
+                    break;
+                case ERROR:
                     tokens[1] = RemoveLeadingColon(tokens[1]);
-                    OnPing(CondenseStrings(tokens, 1));
-                }
-            }
-            else if (tokens[0] == NOTICE)
-            {
-                if (OnPrivateNotice != null)
-                {
-                    OnPrivateNotice(
-                        User.Empty,
-                        CondenseStrings(tokens, 2));
-                }
-            }
-            else if (tokens[0] == ERROR)
-            {
-                tokens[1] = RemoveLeadingColon(tokens[1]);
-                Error(ReplyCode.IrcServerError, CondenseStrings(tokens, 1));
-            }
-            else if (replyRegex.IsMatch(message))
-            {
-                ParseReply(tokens);
-            }
-            else
-            {
-                ParseCommand(tokens);
+                    Error(ReplyCode.IrcServerError, CondenseStrings(tokens, 1));
+                    break;
+                default:
+                    if (replyRegex.IsMatch(message))
+                    {
+                        ParseReply(tokens);
+                    }
+                    else
+                    {
+                        ParseCommand(tokens);
+                    }
+                    break;
             }
         }
+
         /// <summary>
         /// Warn listeners that we are about to close this connection
         /// </summary>
@@ -542,6 +549,14 @@ namespace FlamingIRC
                 case ReplyCode.RPL_NAMREPLY:
                     if (OnNames != null)
                     {
+                        if (tokens[2].EndsWith("=")) //hack: Gamesurge sometimes does this
+                        {
+                            var newtokens = new List<string>(tokens);
+                            newtokens.RemoveAt(2);
+                            newtokens.Insert(2, tokens[2].Remove(tokens[2].Length - 1));
+                            newtokens.Insert(3, "=");
+                            tokens = newtokens.ToArray();
+                        }
                         tokens[5] = RemoveLeadingColon(tokens[5]);
                         int numberOfUsers = tokens.Length - 5;
                         string[] users = new string[numberOfUsers];

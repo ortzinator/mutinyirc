@@ -38,7 +38,7 @@
         {
             //Color parsing - http://www.mirc.co.uk/help/color.txt
             base.AppendText(line);
-            return; //HACK: Bypassing formatting
+            return; //HACK: Bypassing formatting until I fix the NAMES bug
 
             for (int i = 0; i < line.Length; i++)
             {
