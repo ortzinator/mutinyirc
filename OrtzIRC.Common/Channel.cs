@@ -18,8 +18,6 @@
             Name = name;
 
             NickList = new UserList();
-
-            Joined = true;
         }
 
         public Server Server { get; private set; }
@@ -39,7 +37,13 @@
         /// <summary>
         /// Returns true if the user is in the channel
         /// </summary>
-        public bool Joined { get; private set; }
+        public bool Joined
+        {
+            get
+            {
+                return NickList.Count > 0;
+            }
+        }
 
         /// <summary>
         /// Returns a ChannelInfo class to represent the channel.
@@ -147,7 +151,7 @@
         public void Part(string message)
         {
             Server.Connection.Sender.Part(message, Name);
-            Joined = false;
+            NickList.Clear();
         }
 
         public void Part()

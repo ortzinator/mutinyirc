@@ -3,3 +3,4 @@ glob:OrtzIRC.suo
 glob:OrtzIRC.4.1.resharper.user
 relre:^.*/bin/.*
 relre:^.*/obj/.*
+relre:^TestResults/.*
