@@ -89,7 +89,7 @@
 
         private void Channel_OnKick(User nick, string kickee, string reason)
         {
-            AddLine(string.Format("-- Kick: ({0}) was kicked by ({1}) {2}", nick.Nick, kickee, reason));
+            AddLine(string.Format("-- Kick: ({0}) was kicked by ({1}) {2}", kickee, nick.Nick, reason));
         }
 
         private void Channel_OnNick(User nick, string newNick)

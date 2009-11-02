@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System.Drawing;
+using System.Linq;
 using System.Xml.Linq;
 using FlamingIRC;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Windows.Forms;
+using OrtzIRC;
 using OrtzIRC.Common;
 using System;
 using System.Diagnostics;
@@ -71,6 +73,20 @@ namespace FlamingIrcTest
         private void listener_OnNames(string channel, string[] nicks, bool last)
         {
             Debug.WriteLine("Added nicks: " + string.Join(", ", nicks));
+        }
+
+        [TestMethod]
+        public void ColorParseTest()
+        {
+            var form = new Form();
+            form.Size = new Size(600, 800);
+            var tb = new IrcTextBox();
+            form.Controls.Add(tb);
+            tb.Dock = DockStyle.Fill;
+
+            form.Show();
+
+           // tb.AppendLine((char)017 + (char)003 + "1,15 www." +   + "4\002MAX\0031FRAG\002.net - \037Affordable\037 VENTRILO SERVERS \017");
         }
 
 

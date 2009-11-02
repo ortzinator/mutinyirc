@@ -76,6 +76,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq">
@@ -101,6 +102,10 @@
     <ProjectReference Include="..\OrtzIRC.PluginFramework\OrtzIRC.PluginFramework.csproj">
       <Project>{D8266C38-E44E-4708-89AE-3E6CA72D5987}</Project>
       <Name>OrtzIRC.PluginFramework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OrtzIRC\OrtzIRC.csproj">
+      <Project>{3F50443A-7CC6-4490-9916-523D80DEE58F}</Project>
+      <Name>OrtzIRC</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
