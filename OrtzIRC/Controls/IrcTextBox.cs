@@ -22,23 +22,24 @@
 			    Color.SkyBlue,
 			    Color.Blue,
 			    Color.Pink,
-			    Color.DarkGray,
-			    Color.Gray
+			    Color.Gray,
+			    Color.LightGray
 			};
 
         public IrcTextBox()
         {
             InitializeComponent();
             ReadOnly = true;
-            BackColor = System.Drawing.SystemColors.Window;
-            Cursor = System.Windows.Forms.Cursors.Default;
+            DetectUrls = false;
+            //BackColor = System.Drawing.SystemColors.Window;
+            //Cursor = System.Windows.Forms.Cursors.Default;
         }
 
         private new void AppendText(string line)
         {
             //Color parsing - http://www.mirc.co.uk/help/color.txt
-            base.AppendText(line);
-            return; //HACK: Bypassing formatting until I fix the NAMES bug
+            int forecolor = 1;
+            int backcolor = 0;
 
             for (int i = 0; i < line.Length; i++)
             {
@@ -59,15 +60,12 @@
                             break;
                         }
 
-                        int forecolor = 1;
-                        int backcolor = 0;
-
                         if (Char.IsDigit(line[i + 1]))
                         {
                             int offset = line.IndexOf(',', i, 5);
                             forecolor = Int32.Parse(line.Substring(i + 1, Char.IsDigit(line[i + 2]) ? 2 : 1));
                             if (offset != -1) // we have a back color as well
-                                backcolor = Int32.Parse(line.Substring(offset + 1, Char.IsDigit(line[i + 5]) ? 2 : 1));
+                                backcolor = Int32.Parse(line.Substring(offset + 1, Char.IsDigit(line[i + 4]) ? 2 : 1));
                             i += (forecolor >= 0 && forecolor < 10 ? 1 : 2);
                             i += (offset == -1 ? 0 : (backcolor >= 0 && backcolor < 10 ? 2 : 3));
                         }
