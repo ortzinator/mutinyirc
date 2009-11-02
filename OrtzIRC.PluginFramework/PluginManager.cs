@@ -124,67 +124,66 @@ namespace OrtzIRC.PluginFramework
 
             MethodInfo[] methodInfos = methods.ToArray();
 
-            for (int i = 0; i < methodInfos.Length; i++)
+            for (int i = 0; i < methodInfos.Length; i++) //Loop through the methods
             {
-                //Loop through the methods
                 ParameterInfo[] methodParameters = methodInfos[i].GetParameters();
 
-                for (int j = 0; j < methodParameters.Length; j++)
+                for (int j = 0; j < methodParameters.Length; j++) //Loop throught the method's parameters
                 {
-                    //Loop throught the method's parameters
                     ParameterInfo methodParameter = methodParameters[j];
 
                     if (j == 0)
+                    {
                         if (methodParameter.ParameterType != info.Context.GetType())
                             break;
-                        else
-                            continue;
 
-                    if (info.ParameterList.Count == 0)
-                    {
-                        if (methodParameters.Length - 1 > 0)
-                            break;
-                    }
-                    else
-                    {
-                        if (FlamingIRC.Rfc2812Util.IsValidChannelName(info.ParameterList[j - 1] as string))
-                            info.ParameterList[j - 1] = new ChannelInfo(info.ParameterList[j - 1] as string);
-
-                        if (methodParameter.ParameterType != info.ParameterList[j - 1].GetType())
-                            break; //Parameter mismatch. Break parameter loop and go the the next method
-
-                        if (j == methodParameters.Length - 1)
+                        if (info.ParameterList.Count == 0)
                         {
-                            if (methodParameter.ParameterType == typeof(string))
-                            {
-                                bool allStrings = true;
-                                System.Text.StringBuilder openString = new StringBuilder();
+                            if (methodParameters.Length - 1 != 0)
+                                break;
 
-                                int numberOpenEnded = 0;
-                                for (int k = j - 1; k < info.ParameterList.Count; k++)
-                                {
-                                    if (info.ParameterList[k].GetType() != typeof(string))
-                                    {
-                                        allStrings = false;
-                                        break;
-                                    }
-
-                                    openString.Append(info.ParameterList[k] + " ");
-                                    numberOpenEnded++;
-                                }
-
-                                if (allStrings && j != info.ParameterList.Count)
-                                {
-                                    openString.Remove(openString.Length - 1, 1);
-                                    info.ParameterList.RemoveRange(j - 1, numberOpenEnded);
-                                    info.ParameterList.Add(openString.ToString());
-                                }
-                            }
                             info.ParameterList.Insert(0, info.Context);
                             return (CommandResultInfo)methodInfos[i].Invoke(commandInstance, info.ParameterList.ToArray());
-                            //TODO: Should maybe log or something before returning
+                        }
+                        continue;
+                    }
+
+                    if (FlamingIRC.Rfc2812Util.IsValidChannelName(info.ParameterList[j - 1] as string))
+                        info.ParameterList[j - 1] = new ChannelInfo(info.ParameterList[j - 1] as string);
+
+                    if (methodParameter.ParameterType != info.ParameterList[j - 1].GetType())
+                        break; //Parameter mismatch. Break parameter loop and go the the next method
+
+                    if (j != methodParameters.Length - 1) continue;
+
+                    if (methodParameter.ParameterType == typeof(string))
+                    {
+                        bool allStrings = true;
+                        System.Text.StringBuilder openString = new StringBuilder();
+
+                        int numberOpenEnded = 0;
+                        for (int k = j - 1; k < info.ParameterList.Count; k++)
+                        {
+                            if (info.ParameterList[k].GetType() != typeof(string))
+                            {
+                                allStrings = false;
+                                break;
+                            }
+
+                            openString.Append(info.ParameterList[k] + " ");
+                            numberOpenEnded++;
+                        }
+
+                        if (allStrings && j != info.ParameterList.Count)
+                        {
+                            openString.Remove(openString.Length - 1, 1);
+                            info.ParameterList.RemoveRange(j - 1, numberOpenEnded);
+                            info.ParameterList.Add(openString.ToString());
                         }
                     }
+                    info.ParameterList.Insert(0, info.Context);
+                    return (CommandResultInfo)methodInfos[i].Invoke(commandInstance, info.ParameterList.ToArray());
+                    //TODO: Should maybe log or something before returning
                 }
             }
             return null;
