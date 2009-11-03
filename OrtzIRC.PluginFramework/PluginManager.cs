@@ -1,11 +1,8 @@
-﻿using System.Text;
-
-namespace OrtzIRC.PluginFramework
+﻿namespace OrtzIRC.PluginFramework
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.IO;
     using System.Reflection;
     using OrtzIRC.Common;
     using System.Linq;
@@ -49,7 +46,7 @@ namespace OrtzIRC.PluginFramework
         {
             Trace.WriteLine("Loading Plug-ins", TraceCategories.PluginSystem);
 
-            string[] files = Directory.GetFileSystemEntries(userPluginPath, "*.dll");
+            string[] files = System.IO.Directory.GetFileSystemEntries(userPluginPath, "*.dll");
 
             foreach (string file in files)
             {
@@ -159,7 +156,7 @@ namespace OrtzIRC.PluginFramework
                     if (methodParameter.ParameterType == typeof(string))
                     {
                         bool allStrings = true;
-                        System.Text.StringBuilder openString = new StringBuilder();
+                        System.Text.StringBuilder openString = new System.Text.StringBuilder();
 
                         int numberOpenEnded = 0;
                         for (int k = j - 1; k < info.ParameterList.Count; k++)
