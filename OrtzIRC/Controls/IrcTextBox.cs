@@ -35,7 +35,7 @@
             //Cursor = System.Windows.Forms.Cursors.Default;
         }
 
-        private new void AppendText(string line)
+        private void AppendIrcText(string line)
         {
             //Color parsing - http://www.mirc.co.uk/help/color.txt
             int forecolor = 1;
@@ -99,7 +99,7 @@
                         }
                         break;
                     default:
-                        base.AppendText(c.ToString());
+                        AppendText(c.ToString());
                         break;
                 }
             }
@@ -118,10 +118,24 @@
             {
                 DateTime now = DateTime.Now;
 
-                AppendText("\n" + now.ToString("T",
+                AppendIrcText("\n" + now.ToString("T",
                     System.Globalization.CultureInfo.CreateSpecificCulture("es-ES")) + " ");
-                AppendText(line.Trim());
+                AppendIrcText(line.Trim());
                 ScrollToBottom();
+            }
+        }
+
+        public void AppendError(string error)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string>(AppendError), error);
+            }
+            else
+            {
+                SetColor(Color.Red);
+                AppendText(error);
+                SetColor(ForeColor);
             }
         }
 

@@ -80,6 +80,10 @@
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
             CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, e.Data)); //TODO: Do something with the result
+            if (result.Result == CommandResult.Fail)
+            {
+                channelOutputBox.AppendError("\n" + result.Message);
+            }
         }
 
         private void Server_Disconnected()
