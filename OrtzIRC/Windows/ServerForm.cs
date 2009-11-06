@@ -81,7 +81,7 @@ namespace OrtzIRC
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
             CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Server, e.Data));
-            if (result.Result == CommandResult.Fail)
+            if (result != null && result.Result == CommandResult.Fail)
             {
                 serverOutputBox.AppendError("\n" + result.Message);
             }

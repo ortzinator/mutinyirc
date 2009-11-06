@@ -129,12 +129,15 @@
                 {
                     ParameterInfo methodParameter = methodParameters[j];
 
+                    if (info.ParameterList.Count < methodParameters.Length - 1)
+                        break;
+
                     if (j == 0)
                     {
-                        if (methodParameter.ParameterType != info.Context.GetType())
+                        if (methodParameter.ParameterType != info.Context.GetType()) //First parameter must be a context
                             break;
 
-                        if (info.ParameterList.Count == 0)
+                        if (info.ParameterList.Count == 0) //Handle parameterless command
                         {
                             if (methodParameters.Length - 1 != 0)
                                 break;
@@ -148,11 +151,19 @@
                     if (FlamingIRC.Rfc2812Util.IsValidChannelName(info.ParameterList[j - 1] as string))
                         info.ParameterList[j - 1] = new ChannelInfo(info.ParameterList[j - 1] as string);
 
+                    var sp = (info.ParameterList[j - 1] as string);
+                    if (sp != null && sp.StartsWith("-")) // Check for switches
+                    {
+                        sp = sp.Remove(0, 1);
+                        info.ParameterList[j - 1] = sp.ToCharArray();
+                    }
+
                     if (methodParameter.ParameterType != info.ParameterList[j - 1].GetType())
                         break; //Parameter mismatch. Break parameter loop and go the the next method
 
-                    if (j != methodParameters.Length - 1) continue;
+                    if (j != methodParameters.Length - 1) continue; //If this isn't the last parameter then keep looping
 
+                    //Checks for an "open-ended" string parameter.
                     if (methodParameter.ParameterType == typeof(string))
                     {
                         bool allStrings = true;
