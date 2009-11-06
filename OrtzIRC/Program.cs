@@ -1,7 +1,6 @@
 namespace OrtzIRC
 {
     using System;
-    using System.Collections.Generic;
     using System.Windows.Forms;
 
     public static class Program
@@ -14,15 +13,9 @@ namespace OrtzIRC
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            try
-            {
-                Application.Run(new MainForm());
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            
+
+            Application.Run(new MainForm());
+
         }
     }
 }
