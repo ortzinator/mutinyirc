@@ -125,6 +125,9 @@
     <value>Could not connect: {0}</value>
     <comment>Displayed to the user when a connection attempt is not successful.</comment>
   </data>
+  <data name="ServerFormTitleBar" xml:space="preserve">
+    <value>Status: {0} on {1} ({2}:{3})</value>
+  </data>
   <data name="WarnDisconnect" xml:space="preserve">
     <value>This will disconnect you from {0}?</value>
     <comment>Displayed to the user when an action they performed will indirectly cause disconnection.</comment>
