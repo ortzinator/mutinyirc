@@ -6,6 +6,7 @@ namespace OrtzIRC
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
+    using OrtzIRC.Resources;
 
     public partial class MainForm : Form
     {
@@ -20,6 +21,8 @@ namespace OrtzIRC
             TextLoggerManager.LoggerActive = Settings.Default.LoggerActivated;
             TextLoggerManager.AddTimestamp = Settings.Default.LoggerTimestampsActivated;
             TextLoggerManager.TimeFormat = Settings.Default.LoggerTimestampFormat;
+
+            ServerManager.Instance.ServerAdded += Instance_ServerCreated;
 
             windowManagerTreeView.AfterSelect += windowManagerTreeView_AfterSelect;
 
@@ -36,7 +39,6 @@ namespace OrtzIRC
                 foreach (var server in IRCSettingsManager.Instance.GetAutoConnectServers())
                 {
                     Server newServer = ServerManager.Instance.Create(server);
-                    CreateServerForm(newServer);
                     newServer.Connect();
                 }
             }
@@ -45,6 +47,11 @@ namespace OrtzIRC
             RandomMessages.Load();
 
             base.OnLoad(e);
+        }
+
+        private void Instance_ServerCreated(object sender, ServerEventArgs e)
+        {
+            CreateServerForm(e.Server);
         }
 
         private void exitMenuItem_Click(object sender, EventArgs e)
@@ -126,7 +133,7 @@ namespace OrtzIRC
 
         private void loggingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            LogForm lf = new LogForm();
+            var lf = new LogForm();
             lf.Show();
         }
 
@@ -148,6 +155,7 @@ namespace OrtzIRC
             if (ConfirmExit())
             {
                 RandomMessages.Save();
+                //ServerManager.Instance.DisconnectAll();
             }
             else
             {
@@ -157,7 +165,7 @@ namespace OrtzIRC
 
         private bool ConfirmExit()
         {
-            DialogResult dr = MessageBox.Show("Are you sure you wish to close this application?", "Question", MessageBoxButtons.YesNo,
+            DialogResult dr = MessageBox.Show(CommonStrings.MainExitPrompt, CommonStrings.MainExitPromptCaption, MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
 
             return (dr == DialogResult.Yes);

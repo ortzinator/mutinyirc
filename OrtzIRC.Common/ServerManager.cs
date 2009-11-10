@@ -5,7 +5,7 @@
 
     public class ServerManager
     {
-        public event EventHandler<ServerEventArgs> ServerCreated;
+        public event EventHandler<ServerEventArgs> ServerAdded;
         public event EventHandler<ServerEventArgs> ServerRemoved;
 
         private static ServerManager instance;
@@ -14,10 +14,10 @@
 
         public static ServerManager Instance
         {
-            get 
+            get
             {
                 if (instance == null)
-                    instance = new ServerManager {ServerList = new List<Server>()};
+                    instance = new ServerManager { ServerList = new List<Server>() };
 
                 return instance;
             }
@@ -28,16 +28,24 @@
             var newServer = new Server(settings);
             ServerList.Add(newServer);
 
-            ServerCreated.Fire(this, new ServerEventArgs(newServer));
+            ServerAdded.Fire(this, new ServerEventArgs(newServer));
 
             return newServer;
         }
 
         public void Remove(Server ntw)
         {
-            ServerList.Remove(ntw);
+            if (ServerList.Remove(ntw))
+                ServerRemoved.Fire(this, new ServerEventArgs(ntw));
+        }
 
-            ServerRemoved.Fire(this, new ServerEventArgs(ntw));
+        public void DisconnectAll()
+        {
+            foreach (var server in ServerList)
+            {
+                if (server.IsConnected)
+                    server.Disconnect();
+            }
         }
     }
 }

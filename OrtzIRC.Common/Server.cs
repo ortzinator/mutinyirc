@@ -12,6 +12,13 @@
     {
         public Server(ServerSettings settings)
         {
+            SetupConnection(settings);
+
+            HookEvents();
+        }
+
+        private void SetupConnection(ServerSettings settings)
+        {
             Settings = settings;
             ChanManager = new ChannelManager(this);
 
@@ -19,15 +26,13 @@
             //TODO: Select nick
             var args = new ConnectionArgs("OrtzIRC", settings.Url);
             Connection = new Connection(args, true, false);
-
-            Connection.OnConnectSuccess += Connection_OnConnectSuccess;
-            Connection.ConnectFailed += Connection_ConnectFailed;
-
-            HookEvents();
         }
 
         private void HookEvents()
         {
+            Connection.OnConnectSuccess += Connection_OnConnectSuccess;
+            Connection.ConnectFailed += Connection_ConnectFailed;
+
             Connection.Listener.OnJoin += Listener_OnJoin;
             Connection.Listener.OnPart += Listener_OnPart;
             Connection.Listener.OnPublic += Listener_OnPublic;
@@ -68,8 +73,8 @@
             Connection.RawMessageReceived -= Connection_OnRawMessageReceived;
         }
 
-        public string URL 
-        { 
+        public string URL
+        {
             get
             {
                 return Settings.Url;
@@ -80,7 +85,7 @@
         {
             get
             {
-                return Settings.Description;
+                return Settings.Description ?? String.Empty;
             }
         }
 
@@ -157,23 +162,7 @@
 
         public void Connect()
         {
-            DoConnect();
-        }
-
-        public void Disconnect()
-        {
-            Disconnect("OrtzIRC (pre-alpha) - http://www.ortzirc.com/"); //TODO: Pick random message from user-defined list of quit messages
-        }
-
-        public void Disconnect(string reason)
-        {
-            UnhookEvents(); // P90: Fix RAW message callback firing after connection was closed.
-            Connection.Disconnect(reason);
-        }
-
-        private void DoConnect()
-        {
-            CancelEventArgs c = new CancelEventArgs();
+            var c = new CancelEventArgs();
 
             Connecting.Fire(this, c);
 
@@ -193,6 +182,17 @@
             }
         }
 
+        public void Disconnect()
+        {
+            Disconnect("OrtzIRC (pre-alpha) - http://www.ortzirc.com/"); //TODO: Pick random message from user-defined list of quit messages
+        }
+
+        public void Disconnect(string reason)
+        {
+            UnhookEvents(); // P90: Fix RAW message callback firing after connection was closed.
+            Connection.Disconnect(reason);
+        }
+
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
         {
             OnKick(new KickEventArgs(user, ChanManager.GetChannel(channel), kickee, reason));
@@ -206,7 +206,7 @@
                 UserModeChanged(action, mode);
 
             //foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
-                //Connection.Sender.Names(item.Key);
+            //Connection.Sender.Names(item.Key);
         }
 
         private void Listener_OnNick(User user, string newNick)
@@ -400,6 +400,19 @@
         public void Nick(string nick)
         {
             Connection.Sender.Nick(nick);
+        }
+
+        public void ChangeServer(ServerSettings settings)
+        {
+            if (IsConnected)
+            {
+                Disconnect();
+            }
+
+            UnhookEvents();
+            ChanManager.UnhookEvents();
+            SetupConnection(settings);
+            HookEvents();
         }
     }
 }

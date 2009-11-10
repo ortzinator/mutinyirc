@@ -88,6 +88,7 @@
 
         private void Server_Disconnected()
         {
+            AddLine("--Disconnected--");
             Close();
         }
 

@@ -14,8 +14,19 @@
             Server = server;
             Channels = new Dictionary<string, Channel>();
 
+            HookEvents();
+        }
+
+        public void HookEvents()
+        {
             Server.OnNames += Server_OnNames;
             Server.OnNick += Server_OnNick;
+        }
+
+        public void UnhookEvents()
+        {
+            Server.OnNames -= Server_OnNames;
+            Server.OnNick -= Server_OnNick;
         }
 
         public Dictionary<string, Channel> Channels { get; private set; }

@@ -5,8 +5,8 @@ namespace OrtzIRC
     using System.Windows.Forms;
     using FlamingIRC;
     using OrtzIRC.Common;
-    using OrtzIRC.Resources;
     using OrtzIRC.PluginFramework;
+    using OrtzIRC.Resources;
 
     public partial class ServerForm : Form
     {
@@ -75,7 +75,7 @@ namespace OrtzIRC
 
         private void server_Disconnected()
         {
-            //intentionally blank
+            AddLine("--Disconnected--");
         }
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
@@ -109,7 +109,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnError(object sender, ErrorMessageEventArgs a)
         {
-            AddLine(a.Code + " " + a.Message);
+            AddLine(string.Format("{0} {1}", a.Code, a.Message));
         }
 
         private void ParentServer_OnRawMessageReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
@@ -125,7 +125,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnPrivateNotice(object sender, UserMessageEventArgs e)
         {
-            AddLine("-" + e.User.Nick + ":" + e.Message + "-");
+            AddLine(string.Format("-{0}: {1}-", e.User.Nick, e.Message));
         }
 
         private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<string> e)
@@ -141,14 +141,18 @@ namespace OrtzIRC
         private void ParentServer_OnRegistered()
         {
             // TODO: Join list of auto-join channels
-
-            Invoke((MethodInvoker)delegate
+            if (InvokeRequired)
             {
-                // P90: Fix empty server description
-                Text = String.Format("Status: {0} on {1} ({2}:{3})", server.UserNick,
-                                     server.Description.Length == 0 ? server.URL : server.Description, server.URL,
-                                     server.Port); //TODO: This should actually be the network name, not the server
-            });
+                Invoke(new Action(ParentServer_OnRegistered));
+            }
+            else
+            {
+                    Text = ServerStrings.ServerFormTitleBar.With(
+                        server.UserNick,
+                        server.Description == String.Empty ? server.URL : server.Description, server.URL,
+                        server.Port
+                        ); //TODO: This should actually be the network name, not the server
+            }
         }
 
         private void ParentServer_OnJoinSelf(object sender, OrtzIRC.Common.DataEventArgs<Channel> e)
