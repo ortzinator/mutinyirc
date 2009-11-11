@@ -189,8 +189,8 @@
 
         public void Disconnect(string reason)
         {
-            UnhookEvents(); // P90: Fix RAW message callback firing after connection was closed.
             Connection.Disconnect(reason);
+            UnhookEvents();
         }
 
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
@@ -359,7 +359,7 @@
 
         protected virtual void OnRawMessageReceived(DataEventArgs<string> e)
         {
-            RawMessageReceived(this, e);
+            RawMessageReceived.Fire(this, e);
         }
 
         protected virtual void OnConnecting(CancelEventArgs e)
