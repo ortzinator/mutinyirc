@@ -71,7 +71,8 @@
             chan.NickList.Clear();
             foreach (User nick in tempNicks)
             {
-                chan.NickList.Add(nick);
+                if (nick != null)
+                    chan.NickList.Add(nick);
             }
             chan.NickList.NotifyUpdate = true;
             chan.NickList.Refresh();

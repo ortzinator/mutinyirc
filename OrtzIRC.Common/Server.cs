@@ -1,7 +1,6 @@
 ﻿namespace OrtzIRC.Common
 {
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel;
     using FlamingIRC;
 
@@ -24,7 +23,7 @@
 
             //TODO: Select port
             //TODO: Select nick
-            var args = new ConnectionArgs("OrtzIRC", settings.Url);
+            var args = new ConnectionArgs("OrtzIRC", settings.Url, settings.Ssl);
             Connection = new Connection(args, true, false);
         }
 

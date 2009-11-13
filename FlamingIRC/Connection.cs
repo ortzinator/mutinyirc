@@ -22,6 +22,8 @@
  * the archive of this library for complete text of license.
 */
 
+using System.Net.Security;
+
 namespace FlamingIRC
 {
     using System;
@@ -32,12 +34,13 @@ namespace FlamingIRC
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using System.Security.Cryptography.X509Certificates;
 
     /// <summary>
     /// This class manages the connection to the IRC server and provides
     /// access to all the objects needed to send and receive messages.
     /// </summary>
-    public sealed class Connection
+    public sealed class Connection : TcpTextClient
     {
         /// <summary>
         /// Receive all the messages, unparsed, sent by the IRC server. This is not
@@ -52,15 +55,6 @@ namespace FlamingIRC
         public event EventHandler OnConnectSuccess;
         public event EventHandler<FlamingDataEventArgs<string>> ConnectFailed;
         public event EventHandler<FlamingDataEventArgs<string>> ConnectionLost;
-
-        private string buffer;
-
-
-#if Ssl
-		private SecureTcpClient socket;
-#else
-        private Socket socket;
-#endif
 
         private readonly Regex propertiesRegex;
         private Listener listener;
@@ -164,6 +158,7 @@ namespace FlamingIRC
                 return registered;
             }
         }
+
         /// <summary>
         /// A read-only property indicating whether a connection 
         /// has been opened with the IRC server (but not whether 
@@ -177,6 +172,7 @@ namespace FlamingIRC
                 return connected;
             }
         }
+
         /// <summary>
         /// By default the connection itself will handle the case
         /// where, while attempting to register the socket's nick
@@ -201,6 +197,7 @@ namespace FlamingIRC
                 handleNickFailure = value;
             }
         }
+
         /// <summary>
         /// A user friendly name of this Connection in the form 'nick@host'
         /// </summary>
@@ -212,6 +209,7 @@ namespace FlamingIRC
                 return connectionArgs.Nick + "@" + connectionArgs.Hostname;
             }
         }
+
         /// <summary>
         /// Whether Ctcp commands should be processed and if
         /// Ctcp events will be raised.
@@ -239,6 +237,7 @@ namespace FlamingIRC
                 ctcpEnabled = value;
             }
         }
+
         /// <summary>
         /// Whether DCC requests should be processed or ignored 
         /// by this Connection. Since the DccListener is a singleton and
@@ -257,6 +256,7 @@ namespace FlamingIRC
                 dccEnabled = value;
             }
         }
+
         /// <summary>
         /// Sets an automatic responder to Ctcp queries.
         /// </summary>
@@ -276,6 +276,7 @@ namespace FlamingIRC
                 ctcpResponder = value;
             }
         }
+
         /// <summary>
         /// The amount of time that has passed since the socket
         /// sent a command to the IRC server.
@@ -288,6 +289,7 @@ namespace FlamingIRC
                 return DateTime.Now - timeLastSent;
             }
         }
+
         /// <summary>
         /// The object used to send commands to the IRC server.
         /// </summary>
@@ -299,6 +301,7 @@ namespace FlamingIRC
                 return sender;
             }
         }
+
         /// <summary>
         /// The object that parses messages and notifies the appropriate delegate.
         /// </summary>
@@ -310,6 +313,7 @@ namespace FlamingIRC
                 return listener;
             }
         }
+
         /// <summary>
         /// The object used to send CTCP commands to the IRC server.
         /// </summary>
@@ -321,24 +325,16 @@ namespace FlamingIRC
                 return ctcpSender;
             }
         }
+
         /// <summary>
         /// The object that parses CTCP messages and notifies the appropriate delegate.
         /// </summary>
         /// <value>Read only CtcpListener. Null if CtcpEnabled is false.</value>
         public CtcpListener CtcpListener
         {
-            get
-            {
-                if (ctcpEnabled)
-                {
-                    return ctcpListener;
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            get { return ctcpEnabled ? ctcpListener : null; }
         }
+
         /// <summary>
         /// The collection of data used to establish this connection.
         /// </summary>
@@ -385,6 +381,7 @@ namespace FlamingIRC
         {
             sender.Pong(message);
         }
+
         /// <summary>
         /// Update the ConnectionArgs object when the user
         /// changes his nick.
@@ -394,15 +391,15 @@ namespace FlamingIRC
         private void MyNickChanged(User user, string newNick)
         {
             if (connectionArgs.Nick == user.Nick)
-            {
                 connectionArgs.Nick = newNick;
-            }
         }
+
         private void OnRegistered()
         {
             registered = true;
-            listener.OnRegistered -= new RegisteredEventHandler(OnRegistered);
+            listener.OnRegistered -= OnRegistered;
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -411,7 +408,7 @@ namespace FlamingIRC
             //If this is our initial connection attempt
             if (!registered && handleNickFailure)
             {
-                NameGenerator generator = new NameGenerator();
+                var generator = new NameGenerator();
                 string nick;
                 do
                 {
@@ -428,25 +425,24 @@ namespace FlamingIRC
         /// </summary>
         private void OnReply(object sender, ReplyEventArgs a)
         {
-            if (a.ReplyCode == ReplyCode.RPL_BOUNCE) //Code 005
+            if (a.ReplyCode != ReplyCode.RPL_BOUNCE) return;
+
+            //Lazy instantiation
+            if (properties == null)
             {
-                //Lazy instantiation
-                if (properties == null)
-                {
-                    properties = new ServerProperties();
-                }
-                //Populate properties from name/value matches
-                MatchCollection matches = propertiesRegex.Matches(a.Message);
-                if (matches.Count > 0)
-                {
-                    foreach (Match match in matches)
-                    {
-                        properties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
-                    }
-                }
-                //Extract ones we are interested in
-                ExtractProperties();
+                properties = new ServerProperties();
             }
+            //Populate properties from name/value matches
+            MatchCollection matches = propertiesRegex.Matches(a.Message);
+            if (matches.Count > 0)
+            {
+                foreach (Match match in matches)
+                {
+                    properties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
+                }
+            }
+            //Extract ones we are interested in
+            ExtractProperties();
         }
         private void ExtractProperties()
         {
@@ -467,45 +463,32 @@ namespace FlamingIRC
         }
         private void RegisterDelegates()
         {
-            listener.OnPing += new PingEventHandler(KeepAlive);
-            listener.OnNick += new NickEventHandler(MyNickChanged);
-            listener.OnNickError += new EventHandler<NickErrorEventArgs>(OnNickError);
-            listener.OnReply += new EventHandler<ReplyEventArgs>(OnReply);
-            listener.OnRegistered += new RegisteredEventHandler(OnRegistered);
+            listener.OnPing += KeepAlive;
+            listener.OnNick += MyNickChanged;
+            listener.OnNickError += OnNickError;
+            listener.OnReply += OnReply;
+            listener.OnRegistered += OnRegistered;
         }
 
-        //TODO: SSL
-#if Ssl
-		private void ConnectClient( SecureProtocol protocol )   
-		{
-			lock ( this ) 
-			{
-				if( connected ) 
-				{
-					throw new Exception("Connection with IRC server already opened.");
-				}
-				Debug.WriteLineIf( Rfc2812Util.IrcTrace.TraceInfo,"[" + Thread.CurrentThread.Name +"] Connection::Connect()");
-			
-					SecurityOptions options = new SecurityOptions( protocol );
-					options.Certificate = null;
-					options.Entity = ConnectionEnd.Client;
-					options.VerificationType = CredentialVerification.None;
-					options.Flags = SecurityFlags.Default;
-					options.AllowedAlgorithms = SslAlgorithms.SECURE_CIPHERS;
-					socket = new SecureTcpClient( options );		
-					socket.Connect( connectionArgs.Hostname, connectionArgs.Port );
-			
-				connected = true;
-				writer = new StreamWriter( socket.GetStream(), TextEncoding );
-				writer.AutoFlush = true;
-				reader = new StreamReader(  socket.GetStream(), TextEncoding );
-				socketListenThread = new Thread(new ThreadStart( ReceiveIRCMessages ) );
-				socketListenThread.Name = Name;
-				socketListenThread.Start();		
-				sender.RegisterConnection( connectionArgs );
-			}
-		}
-#endif
+        /// <summary>
+        /// Connect to the IRC server and start listening for messages asynchronously
+        /// </summary>
+        /// <exception cref="SocketException">If a connection cannot be established with the IRC server</exception>
+        public void Connect()
+        {
+            lock (this)
+            {
+                if (connected)
+                {
+                    throw new Exception("Connection with IRC server already opened.");
+                }
+
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
+
+                Connect(connectionArgs.Hostname, connectionArgs.Port, connectionArgs.Ssl);
+            }
+        }
+
 
         /// <summary>
         /// Read in message lines from the IRC server
@@ -525,7 +508,6 @@ namespace FlamingIRC
                 {
                     //One of the custom parsers handled this message so
                     //we go back to listening
-                    WaitforData();
                     return;
                 }
                 if (DccListener.IsDccRequest(line))
@@ -558,70 +540,13 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Puts incomplete lines into the buffer and
-        /// </summary>
-        private void BuildBuffer(IAsyncResult a)
-        {
-            SocketPacket theSockId = (SocketPacket)a.AsyncState;
-
-            string line = Encoding.ASCII.GetString(theSockId.Buffer, 0, theSockId.Buffer.Length);
-            line = line.TrimEnd('\0');
-
-            socket.EndReceive(a);
-
-            if (line.Contains("\r\n"))
-            {
-                string[] segments = line.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (string s in segments)
-                {
-                    if (s.EndsWith("\r"))
-                    {
-                        string content = buffer + s.Trim();
-                        ReceiveIRCMessages(content);
-                        buffer = String.Empty;
-                    }
-                    else
-                    {
-                        buffer += s;
-                    }
-                }
-            }
-            else
-            {
-                buffer += line;
-                Debug.WriteLine("WHAT IS THIS!! " + line);
-            }
-
-            if (theSockId.Socket.Connected)
-            {
-                WaitforData();
-            }
-        }
-
-        /// <summary>
         /// Send a message to the IRC server and clear the command buffer.
         /// </summary>
         internal void SendCommand(StringBuilder command)
         {
             try
             {
-                if (!socket.Poll(10, SelectMode.SelectWrite))
-                {
-                    Debug.WriteLine("Socket error");
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-            }
-
-            try
-            {
-                NetworkStream networkStream = new NetworkStream(socket);
-                System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(networkStream);
-                streamWriter.WriteLine(command.ToString());
-                streamWriter.Flush();
+                Send(command.ToString());
 
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() sent= " + command);
                 timeLastSent = DateTime.Now;
@@ -646,10 +571,7 @@ namespace FlamingIRC
         {
             try
             {
-                NetworkStream networkStream = new NetworkStream(socket);
-                System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(networkStream);
-                streamWriter.WriteLine(command.ToString());
-                streamWriter.Flush();
+                Send(command.ToString());
 
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() message=" + command);
             }
@@ -658,99 +580,6 @@ namespace FlamingIRC
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() exception=" + ex);
             }
             command.Remove(0, command.Length);
-        }
-
-
-#if Ssl
-		///<summary>
-		/// Connect to the IRC server and start listening for messages
-		/// on a new thread.
-		/// </summary>
-		/// <exception cref="SocketException">If a connection cannot be established with the IRC server</exception>
-		public void Connect() 
-		{
-			Debug.WriteLineIf( Rfc2812Util.IrcTrace.TraceInfo,"Connecting over clear socket");
-			ConnectClient( SecureProtocol.None );
-		}
-
-		///<summary>
-		/// Connect to the IRC server over an encrypted connection using TLS.
-		/// </summary>
-		/// <exception cref="SocketException">If a connection cannot be established with the IRC server</exception>
-		public void SecureConnect() 
-		{
-			Debug.WriteLineIf( Rfc2812Util.IrcTrace.TraceInfo,"Connecting over encrypted socket");
-			ConnectClient( SecureProtocol.Tls1 );
-		}
-
-		
-#else
-        /// <summary>
-        /// Connect to the IRC server and start listening for messages asynchronously
-        /// </summary>
-        /// <exception cref="SocketException">If a connection cannot be established with the IRC server</exception>
-        public void Connect()
-        {
-            lock (this)
-            {
-                if (connected)
-                {
-                    throw new Exception("Connection with IRC server already opened.");
-                }
-
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
-
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-                socket.BeginConnect(connectionArgs.Hostname, connectionArgs.Port, ConnectCallback, null);
-            }
-        }
-
-
-#endif
-        /// <summary>
-        /// TODO
-        /// </summary>
-        /// <param name="asyn"></param>
-        private void ConnectCallback(IAsyncResult asyn)
-        {
-            try
-            {
-                OnConnectSuccess.Fire(this, EventArgs.Empty);
-
-                WaitforData();
-                sender.RegisterConnection(connectionArgs);
-
-                socket.EndConnect(asyn);
-
-                connected = true;
-            }
-            catch (SocketException e)
-            {
-                if (ConnectFailed != null) ConnectFailed(this, new FlamingDataEventArgs<string>(e.Message));
-            }
-        }
-
-        /// <summary>
-        /// TODO
-        /// </summary>
-        private void WaitforData()
-        {
-            if (!socket.Connected)
-                return;
-
-            var packet = new SocketPacket { Socket = socket };
-
-            SocketError err;
-            try
-            {
-                socket.BeginReceive(packet.Buffer, 0, packet.Buffer.Length, SocketFlags.None, out err, BuildBuffer, packet);
-            }
-            catch (Exception)
-            {
-                Debug.WriteLine("Failed to read socket");
-            }
-            //Trace.WriteLine(err);
         }
 
         /// <summary>
@@ -770,7 +599,7 @@ namespace FlamingIRC
                 listener.Disconnecting();
                 sender.Quit(reason);
                 connected = false;
-                socket.Disconnect(true);
+                //Disconnect();
                 listener.Disconnected();
             }
         }
@@ -806,12 +635,28 @@ namespace FlamingIRC
             parsers.Remove(parser);
         }
 
-    }
 
-    public class SocketPacket
-    {
-        public System.Net.Sockets.Socket Socket;
-        public byte[] Buffer = new byte[1024];
-        public StringBuilder Sb = new StringBuilder();
+        protected override void OnConnect()
+        {
+            OnConnectSuccess.Fire(this, new EventArgs());
+            sender.RegisterConnection(connectionArgs);
+            connected = true;
+        }
+
+        protected override bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnDisconnect(Exception reason)
+        {
+            if (ConnectionLost != null)
+                ConnectionLost(this, new FlamingDataEventArgs<string>(reason.Message)); //TODO: Better errors
+        }
+
+        protected override void OnReceiveLine(string line)
+        {
+            ReceiveIRCMessages(line);
+        }
     }
 }
