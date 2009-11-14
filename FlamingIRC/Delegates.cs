@@ -32,12 +32,6 @@ namespace FlamingIRC
     public delegate void PingEventHandler(string message);
 
     /// <summary>
-    /// Connection with IRC server is open and registered.
-    /// </summary>
-    /// <seealso cref="Listener.OnRegistered"/>
-    public delegate void RegisteredEventHandler();
-
-    /// <summary>
     /// This connection is about to be closed 
     /// </summary>
     /// <seealso cref="Listener.OnDisconnecting"/>

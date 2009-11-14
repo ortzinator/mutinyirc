@@ -394,7 +394,7 @@ namespace FlamingIRC
                 connectionArgs.Nick = newNick;
         }
 
-        private void OnRegistered()
+        private void OnRegistered(object sender, EventArgs e)
         {
             registered = true;
             listener.OnRegistered -= OnRegistered;
