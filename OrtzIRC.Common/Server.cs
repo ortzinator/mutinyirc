@@ -1,6 +1,7 @@
 ﻿namespace OrtzIRC.Common
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using FlamingIRC;
 
@@ -131,7 +132,7 @@
         public event EventHandler<ChannelMessageEventArgs> ChannelMessaged;
         public event EventHandler<EventArgs> Connected;
         public event EventHandler<ErrorMessageEventArgs> ErrorMessageRecieved;
-        public event RegisteredEventHandler Registered;
+        public event EventHandler Registered;
         public event EventHandler<PartEventArgs> Part;
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
         public event UserModeChangeEventHandler UserModeChanged;
@@ -196,7 +197,7 @@
         {
             OnKick(new KickEventArgs(user, ChanManager.GetChannel(channel), kickee, reason));
 
-            //Connection.Sender.Names(channel);
+            Connection.Sender.Names(channel);
         }
 
         private void Listener_OnUserModeChange(ModeAction action, UserMode mode)
@@ -204,8 +205,8 @@
             if (UserModeChanged != null)
                 UserModeChanged(action, mode);
 
-            //foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
-            //Connection.Sender.Names(item.Key);
+            foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
+            Connection.Sender.Names(item.Key);
         }
 
         private void Listener_OnNick(User user, string newNick)
@@ -284,13 +285,13 @@
         {
             OnPart(new PartEventArgs(user, ChanManager.GetChannel(channel), reason));
 
-            //Connection.Sender.Names(channel);
+            Connection.Sender.Names(channel);
         }
 
-        private void Listener_OnRegistered()
+        private void Listener_OnRegistered(object sender, EventArgs e)
         {
             if (Registered != null)
-                Registered();
+                Registered(this, e);
 
             // TODO: Handle a taken nick
             //TODO: Get autojoin list for the network
@@ -308,7 +309,7 @@
         {
             OnChannelModeChange(new ChannelModeChangeEventArgs(who, ChanManager.GetChannel(channel), modes, raw));
 
-            //Connection.Sender.Names(channel);
+            Connection.Sender.Names(channel);
         }
 
         private void Listener_OnError(object sender, ErrorMessageEventArgs a)

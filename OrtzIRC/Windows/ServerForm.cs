@@ -138,21 +138,22 @@ namespace OrtzIRC
             e.Channel.NewAction(e.User, e.Message);
         }
 
-        private void ParentServer_OnRegistered()
+        private void ParentServer_OnRegistered(object sender, EventArgs e)
         {
             // TODO: Join list of auto-join channels
             if (InvokeRequired)
-            {
-                Invoke(new Action(ParentServer_OnRegistered));
-            }
+                Invoke(new Action(SetFormTitle));
             else
-            {
-                    Text = ServerStrings.ServerFormTitleBar.With(
+                SetFormTitle();
+        }
+
+        private void SetFormTitle()
+        {
+            Text = ServerStrings.ServerFormTitleBar.With(
                         server.UserNick,
                         server.Description == String.Empty ? server.URL : server.Description, server.URL,
                         server.Port
                         ); //TODO: This should actually be the network name, not the server
-            }
         }
 
         private void ParentServer_OnJoinSelf(object sender, OrtzIRC.Common.DataEventArgs<Channel> e)

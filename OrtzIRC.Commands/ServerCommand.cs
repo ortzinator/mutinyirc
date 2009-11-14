@@ -14,9 +14,19 @@ namespace OrtzIRC.Commands
         /// </summary>
         public void Execute(Server context, char[] switches, string server)
         {
-            var sb = new System.Text.StringBuilder();
-            sb.Append(switches);
-            System.Diagnostics.Debug.WriteLine("Server command with switches: " + sb + "to server: " + server);
+            foreach (var c in switches)
+            {
+                switch (c)
+                {
+                    case 'm':
+                        var svr = ServerManager.Instance.Create(new ServerSettings { Url = server });
+                        svr.Connect();
+                        return;
+                    case 'n':
+                        ServerManager.Instance.Create(new ServerSettings { Url = server });
+                        return;
+                }
+            }
         }
 
         /// <summary>

@@ -66,7 +66,7 @@ namespace FlamingIRC
         /// <summary>
         /// Connection with the IRC server is open and registered.
         /// </summary>
-        public event RegisteredEventHandler OnRegistered;
+        public event EventHandler OnRegistered;
         /// <summary>
         /// This connection is about to be closed. 
         /// </summary>
@@ -524,7 +524,7 @@ namespace FlamingIRC
                 case ReplyCode.RPL_YOURESERVICE:
                     if (OnRegistered != null)
                     {
-                        OnRegistered();
+                        OnRegistered(this, new EventArgs());
                     }
                     break;
                 case ReplyCode.RPL_MOTDSTART:
