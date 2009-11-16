@@ -18,7 +18,7 @@ namespace OrtzIRC
 
             commandTextBox.Focus();
 
-            commandTextBox.CommandEntered += commandTextBox_CommandEntered;
+            
         }
 
         public Server Server
@@ -53,6 +53,14 @@ namespace OrtzIRC
             server.Kick += ParentServer_OnKick;
             server.Connecting += Server_Connecting;
             server.Disconnected += server_Disconnected;
+            
+            commandTextBox.CommandEntered += commandTextBox_CommandEntered;
+            serverOutputBox.MouseUp += serverOutputBox_MouseUp;
+        }
+
+        private void serverOutputBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            commandTextBox.Focus();
         }
 
         private void UnhookEvents()

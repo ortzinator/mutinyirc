@@ -58,6 +58,7 @@
             // 
             this.channelOutputBox.BackColor = System.Drawing.SystemColors.Window;
             this.channelOutputBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.channelOutputBox.DetectUrls = false;
             this.channelOutputBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.channelOutputBox.Location = new System.Drawing.Point(0, 0);
             this.channelOutputBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);

@@ -45,6 +45,12 @@
             Server.Disconnected += Server_Disconnected;
 
             commandTextBox.CommandEntered += commandTextBox_CommandEntered;
+            channelOutputBox.MouseUp += channelOutputBox_MouseUp;
+        }
+
+        private void channelOutputBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            commandTextBox.Focus();
         }
 
         private void UnhookEvents()
