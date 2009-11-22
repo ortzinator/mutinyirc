@@ -52,6 +52,12 @@ namespace OrtzIRC
         private void Instance_ServerCreated(object sender, ServerEventArgs e)
         {
             CreateServerForm(e.Server);
+            e.Server.PrivateMessageSessionAdded += Server_PrivateMessageSessionAdded;
+        }
+
+        private void Server_PrivateMessageSessionAdded(object sender, PrivateMessageSessionEventArgs e)
+        {
+            CreatePmForm(e.PrivateMessageSession);
         }
 
         private void exitMenuItem_Click(object sender, EventArgs e)
@@ -61,47 +67,67 @@ namespace OrtzIRC
 
         private void serversMenuItem_Click(object sender, EventArgs e)
         {
-            ServerSettingsDialog servers = new ServerSettingsDialog();
+            var servers = new ServerSettingsDialog();
             servers.ShowDialog();
+        }
+
+        public void CreatePmForm(PrivateMessageSession pm)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<PrivateMessageSession>(CreatePmForm), pm);
+            }
+            else
+            {
+                var newPmForm = new PrivateMessageForm { PMSession = pm };
+
+                ServerTreeNode node = windowManagerTreeView.GetServerNode(pm.Server);
+
+                if (node == null)
+                    throw new Exception("ServerTreeNode doesn't exist!"); //hack
+
+                node.AddPmNode(new PmTreeNode(newPmForm));
+                node.Expand();
+                newPmForm.MdiParent = this;
+                newPmForm.Show();
+            }
         }
 
         /// <summary>
         /// Creates and displays a ServerForm and adds a node to the WindowManagerTreeView
         /// </summary>
         /// <param name="server"></param>
-        /// <returns>The ServerForm that was created</returns>
-        public ServerForm CreateServerForm(Server server)
+        public void CreateServerForm(Server server)
         {
-            ServerForm newServerForm = new ServerForm { Server = server };
-
-            Invoke((MethodInvoker)delegate
+            if (InvokeRequired)
             {
+                Invoke(new Action<Server>(CreateServerForm), server);
+            }
+            else
+            {
+                var newServerForm = new ServerForm { Server = server };
+
                 windowManagerTreeView.AddServerNode(new ServerTreeNode(newServerForm));
                 newServerForm.MdiParent = this;
-            });
 
-            newServerForm.Text = server.Description;
-            newServerForm.Show();
-
-            return newServerForm;
+                newServerForm.Text = server.Description;
+                newServerForm.Show();
+            }
         }
-
-        private delegate void CreateChannelFormDlg(Channel channel);
 
         /// <summary>
         /// Creates and displays a ChannelForm and adds a node to the WindowManagerTreeView under the appropriate server node
         /// </summary>
         /// <param name="channel"></param>
-        /// <returns></returns>
         public void CreateChannelForm(Channel channel)
         {
             if (InvokeRequired)
             {
-                Invoke((CreateChannelFormDlg)CreateChannelForm, new object[] { channel });
+                Invoke(new Action<Channel>(CreateChannelForm), new object[] { channel });
             }
             else
             {
-                ChannelForm newChannelForm = new ChannelForm(channel);
+                var newChannelForm = new ChannelForm(channel);
                 ServerTreeNode node = windowManagerTreeView.GetServerNode(channel.Server);
 
                 if (node == null)

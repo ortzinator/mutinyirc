@@ -17,8 +17,6 @@ namespace OrtzIRC
             InitializeComponent();
 
             commandTextBox.Focus();
-
-            
         }
 
         public Server Server
@@ -40,7 +38,6 @@ namespace OrtzIRC
         private void HookupEvents()
         {
             server.Registered += ParentServer_OnRegistered;
-            server.ChannelMessaged += ParentServer_ChannelMessaged;
             server.UserAction += ParentServer_UserAction;
             server.JoinSelf += ParentServer_OnJoinSelf;
             server.JoinOther += ParentServer_OnJoinOther;
@@ -66,7 +63,6 @@ namespace OrtzIRC
         private void UnhookEvents()
         {
             server.Registered -= ParentServer_OnRegistered;
-            server.ChannelMessaged -= ParentServer_ChannelMessaged;
             server.UserAction -= ParentServer_UserAction;
             server.JoinSelf -= ParentServer_OnJoinSelf;
             server.JoinOther -= ParentServer_OnJoinOther;
@@ -143,7 +139,7 @@ namespace OrtzIRC
 
         private void ParentServer_UserAction(object sender, ChannelMessageEventArgs e)
         {
-            e.Channel.NewAction(e.User, e.Message);
+            e.Channel.OnNewAction(e.User, e.Message);
         }
 
         private void ParentServer_OnRegistered(object sender, EventArgs e)
@@ -167,11 +163,6 @@ namespace OrtzIRC
         private void ParentServer_OnJoinSelf(object sender, OrtzIRC.Common.DataEventArgs<Channel> e)
         {
             ((MainForm)MdiParent).CreateChannelForm(e.Data);
-        }
-
-        private void ParentServer_ChannelMessaged(object sender, ChannelMessageEventArgs e)
-        {
-            e.Channel.NewMessage(e.User, e.Message);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

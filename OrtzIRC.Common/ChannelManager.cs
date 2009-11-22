@@ -5,6 +5,7 @@
     using System;
     using System.Diagnostics;
 
+    //TODO: Refactor (SRP!)
     public sealed class ChannelManager
     {
         private bool recievingNames;

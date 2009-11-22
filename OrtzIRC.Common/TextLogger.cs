@@ -5,8 +5,6 @@
 
     using FlamingIRC;
 
-    public delegate void IOErrorEventHandler(String ex);
-
     /// <summary>
     /// Purpose: Log text entry by registering to various channel and network/pmsg events
     ///          and writing their output to a text file.       
@@ -14,7 +12,7 @@
     public static class TextLogger
     {
         // Indicate any IO errors that can't be fixed
-        public static event IOErrorEventHandler WriteFailed;
+        public static event EventHandler<DataEventArgs<string>> WriteFailed;
 
         // Whether we should add time or not
         public static bool AddTimestamp;
@@ -55,10 +53,10 @@
         }
 
         // Error indication
-        private static void Error(String err)
+        private static void Error(string err)
         {
             if (WriteFailed != null)
-                WriteFailed(err);
+                WriteFailed(null, new DataEventArgs<string>(err));
         }
 
         // Data structure management

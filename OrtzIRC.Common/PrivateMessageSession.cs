@@ -1,25 +1,28 @@
 ﻿namespace OrtzIRC.Common
 {
     using System;
+    using FlamingIRC;
 
-    public class PrivateMessageSession : MessageContext
+    public sealed class PrivateMessageSession : MessageContext
     {
-        public PrivateMessageSession(Server parentServer, FlamingIRC.User user)
+        public PrivateMessageSession(Server parentServer, User user)
         {
-            ParentServer = parentServer;
+            Server = parentServer;
             User = user;
         }
 
-        public Server ParentServer { get; private set; }
-        public FlamingIRC.User User { get; private set; }
+        public Server Server { get; private set; }
+        public User User { get; private set; }
         public event EventHandler<DataEventArgs<string>> MessageReceived;
+        public event EventHandler<DataEventArgs<string>> MessageSent;
 
         public void Send(string message)
         {
-            // todo - send message
+            Server.MessageUser(User.Nick, message);
+            MessageSent.Fire(this, new DataEventArgs<string>(message));
         }
 
-        protected virtual void OnMessageReceived(DataEventArgs<string> e)
+        public void OnMessageReceived(DataEventArgs<string> e)
         {
             MessageReceived.Fire(this, e);
         }

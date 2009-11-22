@@ -129,9 +129,9 @@
                 AddLine(string.Format("-- Parted: ({0}) ({1}) {2}", e.User.Nick, e.User.HostMask, e.Message));
         }
 
-        private void Channel_OnJoin(User nick)
+        private void Channel_OnJoin(object sender, UserEventArgs e)
         {
-            AddLine(string.Format("-- Joined: ({0}) ({1})", nick.Nick, nick.HostMask));
+            AddLine(string.Format("-- Joined: ({0}) ({1})", e.User.Nick, e.User.HostMask));
         }
 
         private void Channel_TopicReceived(object sender, DataEventArgs<string> e)

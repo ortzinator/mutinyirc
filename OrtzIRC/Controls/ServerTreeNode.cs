@@ -26,5 +26,10 @@
         {
             Nodes.Add(channelNode);
         }
+
+        public void AddPmNode(PmTreeNode pmNode)
+        {
+            Nodes.Add(pmNode);
+        }
     }
 }

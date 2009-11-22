@@ -86,7 +86,7 @@
         /// <param name="channel"></param>
         public void Execute(PrivateMessageSession context, ChannelInfo channel)
         {
-            Execute(context.ParentServer, channel, defaultMessage);
+            Execute(context.Server, channel, defaultMessage);
         }
 
         /// <summary>
@@ -97,7 +97,7 @@
         /// <param name="message"></param>
         public void Execute(PrivateMessageSession context, ChannelInfo channel, string message)
         {
-            Execute(context.ParentServer, channel, message);
+            Execute(context.Server, channel, message);
         }
     }
 }

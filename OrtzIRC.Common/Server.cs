@@ -8,12 +8,12 @@
     public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
     public delegate void Server_NickEventHandler(User nick, string newNick);
 
-    public class Server : MessageContext
+    public sealed class Server : MessageContext
     {
         public Server(ServerSettings settings)
         {
             SetupConnection(settings);
-
+            PMSessions = new List<PrivateMessageSession>();
             HookEvents();
         }
 
@@ -48,8 +48,30 @@
             Connection.Listener.OnTopicRequest += Listener_OnTopicRequest;
             Connection.Listener.OnNick += Listener_OnNick;
             Connection.Listener.OnKick += Listener_OnKick;
+            Connection.Listener.OnPrivate += Listener_OnPrivate;
 
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
+        }
+
+        private void Listener_OnPrivate(User user, string message)
+        {
+            GetPM(user).OnMessageReceived(new DataEventArgs<string>(message));
+        }
+
+        private PrivateMessageSession GetPM(User user)
+        {
+            foreach (var session in PMSessions)
+            {
+                if (session.User.Equals(user))
+                {
+                    return session;
+                }
+            }
+
+            var tmpsession = new PrivateMessageSession(this, user);
+            PMSessions.Add(tmpsession);
+            PrivateMessageSessionAdded.Fire(this, new PrivateMessageSessionEventArgs(tmpsession));
+            return tmpsession;
         }
 
         private void UnhookEvents()
@@ -69,6 +91,7 @@
             Connection.Listener.OnTopicRequest -= Listener_OnTopicRequest;
             Connection.Listener.OnNick -= Listener_OnNick;
             Connection.Listener.OnKick -= Listener_OnKick;
+            Connection.Listener.OnPrivate -= Listener_OnPrivate;
 
             Connection.RawMessageReceived -= Connection_OnRawMessageReceived;
         }
@@ -97,9 +120,19 @@
             }
         }
 
+        public string Nick
+        {
+            get
+            {
+                return Connection.ConnectionData.Nick;
+            }
+        }
+
         public ServerSettings Settings { get; private set; }
 
         public Connection Connection { get; private set; }
+
+        public List<PrivateMessageSession> PMSessions { get; private set; }
 
         public bool IsConnected
         {
@@ -144,6 +177,7 @@
         public event Server_NickEventHandler OnNick;
         public event NamesEventHandler OnNames;
         public event EventHandler<KickEventArgs> Kick;
+        public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
 
         // hack - should call dispose
         ~Server()
@@ -168,7 +202,7 @@
 
             if (c.Cancel)
             {
-                OnConnectFailed(new DataEventArgs<string>("Connect cancelled."));
+                ConnectFailed.Fire(this, new DataEventArgs<string>("Connect cancelled."));
                 return;
             }
 
@@ -178,7 +212,7 @@
             }
             catch (Exception ex)
             {
-                OnConnectFailed(new DataEventArgs<string>(ex.Message));
+                ConnectFailed.Fire(this, new DataEventArgs<string>(ex.Message));
             }
         }
 
@@ -195,7 +229,7 @@
 
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
         {
-            OnKick(new KickEventArgs(user, ChanManager.GetChannel(channel), kickee, reason));
+            Kick.Fire(this, new KickEventArgs(user, ChanManager.GetChannel(channel), kickee, reason));
 
             Connection.Sender.Names(channel);
         }
@@ -206,7 +240,7 @@
                 UserModeChanged(action, mode);
 
             foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
-            Connection.Sender.Names(item.Key);
+                Connection.Sender.Names(item.Key);
         }
 
         private void Listener_OnNick(User user, string newNick)
@@ -223,12 +257,12 @@
 
         private void Listener_OnPrivateNotice(User user, string notice)
         {
-            OnPrivateNotice(new UserMessageEventArgs(user, notice));
+            PrivateNotice.Fire(this, new UserMessageEventArgs(user, notice));
         }
 
         private void Listener_OnAction(User user, string channel, string description)
         {
-            OnAction(new ChannelMessageEventArgs(user, ChanManager.Create(channel), description));
+            UserAction.Fire(this, new ChannelMessageEventArgs(user, ChanManager.Create(channel), description));
         }
 
         private void Listener_OnDisconnected()
@@ -245,22 +279,23 @@
 
         private void Connection_OnRawMessageReceived(object sender, FlamingDataEventArgs<string> e)
         {
-            OnRawMessageReceived(new DataEventArgs<string>(e.Data));
+            RawMessageReceived.Fire(this, new DataEventArgs<string>(e.Data));
         }
 
         private void Connection_OnConnectSuccess(object sender, EventArgs e)
         {
-            OnConnected(EventArgs.Empty);
+            Connected.Fire(this, EventArgs.Empty);
         }
 
         private void Connection_ConnectFailed(object sender, FlamingDataEventArgs<string> e)
         {
-            OnConnectFailed(new DataEventArgs<string>(e.Data));
+            ConnectFailed.Fire(this, new DataEventArgs<string>(e.Data));
         }
 
         private void Listener_OnPublic(User user, string channel, string message)
         {
-            OnPublicMessage(new ChannelMessageEventArgs(user, ChanManager.GetChannel(channel), message));
+            ChannelMessaged.Fire(this, new ChannelMessageEventArgs(user, ChanManager.GetChannel(channel), message));
+            ChanManager.GetChannel(channel).OnNewMessage(user, message);
         }
 
         private void Listener_OnNames(string channel, string[] nicks, bool last)
@@ -273,17 +308,17 @@
         {
             if (user.Nick == UserNick)
             {
-                OnJoinSelf(new DataEventArgs<Channel>(ChanManager.Create(channel)));
+                JoinSelf.Fire(this, new DataEventArgs<Channel>(ChanManager.Create(channel)));
             }
             else
             {
-                OnJoinOther(new DoubleDataEventArgs<User, Channel>(user, ChanManager.Create(channel)));
+                JoinOther.Fire(this, new DoubleDataEventArgs<User, Channel>(user, ChanManager.Create(channel)));
             }
         }
 
         private void Listener_OnPart(User user, string channel, string reason)
         {
-            OnPart(new PartEventArgs(user, ChanManager.GetChannel(channel), reason));
+            Part.Fire(this, new PartEventArgs(user, ChanManager.GetChannel(channel), reason));
 
             Connection.Sender.Names(channel);
         }
@@ -295,19 +330,19 @@
 
             // TODO: Handle a taken nick
             //TODO: Get autojoin list for the network
-            //HACK: This is for testing. It just gets a list and joins it all. Should be moved to ServerForm when implemented correctly
+            //HACK: This is for testing. It just gets a list and joins it all. Should be done by the GUI layer
             if (Settings.Channels != null)
+            {
                 foreach (var channel in Settings.Channels)
-                {
                     JoinChannel(new ChannelInfo(channel));
-                }
+            }
 
             //JoinChannel(new ChannelInfo("#ortzirc"));
         }
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
         {
-            OnChannelModeChange(new ChannelModeChangeEventArgs(who, ChanManager.GetChannel(channel), modes, raw));
+            ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, ChanManager.GetChannel(channel), modes, raw));
 
             Connection.Sender.Names(channel);
         }
@@ -327,66 +362,6 @@
             return newChan;
         }
 
-        protected virtual void OnPart(PartEventArgs e)
-        {
-            Part.Fire(this, e);
-        }
-
-        protected virtual void OnPublicMessage(ChannelMessageEventArgs e)
-        {
-            ChannelMessaged.Fire(this, e);
-        }
-
-        protected virtual void OnAction(ChannelMessageEventArgs e)
-        {
-            UserAction.Fire(this, e);
-        }
-
-        protected virtual void OnPrivateNotice(UserMessageEventArgs e)
-        {
-            PrivateNotice.Fire(this, e);
-        }
-
-        protected virtual void OnConnected(EventArgs e)
-        {
-            Connected.Fire(this, e);
-        }
-
-        protected virtual void OnKick(KickEventArgs e)
-        {
-            Kick.Fire(this, e);
-        }
-
-        protected virtual void OnRawMessageReceived(DataEventArgs<string> e)
-        {
-            RawMessageReceived.Fire(this, e);
-        }
-
-        protected virtual void OnConnecting(CancelEventArgs e)
-        {
-            Connecting.Fire(this, e);
-        }
-
-        protected virtual void OnJoinSelf(DataEventArgs<Channel> e)
-        {
-            JoinSelf.Fire(this, e);
-        }
-
-        protected virtual void OnJoinOther(DoubleDataEventArgs<User, Channel> e)
-        {
-            JoinOther.Fire(this, e);
-        }
-
-        protected virtual void OnConnectFailed(DataEventArgs<string> e)
-        {
-            ConnectFailed.Fire(this, e);
-        }
-
-        protected virtual void OnChannelModeChange(ChannelModeChangeEventArgs e)
-        {
-            ChannelModeChange.Fire(this, e);
-        }
-
         public void MessageUser(string nick, string msg)
         {
             Connection.Sender.PrivateMessage(nick, msg);
@@ -397,7 +372,7 @@
             return Description;
         }
 
-        public void Nick(string nick)
+        public void ChangeNick(string nick)
         {
             Connection.Sender.Nick(nick);
         }

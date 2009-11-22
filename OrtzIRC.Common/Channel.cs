@@ -3,14 +3,13 @@
     using System;
     using FlamingIRC;
 
-    public delegate void ChannelJoinEventHandler(User nick);
     public delegate void ReceivedNamesEventHandler(UserList nickList);
     public delegate void ChannelKickEventHandler(User nick, string kickee, string reason);
 
     /// <summary>
     /// Represents a specific channel on a network
     /// </summary>
-    public class Channel : MessageContext
+    public sealed class Channel : MessageContext
     {
         public Channel(Server parent, string name)
         {
@@ -21,8 +20,8 @@
         }
 
         public Server Server { get; private set; }
-        public string Key { get; private set; }
-        public int Limit { get; private set; }
+        public string Key { get; set; }
+        public int Limit { get; set; }
         public string Name { get; private set; }
 
         /// <summary>
@@ -73,7 +72,7 @@
         /// <summary>
         /// A user joined the channel
         /// </summary>
-        public event ChannelJoinEventHandler OnJoin;
+        public event EventHandler<UserEventArgs> OnJoin;
         /// <summary>
         /// A user parted the channel
         /// </summary>
@@ -113,7 +112,7 @@
             return Name;
         }
 
-        public void NewMessage(User nick, string message)
+        public void OnNewMessage(User nick, string message)
         {
             foreach (User n in NickList)
             {
@@ -125,7 +124,7 @@
             }
         }
 
-        public void NewAction(User nick, string message)
+        public void OnNewAction(User nick, string message)
         {
             foreach (User n in NickList)
             {
@@ -144,8 +143,7 @@
 
         public void UserJoin(User nick)
         {
-            if (OnJoin != null)
-                OnJoin(nick);
+            OnJoin.Fire(this, new UserEventArgs(nick));
         }
 
         public void Part(string message)
