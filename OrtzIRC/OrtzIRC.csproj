@@ -109,6 +109,10 @@
     </Compile>
     <Compile Include="Controls\ChannelTreeNode.cs" />
     <Compile Include="Controls\NetworkSettingsTreeNode.cs" />
+    <Compile Include="Controls\PmNodeContextMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\PmTreeNode.cs" />
     <Compile Include="Controls\ServerSettingsTreeNode.cs" />
     <Compile Include="Controls\FileTreeNode.cs" />
     <Compile Include="Controls\IrcTextBox.cs">
@@ -166,6 +170,12 @@
     </Compile>
     <Compile Include="Windows\ChannelForm.Designer.cs">
       <DependentUpon>ChannelForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\PrivateMessageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\PrivateMessageForm.Designer.cs">
+      <DependentUpon>PrivateMessageForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Windows\Dialogs\EditServerDialog.cs">
       <SubType>Form</SubType>
@@ -233,6 +243,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\ChannelForm.resx">
       <DependentUpon>ChannelForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Windows\PrivateMessageForm.resx">
+      <DependentUpon>PrivateMessageForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\Dialogs\EditServerDialog.resx">

@@ -1,6 +1,5 @@
 ﻿namespace OrtzIRC.Commands
 {
-    using System;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
 
@@ -31,7 +30,7 @@
         /// </summary>
         public void Execute(PrivateMessageSession context, ChannelInfo channelToJoin)
         {
-            Execute(context.ParentServer, channelToJoin);
+            Execute(context.Server, channelToJoin);
         }
     }
 }

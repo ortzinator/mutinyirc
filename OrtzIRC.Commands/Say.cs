@@ -4,7 +4,7 @@
     using OrtzIRC.PluginFramework;
 
     /// <summary>
-    /// Parts a channel
+    /// 
     /// </summary>
     [Plugin]
     public class Say : ICommand
@@ -17,6 +17,11 @@
         public void Execute(Channel channel, string message)
         {
             channel.Say(message);
+        }
+
+        public void Execute(PrivateMessageSession pm, string message)
+        {
+            pm.Send(message);
         }
     }
 }

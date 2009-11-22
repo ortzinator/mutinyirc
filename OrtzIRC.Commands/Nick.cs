@@ -16,7 +16,7 @@
         /// <param name="nick"></param>
         public void Execute(Server server, string nick)
         {
-            server.Nick(nick);
+            server.ChangeNick(nick);
         }
 
         /// <summary>
