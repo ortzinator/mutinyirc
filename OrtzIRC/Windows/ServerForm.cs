@@ -38,16 +38,11 @@ namespace OrtzIRC
         private void HookupEvents()
         {
             server.Registered += ParentServer_OnRegistered;
-            server.UserAction += ParentServer_UserAction;
             server.JoinSelf += ParentServer_OnJoinSelf;
-            server.JoinOther += ParentServer_OnJoinOther;
-            server.Part += ParentServer_OnPart;
             server.ConnectFailed += Server_OnConnectFail;
             server.PrivateNotice += ParentServer_OnPrivateNotice;
-            server.GotTopic += ParentServer_OnGotTopic;
             server.RawMessageReceived += ParentServer_OnRawMessageReceived;
             server.ErrorMessageRecieved += ParentServer_OnError;
-            server.Kick += ParentServer_OnKick;
             server.Connecting += Server_Connecting;
             server.Disconnected += server_Disconnected;
             
@@ -63,16 +58,11 @@ namespace OrtzIRC
         private void UnhookEvents()
         {
             server.Registered -= ParentServer_OnRegistered;
-            server.UserAction -= ParentServer_UserAction;
             server.JoinSelf -= ParentServer_OnJoinSelf;
-            server.JoinOther -= ParentServer_OnJoinOther;
-            server.Part -= ParentServer_OnPart;
             server.ConnectFailed -= Server_OnConnectFail;
             server.PrivateNotice -= ParentServer_OnPrivateNotice;
-            server.GotTopic -= ParentServer_OnGotTopic;
             server.RawMessageReceived -= ParentServer_OnRawMessageReceived;
             server.ErrorMessageRecieved -= ParentServer_OnError;
-            server.Kick -= ParentServer_OnKick;
             server.Connecting -= Server_Connecting;
             server.Disconnected -= server_Disconnected;
         }
@@ -96,21 +86,6 @@ namespace OrtzIRC
             AddLine(ServerStrings.ConnectingMessage.With(server.URL, server.Port));
         }
 
-        private void ParentServer_OnKick(object sender, KickEventArgs e)
-        {
-            e.Channel.UserKick(e.User, e.Kickee, e.Reason);
-        }
-
-        private void ParentServer_OnPart(object sender, PartEventArgs e)
-        {
-            e.Channel.UserPart(e.User, e.Reason);
-        }
-
-        private void ParentServer_OnJoinOther(object sender, OrtzIRC.Common.DoubleDataEventArgs<User, Channel> e)
-        {
-            e.Second.UserJoin(e.First);
-        }
-
         private void ParentServer_OnError(object sender, ErrorMessageEventArgs a)
         {
             AddLine(string.Format("{0} {1}", a.Code, a.Message));
@@ -122,11 +97,6 @@ namespace OrtzIRC
             //AddLine(e.Data);
         }
 
-        private void ParentServer_OnGotTopic(Channel chan, string topic)
-        {
-            chan.ShowTopic(topic);
-        }
-
         private void ParentServer_OnPrivateNotice(object sender, UserMessageEventArgs e)
         {
             AddLine(string.Format("-{0}: {1}-", e.User.Nick, e.Message));
@@ -135,11 +105,6 @@ namespace OrtzIRC
         private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<string> e)
         {
             AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
-        }
-
-        private void ParentServer_UserAction(object sender, ChannelMessageEventArgs e)
-        {
-            e.Channel.OnNewAction(e.User, e.Message);
         }
 
         private void ParentServer_OnRegistered(object sender, EventArgs e)

@@ -229,7 +229,9 @@
 
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
         {
-            Kick.Fire(this, new KickEventArgs(user, ChanManager.GetChannel(channel), kickee, reason));
+            var chan = ChanManager.GetChannel(channel);
+            Kick.Fire(this, new KickEventArgs(user, chan, kickee, reason));
+            chan.UserKick(user, kickee, reason);
 
             Connection.Sender.Names(channel);
         }
@@ -252,7 +254,11 @@
         private void Listener_OnTopicRequest(string channel, string topic)
         {
             if (GotTopic != null)
-                GotTopic(ChanManager.Create(channel), topic);
+            {
+                var chan = ChanManager.Create(channel);
+                GotTopic(chan, topic);
+                chan.ShowTopic(topic);
+            } 
         }
 
         private void Listener_OnPrivateNotice(User user, string notice)
@@ -262,7 +268,9 @@
 
         private void Listener_OnAction(User user, string channel, string description)
         {
-            UserAction.Fire(this, new ChannelMessageEventArgs(user, ChanManager.Create(channel), description));
+            var chan = ChanManager.Create(channel);
+            UserAction.Fire(this, new ChannelMessageEventArgs(user, chan, description));
+            chan.OnNewAction(user, description);
         }
 
         private void Listener_OnDisconnected()
@@ -306,19 +314,24 @@
 
         private void Listener_OnJoin(User user, string channel)
         {
+            var chan = ChanManager.Create(channel);
             if (user.Nick == UserNick)
             {
-                JoinSelf.Fire(this, new DataEventArgs<Channel>(ChanManager.Create(channel)));
+                JoinSelf.Fire(this, new DataEventArgs<Channel>(chan));
+                
             }
             else
             {
-                JoinOther.Fire(this, new DoubleDataEventArgs<User, Channel>(user, ChanManager.Create(channel)));
+                JoinOther.Fire(this, new DoubleDataEventArgs<User, Channel>(user, chan));
+                chan.UserJoin(user);
             }
         }
 
         private void Listener_OnPart(User user, string channel, string reason)
         {
-            Part.Fire(this, new PartEventArgs(user, ChanManager.GetChannel(channel), reason));
+            var chan = ChanManager.GetChannel(channel);
+            Part.Fire(this, new PartEventArgs(user, chan, reason));
+            chan.UserPart(user, reason);
 
             Connection.Sender.Names(channel);
         }
