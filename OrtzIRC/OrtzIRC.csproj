@@ -159,6 +159,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CommonStrings.resx</DependentUpon>
     </Compile>
+    <Compile Include="Resources\Icons.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Icons.resx</DependentUpon>
+    </Compile>
     <Compile Include="Resources\ServerStrings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -170,6 +175,24 @@
     </Compile>
     <Compile Include="Windows\ChannelForm.Designer.cs">
       <DependentUpon>ChannelForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\Options\GeneralOptionsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Windows\Options\GeneralOptionsPage.Designer.cs">
+      <DependentUpon>GeneralOptionsPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\Options\OptionsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\Options\OptionsDialog.Designer.cs">
+      <DependentUpon>OptionsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\Options\OptionsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Windows\Options\OptionsPage.Designer.cs">
+      <DependentUpon>OptionsPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Windows\PrivateMessageForm.cs">
       <SubType>Form</SubType>
@@ -194,12 +217,6 @@
     </Compile>
     <Compile Include="Windows\Dialogs\ServerSettingsDialog.Designer.cs">
       <DependentUpon>ServerSettingsDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Windows\Dialogs\SettingsDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Windows\Dialogs\SettingsDialog.Designer.cs">
-      <DependentUpon>SettingsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Windows\LogForm.cs">
       <SubType>Form</SubType>
@@ -236,6 +253,10 @@
       <LastGenOutput>CommonStrings.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Icons.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Icons.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\ServerStrings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ServerStrings.Designer.cs</LastGenOutput>
@@ -244,6 +265,12 @@
     <EmbeddedResource Include="Windows\ChannelForm.resx">
       <DependentUpon>ChannelForm.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Windows\Options\GeneralOptionsPage.resx">
+      <DependentUpon>GeneralOptionsPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Windows\Options\OptionsDialog.resx">
+      <DependentUpon>OptionsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\PrivateMessageForm.resx">
       <DependentUpon>PrivateMessageForm.cs</DependentUpon>
@@ -260,10 +287,6 @@
     <EmbeddedResource Include="Windows\Dialogs\ServerSettingsDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>ServerSettingsDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Windows\Dialogs\SettingsDialog.resx">
-      <DependentUpon>SettingsDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\LogForm.resx">
       <DependentUpon>LogForm.cs</DependentUpon>
@@ -327,6 +350,12 @@
       <Project>{D8266C38-E44E-4708-89AE-3E6CA72D5987}</Project>
       <Name>OrtzIRC.PluginFramework</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\process.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\notebook.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

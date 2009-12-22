@@ -175,8 +175,9 @@ namespace OrtzIRC
             splitter1.Dock = DockStyle.Right;
         }
 
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine("MainForm Closing: " + e.CloseReason);
             // TODO: Stuff we should do on exit.
             if (ConfirmExit())
             {
@@ -195,6 +196,13 @@ namespace OrtzIRC
                             MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
 
             return (dr == DialogResult.Yes);
+        }
+
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OptionsDialog dlg = new OptionsDialog();
+            dlg.Pages.Add(new GeneralOptionsPage());
+            dlg.ShowDialog();
         }
     }
 }
