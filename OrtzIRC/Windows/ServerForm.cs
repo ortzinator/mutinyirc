@@ -45,7 +45,7 @@ namespace OrtzIRC
             server.ErrorMessageRecieved += ParentServer_OnError;
             server.Connecting += Server_Connecting;
             server.Disconnected += server_Disconnected;
-            
+
             commandTextBox.CommandEntered += commandTextBox_CommandEntered;
             serverOutputBox.MouseUp += serverOutputBox_MouseUp;
         }
@@ -132,31 +132,24 @@ namespace OrtzIRC
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            if (server.IsConnected)
-            {
-                if (e.CloseReason == CloseReason.UserClosing)
-                {
-                    DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Description),
-                                CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            System.Diagnostics.Debug.WriteLine("ServerForm Closing: " + e.CloseReason);
 
-                    if (result == DialogResult.OK)
-                    {
-                        UnhookEvents();
-                        server.Disconnect();
-                    }
-                    else
-                    {
-                        e.Cancel = true;
-                    }
-                }
-                else
+            if (!server.IsConnected) return;
+
+            if (e.CloseReason != CloseReason.TaskManagerClosing)
+            {
+                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Description), 
+                    CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+                if (result != DialogResult.OK)
                 {
-                    UnhookEvents();
-                    server.Disconnect();
+                    e.Cancel = true;
+                    return;
                 }
             }
 
-            base.OnFormClosing(e);
+            UnhookEvents();
+            server.Disconnect();
         }
 
         private void AddLine(String text)

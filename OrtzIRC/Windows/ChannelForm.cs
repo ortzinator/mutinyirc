@@ -151,6 +151,7 @@
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine("ChannelForm Closing: " + e.CloseReason);
             UnhookEvents();
             Channel.Part();
         }
