@@ -3,6 +3,7 @@ namespace OrtzIRC
     using System;
     using System.Drawing;
     using System.Windows.Forms;
+
     using OrtzIRC.Common;
 
     public partial class ServerSettingsDialog : Form
@@ -41,7 +42,9 @@ namespace OrtzIRC
             }
             else if (e.Node.GetType() == typeof(ServerSettingsTreeNode))
             {
-                ((ServerSettingsTreeNode)e.Node).Settings.Description = e.Label;
+                // P90: Fix empty description (finally?)
+                ((ServerSettingsTreeNode)e.Node).Settings.Description = e.Label ?? String.Empty;
+
                 ircSettingsTree.SelectedNode = e.Node;
             }
         }
@@ -67,7 +70,7 @@ namespace OrtzIRC
             node.Settings.Description = serverDescriptionTextBox.Text;
             
             // P90: Fix empty server description
-            node.Text = node.Settings.Description.Length == 0 ? node.Settings.Url : node.Settings.Description;
+            node.Text = node.Settings.Description.Empty() ? node.Settings.Url : node.Settings.Description;
         }
 
         private void networkNameTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)

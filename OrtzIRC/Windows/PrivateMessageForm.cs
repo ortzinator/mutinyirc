@@ -160,7 +160,7 @@ namespace OrtzIRC
         {
             serverOutputBox.AppendLine(text);
 
-            //TextLoggerManager.TextEntry(PrivateMessageSession, text + '\n'); //TODO: Implement logging for private messages
+            TextLoggerManager.TextEntry(pmsession.Server, pmsession.User, text + '\n');
         }
     }
 }
