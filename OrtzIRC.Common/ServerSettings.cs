@@ -23,6 +23,7 @@
         public string Ports { get; set; }
         public bool Ssl { get; set; }
         public bool AutoConnect { get; set; }
+        public string Nick { get; set; }
         
         //TODO: Make ChannelSettings objects with "name" and "autojoin" properties. For now, these are all assumed to be autojoin
         public List<string> Channels { get; set; } 

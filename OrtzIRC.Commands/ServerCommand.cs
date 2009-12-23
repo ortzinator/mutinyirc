@@ -19,11 +19,11 @@ namespace OrtzIRC.Commands
                 switch (c)
                 {
                     case 'm':
-                        var svr = ServerManager.Instance.Create(new ServerSettings { Url = server });
+                        var svr = ServerManager.Instance.Create(new ServerSettings { Url = server, Nick = OrtzIRC.Properties.Settings.Default.FirstNick });
                         svr.Connect();
                         return;
                     case 'n':
-                        ServerManager.Instance.Create(new ServerSettings { Url = server });
+                        ServerManager.Instance.Create(new ServerSettings { Url = server, Nick = OrtzIRC.Properties.Settings.Default.FirstNick });
                         return;
                 }
             }
@@ -34,7 +34,7 @@ namespace OrtzIRC.Commands
         /// </summary>
         public void Execute(Server context, string server)
         {
-            context.ChangeServer(new ServerSettings { Url = server });
+            context.ChangeServer(new ServerSettings { Url = server, Nick = OrtzIRC.Properties.Settings.Default.FirstNick });
             context.Connect();
         }
     }
