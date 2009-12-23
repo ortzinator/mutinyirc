@@ -202,7 +202,17 @@ namespace OrtzIRC
         {
             OptionsDialog dlg = new OptionsDialog();
             dlg.Pages.Add(new GeneralOptionsPage());
-            dlg.ShowDialog();
+            dlg.Pages.Add(new LoggingOptionsPage());
+            DialogResult result = dlg.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                Settings.Default.Save();
+            }
+            else
+            {
+                Settings.Default.Reload();
+            }
         }
     }
 }

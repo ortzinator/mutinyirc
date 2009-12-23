@@ -14,5 +14,13 @@
                 return "General";
             }
         }
+
+        public override System.Drawing.Image Image
+        {
+            get
+            {
+                return Resources.Icons.Gear;
+            }
+        }
     }
 }

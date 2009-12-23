@@ -31,11 +31,11 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.primaryNickTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.secondaryNickTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.backupNickTextBox = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -57,11 +57,11 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 34.15385F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 65.84615F));
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.textBox1, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.primaryNickTextBox, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.textBox2, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.secondaryNickTextBox, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.label3, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.textBox3, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.backupNickTextBox, 1, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -85,12 +85,14 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Primary Nick:";
             // 
-            // textBox1
+            // primaryNickTextBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(114, 3);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 20);
-            this.textBox1.TabIndex = 1;
+            this.primaryNickTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::OrtzIRC.Properties.Settings.Default, "FirstNick", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.primaryNickTextBox.Location = new System.Drawing.Point(114, 3);
+            this.primaryNickTextBox.Name = "primaryNickTextBox";
+            this.primaryNickTextBox.Size = new System.Drawing.Size(177, 20);
+            this.primaryNickTextBox.TabIndex = 1;
+            this.primaryNickTextBox.Text = global::OrtzIRC.Properties.Settings.Default.FirstNick;
             // 
             // label2
             // 
@@ -102,12 +104,14 @@
             this.label2.TabIndex = 2;
             this.label2.Text = "Secondary Nick:";
             // 
-            // textBox2
+            // secondaryNickTextBox
             // 
-            this.textBox2.Location = new System.Drawing.Point(114, 29);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(100, 20);
-            this.textBox2.TabIndex = 3;
+            this.secondaryNickTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::OrtzIRC.Properties.Settings.Default, "SecondNick", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.secondaryNickTextBox.Location = new System.Drawing.Point(114, 29);
+            this.secondaryNickTextBox.Name = "secondaryNickTextBox";
+            this.secondaryNickTextBox.Size = new System.Drawing.Size(177, 20);
+            this.secondaryNickTextBox.TabIndex = 3;
+            this.secondaryNickTextBox.Text = global::OrtzIRC.Properties.Settings.Default.SecondNick;
             // 
             // label3
             // 
@@ -119,12 +123,14 @@
             this.label3.TabIndex = 4;
             this.label3.Text = "Backup Nick:";
             // 
-            // textBox3
+            // backupNickTextBox
             // 
-            this.textBox3.Location = new System.Drawing.Point(114, 55);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(100, 20);
-            this.textBox3.TabIndex = 5;
+            this.backupNickTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::OrtzIRC.Properties.Settings.Default, "ThirdNick", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.backupNickTextBox.Location = new System.Drawing.Point(114, 55);
+            this.backupNickTextBox.Name = "backupNickTextBox";
+            this.backupNickTextBox.Size = new System.Drawing.Size(177, 20);
+            this.backupNickTextBox.TabIndex = 5;
+            this.backupNickTextBox.Text = global::OrtzIRC.Properties.Settings.Default.ThirdNick;
             // 
             // GeneralOptionsPage
             // 
@@ -144,10 +150,10 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox primaryNickTextBox;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox secondaryNickTextBox;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox backupNickTextBox;
     }
 }
