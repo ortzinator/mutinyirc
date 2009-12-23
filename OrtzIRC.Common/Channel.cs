@@ -14,15 +14,18 @@
         public Channel(Server parent, string name)
         {
             Server = parent;
-            Name = name;
+            
+            Info = new ChannelInfo(name);
 
             NickList = new UserList();
         }
 
         public Server Server { get; private set; }
-        public string Key { get; set; }
-        public int Limit { get; set; }
-        public string Name { get; private set; }
+
+        /// <summary>
+        /// ChannelInfo object to represent the channel.
+        /// </summary>
+        public ChannelInfo Info { get; private set; }
 
         /// <summary>
         /// A UserList of the users in the channel
@@ -41,17 +44,6 @@
             get
             {
                 return NickList.Count > 0;
-            }
-        }
-
-        /// <summary>
-        /// Returns a ChannelInfo class to represent the channel.
-        /// </summary>
-        public ChannelInfo Info
-        {
-            get
-            {
-                return new ChannelInfo(Name);
             }
         }
 
@@ -109,7 +101,7 @@
 
         public override string ToString()
         {
-            return Name;
+            return Info.Name;
         }
 
         public void OnNewMessage(User nick, string message)
@@ -148,7 +140,7 @@
 
         public void Part(string message)
         {
-            Server.Connection.Sender.Part(message, Name);
+            Server.Connection.Sender.Part(message, Info.Name);
             NickList.Clear();
         }
 
@@ -183,7 +175,7 @@
                 {
                     if (NickChanged != null)
                         NickChanged(n, newNick);
-                    Server.Connection.Sender.Names(Name);
+                    Server.Connection.Sender.Names(Info.Name);
                 }
             }
         }
@@ -195,7 +187,7 @@
 
         public void UserKick(User nick, string kickee, string reason)
         {
-            Server.Connection.Sender.Names(Name);
+            Server.Connection.Sender.Names(Info.Name);
 
             if (OnKick != null)
                 OnKick(nick, kickee, reason);
@@ -203,13 +195,13 @@
 
         public void Say(string message)
         {
-            Server.Connection.Sender.PublicMessage(Name, message);
+            Server.Connection.Sender.PublicMessage(Info.Name, message);
             MessagedChannel.Fire(this, new UserMessageEventArgs(NickList.GetUser(Server.UserNick), message)); //TODO: necessary?
         }
 
         public void Act(string message)
         {
-            Server.Connection.Sender.Action(Name, message);
+            Server.Connection.Sender.Action(Info.Name, message);
             MessagedChannel.Fire(this, new UserMessageEventArgs(NickList.GetUser(Server.UserNick), message));
         }
     }

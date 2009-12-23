@@ -38,7 +38,7 @@
 
         public static void TextEntry(Channel chan, String text)
         {
-            WriteText(LogFiles[chan.Server.URL][chan.Name], text);
+            WriteText(LogFiles[chan.Server.URL][chan.Info.Name], text);
         }
 
         private static void WriteText(LoggedItem logger, String text)
@@ -71,7 +71,7 @@
         public static void AddLoggable(Channel chan)
         {
             // Add channel log to the structure
-            LogFiles[chan.Server.URL].Add(chan.Name, new LoggedItem(chan.Name, chan.Server.URL));
+            LogFiles[chan.Server.URL].Add(chan.Info.Name, new LoggedItem(chan.Info.Name, chan.Server.URL));
         }
 
         public static void AddLoggable(Server network, User person)
@@ -97,8 +97,8 @@
         {
             if (!ChannelExists(chan)) return;
 
-            LogFiles[chan.Server.URL][chan.Name].Close();
-            LogFiles[chan.Server.URL].Remove(chan.Name);
+            LogFiles[chan.Server.URL][chan.Info.Name].Close();
+            LogFiles[chan.Server.URL].Remove(chan.Info.Name);
         }
 
         public static void RemoveLoggable(Server network, User person)
@@ -131,7 +131,7 @@
 
         private static bool ChannelExists(Channel chan)
         {
-            return (NetworkExists(chan.Server) && LogFiles[chan.Server.URL].ContainsKey(chan.Name));
+            return (NetworkExists(chan.Server) && LogFiles[chan.Server.URL].ContainsKey(chan.Info.Name));
         }
 
         private static bool PersonExists(Server network, User person)

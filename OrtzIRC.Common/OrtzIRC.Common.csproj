@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChannelEventArgs.cs" />
+    <Compile Include="ChannelSettings.cs" />
     <Compile Include="PrivateMessageSessionEventArgs.cs" />
     <Compile Include="UserEventArgs.cs" />
     <Compile Include="IrcSettingsManager.cs" />
