@@ -94,7 +94,7 @@ namespace OrtzIRC.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("OrtzIRC")]
         public string FirstNick {
             get {
                 return ((string)(this["FirstNick"]));
@@ -106,7 +106,7 @@ namespace OrtzIRC.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("OrtzIRC_")]
         public string SecondNick {
             get {
                 return ((string)(this["SecondNick"]));
@@ -118,7 +118,7 @@ namespace OrtzIRC.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("OrtzIRC__")]
         public string ThirdNick {
             get {
                 return ((string)(this["ThirdNick"]));

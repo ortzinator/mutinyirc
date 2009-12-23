@@ -51,6 +51,9 @@
 
             if (listView.Items.Count != 0)
                 listView.Items[0].Selected = true;
+
+            okButton.DialogResult = DialogResult.OK;
+            cancelButton.DialogResult = DialogResult.Cancel;
         }
 
         void AddListItemForPage(OptionsPage page)

@@ -21,13 +21,13 @@
       <Value Profile="(Default)">[hh:mm:ss]</Value>
     </Setting>
     <Setting Name="FirstNick" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">OrtzIRC</Value>
     </Setting>
     <Setting Name="SecondNick" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">OrtzIRC_</Value>
     </Setting>
     <Setting Name="ThirdNick" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">OrtzIRC__</Value>
     </Setting>
   </Settings>
 </SettingsFile>

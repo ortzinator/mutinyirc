@@ -46,7 +46,7 @@
             this.flowLayoutPanel2.Controls.Add(this.okButton);
             this.flowLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(0, 312);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(0, 289);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Padding = new System.Windows.Forms.Padding(10);
             this.flowLayoutPanel2.Size = new System.Drawing.Size(571, 54);
@@ -79,7 +79,7 @@
             this.listView.LargeImageList = this.imageList;
             this.listView.Location = new System.Drawing.Point(8, 8);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(88, 296);
+            this.listView.Size = new System.Drawing.Size(88, 273);
             this.listView.TabIndex = 3;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
@@ -97,7 +97,7 @@
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
             this.panel1.Padding = new System.Windows.Forms.Padding(8);
-            this.panel1.Size = new System.Drawing.Size(104, 312);
+            this.panel1.Size = new System.Drawing.Size(104, 289);
             this.panel1.TabIndex = 5;
             // 
             // pagesPanel
@@ -106,7 +106,7 @@
             this.pagesPanel.Location = new System.Drawing.Point(104, 0);
             this.pagesPanel.Name = "pagesPanel";
             this.pagesPanel.Padding = new System.Windows.Forms.Padding(8);
-            this.pagesPanel.Size = new System.Drawing.Size(467, 312);
+            this.pagesPanel.Size = new System.Drawing.Size(467, 289);
             this.pagesPanel.TabIndex = 6;
             // 
             // OptionsDialog
@@ -115,7 +115,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(571, 366);
+            this.ClientSize = new System.Drawing.Size(571, 343);
             this.Controls.Add(this.pagesPanel);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.flowLayoutPanel2);
