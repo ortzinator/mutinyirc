@@ -38,6 +38,9 @@ namespace OrtzIRC
             {
                 foreach (var server in IRCSettingsManager.Instance.GetAutoConnectServers())
                 {
+                    if (server.Nick == null)
+                        server.Nick = Settings.Default.FirstNick;
+
                     Server newServer = ServerManager.Instance.Create(server);
                     newServer.Connect();
                 }

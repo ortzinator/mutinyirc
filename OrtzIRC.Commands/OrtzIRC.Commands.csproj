@@ -108,6 +108,10 @@
       <Name>OrtzIRC.PluginFramework</Name>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\OrtzIRC\OrtzIRC.csproj">
+      <Project>{3F50443A-7CC6-4490-9916-523D80DEE58F}</Project>
+      <Name>OrtzIRC</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

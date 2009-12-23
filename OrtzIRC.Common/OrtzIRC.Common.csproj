@@ -96,11 +96,6 @@
     <Compile Include="MessageContext.cs" />
     <Compile Include="NetworkSettings.cs" />
     <Compile Include="NetworkSettingsList.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
     <Compile Include="RandomMessages.cs" />
     <Compile Include="SerializableDictionary.cs" />
     <Compile Include="ServerEventArgs.cs" />
@@ -134,10 +129,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

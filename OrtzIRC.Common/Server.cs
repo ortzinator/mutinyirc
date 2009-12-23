@@ -10,6 +10,8 @@
 
     public sealed class Server : MessageContext
     {
+        private ServerSettings serverSettings;
+
         public Server(ServerSettings settings)
         {
             SetupConnection(settings);
@@ -17,14 +19,67 @@
             HookEvents();
         }
 
+        public string URL
+        {
+            get
+            {
+                return serverSettings.Url;
+            }
+        }
+
+        public string Description
+        {
+            get
+            {
+                return serverSettings.Description ?? String.Empty;
+            }
+        }
+
+        public int Port
+        {
+            get
+            {
+                return Connection.ConnectionData.Port;
+            }
+        }
+
+        public string Nick
+        {
+            get
+            {
+                return Connection.ConnectionData.Nick;
+            }
+        }
+
+        public Connection Connection { get; private set; }
+
+        public List<PrivateMessageSession> PMSessions { get; private set; }
+
+        public bool IsConnected
+        {
+            get { return Connection.Connected; }
+        }
+
+        /// <summary>
+        /// The nick of the connected user
+        /// </summary>
+        public string UserNick
+        {
+            get { return Connection.ConnectionData.Nick; }
+        }
+
+        public ChannelManager ChanManager { get; private set; }
+
         private void SetupConnection(ServerSettings settings)
         {
-            Settings = settings;
+            if (settings.Nick == null)
+                throw new ArgumentException("The ServerSettings.Nick property is null");
+
+            this.serverSettings = settings;
             ChanManager = new ChannelManager(this);
 
             //TODO: Select port
-            //TODO: Select nick
-            var args = new ConnectionArgs("OrtzIRC", settings.Url, settings.Ssl);
+            var args = new ConnectionArgs(settings.Nick, settings.Url, settings.Ssl);
             Connection = new Connection(args, true, false);
         }
 
@@ -95,59 +150,6 @@
 
             Connection.RawMessageReceived -= Connection_OnRawMessageReceived;
         }
-
-        public string URL
-        {
-            get
-            {
-                return Settings.Url;
-            }
-        }
-
-        public string Description
-        {
-            get
-            {
-                return Settings.Description ?? String.Empty;
-            }
-        }
-
-        public int Port
-        {
-            get
-            {
-                return Connection.ConnectionData.Port;
-            }
-        }
-
-        public string Nick
-        {
-            get
-            {
-                return Connection.ConnectionData.Nick;
-            }
-        }
-
-        public ServerSettings Settings { get; private set; }
-
-        public Connection Connection { get; private set; }
-
-        public List<PrivateMessageSession> PMSessions { get; private set; }
-
-        public bool IsConnected
-        {
-            get { return Connection.Connected; }
-        }
-
-        /// <summary>
-        /// The nick of the connected user
-        /// </summary>
-        public string UserNick
-        {
-            get { return Connection.ConnectionData.Nick; }
-        }
-
-        public ChannelManager ChanManager { get; private set; }
 
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
         public event EventHandler<CancelEventArgs> Connecting;
@@ -341,16 +343,14 @@
             if (Registered != null)
                 Registered(this, e);
 
-            // TODO: Handle a taken nick
+            //TODO: Handle a taken nick
             //TODO: Get autojoin list for the network
             //HACK: This is for testing. It just gets a list and joins it all. Should be done by the GUI layer
-            if (Settings.Channels != null)
+            if (serverSettings.Channels != null)
             {
-                foreach (var channel in Settings.Channels)
+                foreach (var channel in serverSettings.Channels)
                     JoinChannel(new ChannelInfo(channel));
             }
-
-            //JoinChannel(new ChannelInfo("#ortzirc"));
         }
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
@@ -395,6 +395,11 @@
             if (IsConnected)
             {
                 Disconnect();
+            }
+
+            if (settings.Nick == null)
+            {
+                settings.Nick = serverSettings.Nick;
             }
 
             UnhookEvents();
