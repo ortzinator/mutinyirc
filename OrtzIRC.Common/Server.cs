@@ -260,7 +260,7 @@
                 var chan = ChanManager.Create(channel);
                 GotTopic(chan, topic);
                 chan.ShowTopic(topic);
-            } 
+            }
         }
 
         private void Listener_OnPrivateNotice(User user, string notice)
@@ -320,7 +320,7 @@
             if (user.Nick == UserNick)
             {
                 JoinSelf.Fire(this, new DataEventArgs<Channel>(chan));
-                
+
             }
             else
             {
@@ -331,7 +331,13 @@
 
         private void Listener_OnPart(User user, string channel, string reason)
         {
+            if (IsMe(user)) return;
+
             var chan = ChanManager.GetChannel(channel);
+
+            if (chan == null)
+                return;
+
             Part.Fire(this, new PartEventArgs(user, chan, reason));
             chan.UserPart(user, reason);
 
@@ -406,6 +412,11 @@
             ChanManager.UnhookEvents();
             SetupConnection(settings);
             HookEvents();
+        }
+
+        private bool IsMe(User user)
+        {
+            return user.Nick == Connection.ConnectionData.Nick;
         }
     }
 }
