@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Xml.Serialization;
     using System.Xml.Schema;
     using System.Xml;
@@ -12,6 +13,11 @@
         {
             Url = url;
             Description = description;
+
+            // Bug tracking, remove this eventually.
+            if (description == null)
+                Debugger.Break();
+
             Ports = ports;
             Ssl = ssl;
         }
@@ -25,8 +31,7 @@
         public bool AutoConnect { get; set; }
         public string Nick { get; set; }
         
-        //TODO: Make ChannelSettings objects with "name" and "autojoin" properties. For now, these are all assumed to be autojoin
-        public List<string> Channels { get; set; } 
+        public List<ChannelSettings> Channels { get; set; }
 
         public int RandomPort
         {
@@ -114,7 +119,7 @@
 
         public void ReadXml(XmlReader reader)
         {
-            Description = reader.GetAttribute("Description");
+            Description = reader.GetAttribute("Description") ?? String.Empty;
             Url = reader.GetAttribute("Url");
             Ports = reader.GetAttribute("Ports");
             AutoConnect = reader.GetAttribute("AutoConnect") == "True";

@@ -23,9 +23,16 @@
         /// </summary>
         public string Topic { get; set; }
 
+        /// <summary>
+        /// The current key
+        /// </summary>
+        public string Key { get; set; } // TODO: Fully implement (wrong passwords, joining, changed key, etc.)
+
+        public int Limit { get; set; }
+
         public override string ToString()
         {
-            return Name;
+            return String.Format("{0} - {1}", Name, Topic);
         }
     }
 }

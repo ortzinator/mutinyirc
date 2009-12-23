@@ -7,8 +7,7 @@
     {
         public ServerSettingsTreeNode(ServerSettings settings, ContextMenuStrip menu)
         {
-            // P90: Fix empty server description
-            Text = settings.Description.Length == 0 ? settings.Url : settings.Description;
+            Text = settings.Description.Empty() ? settings.Url : settings.Description;
             Settings = settings;
             ContextMenuStrip = menu;
         }

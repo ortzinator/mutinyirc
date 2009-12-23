@@ -57,7 +57,6 @@
             {
                 recievingNames = true;
             }
-
                 
             foreach (string nick in nicks)
             {
@@ -129,7 +128,7 @@
         {
             var chan = (Channel)sender;
 
-            Channels.Remove(chan.Name);
+            Channels.Remove(chan.Info.Name);
             TriggerChannelRemoved(chan);
 
             chan.UserParted -= channelUserParted;

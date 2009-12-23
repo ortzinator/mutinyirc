@@ -19,6 +19,11 @@
             return string.Format(format, args);
         }
 
+        public static bool Empty(this string str)
+        {
+            return str.Length == 0;
+        }
+
         public static byte[] GetBytes(this string str)
         {
             return Encoding.ASCII.GetBytes(str);
