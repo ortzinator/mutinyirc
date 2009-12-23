@@ -141,7 +141,7 @@ namespace OrtzIRC
                 newChannelForm.MdiParent = this;
 
                 newChannelForm.Show();
-                newChannelForm.AddLine("Joined: " + channel.Name);
+                newChannelForm.AddLine("Joined: " + channel.Info.Name);
             }
         }
 

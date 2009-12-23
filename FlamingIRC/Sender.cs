@@ -236,47 +236,40 @@ namespace FlamingIRC
         /// <seealso cref="Listener.OnJoin"/>
         public void Join(string channel)
         {
-            lock (this)
-            {
-                if (Rfc2812Util.IsValidChannelName(channel))
-                {
-                    Buffer.Append("JOIN");
-                    Buffer.Append(SPACE);
-                    Buffer.Append(channel);
-                    Connection.SendCommand(Buffer);
-                }
-                else
-                {
-                    ClearBuffer();
-                    throw new ArgumentException(channel + " is not a valid channel name.");
-                }
-            }
+            Join(channel, String.Empty);
         }
+
         /// <summary>
         /// Join a passworded channel.
         /// </summary>
         /// <param name="channel">Channel to join</param>
-        /// <param name="password">The channel's pasword. Cannot be null or empty.</param>
+        /// <param name="password">The channel's password. If empty, joins without a password.</param>
         /// <exception cref="ArgumentException">If the channel name is not valid or the password is null.</exception> 
         /// <seealso cref="Listener.OnJoin"/>
         public void Join(string channel, string password)
         {
             lock (this)
             {
-                if (IsEmpty(password))
+                if (password == null)
                 {
                     ClearBuffer();
                     throw new ArgumentException("Password cannot be empty or null.");
                 }
+
                 if (Rfc2812Util.IsValidChannelName(channel))
                 {
                     Buffer.Append("JOIN");
                     Buffer.Append(SPACE);
                     Buffer.Append(channel);
-                    Buffer.Append(SPACE);
-                    //8 is the JOIN + 2 spaces + CR + LF
-                    password = Truncate(password, 8);
-                    Buffer.Append(password);
+
+                    if (password != String.Empty)
+                    {
+                        Buffer.Append(SPACE);
+                        //8 is the JOIN + 2 spaces + CR + LF
+                        password = Truncate(password, 8);
+                        Buffer.Append(password);
+                    }
+                    
                     Connection.SendCommand(Buffer);
                 }
                 else

@@ -355,7 +355,11 @@
             if (serverSettings.Channels != null)
             {
                 foreach (var channel in serverSettings.Channels)
-                    JoinChannel(new ChannelInfo(channel));
+                {
+                    if (channel.AutoJoin)
+                        JoinChannel(new ChannelInfo(channel.Name));
+                }
+                    
             }
         }
 
@@ -374,9 +378,9 @@
 
         public Channel JoinChannel(ChannelInfo channelToJoin)
         {
-            Channel newChan = ChanManager.Create(channelToJoin.ToString());
+            Channel newChan = ChanManager.Create(channelToJoin.Name);
 
-            Connection.Sender.Join(channelToJoin.ToString());
+            Connection.Sender.Join(channelToJoin.Name, channelToJoin.Key); // TODO: Figure out what happens when you join with a wrong key, and fix up channel manager integrity afterwards.
 
             return newChan;
         }
@@ -388,7 +392,7 @@
 
         public override string ToString()
         {
-            return Description;
+            return String.Format("{0}:{1} - {2}", URL, Port, Description);
         }
 
         public void ChangeNick(string nick)

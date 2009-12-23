@@ -28,7 +28,7 @@
         {
             Load += delegate
             {
-                Text = Channel.Name;
+                Text = Channel.Info.Name;
             };
 
             Channel.OnMessage += Channel_OnMessage;
@@ -57,7 +57,7 @@
         {
             Load -= delegate
             {
-                Text = Channel.Name;
+                Text = Channel.Info.Name;
             };
 
             Channel.OnMessage -= Channel_OnMessage;
