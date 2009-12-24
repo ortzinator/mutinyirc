@@ -7,7 +7,7 @@
         public ChannelTreeNode(ChannelForm channelWindow)
         {
             ChannelWindow = channelWindow;
-            Text = channelWindow.Channel.Info.Name;
+            Text = channelWindow.Channel.Name;
             channelWindow.FormClosed += channelWindow_FormClosed;
 
             ContextMenuStrip = new ChannelNodeContextMenu();

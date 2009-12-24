@@ -128,7 +128,7 @@
         {
             var chan = (Channel)sender;
 
-            Channels.Remove(chan.Info.Name);
+            Channels.Remove(chan.Name);
             TriggerChannelRemoved(chan);
 
             chan.UserParted -= channelUserParted;
