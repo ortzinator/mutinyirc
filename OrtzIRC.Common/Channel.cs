@@ -14,18 +14,15 @@
         public Channel(Server parent, string name)
         {
             Server = parent;
-            
-            Info = new ChannelInfo(name);
+            Name = name;
 
             NickList = new UserList();
         }
 
         public Server Server { get; private set; }
-
-        /// <summary>
-        /// ChannelInfo object to represent the channel.
-        /// </summary>
-        public ChannelInfo Info { get; private set; }
+        public string Key { get; set; }
+        public int Limit { get; set; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// A UserList of the users in the channel
@@ -101,7 +98,7 @@
 
         public override string ToString()
         {
-            return Info.Name;
+            return Name;
         }
 
         public void OnNewMessage(User nick, string message)
@@ -140,7 +137,7 @@
 
         public void Part(string message)
         {
-            Server.Connection.Sender.Part(message, Info.Name);
+            Server.Connection.Sender.Part(message, Name);
             NickList.Clear();
         }
 
@@ -175,7 +172,7 @@
                 {
                     if (NickChanged != null)
                         NickChanged(n, newNick);
-                    Server.Connection.Sender.Names(Info.Name);
+                    Server.Connection.Sender.Names(Name);
                 }
             }
         }
@@ -187,7 +184,7 @@
 
         public void UserKick(User nick, string kickee, string reason)
         {
-            Server.Connection.Sender.Names(Info.Name);
+            Server.Connection.Sender.Names(Name);
 
             if (OnKick != null)
                 OnKick(nick, kickee, reason);
@@ -195,13 +192,13 @@
 
         public void Say(string message)
         {
-            Server.Connection.Sender.PublicMessage(Info.Name, message);
+            Server.Connection.Sender.PublicMessage(Name, message);
             MessagedChannel.Fire(this, new UserMessageEventArgs(NickList.GetUser(Server.UserNick), message)); //TODO: necessary?
         }
 
         public void Act(string message)
         {
-            Server.Connection.Sender.Action(Info.Name, message);
+            Server.Connection.Sender.Action(Name, message);
             MessagedChannel.Fire(this, new UserMessageEventArgs(NickList.GetUser(Server.UserNick), message));
         }
     }

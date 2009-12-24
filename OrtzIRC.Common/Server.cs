@@ -357,7 +357,7 @@
                 foreach (var channel in serverSettings.Channels)
                 {
                     if (channel.AutoJoin)
-                        JoinChannel(new ChannelInfo(channel.Name));
+                        JoinChannel(channel.Name);
                 }
                     
             }
@@ -376,11 +376,16 @@
                 ErrorMessageRecieved(sender, new ErrorMessageEventArgs(a.Code, a.Message));
         }
 
-        public Channel JoinChannel(ChannelInfo channelToJoin)
+        public Channel JoinChannel(string channelToJoin)
         {
-            Channel newChan = ChanManager.Create(channelToJoin.Name);
+            return JoinChannel(channelToJoin, String.Empty);
+        }
 
-            Connection.Sender.Join(channelToJoin.Name, channelToJoin.Key); // TODO: Figure out what happens when you join with a wrong key, and fix up channel manager integrity afterwards.
+        public Channel JoinChannel(string channelToJoin, string key)
+        {
+            Channel newChan = ChanManager.Create(channelToJoin);
+
+            Connection.Sender.Join(channelToJoin, key); // TODO: Figure out what happens when you join with a wrong key, and fix up channel manager integrity afterwards.
 
             return newChan;
         }

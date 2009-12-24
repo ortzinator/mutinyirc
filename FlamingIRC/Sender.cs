@@ -253,7 +253,7 @@ namespace FlamingIRC
                 if (password == null)
                 {
                     ClearBuffer();
-                    throw new ArgumentException("Password cannot be empty or null.");
+                    throw new ArgumentException("Password cannot be null.");
                 }
 
                 if (Rfc2812Util.IsValidChannelName(channel))

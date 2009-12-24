@@ -22,7 +22,7 @@
         /// </summary>
         public void Execute(Server context, ChannelInfo channelToJoin)
         {
-            context.JoinChannel(channelToJoin);
+            context.JoinChannel(channelToJoin.Name);
         }
 
         /// <summary>
