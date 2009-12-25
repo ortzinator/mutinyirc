@@ -135,6 +135,7 @@ namespace OrtzIRC
             System.Diagnostics.Debug.WriteLine("ServerForm Closing: " + e.CloseReason);
 
             if (!server.IsConnected) return;
+            if (e.CloseReason == CloseReason.MdiFormClosing) return;
 
             if (e.CloseReason != CloseReason.TaskManagerClosing)
             {
