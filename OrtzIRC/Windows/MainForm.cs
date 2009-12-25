@@ -185,7 +185,7 @@ namespace OrtzIRC
             if (ConfirmExit())
             {
                 RandomMessages.Save();
-                //ServerManager.Instance.DisconnectAll();
+                ServerManager.Instance.DisconnectAll();
             }
             else
             {
