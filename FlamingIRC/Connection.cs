@@ -50,15 +50,15 @@ namespace FlamingIRC
         /// <summary>
         /// Receive all the raw messages sent to the IRC from this connection
         /// </summary>
-        public event EventHandler<FlamingDataEventArgs<string>> OnRawMessageSent;
+        public event EventHandler<FlamingDataEventArgs<string>> RawMessageSent;
 
-        public event EventHandler OnConnectSuccess;
+        public event EventHandler ConnectionEstablished;
         public event EventHandler<FlamingDataEventArgs<string>> ConnectFailed;
         public event EventHandler<FlamingDataEventArgs<string>> ConnectionLost;
 
-        private readonly Regex propertiesRegex;
-        private Listener listener;
-        private Sender sender;
+        private Regex propertiesRegex;
+        private readonly Listener listener;
+        private readonly Sender sender;
         private CtcpListener ctcpListener;
         private CtcpSender ctcpSender;
         private CtcpResponder ctcpResponder;
@@ -68,11 +68,9 @@ namespace FlamingIRC
         //Connected and registered with IRC server
         private bool registered;
         //TCP/IP connection established with IRC server
-        private bool connected;
         private bool handleNickFailure;
         private ArrayList parsers;
         private ServerProperties properties;
-        private Encoding encoding;
 
         internal ConnectionArgs connectionArgs;
 
@@ -99,7 +97,6 @@ namespace FlamingIRC
         {
             propertiesRegex = new Regex("([A-Z]+)=([^\\s]+)", RegexOptions.Compiled | RegexOptions.Singleline);
             registered = false;
-            connected = false;
             handleNickFailure = true;
             connectionArgs = args;
             parsers = new ArrayList();
@@ -126,25 +123,6 @@ namespace FlamingIRC
             TextEncoding = textEncoding;
         }
 
-
-        /// <summary>
-        /// Sets the text encoding used by the read and write streams.
-        /// Must be set before Connect() is called and should not be changed
-        /// while the connection is processing messages.
-        /// </summary>
-        /// <value>An Encoding constant.</value>
-        public Encoding TextEncoding
-        {
-            get
-            {
-                return encoding;
-            }
-            set
-            {
-                encoding = value;
-            }
-        }
-
         /// <summary>
         /// A read-only property indicating whether the connection 
         /// has been opened with the IRC server and the 
@@ -156,20 +134,6 @@ namespace FlamingIRC
             get
             {
                 return registered;
-            }
-        }
-
-        /// <summary>
-        /// A read-only property indicating whether a connection 
-        /// has been opened with the IRC server (but not whether 
-        /// registration has succeeded).
-        /// </summary>
-        /// <value>True if the socket is connected.</value>
-        public bool Connected
-        {
-            get
-            {
-                return connected;
             }
         }
 
@@ -478,7 +442,7 @@ namespace FlamingIRC
         {
             lock (this)
             {
-                if (connected)
+                if (Connected)
                 {
                     throw new Exception("Connection with IRC server already opened.");
                 }
@@ -556,8 +520,8 @@ namespace FlamingIRC
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() exception=" + ex);
             }
 
-            OnRawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
-            Trace.WriteLine("Sent command: " + command.ToString(), "IRC");
+            RawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
+            Trace.WriteLine("Sent command: " + command, "IRC");
 
             command.Remove(0, command.Length);
         }
@@ -592,15 +556,14 @@ namespace FlamingIRC
         {
             lock (this)
             {
-                if (!connected)
-                    throw new Exception("Not connected to IRC server.");
+                if (!Connected)
+                    return;
 
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Disconnect()");
                 listener.Disconnecting();
                 sender.Quit(reason);
-                connected = false;
-                //Disconnect();
+                Disconnect();
                 listener.Disconnected();
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Disconnect()");
             }
         }
 
@@ -638,9 +601,9 @@ namespace FlamingIRC
 
         protected override void OnConnect()
         {
-            OnConnectSuccess.Fire(this, new EventArgs());
+            ConnectionEstablished.Fire(this, new EventArgs());
             sender.RegisterConnection(connectionArgs);
-            connected = true;
+            Connected = true;
         }
 
         protected override bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
@@ -652,6 +615,12 @@ namespace FlamingIRC
         {
             if (ConnectionLost != null)
                 ConnectionLost(this, new FlamingDataEventArgs<string>(reason.Message)); //TODO: Better errors
+        }
+
+        protected override void OnConnectFailed(Exception reason)
+        {
+            if (ConnectFailed != null)
+                ConnectFailed(this, new FlamingDataEventArgs<string>(reason.Message));
         }
 
         protected override void OnReceiveLine(string line)
