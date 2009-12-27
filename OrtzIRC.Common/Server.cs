@@ -75,7 +75,7 @@
             if (settings.Nick == null)
                 throw new ArgumentException("The ServerSettings.Nick property is null");
 
-            this.serverSettings = settings;
+            serverSettings = settings;
             ChanManager = new ChannelManager(this);
 
             //TODO: Select port
@@ -85,8 +85,9 @@
 
         private void HookEvents()
         {
-            Connection.OnConnectSuccess += Connection_OnConnectSuccess;
+            Connection.ConnectionEstablished += Connection_OnConnectSuccess;
             Connection.ConnectFailed += Connection_ConnectFailed;
+            Connection.ConnectionLost += Connection_ConnectionLost;
 
             Connection.Listener.OnJoin += Listener_OnJoin;
             Connection.Listener.OnPart += Listener_OnPart;
@@ -106,6 +107,11 @@
             Connection.Listener.OnPrivate += Listener_OnPrivate;
 
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
+        }
+
+        private void Connection_ConnectionLost(object sender, FlamingDataEventArgs<string> e)
+        {
+            ConnectionLost.Fire(this, new DataEventArgs<string>(e.Data));
         }
 
         private void Listener_OnPrivate(User user, string message)
@@ -180,6 +186,7 @@
         public event NamesEventHandler OnNames;
         public event EventHandler<KickEventArgs> Kick;
         public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
+        public event EventHandler<DataEventArgs<string>> ConnectionLost;
 
         // hack - should call dispose
         ~Server()
@@ -359,7 +366,7 @@
                     if (channel.AutoJoin)
                         JoinChannel(channel.Name);
                 }
-                    
+
             }
         }
 

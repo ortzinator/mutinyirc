@@ -417,7 +417,7 @@ namespace FlamingIRC
     /// includes all messages sent except for those exchanged during a DCC chat.
     /// </summary>
     /// <param name="message">The text sent.</param>
-    /// <see cref="Connection.OnRawMessageSent"/>
+    /// <see cref="Connection.RawMessageSent"/>
     public delegate void RawMessageSentEventHandler(string message);
 
     /// <summary>

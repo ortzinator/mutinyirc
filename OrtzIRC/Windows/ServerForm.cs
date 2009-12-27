@@ -45,9 +45,15 @@ namespace OrtzIRC
             server.ErrorMessageRecieved += ParentServer_OnError;
             server.Connecting += Server_Connecting;
             server.Disconnected += server_Disconnected;
+            server.ConnectionLost += server_ConnectionLost;
 
             commandTextBox.CommandEntered += commandTextBox_CommandEntered;
             serverOutputBox.MouseUp += serverOutputBox_MouseUp;
+        }
+
+        private void server_ConnectionLost(object sender, DataEventArgs<string> e)
+        {
+            AddLine("--Disconnected: " + e.Data); //hack - proper messages
         }
 
         private void serverOutputBox_MouseUp(object sender, MouseEventArgs e)
@@ -65,6 +71,7 @@ namespace OrtzIRC
             server.ErrorMessageRecieved -= ParentServer_OnError;
             server.Connecting -= Server_Connecting;
             server.Disconnected -= server_Disconnected;
+            server.ConnectionLost -= server_ConnectionLost;
         }
 
         private void server_Disconnected()
@@ -139,7 +146,7 @@ namespace OrtzIRC
 
             if (e.CloseReason != CloseReason.TaskManagerClosing)
             {
-                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Description), 
+                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Description),
                     CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
                 if (result != DialogResult.OK)

@@ -53,9 +53,9 @@ namespace FlamingIRC
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
-        protected Encoding TextEncoding { get; set; }
+        public Encoding TextEncoding { get; protected set; }
 
-        public bool Connected { get; set; }
+        public bool Connected { get; protected set; }
 
         /// <summary>
         /// Create a new connection to the server.
@@ -82,6 +82,9 @@ namespace FlamingIRC
         /// </summary>
         public void Disconnect()
         {
+            socket.Shutdown(SocketShutdown.Both);
+            socket.Close();
+            Connected = false;
         }
 
         /// <summary>
@@ -102,6 +105,7 @@ namespace FlamingIRC
             catch (Exception e)
             {
                 socket.Shutdown(SocketShutdown.Both);
+                Connected = false;
                 OnDisconnect(e);
             }
         }
@@ -127,8 +131,7 @@ namespace FlamingIRC
             }
             catch (Exception e)
             {
-                socket.Shutdown(SocketShutdown.Both);
-                OnDisconnect(e);
+                OnConnectFailed(e);
             }
         }
 
@@ -154,6 +157,7 @@ namespace FlamingIRC
             catch (Exception e)
             {
                 socket.Shutdown(SocketShutdown.Both);
+                Connected = false;
                 OnDisconnect(e);
             }
         }
@@ -167,12 +171,16 @@ namespace FlamingIRC
             catch (Exception e)
             {
                 socket.Shutdown(SocketShutdown.Both);
+                Connected = false;
                 OnDisconnect(e);
             }
         }
 
         private void onDataReceived(IAsyncResult res)
         {
+            if (!socket.Connected)
+                return;
+
             try
             {
                 int bytes = stream.EndRead(res);
@@ -181,6 +189,7 @@ namespace FlamingIRC
                 {
                     // Connection Closed!
                     socket.Shutdown(SocketShutdown.Both);
+                    Connected = false;
                     OnDisconnect(new Exception("Remote Host Closed Connection"));
                     return;
                 }
@@ -210,6 +219,7 @@ namespace FlamingIRC
             catch (Exception e)
             {
                 socket.Shutdown(SocketShutdown.Both);
+                Connected = false;
                 OnDisconnect(e);
             }
         }
@@ -223,16 +233,18 @@ namespace FlamingIRC
             catch (Exception e)
             {
                 socket.Shutdown(SocketShutdown.Both);
+                Connected = false;
                 OnDisconnect(e);
             }
         }
 
         protected abstract void OnConnect();
-
+        
         protected abstract bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain,
                                                                 SslPolicyErrors errors);
 
         protected abstract void OnDisconnect(Exception reason);
+        protected abstract void OnConnectFailed(Exception reason);
         protected abstract void OnReceiveLine(string line);
     }
 }
