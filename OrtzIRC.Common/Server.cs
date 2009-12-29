@@ -165,9 +165,9 @@
         /// Informs the subscriber that a connect attempt fails.
         /// </summary>
         /// <remarks>
-        /// The string data is the message about why the connection failed.
+        /// The socket error code
         /// </remarks>
-        public event EventHandler<DataEventArgs<string>> ConnectFailed;
+        public event EventHandler<DataEventArgs<int>> ConnectFailed;
 
         public event EventHandler<DataEventArgs<string>> RawMessageReceived;
         public event EventHandler<ChannelMessageEventArgs> ChannelMessaged;
@@ -187,6 +187,7 @@
         public event EventHandler<KickEventArgs> Kick;
         public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
         public event EventHandler<DataEventArgs<string>> ConnectionLost;
+        public event EventHandler ConnectCancelled;
 
         // hack - should call dispose
         ~Server()
@@ -211,18 +212,11 @@
 
             if (c.Cancel)
             {
-                ConnectFailed.Fire(this, new DataEventArgs<string>("Connect cancelled."));
+                ConnectCancelled.Fire(this, EventArgs.Empty);
                 return;
             }
 
-            try
-            {
-                Connection.Connect();
-            }
-            catch (Exception ex)
-            {
-                ConnectFailed.Fire(this, new DataEventArgs<string>(ex.Message));
-            }
+            Connection.Connect();
         }
 
         public void Disconnect()
@@ -304,9 +298,9 @@
             Connected.Fire(this, EventArgs.Empty);
         }
 
-        private void Connection_ConnectFailed(object sender, FlamingDataEventArgs<string> e)
+        private void Connection_ConnectFailed(object sender, FlamingDataEventArgs<int> e)
         {
-            ConnectFailed.Fire(this, new DataEventArgs<string>(e.Data));
+            ConnectFailed.Fire(this, new DataEventArgs<int>(e.Data));
         }
 
         private void Listener_OnPublic(User user, string channel, string message)

@@ -46,9 +46,15 @@ namespace OrtzIRC
             server.Connecting += Server_Connecting;
             server.Disconnected += server_Disconnected;
             server.ConnectionLost += server_ConnectionLost;
+            server.ConnectCancelled += server_ConnectCancelled;
 
             commandTextBox.CommandEntered += commandTextBox_CommandEntered;
             serverOutputBox.MouseUp += serverOutputBox_MouseUp;
+        }
+
+        private void server_ConnectCancelled(object sender, EventArgs e)
+        {
+            AddLine("--Disconnected--");
         }
 
         private void server_ConnectionLost(object sender, DataEventArgs<string> e)
@@ -109,7 +115,7 @@ namespace OrtzIRC
             AddLine(string.Format("-{0}: {1}-", e.User.Nick, e.Message));
         }
 
-        private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<string> e)
+        private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<int> e)
         {
             AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
         }

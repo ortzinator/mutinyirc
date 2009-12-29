@@ -53,7 +53,7 @@ namespace FlamingIRC
         public event EventHandler<FlamingDataEventArgs<string>> RawMessageSent;
 
         public event EventHandler ConnectionEstablished;
-        public event EventHandler<FlamingDataEventArgs<string>> ConnectFailed;
+        public event EventHandler<FlamingDataEventArgs<int>> ConnectFailed;
         public event EventHandler<FlamingDataEventArgs<string>> ConnectionLost;
 
         private Regex propertiesRegex;
@@ -437,15 +437,12 @@ namespace FlamingIRC
         /// <summary>
         /// Connect to the IRC server and start listening for messages asynchronously
         /// </summary>
-        /// <exception cref="SocketException">If a connection cannot be established with the IRC server</exception>
         public void Connect()
         {
             lock (this)
             {
                 if (Connected)
-                {
                     throw new Exception("Connection with IRC server already opened.");
-                }
 
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
 
@@ -614,13 +611,15 @@ namespace FlamingIRC
         protected override void OnDisconnect(Exception reason)
         {
             if (ConnectionLost != null)
+            {
                 ConnectionLost(this, new FlamingDataEventArgs<string>(reason.Message)); //TODO: Better errors
+            }
         }
 
-        protected override void OnConnectFailed(Exception reason)
+        protected override void OnConnectFailed(int socketErrorCode)
         {
             if (ConnectFailed != null)
-                ConnectFailed(this, new FlamingDataEventArgs<string>(reason.Message));
+                ConnectFailed(this, new FlamingDataEventArgs<int>(socketErrorCode));
         }
 
         protected override void OnReceiveLine(string line)

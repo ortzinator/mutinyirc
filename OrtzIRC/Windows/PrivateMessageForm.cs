@@ -39,7 +39,6 @@ namespace OrtzIRC
             pmsession.Server.UserAction += ParentServer_UserAction;
             pmsession.Server.JoinOther += ParentServer_OnJoinOther;
             pmsession.Server.Part += ParentServer_OnPart;
-            pmsession.Server.ConnectFailed += Server_OnConnectFail;
             pmsession.Server.PrivateNotice += ParentServer_OnPrivateNotice;
             pmsession.Server.GotTopic += ParentServer_OnGotTopic;
             pmsession.Server.RawMessageReceived += ParentServer_OnRawMessageReceived;
@@ -59,7 +58,6 @@ namespace OrtzIRC
             pmsession.Server.UserAction -= ParentServer_UserAction;
             pmsession.Server.JoinOther -= ParentServer_OnJoinOther;
             pmsession.Server.Part -= ParentServer_OnPart;
-            pmsession.Server.ConnectFailed -= Server_OnConnectFail;
             pmsession.Server.PrivateNotice -= ParentServer_OnPrivateNotice;
             pmsession.Server.GotTopic -= ParentServer_OnGotTopic;
             pmsession.Server.RawMessageReceived -= ParentServer_OnRawMessageReceived;
@@ -134,11 +132,6 @@ namespace OrtzIRC
         private void ParentServer_OnPrivateNotice(object sender, UserMessageEventArgs e)
         {
             AddLine(string.Format("-{0}: {1}-", e.User.Nick, e.Message));
-        }
-
-        private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<string> e)
-        {
-            AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
         }
 
         private void ParentServer_UserAction(object sender, ChannelMessageEventArgs e)
