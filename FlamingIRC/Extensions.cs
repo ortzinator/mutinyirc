@@ -28,7 +28,7 @@ namespace FlamingIRC
 {
     using System.Text;
 
-    public static class Extensions
+    internal static class Extensions
     {
         /// <summary>
         /// Get the array slice between the two indexes.
@@ -45,7 +45,7 @@ namespace FlamingIRC
             int len = end - start;
 
             // Return new array
-            T[] res = new T[len];
+            var res = new T[len];
             for (int i = 0; i < len; i++)
             {
                 res[i] = source[i + start];

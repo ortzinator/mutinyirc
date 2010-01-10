@@ -84,7 +84,8 @@ namespace OrtzIRC
         {
             commandTextBox.Focus();
         }
-        private void server_Disconnected()
+
+        private void server_Disconnected(object sender, EventArgs e)
         {
             AddLine("--Disconnected--");
         }

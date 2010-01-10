@@ -36,6 +36,7 @@ namespace OrtzIRC
             // 
             this.serverOutputBox.BackColor = System.Drawing.SystemColors.Window;
             this.serverOutputBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.serverOutputBox.DetectUrls = false;
             this.serverOutputBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.serverOutputBox.Location = new System.Drawing.Point(0, 0);
             this.serverOutputBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
