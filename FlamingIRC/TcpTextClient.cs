@@ -24,40 +24,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Security.Authentication;
-
 namespace FlamingIRC
 {
     using System;
     using System.IO;
     using System.Net.Security;
     using System.Net.Sockets;
+    using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
 
     public enum ConnectError
     {
         ConnectionRefused,
+        AuthenticationFailed,
+        SocketError,
+        Other
+    }
+
+    public enum DisconnectReason
+    {
+        UserInitiated,
+        PingTimeout,
+        SocketError,
+        RemoteHostClosedConnection,
         Other
     }
 
     public abstract class TcpTextClient
     {
         private const int bufferLength = 512;
-        private readonly byte[] byteBuffer;
-        private readonly Socket socket;
-        private readonly StringBuilder textBuffer;
+        private byte[] byteBuffer;
+        private Socket socket;
+        private StringBuilder textBuffer;
         private string serverName;
         private SslStream sslStream;
         private Stream stream;
         private bool usesSSL;
+
 
         protected TcpTextClient()
         {
             byteBuffer = new byte[bufferLength];
             textBuffer = new StringBuilder();
             TextEncoding = Encoding.UTF8;
-
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
@@ -88,11 +98,13 @@ namespace FlamingIRC
         /// <summary>
         /// Close the connection to the server.
         /// </summary>
-        public void Disconnect()
+        public void Disconnect(DisconnectReason reason)
         {
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Connected = false;
+            OnDisconnect(reason, null);
         }
 
         /// <summary>
@@ -130,11 +142,11 @@ namespace FlamingIRC
             }
             catch (SocketException e)
             {
-                OnConnectFailed(e.ErrorCode);
+                OnConnectFailed(ConnectError.SocketError, e.ErrorCode);
             }
             catch (Exception e)
             {
-                OnConnectFailed(-1);
+                OnConnectFailed(ConnectError.SocketError, null);
                 System.Diagnostics.Debug.WriteLine("Connect failed: " + e.Message);
                 throw;
             }
@@ -159,11 +171,11 @@ namespace FlamingIRC
                 OnConnect();
                 waitForData();
             }
-            catch (AuthenticationException e)
+            catch (AuthenticationException)
             {
                 socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
-                OnDisconnect(e); //TODO: OnConnectFailed?
+                OnConnectFailed(ConnectError.AuthenticationFailed, null);
             }
         }
 
@@ -177,8 +189,8 @@ namespace FlamingIRC
             {
                 socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
-                OnDisconnect(e);
-                throw;
+                OnDisconnect(DisconnectReason.SocketError, null);
+                throw; //Wasn't really handled so pass it through
             }
         }
 
@@ -196,7 +208,7 @@ namespace FlamingIRC
                     // Connection Closed!
                     socket.Shutdown(SocketShutdown.Both);
                     Connected = false;
-                    OnDisconnect(new Exception("Remote Host Closed Connection"));
+                    OnDisconnect(DisconnectReason.RemoteHostClosedConnection, null);
                     return;
                 }
 
@@ -222,12 +234,12 @@ namespace FlamingIRC
 
                 waitForData();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
-                OnDisconnect(e);
-                throw;
+                OnDisconnect(DisconnectReason.SocketError, null);
+                throw; //Wasn't really handled so pass it through
             }
         }
 
@@ -237,12 +249,12 @@ namespace FlamingIRC
             {
                 stream.EndWrite(res);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
-                OnDisconnect(e);
-                throw;
+                OnDisconnect(DisconnectReason.SocketError, null);
+                throw; //Wasn't really handled so pass it through
             }
         }
 
@@ -251,8 +263,8 @@ namespace FlamingIRC
         protected abstract bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain,
                                                                 SslPolicyErrors errors);
 
-        protected abstract void OnDisconnect(Exception reason);
-        protected abstract void OnConnectFailed(int socketErrorCode);
+        protected abstract void OnDisconnect(DisconnectReason reason, int? socketErrorCode);
+        protected abstract void OnConnectFailed(ConnectError error, int? socketErrorCode);
         protected abstract void OnReceiveLine(string line);
     }
 }

@@ -24,6 +24,8 @@
             commandTextBox.Focus();
         }
 
+        public Channel Channel { get; private set; }
+
         private void HookEvents()
         {
             Load += delegate
@@ -76,8 +78,6 @@
             commandTextBox.CommandEntered -= commandTextBox_CommandEntered;
         }
 
-        public Channel Channel { get; private set; }
-
         private void Channel_MessagedChannel(object sender, UserMessageEventArgs e)
         {
             AddLine(string.Format("{0}: {1}", e.User.NamesLiteral, e.Message));
@@ -92,7 +92,7 @@
             }
         }
 
-        private void Server_Disconnected()
+        private void Server_Disconnected(object sender, EventArgs e)
         {
             AddLine("--Disconnected--");
             Close();

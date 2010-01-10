@@ -38,12 +38,6 @@ namespace FlamingIRC
     public delegate void DisconnectingEventHandler();
 
     /// <summary>
-    /// This connection has been closed 
-    /// </summary>
-    /// <seealso cref="Listener.OnDisconnected"/>
-    public delegate void DisconnectedEventHandler();
-
-    /// <summary>
     /// A Notice type message was sent to a channel.
     /// </summary>
     /// <param name="user">The user who sent the message.</param>

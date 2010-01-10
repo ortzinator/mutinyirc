@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+
 namespace OrtzIRC.Commands
 {
     using OrtzIRC.Common;
@@ -35,7 +38,12 @@ namespace OrtzIRC.Commands
         public void Execute(Server context, string server)
         {
             context.ChangeServer(new ServerSettings { Url = server, Nick = OrtzIRC.Properties.Settings.Default.FirstNick });
-            context.Connect();
+            var th = new Thread((ThreadStart)delegate
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+                context.Connect();
+            });
+            th.Start();
         }
     }
 }

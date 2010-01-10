@@ -97,21 +97,32 @@
             Connection.Listener.OnChannelModeChange += Listener_OnChannelModeChange;
             Connection.Listener.OnUserModeChange += Listener_OnUserModeChange;
             Connection.Listener.OnError += Listener_OnError;
-            Connection.Listener.OnDisconnecting += Listener_OnDisconnecting;
-            Connection.Listener.OnDisconnected += Listener_OnDisconnected;
             Connection.Listener.OnAction += Listener_OnAction;
             Connection.Listener.OnPrivateNotice += Listener_OnPrivateNotice;
             Connection.Listener.OnTopicRequest += Listener_OnTopicRequest;
             Connection.Listener.OnNick += Listener_OnNick;
             Connection.Listener.OnKick += Listener_OnKick;
             Connection.Listener.OnPrivate += Listener_OnPrivate;
+            Connection.Listener.OnPing += Listener_OnPing;
 
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
         }
 
-        private void Connection_ConnectionLost(object sender, FlamingDataEventArgs<string> e)
+        private void Listener_OnPing(string message)
         {
-            ConnectionLost.Fire(this, new DataEventArgs<string>(e.Data));
+            PingReceived.Fire(this, new DataEventArgs<string>(message));
+        }
+
+        private void Connection_ConnectionLost(object sender, DisconnectEventArgs e)
+        {
+            if (e.Reason == DisconnectReason.UserInitiated)
+            {
+                Disconnected.Fire(this, e);
+            }
+            else
+            {
+                ConnectionLost.Fire(this, e);
+            }
         }
 
         private void Listener_OnPrivate(User user, string message)
@@ -145,14 +156,13 @@
             Connection.Listener.OnChannelModeChange -= Listener_OnChannelModeChange;
             Connection.Listener.OnUserModeChange -= Listener_OnUserModeChange;
             Connection.Listener.OnError -= Listener_OnError;
-            Connection.Listener.OnDisconnecting -= Listener_OnDisconnecting;
-            Connection.Listener.OnDisconnected -= Listener_OnDisconnected;
             Connection.Listener.OnAction -= Listener_OnAction;
             Connection.Listener.OnPrivateNotice -= Listener_OnPrivateNotice;
             Connection.Listener.OnTopicRequest -= Listener_OnTopicRequest;
             Connection.Listener.OnNick -= Listener_OnNick;
             Connection.Listener.OnKick -= Listener_OnKick;
             Connection.Listener.OnPrivate -= Listener_OnPrivate;
+            Connection.Listener.OnPing -= Listener_OnPing;
 
             Connection.RawMessageReceived -= Connection_OnRawMessageReceived;
         }
@@ -167,7 +177,7 @@
         /// <remarks>
         /// The socket error code
         /// </remarks>
-        public event EventHandler<DataEventArgs<int>> ConnectFailed;
+        public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
 
         public event EventHandler<DataEventArgs<string>> RawMessageReceived;
         public event EventHandler<ChannelMessageEventArgs> ChannelMessaged;
@@ -178,7 +188,7 @@
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
         public event UserModeChangeEventHandler UserModeChanged;
         public event DisconnectingEventHandler Disconnecting;
-        public event DisconnectedEventHandler Disconnected;
+        public event EventHandler Disconnected;
         public event EventHandler<ChannelMessageEventArgs> UserAction;
         public event EventHandler<UserMessageEventArgs> PrivateNotice;
         public event Server_TopicRequestEventHandler GotTopic;
@@ -186,8 +196,9 @@
         public event NamesEventHandler OnNames;
         public event EventHandler<KickEventArgs> Kick;
         public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
-        public event EventHandler<DataEventArgs<string>> ConnectionLost;
+        public event EventHandler<DisconnectEventArgs> ConnectionLost;
         public event EventHandler ConnectCancelled;
+        public event EventHandler<DataEventArgs<string>> PingReceived;
 
         // hack - should call dispose
         ~Server()
@@ -276,18 +287,6 @@
             chan.OnNewAction(user, description);
         }
 
-        private void Listener_OnDisconnected()
-        {
-            if (Disconnected != null)
-                Disconnected();
-        }
-
-        private void Listener_OnDisconnecting()
-        {
-            if (Disconnecting != null)
-                Disconnecting();
-        }
-
         private void Connection_OnRawMessageReceived(object sender, FlamingDataEventArgs<string> e)
         {
             RawMessageReceived.Fire(this, new DataEventArgs<string>(e.Data));
@@ -298,9 +297,9 @@
             Connected.Fire(this, EventArgs.Empty);
         }
 
-        private void Connection_ConnectFailed(object sender, FlamingDataEventArgs<int> e)
+        private void Connection_ConnectFailed(object sender, ConnectFailedEventArgs e)
         {
-            ConnectFailed.Fire(this, new DataEventArgs<int>(e.Data));
+            ConnectFailed.Fire(this, e);
         }
 
         private void Listener_OnPublic(User user, string channel, string message)

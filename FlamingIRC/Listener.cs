@@ -70,11 +70,11 @@ namespace FlamingIRC
         /// <summary>
         /// This connection is about to be closed. 
         /// </summary>
-        public event DisconnectingEventHandler OnDisconnecting;
+        //public event DisconnectingEventHandler OnDisconnecting;
         /// <summary>
         /// This connection has been closed. 
         /// </summary>
-        public event DisconnectedEventHandler OnDisconnected;
+        //public event EventHandler OnDisconnected;
         /// <summary>
         /// A Notice type message was sent to a channel.
         /// </summary>
@@ -290,26 +290,6 @@ namespace FlamingIRC
             }
         }
 
-        /// <summary>
-        /// Warn listeners that we are about to close this connection
-        /// </summary>
-        internal void Disconnecting()
-        {
-            if (OnDisconnecting != null)
-            {
-                OnDisconnecting();
-            }
-        }
-        /// <summary>
-        /// Tell listeners that this connection is closed
-        /// </summary>
-        internal void Disconnected()
-        {
-            if (OnDisconnected != null)
-            {
-                OnDisconnected();
-            }
-        }
         /// <summary>
         /// Tell listeners that an error has been encountered
         /// </summary>

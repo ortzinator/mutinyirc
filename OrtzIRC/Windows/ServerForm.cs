@@ -1,3 +1,5 @@
+using System.Timers;
+
 namespace OrtzIRC
 {
     using System;
@@ -57,9 +59,22 @@ namespace OrtzIRC
             AddLine("--Disconnected--");
         }
 
-        private void server_ConnectionLost(object sender, DataEventArgs<string> e)
+        private void server_ConnectionLost(object sender, DisconnectEventArgs e)
         {
-            AddLine("--Disconnected: " + e.Data); //hack - proper messages
+            if (e.SocketErrorCode == 0)
+            {
+                AddLine(string.Format("--Disconnected: {0}", e.Reason));
+            }
+            else
+            {
+                AddLine(string.Format("--Disconnected: {0} {1}", e.Reason, e.SocketErrorCode));
+            }
+
+            if (e.Reason != DisconnectReason.UserInitiated)
+            {
+                AddLine("Attempting to reconnect...");
+                ThreadHelper.InvokeAfter(TimeSpan.FromSeconds(4), delegate { server.Connect(); });
+            }
         }
 
         private void serverOutputBox_MouseUp(object sender, MouseEventArgs e)
@@ -78,9 +93,10 @@ namespace OrtzIRC
             server.Connecting -= Server_Connecting;
             server.Disconnected -= server_Disconnected;
             server.ConnectionLost -= server_ConnectionLost;
+            server.ConnectCancelled -= server_ConnectCancelled;
         }
 
-        private void server_Disconnected()
+        private void server_Disconnected(object sender, EventArgs e)
         {
             AddLine("--Disconnected--");
         }
@@ -115,9 +131,18 @@ namespace OrtzIRC
             AddLine(string.Format("-{0}: {1}-", e.User.Nick, e.Message));
         }
 
-        private void Server_OnConnectFail(object sender, OrtzIRC.Common.DataEventArgs<int> e)
+        private void Server_OnConnectFail(object sender, ConnectFailedEventArgs e)
         {
-            AddLine(ServerStrings.ConnectionFailedMessage.With(e.Data));
+            if (e.SocketErrorCode == 0)
+            {
+                AddLine(ServerStrings.ConnectionFailedMessage.With(e.Reason.ToString()));
+            }
+            else
+            {
+                AddLine(ServerStrings.ConnectionFailedMessage.With(string.Format("{0}: {1}", e.Reason, e.SocketErrorCode)));
+            }
+
+            ThreadHelper.InvokeAfter(TimeSpan.FromSeconds(4), delegate { server.Connect(); });
         }
 
         private void ParentServer_OnRegistered(object sender, EventArgs e)
