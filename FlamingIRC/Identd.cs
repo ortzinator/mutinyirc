@@ -27,6 +27,7 @@ namespace FlamingIRC
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Net;
     using System.Net.Sockets;
     using System.Threading;
 
@@ -94,7 +95,7 @@ namespace FlamingIRC
         {
             lock (lockObject)
             {
-                if (running == true)
+                if (running)
                 {
                     listener.Stop();
                     Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Stop()");
@@ -109,7 +110,7 @@ namespace FlamingIRC
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run()");
             try
             {
-                listener = new TcpListener(System.Net.IPAddress.Parse("127.0.0.1"), IdentdPort);
+                listener = new TcpListener(IPAddress.Loopback, IdentdPort);
                 listener.Start();
 
             loop:

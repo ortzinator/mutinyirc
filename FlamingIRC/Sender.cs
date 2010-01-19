@@ -625,6 +625,18 @@ namespace FlamingIRC
                 }
             }
         }
+
+        public void Ping()
+        {
+            lock(this)
+            {
+                Buffer.Append("PING");
+                Buffer.Append(SPACE);
+                Buffer.Append("ping");
+                Connection.SendCommand(Buffer);
+            }
+        }
+
         /// <summary>Send a notice to a channel.</summary>
         /// <remarks>
         /// <para>The difference between a notice and a normal message is that 
