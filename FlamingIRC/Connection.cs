@@ -70,8 +70,9 @@ namespace FlamingIRC
         private bool handleNickFailure;
         private ArrayList parsers;
         private ServerProperties properties;
-        private System.Timers.Timer timeoutTimer;
-        private DateTime lastPing;
+
+        private System.Timers.Timer activityTimer;
+        private DateTime lastTraffic;
 
         internal ConnectionArgs connectionArgs;
 
@@ -81,10 +82,8 @@ namespace FlamingIRC
         internal Connection(ConnectionArgs args)
             : this(args, true, true)
         {
-            timeoutTimer = new System.Timers.Timer { Interval = TimeSpan.FromSeconds(5).Milliseconds };
-            timeoutTimer.Elapsed += timeoutTimer_Elapsed;
-            timeoutTimer.Start();
         }
+
         /// <summary>
         /// Prepare a connection to an IRC server but do not open it. This sets the text Encoding to Default.
         /// </summary>
@@ -105,9 +104,13 @@ namespace FlamingIRC
             EnableCtcp = enableCtcp;
             EnableDcc = enableDcc;
             TextEncoding = Encoding.Default;
-            lastPing = DateTime.Now;
-        }
 
+            lastTraffic = DateTime.Now;
+
+            activityTimer = new System.Timers.Timer {Interval = TimeSpan.FromSeconds(30).TotalMilliseconds};
+            activityTimer.Elapsed += new System.Timers.ElapsedEventHandler(activityTimer_Elapsed);
+            activityTimer.Start();
+        }
 
         /// <summary>
         /// Prepare a connection to an IRC server but do not open it.
@@ -122,18 +125,10 @@ namespace FlamingIRC
             TextEncoding = textEncoding;
         }
 
-        private void timeoutTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void activityTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (DateTime.Now - lastPing > TimeSpan.FromMinutes(5))
-            {
-                base.Disconnect(DisconnectReason.PingTimeout);
-            }
-        }
-
-        public double TimeoutTime
-        {
-            get { return timeoutTimer.Interval; }
-            set { timeoutTimer.Interval = value; }
+            if (DateTime.Now - lastTraffic > TimeSpan.FromSeconds(30))
+                Sender.Ping();
         }
 
         /// <summary>
@@ -357,7 +352,11 @@ namespace FlamingIRC
         private void KeepAlive(string message)
         {
             sender.Pong(message);
-            lastPing = DateTime.Now;
+        }
+
+        private void UpdateLastTime()
+        {
+            lastTraffic = DateTime.Now;
         }
 
         /// <summary>
@@ -438,6 +437,7 @@ namespace FlamingIRC
         private void RegisterDelegates()
         {
             listener.OnPing += KeepAlive;
+            listener.OnAnything += UpdateLastTime;
             listener.OnNick += MyNickChanged;
             listener.OnNickError += OnNickError;
             listener.OnReply += OnReply;

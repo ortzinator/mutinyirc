@@ -185,7 +185,7 @@ namespace FlamingIRC
             {
                 stream.BeginRead(byteBuffer, 0, bufferLength, onDataReceived, null);
             }
-            catch (Exception e)
+            catch (Exception )
             {
                 socket.Shutdown(SocketShutdown.Both);
                 Connected = false;

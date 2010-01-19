@@ -64,6 +64,10 @@ namespace FlamingIRC
         /// </summary>
         public event PingEventHandler OnPing;
         /// <summary>
+        /// Keep track of activity
+        /// </summary>
+        public event PongEventHandler OnAnything;
+        /// <summary>
         /// Connection with the IRC server is open and registered.
         /// </summary>
         public event EventHandler OnRegistered;
@@ -213,6 +217,7 @@ namespace FlamingIRC
         public event KillEventHandler OnKill;
 
         private const string PING = "PING";
+        private const string PONG = "PONG";
         private const string ERROR = "ERROR";
         private const string NOTICE = "NOTICE";
         private const string JOIN = "JOIN";
@@ -253,8 +258,10 @@ namespace FlamingIRC
         /// <param name="message"></param>
         public void Parse(string message) //Hack: Made public for unit testing, should be internal
         {
-            string[] tokens = message.Split(Separator);
+            if (OnAnything != null)
+                OnAnything();
 
+            string[] tokens = message.Split(Separator);
 
             switch (tokens[0])
             {
@@ -313,6 +320,8 @@ namespace FlamingIRC
             tokens[0] = RemoveLeadingColon(tokens[0]);
             switch (tokens[1])
             {
+                case PONG:
+                    break;
                 case NOTICE:
                     tokens[3] = RemoveLeadingColon(tokens[3]);
                     if (Rfc2812Util.IsValidChannelName(tokens[2]))

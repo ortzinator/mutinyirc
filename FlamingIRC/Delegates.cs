@@ -31,6 +31,8 @@ namespace FlamingIRC
     /// <seealso cref="Listener.OnPing"/>
     public delegate void PingEventHandler(string message);
 
+    public delegate void PongEventHandler(); // P90: ping timeout fix.
+
     /// <summary>
     /// This connection is about to be closed 
     /// </summary>
