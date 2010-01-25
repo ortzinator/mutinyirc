@@ -49,6 +49,7 @@ namespace OrtzIRC
             server.Disconnected += server_Disconnected;
             server.ConnectionLost += server_ConnectionLost;
             server.ConnectCancelled += server_ConnectCancelled;
+            //server.
 
             commandTextBox.CommandEntered += commandTextBox_CommandEntered;
             serverOutputBox.MouseUp += serverOutputBox_MouseUp;
@@ -112,7 +113,7 @@ namespace OrtzIRC
 
         private void Server_Connecting(object sender, CancelEventArgs e)
         {
-            AddLine(ServerStrings.ConnectingMessage.With(server.URL, server.Port));
+            AddLine(ServerStrings.ConnectingMessage.With(server.Url, server.Port));
         }
 
         private void ParentServer_OnError(object sender, ErrorMessageEventArgs a)
@@ -158,7 +159,7 @@ namespace OrtzIRC
         {
             Text = ServerStrings.ServerFormTitleBar.With(
                         server.UserNick,
-                        server.Description == String.Empty ? server.URL : server.Description, server.URL,
+                        server.Description == String.Empty ? server.Url : server.Description, server.Url,
                         server.Port
                         ); //TODO: This should actually be the network name, not the server
         }

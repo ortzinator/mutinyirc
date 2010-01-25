@@ -15,10 +15,10 @@
         public static event EventHandler<DataEventArgs<string>> WriteFailed;
 
         // Whether we should add time or not
-        public static bool AddTimestamp;
+        public static bool addTimestamp;
 
         // Timestamp
-        public static String TimeFormat;
+        public static String timeFormat;
 
         // Main datastructure
         private static Dictionary<string, Dictionary<string, LoggedItem>> LogFiles =
@@ -28,22 +28,22 @@
 
         public static void TextEntry(Server network, String text)
         {
-            WriteText(LogFiles[network.URL]['!' + network.URL], text);
+            WriteText(LogFiles[network.Url]['!' + network.Url], text);
         }
 
         public static void TextEntry(Server network, User person, String text)
         {
-            WriteText(LogFiles[network.URL][person.Nick], text);
+            WriteText(LogFiles[network.Url][person.Nick], text);
         }
 
         public static void TextEntry(Channel chan, String text)
         {
-            WriteText(LogFiles[chan.Server.URL][chan.Name], text);
+            WriteText(LogFiles[chan.Server.Url][chan.Name], text);
         }
 
         private static void WriteText(LoggedItem logger, String text)
         {
-            logger.Write(AddTimestamp ? DateTime.Now.ToString(TimeFormat) + ' ' + text : text);
+            logger.Write(addTimestamp ? DateTime.Now.ToString(timeFormat) + ' ' + text : text);
 
             // Check for errors
             if (logger.Failed)
@@ -63,62 +63,62 @@
         public static void AddLoggable(Server network)
         {
             // Add value to Network key to hold the different loggables
-            LogFiles.Add(network.URL, new Dictionary<string, LoggedItem>());
+            LogFiles.Add(network.Url, new Dictionary<string, LoggedItem>());
             // Add the network log
-            LogFiles[network.URL].Add('!' + network.URL, new LoggedItem('!' + network.URL, network.URL));
+            LogFiles[network.Url].Add('!' + network.Url, new LoggedItem('!' + network.Url, network.Url));
         }
 
         public static void AddLoggable(Channel chan)
         {
             // Add channel log to the structure
-            LogFiles[chan.Server.URL].Add(chan.Name, new LoggedItem(chan.Name, chan.Server.URL));
+            LogFiles[chan.Server.Url].Add(chan.Name, new LoggedItem(chan.Name, chan.Server.Url));
         }
 
         public static void AddLoggable(Server network, User person)
         {
             // Add pmsg log to the data struture
-            LogFiles[network.URL].Add(person.Nick, new LoggedItem(person.Nick, network.URL)); 
+            LogFiles[network.Url].Add(person.Nick, new LoggedItem(person.Nick, network.Url)); 
         }
 
         public static void RemoveLoggable(Server network)
         {
             if (!NetworkExists(network)) return;
 
-            foreach (LoggedItem Log in LogFiles[network.URL].Values)
+            foreach (LoggedItem log in LogFiles[network.Url].Values)
             {
-                Log.Close();
+                log.Close();
             }
 
-            LogFiles[network.URL].Clear();
-            LogFiles.Remove(network.URL);
+            LogFiles[network.Url].Clear();
+            LogFiles.Remove(network.Url);
         }
 
         public static void RemoveLoggable(Channel chan)
         {
             if (!ChannelExists(chan)) return;
 
-            LogFiles[chan.Server.URL][chan.Name].Close();
-            LogFiles[chan.Server.URL].Remove(chan.Name);
+            LogFiles[chan.Server.Url][chan.Name].Close();
+            LogFiles[chan.Server.Url].Remove(chan.Name);
         }
 
         public static void RemoveLoggable(Server network, User person)
         {
             if (!PersonExists(network, person)) return;
 
-            LogFiles[network.URL][person.Nick].Close();
-            LogFiles[network.URL].Remove(person.Nick);
+            LogFiles[network.Url][person.Nick].Close();
+            LogFiles[network.Url].Remove(person.Nick);
         }
 
         public static void RemoveAllLoggables()
         {
-            foreach(Dictionary<string, LoggedItem> InnerDict in LogFiles.Values)
+            foreach(Dictionary<string, LoggedItem> innerDict in LogFiles.Values)
             {
-                foreach (LoggedItem Li in InnerDict.Values)
+                foreach (LoggedItem li in innerDict.Values)
                 {
-                    Li.Close();
+                    li.Close();
                 }
 
-                InnerDict.Clear();
+                innerDict.Clear();
             }
 
             LogFiles.Clear();
@@ -126,17 +126,17 @@
 
         private static bool NetworkExists(Server network)
         {
-            return LogFiles.ContainsKey(network.URL);
+            return LogFiles.ContainsKey(network.Url);
         }
 
         private static bool ChannelExists(Channel chan)
         {
-            return (NetworkExists(chan.Server) && LogFiles[chan.Server.URL].ContainsKey(chan.Name));
+            return (NetworkExists(chan.Server) && LogFiles[chan.Server.Url].ContainsKey(chan.Name));
         }
 
         private static bool PersonExists(Server network, User person)
         {
-            return (NetworkExists(network) && LogFiles[network.URL].ContainsKey(person.Nick));
+            return (NetworkExists(network) && LogFiles[network.Url].ContainsKey(person.Nick));
         }
     }
 }

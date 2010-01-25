@@ -1,9 +1,8 @@
-﻿namespace OrtzIRC.Common
+﻿using FlamingIRC;
+
+namespace OrtzIRC.Common
 {
     using System;
-
-    using OrtzIRC;
-    using FlamingIRC;
 
     /// <summary>
     /// Purpose: Handle the environnement around the manager such as subscribing
@@ -13,7 +12,8 @@
     /// </summary>
     public static class TextLoggerManager
     {
-        private static bool loggerActive = false;
+        private static bool loggerActive;
+
         public static bool LoggerActive
         {
             get { return loggerActive; }
@@ -23,13 +23,9 @@
                 if (value == loggerActive) return;
 
                 if (value)
-                {
                     TurnOn();
-                }
                 else
-                {
                     TurnOff();
-                }
 
                 loggerActive = value;
             }
@@ -37,38 +33,32 @@
 
         public static bool AddTimestamp
         {
-            get { return TextLogger.AddTimestamp; }
-            set { TextLogger.AddTimestamp = value; }
+            get { return TextLogger.addTimestamp; }
+            set { TextLogger.addTimestamp = value; }
         }
 
         public static string TimeFormat
         {
-            get { return TextLogger.TimeFormat; }
-            set { TextLogger.TimeFormat = value; }
+            get { return TextLogger.timeFormat; }
+            set { TextLogger.timeFormat = value; }
         }
 
-        public static void TextEntry(Server Network, String Text)
+        public static void TextEntry(Server network, String text)
         {
             if (LoggerActive)
-            {
-                TextLogger.TextEntry(Network, Text);
-            }
+                TextLogger.TextEntry(network, text);
         }
 
-        public static void TextEntry(Server Network, User Person, String Text)
+        public static void TextEntry(Server network, User person, String text)
         {
             if (LoggerActive)
-            {
-                TextLogger.TextEntry(Network, Person, Text);
-            }
+                TextLogger.TextEntry(network, person, text);
         }
 
-        public static void TextEntry(Channel Chan, String Text)
+        public static void TextEntry(Channel chan, String text)
         {
             if (LoggerActive)
-            {
-                TextLogger.TextEntry(Chan, Text);
-            }
+                TextLogger.TextEntry(chan, text);
         }
 
         public static void TurnOn()
@@ -79,14 +69,12 @@
             ServerManager.Instance.ServerAdded += ServerManager_ElementCreated;
             ServerManager.Instance.ServerRemoved += ServerManager_ElementRemoved;
 
-            foreach(Server Ntw in ServerManager.Instance.ServerList)
+            foreach (Server ntw in ServerManager.Instance.ServerList)
             {
-                TextLogger.AddLoggable(Ntw);
+                TextLogger.AddLoggable(ntw);
 
-                foreach(Channel Chan in Ntw.ChanManager.Channels.Values)
-                {
-                    TextLogger.AddLoggable(Chan);
-                }
+                foreach (Channel chan in ntw.ChanManager.Channels.Values)
+                    TextLogger.AddLoggable(chan);
             }
         }
 

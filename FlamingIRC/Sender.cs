@@ -164,6 +164,7 @@ namespace FlamingIRC
             Buffer.Append(message);
             Connection.SendAutomaticReply(Buffer);
         }
+
         /// <summary>
         /// The PASS command is used to set a 'Connection password'. 
         /// </summary>
@@ -269,7 +270,7 @@ namespace FlamingIRC
                         password = Truncate(password, 8);
                         Buffer.Append(password);
                     }
-                    
+
                     Connection.SendCommand(Buffer);
                 }
                 else
