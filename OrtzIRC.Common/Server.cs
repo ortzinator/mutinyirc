@@ -81,6 +81,7 @@
             //TODO: Select port
             var args = new ConnectionArgs(settings.Nick, settings.Url, settings.Ssl);
             Connection = new Connection(args, true, false);
+            Connection.HandleNickTaken = false;
         }
 
         private void HookEvents()

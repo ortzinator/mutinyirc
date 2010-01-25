@@ -9,6 +9,7 @@ namespace OrtzIRC
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Resources;
+    using OrtzIRC.Properties;
 
     public partial class ServerForm : Form
     {
@@ -49,10 +50,56 @@ namespace OrtzIRC
             server.Disconnected += server_Disconnected;
             server.ConnectionLost += server_ConnectionLost;
             server.ConnectCancelled += server_ConnectCancelled;
-            //server.
+            server.NickError += server_NickError;
 
             commandTextBox.CommandEntered += commandTextBox_CommandEntered;
             serverOutputBox.MouseUp += serverOutputBox_MouseUp;
+        }
+
+        private int nickRetry;
+        private bool nickRetryFailed;
+        private void server_NickError(object sender, NickErrorEventArgs e)
+        {
+            if (server.Connection.Registered || server.Connection.HandleNickTaken) return;
+            string newNick;
+            switch (nickRetry)
+            {
+                case 0:
+                    newNick = Settings.Default.SecondNick;
+                    DisplayNickTakenMessage(e.BadNick, newNick);
+                    server.Connection.Sender.Register(newNick);
+                    nickRetry = 1;
+                    break;
+                case 1:
+                    newNick = Settings.Default.ThirdNick;
+                    DisplayNickTakenMessage(e.BadNick, newNick);
+                    server.Connection.Sender.Register(Settings.Default.ThirdNick);
+                    nickRetry = 2;
+                    break;
+            }
+
+            if (nickRetry == 2 || nickRetryFailed)
+            {
+                nickRetryFailed = true;
+                //If the following is successful then nickRetryFailed will be set back to false
+
+                var generator = new NameGenerator();
+                string nick;
+                do
+                {
+                    nick = generator.MakeName();
+                } while (!Rfc2812Util.IsValidNick(nick) || nick.Length == 1);
+                //Try to reconnect
+                server.Connection.Sender.Register(nick);
+            }
+        }
+
+        private void DisplayNickTakenMessage(string nick, string newNick)
+        {
+            if (InvokeRequired)
+                Invoke(new Action<string, string>(DisplayNickTakenMessage), nick, newNick);
+            else
+                AddLine(string.Format("The nick '{0}' was taken. Trying '{1}'", nick, newNick));
         }
 
         private void server_ConnectCancelled(object sender, EventArgs e)
@@ -150,18 +197,27 @@ namespace OrtzIRC
         {
             // TODO: Join list of auto-join channels
             if (InvokeRequired)
-                Invoke(new Action(SetFormTitle));
+                Invoke(new Action(DoRegister));
             else
-                SetFormTitle();
+                DoRegister();
         }
 
-        private void SetFormTitle()
+        private void DoRegister()
         {
             Text = ServerStrings.ServerFormTitleBar.With(
                         server.UserNick,
                         server.Description == String.Empty ? server.Url : server.Description, server.Url,
                         server.Port
                         ); //TODO: This should actually be the network name, not the server
+
+
+            if (nickRetryFailed)
+            {
+                AddLine("All of your alternate nicks were taken, so one was randomly chosen for you."); //TODO: Messagebox?
+            }
+
+            nickRetry = 0;
+            nickRetryFailed = false;
         }
 
         private void ParentServer_OnJoinSelf(object sender, OrtzIRC.Common.DataEventArgs<Channel> e)
