@@ -22,18 +22,18 @@
  * the archive of this library for complete text of license.
 */
 
-using System.Net.Security;
-
 namespace FlamingIRC
 {
     using System;
     using System.Collections;
     using System.Diagnostics;
-    using System.IO;
+    using System.Net.Security;
+    using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading;
-    using System.Security.Cryptography.X509Certificates;
+    using System.Timers;
+    using Timer = System.Timers.Timer;
 
     /// <summary>
     /// This class manages the connection to the IRC server and provides
@@ -41,48 +41,22 @@ namespace FlamingIRC
     /// </summary>
     public sealed class Connection : TcpTextClient
     {
-        /// <summary>
-        /// Receive all the messages, unparsed, sent by the IRC server. This is not
-        /// normally needed but provided for those who are interested.
-        /// </summary>
-        public event EventHandler<FlamingDataEventArgs<string>> RawMessageReceived;
-        /// <summary>
-        /// Receive all the raw messages sent to the IRC from this connection
-        /// </summary>
-        public event EventHandler<FlamingDataEventArgs<string>> RawMessageSent;
-
-        public event EventHandler ConnectionEstablished;
-        public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
-        public event EventHandler<DisconnectEventArgs> ConnectionLost;
-
-        private Regex propertiesRegex;
-        private readonly Listener listener;
-        private readonly Sender sender;
-        private CtcpListener ctcpListener;
-        private CtcpSender ctcpSender;
-        private CtcpResponder ctcpResponder;
-        private bool ctcpEnabled;
-        private bool dccEnabled;
-        private DateTime timeLastSent;
-        //Connected and registered with IRC server
-        private bool registered;
-        //TCP/IP connection established with IRC server
-        private bool handleNickFailure;
-        private ArrayList parsers;
-        private ServerProperties properties;
-
-        private System.Timers.Timer activityTimer;
-        private DateTime lastTraffic;
-
+        private readonly Timer activityTimer;
+        private readonly ArrayList parsers;
+        private readonly Regex propertiesRegex;
         internal ConnectionArgs connectionArgs;
+        private bool ctcpEnabled;
+        private CtcpListener ctcpListener;
+        private CtcpResponder ctcpResponder;
+        private DateTime lastTraffic;
+        private ServerProperties properties;
+        private DateTime timeLastSent;
 
         /// <summary>
         /// Used for internal test purposes only.
         /// </summary>
         internal Connection(ConnectionArgs args)
-            : this(args, true, true)
-        {
-        }
+            : this(args, true, true) { }
 
         /// <summary>
         /// Prepare a connection to an IRC server but do not open it. This sets the text Encoding to Default.
@@ -93,12 +67,12 @@ namespace FlamingIRC
         public Connection(ConnectionArgs args, bool enableCtcp, bool enableDcc)
         {
             propertiesRegex = new Regex("([A-Z]+)=([^\\s]+)", RegexOptions.Compiled | RegexOptions.Singleline);
-            registered = false;
-            handleNickFailure = true;
+            Registered = false;
+            HandleNickTaken = true;
             connectionArgs = args;
             parsers = new ArrayList();
-            sender = new Sender(this);
-            listener = new Listener();
+            Sender = new Sender(this);
+            Listener = new Listener();
             RegisterDelegates();
             timeLastSent = DateTime.Now;
             EnableCtcp = enableCtcp;
@@ -107,8 +81,8 @@ namespace FlamingIRC
 
             lastTraffic = DateTime.Now;
 
-            activityTimer = new System.Timers.Timer {Interval = TimeSpan.FromSeconds(30).TotalMilliseconds};
-            activityTimer.Elapsed += new System.Timers.ElapsedEventHandler(activityTimer_Elapsed);
+            activityTimer = new Timer { Interval = TimeSpan.FromSeconds(30).TotalMilliseconds };
+            activityTimer.Elapsed += activityTimer_Elapsed;
             activityTimer.Start();
         }
 
@@ -125,25 +99,13 @@ namespace FlamingIRC
             TextEncoding = textEncoding;
         }
 
-        private void activityTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (DateTime.Now - lastTraffic > TimeSpan.FromSeconds(30))
-                Sender.Ping();
-        }
-
         /// <summary>
         /// A read-only property indicating whether the connection 
         /// has been opened with the IRC server and the 
         /// socket has been successfully registered.
         /// </summary>
         /// <value>True if the socket is connected and registered.</value>
-        public bool Registered
-        {
-            get
-            {
-                return registered;
-            }
-        }
+        public bool Registered { get; private set; }
 
         /// <summary>
         /// By default the connection itself will handle the case
@@ -158,17 +120,7 @@ namespace FlamingIRC
         /// </remarks>
         /// <value>True if the connection should handle this case and
         /// false if the socket will handle it itself.</value>
-        public bool HandleNickTaken
-        {
-            get
-            {
-                return handleNickFailure;
-            }
-            set
-            {
-                handleNickFailure = value;
-            }
-        }
+        public bool HandleNickTaken { get; set; }
 
         /// <summary>
         /// A user friendly name of this Connection in the form 'nick@host'
@@ -176,10 +128,7 @@ namespace FlamingIRC
         /// <value>Read only string</value>
         public string Name
         {
-            get
-            {
-                return connectionArgs.Nick + "@" + connectionArgs.Hostname;
-            }
+            get { return connectionArgs.Nick + "@" + connectionArgs.Hostname; }
         }
 
         /// <summary>
@@ -190,21 +139,18 @@ namespace FlamingIRC
         /// false will cause their property calls to return null.</value>
         public bool EnableCtcp
         {
-            get
-            {
-                return ctcpEnabled;
-            }
+            get { return ctcpEnabled; }
             set
             {
                 if (value && !ctcpEnabled)
                 {
                     ctcpListener = new CtcpListener(this);
-                    ctcpSender = new CtcpSender(this);
+                    CtcpSender = new CtcpSender(this);
                 }
                 else if (!value)
                 {
                     ctcpListener = null;
-                    ctcpSender = null;
+                    CtcpSender = null;
                 }
                 ctcpEnabled = value;
             }
@@ -217,17 +163,7 @@ namespace FlamingIRC
         /// be manually removed when no longer needed.
         /// </summary>
         /// <value>True to process DCC requests.</value>
-        public bool EnableDcc
-        {
-            get
-            {
-                return dccEnabled;
-            }
-            set
-            {
-                dccEnabled = value;
-            }
-        }
+        public bool EnableDcc { get; set; }
 
         /// <summary>
         /// Sets an automatic responder to Ctcp queries.
@@ -235,16 +171,11 @@ namespace FlamingIRC
         /// <value>Once this is set it can be removed by setting it to null.</value>
         public CtcpResponder CtcpResponder
         {
-            get
-            {
-                return ctcpResponder;
-            }
+            get { return ctcpResponder; }
             set
             {
                 if (value == null && ctcpResponder != null)
-                {
                     ctcpResponder.Disable();
-                }
                 ctcpResponder = value;
             }
         }
@@ -256,47 +187,26 @@ namespace FlamingIRC
         /// <value>Read only TimeSpan</value>
         public TimeSpan IdleTime
         {
-            get
-            {
-                return DateTime.Now - timeLastSent;
-            }
+            get { return DateTime.Now - timeLastSent; }
         }
 
         /// <summary>
         /// The object used to send commands to the IRC server.
         /// </summary>
         /// <value>Read-only Sender.</value>
-        public Sender Sender
-        {
-            get
-            {
-                return sender;
-            }
-        }
+        public Sender Sender { get; private set; }
 
         /// <summary>
         /// The object that parses messages and notifies the appropriate delegate.
         /// </summary>
         /// <value>Read only Listener.</value>
-        public Listener Listener
-        {
-            get
-            {
-                return listener;
-            }
-        }
+        public Listener Listener { get; private set; }
 
         /// <summary>
         /// The object used to send CTCP commands to the IRC server.
         /// </summary>
         /// <value>Read only CtcpSender. Null if CtcpEnabled is false.</value>
-        public CtcpSender CtcpSender
-        {
-            get
-            {
-                return ctcpSender;
-            }
-        }
+        public CtcpSender CtcpSender { get; private set; }
 
         /// <summary>
         /// The object that parses CTCP messages and notifies the appropriate delegate.
@@ -313,10 +223,7 @@ namespace FlamingIRC
         /// <value>Read only ConnectionArgs.</value>
         public ConnectionArgs ConnectionData
         {
-            get
-            {
-                return connectionArgs;
-            }
+            get { return connectionArgs; }
         }
 
         /// <summary>
@@ -327,10 +234,28 @@ namespace FlamingIRC
         /// has not been created.</value>
         public ServerProperties ServerProperties
         {
-            get
-            {
-                return properties;
-            }
+            get { return properties; }
+        }
+
+        /// <summary>
+        /// Receive all the messages, unparsed, sent by the IRC server. This is not
+        /// normally needed but provided for those who are interested.
+        /// </summary>
+        public event EventHandler<FlamingDataEventArgs<string>> RawMessageReceived;
+
+        /// <summary>
+        /// Receive all the raw messages sent to the IRC from this connection
+        /// </summary>
+        public event EventHandler<FlamingDataEventArgs<string>> RawMessageSent;
+
+        public event EventHandler ConnectionEstablished;
+        public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
+        public event EventHandler<DisconnectEventArgs> ConnectionLost;
+
+        private void activityTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (DateTime.Now - lastTraffic > TimeSpan.FromSeconds(30))
+                Sender.Ping();
         }
 
         private bool CustomParse(string line)
@@ -345,13 +270,14 @@ namespace FlamingIRC
             }
             return false;
         }
+
         /// <summary>
         /// Respond to IRC keep-alives.
         /// </summary>
         /// <param name="message">The message that should be echoed back</param>
         private void KeepAlive(string message)
         {
-            sender.Pong(message);
+            Sender.Pong(message);
         }
 
         private void UpdateLastTime()
@@ -373,8 +299,8 @@ namespace FlamingIRC
 
         private void OnRegistered(object sender, EventArgs e)
         {
-            registered = true;
-            listener.OnRegistered -= OnRegistered;
+            Registered = true;
+            Listener.OnRegistered -= OnRegistered;
         }
 
         /// <summary>
@@ -383,19 +309,19 @@ namespace FlamingIRC
         private void OnNickError(object sender, NickErrorEventArgs ea)
         {
             //If this is our initial connection attempt
-            if (!registered && handleNickFailure)
+            if (!Registered && HandleNickTaken)
             {
                 var generator = new NameGenerator();
                 string nick;
                 do
                 {
                     nick = generator.MakeName();
-                }
-                while (!Rfc2812Util.IsValidNick(nick) || nick.Length == 1);
+                } while (!Rfc2812Util.IsValidNick(nick) || nick.Length == 1);
                 //Try to reconnect
                 Sender.Register(nick);
             }
         }
+
         /// <summary>
         /// Listen for the 005 info messages sent during registration so that the maximum lengths
         /// of certain items (Nick, Away, Topic) can be determined dynamically.
@@ -409,9 +335,7 @@ namespace FlamingIRC
             if (matches.Count > 0)
             {
                 foreach (Match match in matches)
-                {
                     properties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
-                }
             }
             //Extract ones we are interested in
             ExtractProperties();
@@ -434,14 +358,15 @@ namespace FlamingIRC
             }
             */
         }
+
         private void RegisterDelegates()
         {
-            listener.OnPing += KeepAlive;
-            listener.OnAnything += UpdateLastTime;
-            listener.OnNick += MyNickChanged;
-            listener.OnNickError += OnNickError;
-            listener.OnReply += OnReply;
-            listener.OnRegistered += OnRegistered;
+            Listener.OnPing += KeepAlive;
+            Listener.OnAnything += UpdateLastTime;
+            Listener.OnNick += MyNickChanged;
+            Listener.OnNickError += OnNickError;
+            Listener.OnReply += OnReply;
+            Listener.OnRegistered += OnRegistered;
         }
 
         /// <summary>
@@ -454,12 +379,12 @@ namespace FlamingIRC
                 if (Connected)
                     throw new Exception("Connection with IRC server already opened.");
                 properties = new ServerProperties();
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                                  "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
 
                 Connect(connectionArgs.Hostname, connectionArgs.Port, connectionArgs.Ssl);
             }
         }
-
 
         /// <summary>
         /// Read in message lines from the IRC server
@@ -469,9 +394,11 @@ namespace FlamingIRC
         /// </summary>
         internal void ReceiveIRCMessages(string line)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages()");
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                              "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages()");
 
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages() rec'd:" + line);
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                              "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages() rec'd:" + line);
             //Try any custom parsers first
             if (CustomParse(line))
             {
@@ -481,22 +408,16 @@ namespace FlamingIRC
             }
             if (DccListener.IsDccRequest(line))
             {
-                if (dccEnabled)
-                {
+                if (EnableDcc)
                     DccListener.DefaultInstance.Parse(this, line);
-                }
             }
             else if (CtcpListener.IsCtcpMessage(line))
             {
                 if (ctcpEnabled)
-                {
                     ctcpListener.Parse(line);
-                }
             }
             else
-            {
-                listener.Parse(line);
-            }
+                Listener.Parse(line);
 
             RawMessageReceived.Fire(this, new FlamingDataEventArgs<string>(line));
         }
@@ -510,12 +431,14 @@ namespace FlamingIRC
             {
                 Send(command.ToString());
 
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() sent= " + command);
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                                  "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() sent= " + command);
                 timeLastSent = DateTime.Now;
             }
             catch (Exception ex)
             {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() exception=" + ex);
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                                  "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() exception=" + ex);
             }
 
             RawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
@@ -535,11 +458,14 @@ namespace FlamingIRC
             {
                 Send(command.ToString());
 
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() message=" + command);
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                                  "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() message=" +
+                                  command);
             }
             catch (Exception ex)
             {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() exception=" + ex);
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                                  "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() exception=" + ex);
             }
             command.Remove(0, command.Length);
         }
@@ -557,9 +483,10 @@ namespace FlamingIRC
                 if (!Connected)
                     return;
 
-                sender.Quit(reason);
+                Sender.Quit(reason);
                 Disconnect(DisconnectReason.UserInitiated);
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Connection::Disconnect()");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                                  "[" + Thread.CurrentThread.Name + "] Connection::Disconnect()");
             }
         }
 
@@ -594,15 +521,15 @@ namespace FlamingIRC
             parsers.Remove(parser);
         }
 
-
         protected override void OnConnect()
         {
             ConnectionEstablished.Fire(this, new EventArgs());
-            sender.RegisterConnection(connectionArgs);
+            Sender.RegisterConnection(connectionArgs);
             Connected = true;
         }
 
-        protected override bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
+        protected override bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain,
+                                                                SslPolicyErrors errors)
         {
             throw new NotImplementedException();
         }
@@ -612,14 +539,9 @@ namespace FlamingIRC
             if (ConnectionLost != null)
             {
                 if (socketErrorCode == null)
-                {
                     ConnectionLost(this, new DisconnectEventArgs(reason));
-                }
                 else
-                {
                     ConnectionLost(this, new DisconnectEventArgs(reason, (int)socketErrorCode));
-                }
-
             }
         }
 
@@ -628,13 +550,9 @@ namespace FlamingIRC
             if (ConnectFailed != null)
             {
                 if (socketErrorCode == null)
-                {
                     ConnectFailed(this, new ConnectFailedEventArgs(reason));
-                }
                 else
-                {
                     ConnectFailed(this, new ConnectFailedEventArgs(reason, (int)socketErrorCode));
-                }
             }
         }
 

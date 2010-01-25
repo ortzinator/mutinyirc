@@ -19,7 +19,7 @@
             HookEvents();
         }
 
-        public string URL
+        public string Url
         {
             get
             {
@@ -104,8 +104,14 @@
             Connection.Listener.OnKick += Listener_OnKick;
             Connection.Listener.OnPrivate += Listener_OnPrivate;
             Connection.Listener.OnPing += Listener_OnPing;
+            Connection.Listener.OnNickError += Listener_OnNickError;
 
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
+        }
+
+        private void Listener_OnNickError(object sender, NickErrorEventArgs e)
+        {
+            NickError.Fire(this, e);
         }
 
         private void Listener_OnPing(string message)
@@ -167,16 +173,20 @@
             Connection.RawMessageReceived -= Connection_OnRawMessageReceived;
         }
 
+        /// <summary>
+        /// The client joined a channel.
+        /// </summary>
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
         public event EventHandler<CancelEventArgs> Connecting;
+
+        /// <summary>
+        /// Another user joined a channel.
+        /// </summary>
         public event EventHandler<DoubleDataEventArgs<User, Channel>> JoinOther;
 
         /// <summary>
-        /// Informs the subscriber that a connect attempt fails.
+        /// A connect attempt failed.
         /// </summary>
-        /// <remarks>
-        /// The socket error code
-        /// </remarks>
         public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
 
         public event EventHandler<DataEventArgs<string>> RawMessageReceived;
@@ -199,6 +209,7 @@
         public event EventHandler<DisconnectEventArgs> ConnectionLost;
         public event EventHandler ConnectCancelled;
         public event EventHandler<DataEventArgs<string>> PingReceived;
+        public event EventHandler<NickErrorEventArgs> NickError;
 
         // hack - should call dispose
         ~Server()
@@ -397,7 +408,7 @@
 
         public override string ToString()
         {
-            return String.Format("{0}:{1} - {2}", URL, Port, Description);
+            return String.Format("{0}:{1} - {2}", Url, Port, Description);
         }
 
         public void ChangeNick(string nick)
