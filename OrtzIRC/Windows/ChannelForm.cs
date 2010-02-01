@@ -5,6 +5,7 @@
     using FlamingIRC;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
+    using OrtzIRC.Resources;
 
     public partial class ChannelForm : Form
     {
@@ -80,7 +81,7 @@
 
         private void Channel_MessagedChannel(object sender, UserMessageEventArgs e)
         {
-            AddLine(string.Format("{0}: {1}", e.User.NamesLiteral, e.Message));
+            AddLine(ChannelStrings.PublicMessage.With(e.User.NamesLiteral, e.Message));
         }
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
@@ -94,23 +95,23 @@
 
         private void Server_Disconnected(object sender, EventArgs e)
         {
-            AddLine("--Disconnected--");
+            AddLine(ServerStrings.Disconnected);
             Close();
         }
 
         private void Channel_OnKick(User nick, string kickee, string reason)
         {
-            AddLine(string.Format("-- Kick: ({0}) was kicked by ({1}) {2}", kickee, nick.Nick, reason));
+            AddLine(ChannelStrings.Kick.With(kickee, nick.Nick, reason));
         }
 
         private void Channel_OnNick(User nick, string newNick)
         {
-            AddLine(string.Format("-- Nick: ({0}) is now known as ({1})", nick.Nick, newNick));
+            AddLine(ChannelStrings.NickChange.With(nick.Nick, newNick));
         }
 
         private void Channel_OnUserQuitted(object sender, UserMessageEventArgs e)
         {
-            AddLine(string.Format("-- Quit: ({0}) ({1}) {2}", e.User.Nick, e.User.HostMask, e.Message));
+            AddLine(ChannelStrings.Quit.With(e.User.Nick, e.User.HostMask, e.Message));
         }
 
         private void Channel_UserParted(object sender, EventArgs e)
@@ -124,29 +125,29 @@
         private void Channel_OtherUserParted(object sender, UserMessageEventArgs e)
         {
             if (e.Message == String.Empty)
-                AddLine(string.Format("-- Parted: ({0}) ({1})", e.User.Nick, e.User.HostMask));
+                AddLine(ChannelStrings.Part.With(e.User.Nick, e.User.HostMask));
             else
-                AddLine(string.Format("-- Parted: ({0}) ({1}) {2}", e.User.Nick, e.User.HostMask, e.Message));
+                AddLine(ChannelStrings.PartWithReason.With(e.User.Nick, e.User.HostMask, e.Message));
         }
 
         private void Channel_OnJoin(object sender, UserEventArgs e)
         {
-            AddLine(string.Format("-- Joined: ({0}) ({1})", e.User.Nick, e.User.HostMask));
+            AddLine(ChannelStrings.Joined.With(e.User.Nick, e.User.HostMask));
         }
 
         private void Channel_TopicReceived(object sender, DataEventArgs<string> e)
         {
-            AddLine(string.Format("topic: ({0})", e.Data));
+            AddLine(ChannelStrings.TopicRecieved.With(e.Data));
         }
 
         private void Channel_OnAction(object sender, UserMessageEventArgs e)
         {
-            AddLine(string.Format("-- {0} {1}", e.User.Nick, e.Message));
+            AddLine(ChannelStrings.Action.With(e.User.Nick, e.Message));
         }
 
         private void Channel_OnMessage(object sender, UserMessageEventArgs e)
         {
-            AddLine(string.Format("{0}: {1}", e.User.NamesLiteral, e.Message));
+            AddLine(ChannelStrings.PublicMessage.With(e.User.NamesLiteral, e.Message));
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

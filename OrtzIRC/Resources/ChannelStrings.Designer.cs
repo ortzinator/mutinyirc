@@ -22,14 +22,14 @@ namespace OrtzIRC.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "2.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class ServerStrings {
+    internal class ChannelStrings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ServerStrings() {
+        internal ChannelStrings() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace OrtzIRC.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OrtzIRC.Resources.ServerStrings", typeof(ServerStrings).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OrtzIRC.Resources.ChannelStrings", typeof(ChannelStrings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,92 +61,83 @@ namespace OrtzIRC.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Attempting to reconnect....
+        ///   Looks up a localized string similar to -- {0} {1}.
         /// </summary>
-        internal static string AttemptingReconnect {
+        internal static string Action {
             get {
-                return ResourceManager.GetString("AttemptingReconnect", resourceCulture);
+                return ResourceManager.GetString("Action", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connecting to {0} ({1})....
+        ///   Looks up a localized string similar to -- Joined: ({0}) ({1}).
         /// </summary>
-        internal static string ConnectingMessage {
+        internal static string Joined {
             get {
-                return ResourceManager.GetString("ConnectingMessage", resourceCulture);
+                return ResourceManager.GetString("Joined", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not connect: {0}.
+        ///   Looks up a localized string similar to -- Kick: ({0}) was kicked by ({1}) {2}.
         /// </summary>
-        internal static string ConnectionFailedMessage {
+        internal static string Kick {
             get {
-                return ResourceManager.GetString("ConnectionFailedMessage", resourceCulture);
+                return ResourceManager.GetString("Kick", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to --Disconnected--.
+        ///   Looks up a localized string similar to -- Nick: ({0}) is now known as ({1}).
         /// </summary>
-        internal static string Disconnected {
+        internal static string NickChange {
             get {
-                return ResourceManager.GetString("Disconnected", resourceCulture);
+                return ResourceManager.GetString("NickChange", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to --Disconnected: {0} (Socket error {1}).
+        ///   Looks up a localized string similar to -- Parted: ({0}) ({1}).
         /// </summary>
-        internal static string DisconnectSocketError {
+        internal static string Part {
             get {
-                return ResourceManager.GetString("DisconnectSocketError", resourceCulture);
+                return ResourceManager.GetString("Part", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The nick &apos;{0}&apos; was taken. Trying &apos;{1}&apos;.
+        ///   Looks up a localized string similar to -- Parted: ({0}) ({1}) {2}.
         /// </summary>
-        internal static string NickTakenMessage {
+        internal static string PartWithReason {
             get {
-                return ResourceManager.GetString("NickTakenMessage", resourceCulture);
+                return ResourceManager.GetString("PartWithReason", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All of your alternate nicks were taken, so one was randomly chosen for you..
+        ///   Looks up a localized string similar to {0}: {1}.
         /// </summary>
-        internal static string RandomNickMessage {
+        internal static string PublicMessage {
             get {
-                return ResourceManager.GetString("RandomNickMessage", resourceCulture);
+                return ResourceManager.GetString("PublicMessage", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} {1}.
+        ///   Looks up a localized string similar to -- Quit: ({0}) ({1}) {2}.
         /// </summary>
-        internal static string ServerErrorMessage {
+        internal static string Quit {
             get {
-                return ResourceManager.GetString("ServerErrorMessage", resourceCulture);
+                return ResourceManager.GetString("Quit", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status: {0} on {1} ({2}:{3}).
+        ///   Looks up a localized string similar to Topic: ({0}).
         /// </summary>
-        internal static string ServerFormTitleBar {
+        internal static string TopicRecieved {
             get {
-                return ResourceManager.GetString("ServerFormTitleBar", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This will disconnect you from {0}?.
-        /// </summary>
-        internal static string WarnDisconnect {
-            get {
-                return ResourceManager.GetString("WarnDisconnect", resourceCulture);
+                return ResourceManager.GetString("TopicRecieved", resourceCulture);
             }
         }
     }
