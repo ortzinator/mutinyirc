@@ -1,5 +1,3 @@
-using System.Timers;
-
 namespace OrtzIRC
 {
     using System;
@@ -82,14 +80,12 @@ namespace OrtzIRC
             {
                 nickRetryFailed = true;
                 //If the following is successful then nickRetryFailed will be set back to false
-
                 var generator = new NameGenerator();
                 string nick;
                 do
                 {
                     nick = generator.MakeName();
                 } while (!Rfc2812Util.IsValidNick(nick) || nick.Length == 1);
-                //Try to reconnect
                 server.Connection.Sender.Register(nick);
             }
         }
@@ -99,12 +95,12 @@ namespace OrtzIRC
             if (InvokeRequired)
                 Invoke(new Action<string, string>(DisplayNickTakenMessage), nick, newNick);
             else
-                AddLine(string.Format("The nick '{0}' was taken. Trying '{1}'", nick, newNick));
+                AddLine(ServerStrings.NickTakenMessage.With(nick, newNick));
         }
 
         private void server_ConnectCancelled(object sender, EventArgs e)
         {
-            AddLine("--Disconnected--");
+            AddLine(ServerStrings.Disconnected);
         }
 
         private void server_ConnectionLost(object sender, DisconnectEventArgs e)
@@ -115,12 +111,12 @@ namespace OrtzIRC
             }
             else
             {
-                AddLine(string.Format("--Disconnected: {0} {1}", e.Reason, e.SocketErrorCode));
+                AddLine(ServerStrings.DisconnectSocketError.With(e.Reason, e.SocketErrorCode));
             }
 
             if (e.Reason != DisconnectReason.UserInitiated)
             {
-                AddLine("Attempting to reconnect...");
+                AddLine(ServerStrings.AttemptingReconnect);
                 ThreadHelper.InvokeAfter(TimeSpan.FromSeconds(4), delegate { server.Connect(); });
             }
         }
@@ -146,7 +142,7 @@ namespace OrtzIRC
 
         private void server_Disconnected(object sender, EventArgs e)
         {
-            AddLine("--Disconnected--");
+            AddLine(ServerStrings.Disconnected);
         }
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
@@ -213,7 +209,7 @@ namespace OrtzIRC
 
             if (nickRetryFailed)
             {
-                AddLine("All of your alternate nicks were taken, so one was randomly chosen for you."); //TODO: Messagebox?
+                AddLine(ServerStrings.RandomNickMessage); //TODO: Messagebox?
             }
 
             nickRetry = 0;

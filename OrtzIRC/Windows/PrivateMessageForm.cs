@@ -72,12 +72,12 @@ namespace OrtzIRC
         {
             string nick = PMSession.Server.Connection.ConnectionData.Nick;
 
-            AddLine(string.Format("{0}: {1}", nick, e.Data));
+            AddLine(ChannelStrings.PublicMessage.With(nick, e.Data));
         }
 
         private void pmsession_MessageReceived(object sender, DataEventArgs<string> e)
         {
-            AddLine(string.Format("{0}: {1}", pmsession.User.Nick, e.Data));
+            AddLine(ChannelStrings.PublicMessage.With(pmsession.User.Nick, e.Data));
         }
 
         private void serverOutputBox_MouseUp(object sender, MouseEventArgs e)
@@ -87,7 +87,7 @@ namespace OrtzIRC
 
         private void server_Disconnected(object sender, EventArgs e)
         {
-            AddLine("--Disconnected--");
+            AddLine(ServerStrings.Disconnected);
         }
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
@@ -95,7 +95,7 @@ namespace OrtzIRC
             CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(PMSession, e.Data));
             if (result != null && result.Result == CommandResult.Fail)
             {
-                serverOutputBox.AppendError("\n" + result.Message);
+                serverOutputBox.AppendError("\n" + CommonStrings.CommandErrorMessage.With(result.Message));
             }
         }
 
@@ -116,7 +116,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnError(object sender, ErrorMessageEventArgs a)
         {
-            AddLine(string.Format("{0} {1}", a.Code, a.Message));
+            AddLine(ServerStrings.ServerErrorMessage.With(a.Code, a.Message));
         }
 
         private void ParentServer_OnRawMessageReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
@@ -132,7 +132,7 @@ namespace OrtzIRC
 
         private void ParentServer_OnPrivateNotice(object sender, UserMessageEventArgs e)
         {
-            AddLine(string.Format("-{0}: {1}-", e.User.Nick, e.Message));
+            AddLine(CommonStrings.PrivateNotice.With(e.User.Nick, e.Message));
         }
 
         private void ParentServer_UserAction(object sender, ChannelMessageEventArgs e)

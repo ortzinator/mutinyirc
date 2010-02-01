@@ -117,37 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AttemptingReconnect" xml:space="preserve">
-    <value>Attempting to reconnect...</value>
+  <data name="Action" xml:space="preserve">
+    <value>-- {0} {1}</value>
   </data>
-  <data name="ConnectingMessage" xml:space="preserve">
-    <value>Connecting to {0} ({1})...</value>
-    <comment>Displayed to user in a server window when trying to connect.</comment>
+  <data name="Joined" xml:space="preserve">
+    <value>-- Joined: ({0}) ({1})</value>
   </data>
-  <data name="ConnectionFailedMessage" xml:space="preserve">
-    <value>Could not connect: {0}</value>
-    <comment>Displayed to the user when a connection attempt is not successful.</comment>
+  <data name="Kick" xml:space="preserve">
+    <value>-- Kick: ({0}) was kicked by ({1}) {2}</value>
   </data>
-  <data name="Disconnected" xml:space="preserve">
-    <value>--Disconnected--</value>
+  <data name="NickChange" xml:space="preserve">
+    <value>-- Nick: ({0}) is now known as ({1})</value>
   </data>
-  <data name="DisconnectSocketError" xml:space="preserve">
-    <value>--Disconnected: {0} (Socket error {1})</value>
+  <data name="Part" xml:space="preserve">
+    <value>-- Parted: ({0}) ({1})</value>
   </data>
-  <data name="NickTakenMessage" xml:space="preserve">
-    <value>The nick '{0}' was taken. Trying '{1}'</value>
+  <data name="PartWithReason" xml:space="preserve">
+    <value>-- Parted: ({0}) ({1}) {2}</value>
   </data>
-  <data name="RandomNickMessage" xml:space="preserve">
-    <value>All of your alternate nicks were taken, so one was randomly chosen for you.</value>
+  <data name="PublicMessage" xml:space="preserve">
+    <value>{0}: {1}</value>
   </data>
-  <data name="ServerErrorMessage" xml:space="preserve">
-    <value>{0} {1}</value>
+  <data name="Quit" xml:space="preserve">
+    <value>-- Quit: ({0}) ({1}) {2}</value>
   </data>
-  <data name="ServerFormTitleBar" xml:space="preserve">
-    <value>Status: {0} on {1} ({2}:{3})</value>
-  </data>
-  <data name="WarnDisconnect" xml:space="preserve">
-    <value>This will disconnect you from {0}?</value>
-    <comment>Displayed to the user when an action they performed will indirectly cause disconnection.</comment>
+  <data name="TopicRecieved" xml:space="preserve">
+    <value>Topic: ({0})</value>
   </data>
 </root>
