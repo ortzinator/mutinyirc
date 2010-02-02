@@ -2,15 +2,18 @@ namespace OrtzIRC
 {
     using System;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.Windows.Forms;
     using FlamingIRC;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
-    using OrtzIRC.Resources;
     using OrtzIRC.Properties;
+    using OrtzIRC.Resources;
 
     public partial class ServerForm : Form
     {
+        private int nickRetry;
+        private bool nickRetryFailed;
         private Server server;
 
         public ServerForm()
@@ -54,8 +57,6 @@ namespace OrtzIRC
             serverOutputBox.MouseUp += serverOutputBox_MouseUp;
         }
 
-        private int nickRetry;
-        private bool nickRetryFailed;
         private void server_NickError(object sender, NickErrorEventArgs e)
         {
             if (server.Connection.Registered || server.Connection.HandleNickTaken) return;
@@ -106,13 +107,9 @@ namespace OrtzIRC
         private void server_ConnectionLost(object sender, DisconnectEventArgs e)
         {
             if (e.SocketErrorCode == 0)
-            {
-                AddLine(string.Format("--Disconnected: {0}", e.Reason));
-            }
+                AddLine(ServerStrings.ConnectionLost.With(e.Reason));
             else
-            {
                 AddLine(ServerStrings.DisconnectSocketError.With(e.Reason, e.SocketErrorCode));
-            }
 
             if (e.Reason != DisconnectReason.UserInitiated)
             {
@@ -149,9 +146,7 @@ namespace OrtzIRC
         {
             CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Server, e.Data));
             if (result != null && result.Result == CommandResult.Fail)
-            {
                 serverOutputBox.AppendError("\n" + result.Message);
-            }
         }
 
         private void Server_Connecting(object sender, CancelEventArgs e)
@@ -161,10 +156,16 @@ namespace OrtzIRC
 
         private void ParentServer_OnError(object sender, ErrorMessageEventArgs a)
         {
+            if (a.Code == ReplyCode.ERR_NOMOTD)
+            {
+                Debug.WriteLine("Message ignored: " + a.Code);
+                return;
+            }
+
             AddLine(string.Format("{0} {1}", a.Code, a.Message));
         }
 
-        private void ParentServer_OnRawMessageReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
+        private void ParentServer_OnRawMessageReceived(object sender, DataEventArgs<string> e)
         {
             //intentionally blank
             //AddLine(e.Data);
@@ -178,13 +179,10 @@ namespace OrtzIRC
         private void Server_OnConnectFail(object sender, ConnectFailedEventArgs e)
         {
             if (e.SocketErrorCode == 0)
-            {
                 AddLine(ServerStrings.ConnectionFailedMessage.With(e.Reason.ToString()));
-            }
             else
-            {
-                AddLine(ServerStrings.ConnectionFailedMessage.With(string.Format("{0}: {1}", e.Reason, e.SocketErrorCode)));
-            }
+                AddLine(
+                    ServerStrings.ConnectionFailedMessage.With(string.Format("{0}: {1}", e.Reason, e.SocketErrorCode)));
 
             ThreadHelper.InvokeAfter(TimeSpan.FromSeconds(4), delegate { server.Connect(); });
         }
@@ -201,29 +199,26 @@ namespace OrtzIRC
         private void DoRegister()
         {
             Text = ServerStrings.ServerFormTitleBar.With(
-                        server.UserNick,
-                        server.Description == String.Empty ? server.Url : server.Description, server.Url,
-                        server.Port
-                        ); //TODO: This should actually be the network name, not the server
-
+                server.UserNick,
+                server.Description == String.Empty ? server.Url : server.Description, server.Url,
+                server.Port
+                ); //TODO: This should actually be the network name, not the server
 
             if (nickRetryFailed)
-            {
                 AddLine(ServerStrings.RandomNickMessage); //TODO: Messagebox?
-            }
 
             nickRetry = 0;
             nickRetryFailed = false;
         }
 
-        private void ParentServer_OnJoinSelf(object sender, OrtzIRC.Common.DataEventArgs<Channel> e)
+        private void ParentServer_OnJoinSelf(object sender, DataEventArgs<Channel> e)
         {
             ((MainForm)MdiParent).CreateChannelForm(e.Data);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("ServerForm Closing: " + e.CloseReason);
+            Debug.WriteLine("ServerForm Closing: " + e.CloseReason);
 
             if (!server.IsConnected) return;
             if (e.CloseReason == CloseReason.MdiFormClosing) return;
@@ -231,7 +226,8 @@ namespace OrtzIRC
             if (e.CloseReason != CloseReason.TaskManagerClosing)
             {
                 DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Description),
-                    CommonStrings.DialogCaption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                                                      CommonStrings.DialogCaption, MessageBoxButtons.OKCancel,
+                                                      MessageBoxIcon.Warning);
 
                 if (result != DialogResult.OK)
                 {

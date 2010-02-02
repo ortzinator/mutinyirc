@@ -3,7 +3,7 @@
     using System;
     using System.Threading;
 
-    public class ThreadHelper
+    public static class ThreadHelper
     {
         public static void InvokeAfter(TimeSpan time, TimerCallback method)
         {

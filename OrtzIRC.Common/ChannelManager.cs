@@ -72,7 +72,7 @@
             foreach (User nick in tempNicks)
             {
                 if (nick != null)
-                    chan.NickList.Add(nick);
+                    chan.AddNick(nick);
             }
             chan.NickList.NotifyUpdate = true;
             chan.NickList.Refresh();

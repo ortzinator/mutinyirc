@@ -88,6 +88,15 @@ namespace OrtzIRC.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to --Disconnected: {0}.
+        /// </summary>
+        internal static string ConnectionLost {
+            get {
+                return ResourceManager.GetString("ConnectionLost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to --Disconnected--.
         /// </summary>
         internal static string Disconnected {

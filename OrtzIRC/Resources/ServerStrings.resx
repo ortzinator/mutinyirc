@@ -150,4 +150,7 @@
     <value>This will disconnect you from {0}?</value>
     <comment>Displayed to the user when an action they performed will indirectly cause disconnection.</comment>
   </data>
+  <data name="ConnectionLost" xml:space="preserve">
+    <value>--Disconnected: {0}</value>
+  </data>
 </root>
