@@ -40,7 +40,6 @@ namespace OrtzIRC
             pmsession.Server.JoinOther += ParentServer_OnJoinOther;
             pmsession.Server.Part += ParentServer_OnPart;
             pmsession.Server.PrivateNotice += ParentServer_OnPrivateNotice;
-            pmsession.Server.GotTopic += ParentServer_OnGotTopic;
             pmsession.Server.RawMessageReceived += ParentServer_OnRawMessageReceived;
             pmsession.Server.ErrorMessageRecieved += ParentServer_OnError;
             pmsession.Server.Kick += ParentServer_OnKick;
@@ -59,7 +58,6 @@ namespace OrtzIRC
             pmsession.Server.JoinOther -= ParentServer_OnJoinOther;
             pmsession.Server.Part -= ParentServer_OnPart;
             pmsession.Server.PrivateNotice -= ParentServer_OnPrivateNotice;
-            pmsession.Server.GotTopic -= ParentServer_OnGotTopic;
             pmsession.Server.RawMessageReceived -= ParentServer_OnRawMessageReceived;
             pmsession.Server.ErrorMessageRecieved -= ParentServer_OnError;
             pmsession.Server.Kick -= ParentServer_OnKick;
@@ -101,17 +99,17 @@ namespace OrtzIRC
 
         private void ParentServer_OnKick(object sender, KickEventArgs e)
         {
-            //e.Channel.UserKick(e.User, e.Kickee, e.Reason);
+            AddLine(ChannelStrings.Kick.With(e.Kickee + ":" + e.Channel, e.User.Nick, e.Reason));
         }
 
         private void ParentServer_OnPart(object sender, PartEventArgs e)
         {
-            //e.Channel.UserPart(e.User, e.Reason);
+            AddLine(ChannelStrings.PartWithReason.With(e.User.Nick + ":" + e.Channel, e.User.HostMask, String.Empty));
         }
 
         private void ParentServer_OnJoinOther(object sender, OrtzIRC.Common.DoubleDataEventArgs<User, Channel> e)
         {
-            //e.Second.UserJoin(e.First);
+            AddLine(ChannelStrings.Joined.With(e.First.Nick + ":" + e.Second, e.First.HostMask));
         }
 
         private void ParentServer_OnError(object sender, ErrorMessageEventArgs a)
@@ -125,11 +123,6 @@ namespace OrtzIRC
             //AddLine(e.Data);
         }
 
-        private void ParentServer_OnGotTopic(Channel chan, string topic)
-        {
-            chan.ShowTopic(topic);
-        }
-
         private void ParentServer_OnPrivateNotice(object sender, UserMessageEventArgs e)
         {
             AddLine(CommonStrings.PrivateNotice.With(e.User.Nick, e.Message));
@@ -137,7 +130,7 @@ namespace OrtzIRC
 
         private void ParentServer_UserAction(object sender, ChannelMessageEventArgs e)
         {
-            //e.Channel.OnNewAction(e.User, e.Message);
+            AddLine(ChannelStrings.Action.With(e.User.Nick, e.Message));
         }
 
         private void SetFormTitle()
