@@ -106,10 +106,7 @@ namespace OrtzIRC
 
         private void server_ConnectionLost(object sender, DisconnectEventArgs e)
         {
-            if (e.SocketErrorCode == 0)
-                AddLine(ServerStrings.ConnectionLost.With(e.Reason));
-            else
-                AddLine(ServerStrings.DisconnectSocketError.With(e.Reason, e.SocketErrorCode));
+            AddLine(ServerStrings.ConnectionLost.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
 
             if (e.Reason != DisconnectReason.UserInitiated)
             {
@@ -178,11 +175,7 @@ namespace OrtzIRC
 
         private void Server_OnConnectFail(object sender, ConnectFailedEventArgs e)
         {
-            if (e.SocketErrorCode == 0)
-                AddLine(ServerStrings.ConnectionFailedMessage.With(e.Reason.ToString()));
-            else
-                AddLine(
-                    ServerStrings.ConnectionFailedMessage.With(string.Format("{0}: {1}", e.Reason, e.SocketErrorCode)));
+            AddLine(ServerStrings.ConnectionFailedMessage.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
 
             ThreadHelper.InvokeAfter(TimeSpan.FromSeconds(4), delegate { server.Connect(); });
         }

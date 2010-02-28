@@ -79,7 +79,7 @@ namespace OrtzIRC.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not connect: {0}.
+        ///   Looks up a localized string similar to Could not connect: ({0}).
         /// </summary>
         internal static string ConnectionFailedMessage {
             get {

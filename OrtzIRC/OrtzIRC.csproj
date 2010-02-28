@@ -174,7 +174,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ServerStrings.resx</DependentUpon>
     </Compile>
+    <Compile Include="Resources\SocketErrorStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SocketErrorStrings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="SocketErrorTranslator.cs" />
     <Compile Include="Windows\ChannelForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -276,6 +282,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ServerStrings.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\SocketErrorStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SocketErrorStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\ChannelForm.resx">
       <DependentUpon>ChannelForm.cs</DependentUpon>
