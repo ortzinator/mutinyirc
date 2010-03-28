@@ -8,7 +8,7 @@
         {
             ServerWindow = serverWindow;
             // P90: Fix empty server description
-            Text = serverWindow.Server.Description.Length == 0 ? serverWindow.Server.Url : serverWindow.Server.Description;
+            Text = serverWindow.Server.NetworkName.Length == 0 ? serverWindow.Server.Url : serverWindow.Server.NetworkName;
             serverWindow.FormClosed += serverWindow_FormClosed;
 
             ContextMenuStrip = new ServerNodeContextMenu();

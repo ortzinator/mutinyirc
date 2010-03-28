@@ -7,23 +7,23 @@ namespace OrtzIRC.Common
     using System.IO;
     using System.Xml.Serialization;
 
-    public sealed class IRCSettingsManager
+    public sealed class IrcSettingsManager
     {
-        private static IRCSettingsManager instance;
+        private static IrcSettingsManager instance;
 
         public NetworkSettingsList Networks { get; private set; }
 
-        private IRCSettingsManager()
+        private IrcSettingsManager()
         {
             Networks = new NetworkSettingsList();
         }
 
-        public static IRCSettingsManager Instance
+        public static IrcSettingsManager Instance
         {
             get
             {
                 if (instance != null) return instance;
-                instance = new IRCSettingsManager();
+                instance = new IrcSettingsManager();
                 instance.Load();
                 return instance;
             }
@@ -41,7 +41,7 @@ namespace OrtzIRC.Common
 
         public NetworkSettings GetNetwork(string name)
         {
-            foreach (var network in Networks)
+            foreach (NetworkSettings network in Networks)
                 if (network.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
                     return network;
 
@@ -59,10 +59,10 @@ namespace OrtzIRC.Common
                 writer.Close();
                 fs.Close();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show("Could not save IRC settings to disk", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //TODO: Log, or something.
+                MessageBox.Show("Could not save IRC settings to disk", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); //hack
+                //TODO: Log, or something, instead of MessageBox.
             }
         }
 

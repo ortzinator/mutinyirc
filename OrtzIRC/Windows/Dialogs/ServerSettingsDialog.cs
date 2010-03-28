@@ -90,7 +90,7 @@ namespace OrtzIRC
 
         protected override void OnLoad(EventArgs e)
         {
-            foreach (var network in IRCSettingsManager.Instance.Networks)
+            foreach (var network in IrcSettingsManager.Instance.Networks)
             {
                 var net = new NetworkSettingsTreeNode(network, networkContextMenuStrip);
                 foreach (var server in network.Servers)
@@ -140,13 +140,13 @@ namespace OrtzIRC
 
         private void okButton_Click(object sender, EventArgs e)
         {
-            IRCSettingsManager.Instance.Save();
+            IrcSettingsManager.Instance.Save();
             Close();
         }
 
         private void addNetworkToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            NetworkSettings net = IRCSettingsManager.Instance.AddNetwork("New Network");
+            NetworkSettings net = IrcSettingsManager.Instance.AddNetwork("New Network");
             var node = new NetworkSettingsTreeNode(net, networkContextMenuStrip);
             ircSettingsTree.Nodes.Add(node);
             node.BeginEdit();
@@ -175,7 +175,7 @@ namespace OrtzIRC
             TreeView treeView = (TreeView)cms.SourceControl;
             TreeNode selectedNode = treeView.GetNodeAt(treeView.PointToClient(cms.Location));
 
-            IRCSettingsManager.Instance.RemoveNetwork(((NetworkSettingsTreeNode)selectedNode).Settings);
+            IrcSettingsManager.Instance.RemoveNetwork(((NetworkSettingsTreeNode)selectedNode).Settings);
             ircSettingsTree.Nodes.Remove(selectedNode);
         }
 

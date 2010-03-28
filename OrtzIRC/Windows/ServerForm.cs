@@ -191,11 +191,23 @@ namespace OrtzIRC
 
         private void DoRegister()
         {
-            Text = ServerStrings.ServerFormTitleBar.With(
-                server.UserNick,
-                server.Description == String.Empty ? server.Url : server.Description, server.Url,
-                server.Port
-                ); //TODO: This should actually be the network name, not the server
+            string network = Server.Connection.ServerProperties["Network"];
+            if (network != String.Empty)
+            {
+                Text = ServerStrings.ServerFormTitleBar.With(
+                    server.UserNick,
+                    network,
+                    server.Url,
+                    server.Port);
+            }
+            else
+            {
+                Text = ServerStrings.ServerFormTitleBar.With(
+                    server.UserNick,
+                    server.NetworkName  == String.Empty ? server.Url : server.NetworkName,
+                    server.Url,
+                    server.Port); //TODO: This should actually be the network name, not the server 
+            }
 
             if (nickRetryFailed)
                 AddLine(ServerStrings.RandomNickMessage); //TODO: Messagebox?

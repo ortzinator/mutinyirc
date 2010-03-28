@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Xml.Serialization;
     using System.Xml.Schema;
     using System.Xml;
@@ -13,11 +12,6 @@
         {
             Url = url;
             Description = description;
-
-            // Bug tracking, remove this eventually.
-            if (description == null)
-                Debugger.Break();
-
             Ports = ports;
             Ssl = ssl;
         }
@@ -30,7 +24,8 @@
         public bool Ssl { get; set; }
         public bool AutoConnect { get; set; }
         public string Nick { get; set; }
-        
+        public NetworkSettings Network { get; set; }
+
         public List<ChannelSettings> Channels { get; set; }
 
         public int RandomPort

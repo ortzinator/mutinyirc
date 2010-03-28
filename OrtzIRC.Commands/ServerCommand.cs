@@ -21,11 +21,11 @@ namespace OrtzIRC.Commands
             {
                 switch (c)
                 {
-                    case 'm':
+                    case 'm': //New window and connect
                         var svr = ServerManager.Instance.Create(new ServerSettings { Url = server, Nick = OrtzIRC.Properties.Settings.Default.FirstNick });
                         svr.Connect();
                         return;
-                    case 'n':
+                    case 'n': //New window, don't connect
                         ServerManager.Instance.Create(new ServerSettings { Url = server, Nick = OrtzIRC.Properties.Settings.Default.FirstNick });
                         return;
                 }
@@ -33,7 +33,7 @@ namespace OrtzIRC.Commands
         }
 
         /// <summary>
-        /// Summary of command with these specific parameters
+        /// Connect to a server in the same window
         /// </summary>
         public void Execute(Server context, string server)
         {

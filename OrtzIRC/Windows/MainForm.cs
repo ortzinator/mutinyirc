@@ -29,14 +29,14 @@ namespace OrtzIRC
             Settings.Default.UserPluginDirectory = Path.Combine(Environment.CurrentDirectory, @"Plugins");
             Settings.Default.Save();
 
-            IRCSettingsManager.Instance.GetAutoConnectServers();
+            IrcSettingsManager.Instance.GetAutoConnectServers();
 
             if (!Directory.Exists(Settings.Default.UserPluginDirectory))
                 Directory.CreateDirectory(Settings.Default.UserPluginDirectory);
 
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                foreach (var server in IRCSettingsManager.Instance.GetAutoConnectServers())
+                foreach (var server in IrcSettingsManager.Instance.GetAutoConnectServers())
                 {
                     if (server.Nick == null)
                         server.Nick = Settings.Default.FirstNick;
@@ -113,7 +113,7 @@ namespace OrtzIRC
                 windowManagerTreeView.AddServerNode(new ServerTreeNode(newServerForm));
                 newServerForm.MdiParent = this;
 
-                newServerForm.Text = server.Description;
+                newServerForm.Text = server.NetworkName;
                 newServerForm.Show();
             }
         }
