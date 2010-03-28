@@ -30,13 +30,14 @@ namespace OrtzIRC.Common
             if (Servers.Contains(server))
                 return;
 
+            server.Network = this;
             Servers.Add(server);
         }
 
         public ServerSettings AddServer()
         {
             var server = new ServerSettings();
-            Servers.Add(server);
+            AddServer(server);
             return server;
         }
 
@@ -61,7 +62,7 @@ namespace OrtzIRC.Common
             {
                 var net = new ServerSettings();
                 net.ReadXml(reader);
-                Servers.Add(net);
+                AddServer(net);
                 reader.Read();
             }
         }

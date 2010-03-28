@@ -43,11 +43,11 @@
             }
         }
 
-        public string Nick
+        public string NetworkName
         {
             get
             {
-                return Connection.ConnectionData.Nick;
+                return serverSettings.Network == null ? String.Empty : serverSettings.Network.Name;
             }
         }
 

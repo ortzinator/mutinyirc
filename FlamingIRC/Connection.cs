@@ -379,6 +379,7 @@ namespace FlamingIRC
                 if (Connected)
                     throw new Exception("Connection with IRC server already opened.");
                 properties = new ServerProperties();
+                activityTimer.Start();
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
                                   "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
 
@@ -485,6 +486,7 @@ namespace FlamingIRC
 
                 Sender.Quit(reason);
                 Disconnect(DisconnectReason.UserInitiated);
+                activityTimer.Stop();
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
                                   "[" + Thread.CurrentThread.Name + "] Connection::Disconnect()");
             }
