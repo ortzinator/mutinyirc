@@ -149,6 +149,9 @@
     <Compile Include="Intellisense\AutoCompleteForm.Designer.cs">
       <DependentUpon>AutoCompleteForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="IrcSettingsManager.cs" />
+    <Compile Include="NetworkSettings.cs" />
+    <Compile Include="NetworkSettingsList.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -179,6 +182,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SocketErrorStrings.resx</DependentUpon>
     </Compile>
+    <Compile Include="ServerSettings.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SocketErrorTranslator.cs" />
     <Compile Include="Windows\ChannelForm.cs">
@@ -383,6 +387,7 @@
     <None Include="Resources\process.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
     <None Include="Resources\notebook.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml;
+﻿using OrtzIRC.Common;
 
-namespace OrtzIRC.Common
+namespace OrtzIRC
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Xml;
     using System.Xml.Serialization;
 
     public class NetworkSettings : IXmlSerializable
@@ -18,11 +19,12 @@ namespace OrtzIRC.Common
 
         public string Name { get; set; }
         public List<ServerSettings> Servers { get; private set; }
+        public List<ChannelSettings> Channels { get; set; }
 
         public ServerSettings GetRandomServer()
         {
             var rand = new Random();
-            return Servers[rand.Next(Servers.Count)];
+            return Servers[rand.Next(Servers.Count - 1)];
         }
 
         public void AddServer(ServerSettings server)

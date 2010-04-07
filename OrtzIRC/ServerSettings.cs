@@ -1,10 +1,11 @@
-﻿namespace OrtzIRC.Common
+﻿namespace OrtzIRC
 {
     using System;
     using System.Collections.Generic;
     using System.Xml.Serialization;
     using System.Xml.Schema;
     using System.Xml;
+    using OrtzIRC.Common;
 
     public class ServerSettings : IXmlSerializable
     {
@@ -25,8 +26,6 @@
         public bool AutoConnect { get; set; }
         public string Nick { get; set; }
         public NetworkSettings Network { get; set; }
-
-        public List<ChannelSettings> Channels { get; set; }
 
         public int RandomPort
         {

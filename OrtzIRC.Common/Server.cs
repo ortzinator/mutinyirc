@@ -10,9 +10,7 @@
 
     public sealed class Server : MessageContext
     {
-        private ServerSettings serverSettings;
-
-        public Server(ServerSettings settings)
+        public Server(ConnectionArgs settings)
         {
             SetupConnection(settings);
             PMSessions = new List<PrivateMessageSession>();
@@ -23,15 +21,7 @@
         {
             get
             {
-                return serverSettings.Url;
-            }
-        }
-
-        public string Description
-        {
-            get
-            {
-                return serverSettings.Description ?? String.Empty;
+                return Connection.ConnectionData.Hostname;
             }
         }
 
@@ -40,14 +30,6 @@
             get
             {
                 return Connection.ConnectionData.Port;
-            }
-        }
-
-        public string NetworkName
-        {
-            get
-            {
-                return serverSettings.Network == null ? String.Empty : serverSettings.Network.Name;
             }
         }
 
@@ -70,16 +52,14 @@
 
         public ChannelManager ChanManager { get; private set; }
 
-        private void SetupConnection(ServerSettings settings)
+        private void SetupConnection(ConnectionArgs args)
         {
-            if (settings.Nick == null)
+            if (args.Nick == null)
                 throw new ArgumentException("The ServerSettings.Nick property is null");
 
-            serverSettings = settings;
             ChanManager = new ChannelManager(this);
 
             //TODO: Select port
-            var args = new ConnectionArgs(settings.Nick, settings.Url, settings.Ssl);
             Connection = new Connection(args, true, false);
             Connection.HandleNickTaken = false;
         }
@@ -364,15 +344,15 @@
             //TODO: Handle a taken nick
             //TODO: Get autojoin list for the network
             //HACK: This is for testing. It just gets a list and joins it all. Should be done by the GUI layer
-            if (serverSettings.Channels != null)
-            {
-                foreach (var channel in serverSettings.Channels)
-                {
-                    if (channel.AutoJoin)
-                        JoinChannel(channel.Name);
-                }
+            //if (serverSettings.Channels != null)
+            //{
+            //    foreach (var channel in serverSettings.Channels)
+            //    {
+            //        if (channel.AutoJoin)
+            //            JoinChannel(channel.Name);
+            //    }
 
-            }
+            //}
         }
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
@@ -409,7 +389,7 @@
 
         public override string ToString()
         {
-            return String.Format("{0}:{1} - {2}", Url, Port, Description);
+            return String.Format("{0}:{1}", Url, Port);
         }
 
         public void ChangeNick(string nick)
@@ -417,21 +397,21 @@
             Connection.Sender.Nick(nick);
         }
 
-        public void ChangeServer(ServerSettings settings)
+        public void ChangeServer(ConnectionArgs args)
         {
             if (IsConnected)
             {
                 Disconnect();
             }
 
-            if (settings.Nick == null)
+            if (args.Nick == null)
             {
-                settings.Nick = serverSettings.Nick;
+                args.Nick = Connection.ConnectionData.Nick;
             }
 
             UnhookEvents();
             ChanManager.UnhookEvents();
-            SetupConnection(settings);
+            SetupConnection(args);
             HookEvents();
         }
 

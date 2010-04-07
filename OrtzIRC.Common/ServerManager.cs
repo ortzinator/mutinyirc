@@ -1,7 +1,9 @@
-﻿namespace OrtzIRC.Common
+﻿namespace OrtzIRC
 {
     using System.Collections.Generic;
     using System;
+    using FlamingIRC;
+    using OrtzIRC.Common;
 
     public class ServerManager
     {
@@ -23,9 +25,9 @@
             }
         }
 
-        public Server Create(ServerSettings settings)
+        public Server Create(ConnectionArgs args)
         {
-            var newServer = new Server(settings);
+            var newServer = new Server(args);
             ServerList.Add(newServer);
 
             ServerAdded.Fire(this, new ServerEventArgs(newServer));

@@ -9,13 +9,10 @@
 
     public partial class ChannelForm : Form
     {
-        private Server Server;
-
         public ChannelForm(Channel channel)
         {
             InitializeComponent();
 
-            Server = channel.Server;
             Channel = channel;
 
             HookEvents();
@@ -45,7 +42,7 @@
             Channel.OnKick += Channel_OnKick;
             Channel.MessagedChannel += Channel_MessagedChannel;
 
-            Server.Disconnected += Server_Disconnected;
+            Channel.Server.Disconnected += Server_Disconnected;
 
             commandTextBox.CommandEntered += commandTextBox_CommandEntered;
             channelOutputBox.MouseUp += channelOutputBox_MouseUp;
@@ -74,7 +71,7 @@
             Channel.OnKick -= Channel_OnKick;
             Channel.MessagedChannel -= Channel_MessagedChannel;
 
-            Server.Disconnected -= Server_Disconnected;
+            Channel.Server.Disconnected -= Server_Disconnected;
 
             commandTextBox.CommandEntered -= commandTextBox_CommandEntered;
         }
