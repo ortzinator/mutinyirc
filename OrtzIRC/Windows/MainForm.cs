@@ -1,3 +1,5 @@
+using FlamingIRC;
+
 namespace OrtzIRC
 {
     using System;
@@ -41,7 +43,7 @@ namespace OrtzIRC
                     if (server.Nick == null)
                         server.Nick = Settings.Default.FirstNick;
 
-                    Server newServer = ServerManager.Instance.Create(server);
+                    Server newServer = ServerManager.Instance.Create(new ConnectionArgs(server.Nick, server.Url, server.Ssl));
                     newServer.Connect();
                 }
             }
@@ -113,7 +115,7 @@ namespace OrtzIRC
                 windowManagerTreeView.AddServerNode(new ServerTreeNode(newServerForm));
                 newServerForm.MdiParent = this;
 
-                newServerForm.Text = server.NetworkName;
+                newServerForm.Text = server.Url;
                 newServerForm.Show();
             }
         }

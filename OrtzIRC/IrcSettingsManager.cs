@@ -1,11 +1,11 @@
-﻿using System.Windows.Forms;
-
-namespace OrtzIRC.Common
+﻿namespace OrtzIRC
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Windows.Forms;
     using System.Xml.Serialization;
+    using OrtzIRC.Common;
 
     public sealed class IrcSettingsManager
     {
@@ -99,6 +99,21 @@ namespace OrtzIRC.Common
                 }
             }
             return tmp;
+        }
+
+        public NetworkSettings GetNetwork(Server server)
+        {
+            foreach (NetworkSettings networkSettings in Networks)
+            {
+                foreach (ServerSettings serverSettings in networkSettings.Servers)
+                {
+                    if (server.Url == serverSettings.Url)
+                    {
+                        return networkSettings;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="OrtzIRC.Common.Channel">
+    <Position X="0.5" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAQBIAAIhIQEABAAEQYgAAgICAYgAgDAAgAGAEA=</HashCode>
+      <FileName>Channel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.ChannelInfo">
+    <Position X="14.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQEAAAAAQQAAAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>ChannelInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.ChannelManager">
+    <Position X="8" Y="6.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>iFoAAAAAIQAAAAAIAAAAAAAAAAAAAEAAAkAAggAAEAg=</HashCode>
+      <FileName>ChannelManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.ChannelSettings" BaseTypeListCollapsed="true">
+    <Position X="16.25" Y="1.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAgAAQAAAAAAAQCAABAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>ChannelSettings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="OrtzIRC.Common.IrcSettingsManager">
+    <Position X="8.75" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAgIQAAAAAAAAAAAQAAAAAAABAAAAgQAAAAAAACAA=</HashCode>
+      <FileName>IrcSettingsManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.LoggedItem">
+    <Position X="11.75" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIQAQIAIgAAAEAAQAAAAAAAAAABAAAAGAAAA=</HashCode>
+      <FileName>LoggedItem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.MessageContext" Collapsed="true">
+    <Position X="2.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MessageContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.NetworkSettings" BaseTypeListCollapsed="true">
+    <Position X="11" Y="1.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAQCAABAAgAAABAAgAAIAAA=</HashCode>
+      <FileName>NetworkSettings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="OrtzIRC.Common.PrivateMessageSession">
+    <Position X="5.5" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAQAAAAAQAAEAAAAAAAAAAAAAAAAAAAgAAAgA=</HashCode>
+      <FileName>PrivateMessageSession.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.RandomMessages">
+    <Position X="11.25" Y="6.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>ACEAgIAAAAEAAAAAAABAAAAACAQAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>RandomMessages.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.Server">
+    <Position X="2.5" Y="1.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>EE0ANABCqEIrQAHG2ABQSICaCEQEyIAACKSAQhBhQUA=</HashCode>
+      <FileName>Server.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.ServerManager">
+    <Position X="6.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAgAAAABAACAABAAEAAQAAQAgAAAAA=</HashCode>
+      <FileName>ServerManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.ServerSettings" BaseTypeListCollapsed="true">
+    <Position X="13.75" Y="1.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAAABAAAAAACGFBAAAAACAgAgAQAEAA=</HashCode>
+      <FileName>ServerSettings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="OrtzIRC.Common.TextLogger">
+    <Position X="9" Y="12.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAVBAIUAAgAAAgAgAAAAAACAAAAgAAAAAAAA=</HashCode>
+      <FileName>TextLogger.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.TextLoggerManager">
+    <Position X="6" Y="12.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>ABAARAABABAAAAAAAAAAAAAhIAAAAAAAQAAAQBAAAAA=</HashCode>
+      <FileName>TextLoggerManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrtzIRC.Common.UserInfo">
+    <Position X="14" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAQCAAAAACABAAAAAAAQAAACAAAAA=</HashCode>
+      <FileName>UserInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -192,28 +192,41 @@ namespace OrtzIRC
         private void DoRegister()
         {
             string network = Server.Connection.ServerProperties["Network"];
-            if (network != String.Empty)
+            var networkSettings = IrcSettingsManager.Instance.GetNetwork(Server);
+
+            if (network == String.Empty)
             {
-                Text = ServerStrings.ServerFormTitleBar.With(
+                if (networkSettings != null)
+                    network = IrcSettingsManager.Instance.GetNetwork(Server).Name;
+            }
+            else
+            {
+                networkSettings.Name = network;
+            }
+
+            Text = ServerStrings.ServerFormTitleBar.With(
                     server.UserNick,
                     network,
                     server.Url,
                     server.Port);
-            }
-            else
-            {
-                Text = ServerStrings.ServerFormTitleBar.With(
-                    server.UserNick,
-                    server.NetworkName  == String.Empty ? server.Url : server.NetworkName,
-                    server.Url,
-                    server.Port); //TODO: This should actually be the network name, not the server 
-            }
 
             if (nickRetryFailed)
                 AddLine(ServerStrings.RandomNickMessage); //TODO: Messagebox?
 
             nickRetry = 0;
             nickRetryFailed = false;
+
+            if (networkSettings != null)
+            {
+                if (networkSettings.Channels != null)
+                {
+                    foreach (ChannelSettings channel in networkSettings.Channels)
+                    {
+                        if (channel.AutoJoin)
+                            Server.JoinChannel(channel.Name);
+                    }
+                }
+            }
         }
 
         private void ParentServer_OnJoinSelf(object sender, DataEventArgs<Channel> e)
@@ -230,7 +243,7 @@ namespace OrtzIRC
 
             if (e.CloseReason != CloseReason.TaskManagerClosing)
             {
-                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Description),
+                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Url),
                                                       CommonStrings.DialogCaption, MessageBoxButtons.OKCancel,
                                                       MessageBoxIcon.Warning);
 

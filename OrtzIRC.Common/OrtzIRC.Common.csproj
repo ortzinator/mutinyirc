@@ -92,15 +92,11 @@
     <Compile Include="ChannelSettings.cs" />
     <Compile Include="PrivateMessageSessionEventArgs.cs" />
     <Compile Include="UserEventArgs.cs" />
-    <Compile Include="IrcSettingsManager.cs" />
     <Compile Include="LoggedItem.cs" />
     <Compile Include="MessageContext.cs" />
-    <Compile Include="NetworkSettings.cs" />
-    <Compile Include="NetworkSettingsList.cs" />
     <Compile Include="RandomMessages.cs" />
     <Compile Include="SerializableDictionary.cs" />
     <Compile Include="ServerEventArgs.cs" />
-    <Compile Include="ServerSettings.cs" />
     <Compile Include="TextLogger.cs" />
     <Compile Include="Channel.cs" />
     <Compile Include="ChannelInfo.cs" />
@@ -130,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
