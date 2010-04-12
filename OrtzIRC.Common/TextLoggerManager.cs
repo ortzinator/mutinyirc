@@ -1,8 +1,7 @@
-﻿using FlamingIRC;
-
-namespace OrtzIRC.Common
+﻿namespace OrtzIRC.Common
 {
     using System;
+    using FlamingIRC;
 
     /// <summary>
     /// Purpose: Handle the environnement around the manager such as subscribing

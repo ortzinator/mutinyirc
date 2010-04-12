@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC
+﻿namespace OrtzIRC.Common
 {
     using System;
 

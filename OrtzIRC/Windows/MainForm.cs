@@ -1,5 +1,3 @@
-using FlamingIRC;
-
 namespace OrtzIRC
 {
     using System;
@@ -9,6 +7,7 @@ namespace OrtzIRC
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
     using OrtzIRC.Resources;
+    using FlamingIRC;
 
     public partial class MainForm : Form
     {
@@ -38,7 +37,7 @@ namespace OrtzIRC
 
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                foreach (var server in IrcSettingsManager.Instance.GetAutoConnectServers())
+                foreach (ServerSettings server in IrcSettingsManager.Instance.GetAutoConnectServers())
                 {
                     if (server.Nick == null)
                         server.Nick = Settings.Default.FirstNick;

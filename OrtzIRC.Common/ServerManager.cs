@@ -1,9 +1,8 @@
-﻿namespace OrtzIRC
+﻿namespace OrtzIRC.Common
 {
     using System.Collections.Generic;
     using System;
     using FlamingIRC;
-    using OrtzIRC.Common;
 
     public class ServerManager
     {
@@ -48,6 +47,11 @@
                 if (server.IsConnected)
                     server.Disconnect();
             }
+        }
+
+        public Server Create(string nick, string url, bool ssl)
+        {
+            Create(new ConnectionArgs(nick, url, ssl));
         }
     }
 }
