@@ -415,6 +415,11 @@
             HookEvents();
         }
 
+        public void ChangeServer(string nick, string url, bool ssl)
+        {
+            ChangeServer(new ConnectionArgs(nick, url, ssl));
+        }
+
         private bool IsMe(User user)
         {
             return user.Nick == Connection.ConnectionData.Nick;

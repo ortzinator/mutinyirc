@@ -1,7 +1,6 @@
-﻿namespace OrtzIRC
+﻿namespace OrtzIRC.Common
 {
     using System;
-    using OrtzIRC.Common;
 
     public class ChannelEventArgs : EventArgs
     {

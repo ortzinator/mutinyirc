@@ -1,7 +1,7 @@
-﻿using FlamingIRC;
-
-namespace OrtzIRC.Common
+﻿namespace OrtzIRC.Common
 {
+    using FlamingIRC;
+
     public class UserInfo
     {
         /// <summary>The user's nickname.</summary>

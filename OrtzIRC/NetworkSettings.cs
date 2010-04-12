@@ -85,5 +85,17 @@ namespace OrtzIRC
         {
             return Servers.Remove(serverSettings);
         }
+
+        public ServerSettings GetServer(string url)
+        {
+            foreach (ServerSettings server in Servers)
+            {
+                if (server.Url.Equals(url, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    return server;
+                }
+            }
+            return null;
+        }
     }
 }

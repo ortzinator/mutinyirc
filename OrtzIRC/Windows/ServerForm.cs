@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace OrtzIRC
 {
     using System;
@@ -141,7 +143,16 @@ namespace OrtzIRC
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
-            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Server, e.Data));
+            CommandResultInfo result = new CommandResultInfo();
+            try
+            {
+                result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Server, e.Data));
+            }
+            catch (TargetInvocationException ex)
+            {
+                serverOutputBox.AppendError("\n" + ex.InnerException.Message);
+            }
+
             if (result != null && result.Result == CommandResult.Fail)
                 serverOutputBox.AppendError("\n" + result.Message);
         }
@@ -182,7 +193,6 @@ namespace OrtzIRC
 
         private void ParentServer_OnRegistered(object sender, EventArgs e)
         {
-            // TODO: Join list of auto-join channels
             if (InvokeRequired)
                 Invoke(new Action(DoRegister));
             else
@@ -194,14 +204,40 @@ namespace OrtzIRC
             string network = Server.Connection.ServerProperties["Network"];
             var networkSettings = IrcSettingsManager.Instance.GetNetwork(Server);
 
-            if (network == String.Empty)
+            if (networkSettings == null)
             {
-                if (networkSettings != null)
-                    network = IrcSettingsManager.Instance.GetNetwork(Server).Name;
+                NetworkSettings nNet;
+                if (network == String.Empty)
+                {
+                    nNet = IrcSettingsManager.Instance.AddNetwork(Server.Url); //TODO: Get domain name or something
+                    network = "Network"; //HACK
+                }
+                else
+                {
+                    nNet = IrcSettingsManager.Instance.AddNetwork(network);
+
+                }
+
+                nNet.AddServer(new ServerSettings(Server.Url, "Random", Server.Port.ToString(),
+                        Server.Connection.ConnectionData.Ssl) { AutoConnect = true });
             }
             else
             {
-                networkSettings.Name = network;
+                if (network == String.Empty)
+                {
+                    network = networkSettings.Name;
+                }
+                else
+                {
+                    networkSettings.Name = network;
+                }
+
+                ServerSettings nServer = networkSettings.GetServer(Server.Url);
+                if (nServer == null)
+                {
+                    networkSettings.AddServer(new ServerSettings(Server.Url, "Random", Server.Port.ToString(),
+                        Server.Connection.ConnectionData.Ssl) { AutoConnect = true });
+                }
             }
 
             Text = ServerStrings.ServerFormTitleBar.With(

@@ -1,8 +1,7 @@
-﻿namespace OrtzIRC
+﻿namespace OrtzIRC.Common
 {
     using System;
     using FlamingIRC;
-    using OrtzIRC.Common;
 
     public class ChannelMessageEventArgs : EventArgs
     {

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Windows.Forms;
+    using OrtzIRC.Common;
 
     public class PmNodeContextMenu : ContextMenuStrip
     {
