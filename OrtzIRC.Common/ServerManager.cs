@@ -51,7 +51,7 @@
 
         public Server Create(string nick, string url, bool ssl)
         {
-            Create(new ConnectionArgs(nick, url, ssl));
+            return Create(new ConnectionArgs(nick, url, ssl));
         }
     }
 }
