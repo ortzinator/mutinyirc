@@ -4,3 +4,4 @@ relre:^.*/bin/.*
 relre:^.*/obj/.*
 relre:^TestResults/.*
 relre:OrtzIRC\..+\.resharper
+relre:.*\.user$

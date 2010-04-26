@@ -1,0 +1,21 @@
+<Configuration>
+  <SharedSolutionTemplateManager>
+    <FileTemplates>
+      <Template uid="96f54528-38f6-45fb-8900-bf8d58e1cc0b" shortcut="" description="OrtzIRC Command" text="namespace $NAMESPACE$&#xD;&#xA;{&#xD;&#xA;    using System;&#xD;&#xA;    using OrtzIRC.Common;&#xD;&#xA;    using OrtzIRC.PluginFramework;&#xD;&#xA;&#xD;&#xA;    /// &lt;summary&gt;&#xD;&#xA;    /// Summary of command&#xD;&#xA;    /// &lt;/summary&gt;&#xD;&#xA;    [Plugin]&#xD;&#xA;    public class $COMMAND$ : ICommand&#xD;&#xA;    {&#xD;&#xA;        /// &lt;summary&gt;&#xD;&#xA;        /// Summary of command with these specific parameters&#xD;&#xA;        /// &lt;/summary&gt;&#xD;&#xA;        public void Execute(Server context, ChannelInfo channelToJoin)&#xD;&#xA;        {&#xD;&#xA;            //Do stuff&#xD;&#xA;        }&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;" reformat="True" shortenQualifiedReferences="False">
+        <Context>
+          <ProjectLanguageContext language="CSharp" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="NAMESPACE" expression="fileDefaultNamespace()" initialRange="-1" />
+          <Variable name="COMMAND" expression="getFileNameWithoutExtension()" initialRange="-1" />
+        </Variables>
+        <CustomProperties>
+          <Property key="FileName" value="Command" />
+          <Property key="Extension" value="cs" />
+          <Property key="ValidateFileName" value="False" />
+        </CustomProperties>
+      </Template>
+    </FileTemplates>
+  </SharedSolutionTemplateManager>
+</Configuration>

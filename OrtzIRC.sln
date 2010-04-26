@@ -1,12 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC", "OrtzIRC\OrtzIRC.csproj", "{3F50443A-7CC6-4490-9916-523D80DEE58F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlamingIRC", "FlamingIRC\FlamingIRC.csproj", "{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Common", "OrtzIRC.Common\OrtzIRC.Common.csproj", "{1594A34C-9BB8-4334-880B-26671436D95E}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{998BC590-6C47-4FB7-8A05-A2F68DA34BA5}"
 	ProjectSection(SolutionItems) = preProject
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
@@ -14,6 +8,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		OrtzIRC3.vsmdi = OrtzIRC3.vsmdi
 		Settings.StyleCop = Settings.StyleCop
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC", "OrtzIRC\OrtzIRC.csproj", "{3F50443A-7CC6-4490-9916-523D80DEE58F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlamingIRC", "FlamingIRC\FlamingIRC.csproj", "{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Common", "OrtzIRC.Common\OrtzIRC.Common.csproj", "{1594A34C-9BB8-4334-880B-26671436D95E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Commands", "OrtzIRC.Commands\OrtzIRC.Commands.csproj", "{30204C2A-1273-41CD-A0CB-39BBEF14B55C}"
 EndProject
