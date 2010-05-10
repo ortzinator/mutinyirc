@@ -66,7 +66,7 @@ namespace FlamingIRC
         /// <summary>
         /// Keep track of activity
         /// </summary>
-        public event PongEventHandler OnAnything;
+        public event EventHandler OnAnything;
         /// <summary>
         /// Connection with the IRC server is open and registered.
         /// </summary>
@@ -82,7 +82,7 @@ namespace FlamingIRC
         /// <summary>
         /// A Notice type message was sent to a channel.
         /// </summary>
-        public event PublicNoticeEventHandler OnPublicNotice;
+        public event EventHandler<UserChannelMessageEventArgs> OnPublicNotice;
         /// <summary>
         /// A private Notice type message was sent to the user.
         /// </summary>
@@ -94,11 +94,11 @@ namespace FlamingIRC
         /// <summary>
         /// A public message was sent to a channel.
         /// </summary>
-        public event PublicMessageEventHandler OnPublic;
+        public event EventHandler<UserChannelMessageEventArgs> OnPublic;
         /// <summary>
         /// An action message was sent to a channel.
         /// </summary>
-        public event ActionEventHandler OnAction;
+        public event EventHandler<UserChannelMessageEventArgs> OnAction;
         /// <summary>
         /// A private action message was sent to the user.
         /// </summary>
@@ -114,11 +114,11 @@ namespace FlamingIRC
         /// <summary>
         /// A channel's topic has changed.
         /// </summary>
-        public event TopicEventHandler OnTopicChanged;
+        public event EventHandler<UserChannelMessageEventArgs> OnTopicChanged;
         /// <summary>
         /// The response to a <see cref="Sender.RequestTopic"/> command.
         /// </summary>
-        public event TopicRequestEventHandler OnTopicRequest;
+        public event TopicRequestEventHandler OnRecieveTopic;
         /// <summary>
         /// Someone has left a channel. 
         /// </summary>
@@ -259,7 +259,7 @@ namespace FlamingIRC
         public void Parse(string message) //Hack: Made public for unit testing, should be internal
         {
             if (OnAnything != null)
-                OnAnything();
+                OnAnything(this, new EventArgs());
 
             string[] tokens = message.Split(Separator);
 
@@ -328,10 +328,10 @@ namespace FlamingIRC
                     {
                         if (OnPublicNotice != null)
                         {
-                            OnPublicNotice(
+                            OnPublicNotice(this, new UserChannelMessageEventArgs(
                                 Rfc2812Util.UserFromString(tokens[0]),
                                 tokens[2],
-                                CondenseStrings(tokens, 3));
+                                CondenseStrings(tokens, 3)));
                             //Trace.WriteLine("Public notice", "IRC");
                         }
                     }
@@ -363,7 +363,7 @@ namespace FlamingIRC
                             {
                                 int last = tokens.Length - 1;
                                 tokens[last] = RemoveTrailingQuote(tokens[last]);
-                                OnAction(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 4));
+                                OnAction(this, new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 4)));
                                 //Trace.WriteLine("Channel action", "IRC");
                             }
                         }
@@ -382,7 +382,7 @@ namespace FlamingIRC
                     {
                         if (OnPublic != null)
                         {
-                            OnPublic(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3));
+                            OnPublic(this, new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3)));
                             Trace.WriteLine("Public msg", "IRC");
                         }
                     }
@@ -406,8 +406,8 @@ namespace FlamingIRC
                     if (OnTopicChanged != null)
                     {
                         tokens[3] = RemoveLeadingColon(tokens[3]);
-                        OnTopicChanged(
-                            Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3));
+                        OnTopicChanged(this, new UserChannelMessageEventArgs(
+                            Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3)));
                         //Trace.WriteLine("Topic changed", "IRC");
                     }
                     break;
@@ -594,10 +594,10 @@ namespace FlamingIRC
                     }
                     break;
                 case ReplyCode.RPL_TOPIC:
-                    if (OnTopicRequest != null)
+                    if (OnRecieveTopic != null)
                     {
                         tokens[4] = RemoveLeadingColon(tokens[4]);
-                        OnTopicRequest(tokens[3], CondenseStrings(tokens, 4));
+                        OnRecieveTopic(tokens[3], CondenseStrings(tokens, 4));
                     }
                     break;
                 case ReplyCode.RPL_INVITING:

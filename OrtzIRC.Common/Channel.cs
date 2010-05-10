@@ -77,7 +77,7 @@
         /// <summary>
         /// A user in the channel changed his nickname
         /// </summary>
-        public event Server_NickEventHandler NickChanged;
+        public event EventHandler<NickChangeEventArgs> NickChanged;
         /// <summary>
         /// A NAMES list was recieved for the channel.
         /// </summary>
@@ -170,8 +170,7 @@
             {
                 if (nick.Nick == n.Nick)
                 {
-                    if (NickChanged != null)
-                        NickChanged(n, newNick);
+                    NickChanged.Fire(this, new NickChangeEventArgs(nick, newNick));
                     Server.Connection.Sender.Names(Name);
                 }
             }

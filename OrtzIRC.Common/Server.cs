@@ -6,7 +6,7 @@
     using FlamingIRC;
 
     public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
-    public delegate void Server_NickEventHandler(User nick, string newNick);
+    //public delegate void Server_NickEventHandler(User nick, string newNick);
 
     public sealed class Server : MessageContext
     {
@@ -80,7 +80,7 @@
             Connection.Listener.OnError += Listener_OnError;
             Connection.Listener.OnAction += Listener_OnAction;
             Connection.Listener.OnPrivateNotice += Listener_OnPrivateNotice;
-            Connection.Listener.OnTopicRequest += Listener_OnTopicRequest;
+            Connection.Listener.OnRecieveTopic += ListenerOnRecieveTopic;
             Connection.Listener.OnNick += Listener_OnNick;
             Connection.Listener.OnKick += Listener_OnKick;
             Connection.Listener.OnPrivate += Listener_OnPrivate;
@@ -145,7 +145,7 @@
             Connection.Listener.OnError -= Listener_OnError;
             Connection.Listener.OnAction -= Listener_OnAction;
             Connection.Listener.OnPrivateNotice -= Listener_OnPrivateNotice;
-            Connection.Listener.OnTopicRequest -= Listener_OnTopicRequest;
+            Connection.Listener.OnRecieveTopic -= ListenerOnRecieveTopic;
             Connection.Listener.OnNick -= Listener_OnNick;
             Connection.Listener.OnKick -= Listener_OnKick;
             Connection.Listener.OnPrivate -= Listener_OnPrivate;
@@ -183,7 +183,7 @@
         public event EventHandler<ChannelMessageEventArgs> UserAction;
         public event EventHandler<UserMessageEventArgs> PrivateNotice;
         public event Server_TopicRequestEventHandler GotTopic;
-        public event Server_NickEventHandler OnNick;
+        public event EventHandler<NickChangeEventArgs> OnNick;
         public event NamesEventHandler OnNames;
         public event EventHandler<KickEventArgs> Kick;
         public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
@@ -253,11 +253,10 @@
 
         private void Listener_OnNick(User user, string newNick)
         {
-            if (OnNick != null)
-                OnNick(user, newNick);
+            OnNick.Fire(this, new NickChangeEventArgs(user, newNick));
         }
 
-        private void Listener_OnTopicRequest(string channel, string topic)
+        private void ListenerOnRecieveTopic(string channel, string topic)
         {
             if (GotTopic != null)
             {
@@ -272,11 +271,11 @@
             PrivateNotice.Fire(this, new UserMessageEventArgs(user, notice));
         }
 
-        private void Listener_OnAction(User user, string channel, string description)
+        private void Listener_OnAction(object sender, UserChannelMessageEventArgs ea)
         {
-            var chan = ChanManager.Create(channel);
-            UserAction.Fire(this, new ChannelMessageEventArgs(user, chan, description));
-            chan.OnNewAction(user, description);
+            var chan = ChanManager.Create(ea.Channel);
+            UserAction.Fire(this, new ChannelMessageEventArgs(ea.User, chan, ea.Message));
+            chan.OnNewAction(ea.User, ea.Message);
         }
 
         private void Connection_OnRawMessageReceived(object sender, FlamingDataEventArgs<string> e)
@@ -294,10 +293,10 @@
             ConnectFailed.Fire(this, e);
         }
 
-        private void Listener_OnPublic(User user, string channel, string message)
+        private void Listener_OnPublic(object sender, UserChannelMessageEventArgs ea)
         {
-            ChannelMessaged.Fire(this, new ChannelMessageEventArgs(user, ChanManager.GetChannel(channel), message));
-            ChanManager.GetChannel(channel).OnNewMessage(user, message);
+            ChannelMessaged.Fire(this, new ChannelMessageEventArgs(ea.User, ChanManager.GetChannel(ea.Channel), ea.Message));
+            ChanManager.GetChannel(ea.Channel).OnNewMessage(ea.User, ea.Message);
         }
 
         private void Listener_OnNames(string channel, string[] nicks, bool last)

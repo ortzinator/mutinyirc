@@ -31,8 +31,6 @@ namespace FlamingIRC
     /// <seealso cref="Listener.OnPing"/>
     public delegate void PingEventHandler(string message);
 
-    public delegate void PongEventHandler(); // P90: ping timeout fix.
-
     /// <summary>
     /// This connection is about to be closed 
     /// </summary>
@@ -46,7 +44,7 @@ namespace FlamingIRC
     /// <param name="channel">The target channel.</param>
     /// <param name="notice">A message.</param>
     /// <seealso cref="Listener.OnPublicNotice"/>
-    public delegate void PublicNoticeEventHandler(User user, string channel, string notice);
+    //public delegate void PublicNoticeEventHandler(User user, string channel, string notice);
 
     /// <summary>
     /// A private Notice type message was sent to the user.
@@ -71,7 +69,7 @@ namespace FlamingIRC
     /// <param name="channel">The target channel.</param>
     /// <param name="description">An action.</param>
     /// <seealso cref="Listener.OnAction"/>
-    public delegate void ActionEventHandler(User user, string channel, string description);
+    //public delegate void ActionEventHandler(User user, string channel, string description);
 
     /// <summary>
     /// A private action message was sent to the user.
@@ -88,7 +86,7 @@ namespace FlamingIRC
     /// <param name="channel">The taregt channel.</param>
     /// <param name="message">A message.</param>
     /// <seealso cref="Listener.OnPublic"/>
-    public delegate void PublicMessageEventHandler(User user, string channel, string message);
+    //public delegate void PublicMessageEventHandler(User user, string channel, string message);
 
     /// <summary>
     /// A user changed his nickname.
@@ -113,14 +111,14 @@ namespace FlamingIRC
     /// <param name="channel">Which channel had its topic changed.</param>
     /// <param name="newTopic">The new topic.</param>
     /// <seealso cref="Listener.OnTopicChanged"/>
-    public delegate void TopicEventHandler(User user, string channel, string newTopic);
+    //public delegate void TopicEventHandler(User user, string channel, string newTopic);
 
     /// <summary>
     /// The response to a <see cref="Sender.RequestTopic"/> command.
     /// </summary>
     /// <param name="channel">The channel who topic was requested.</param>
     /// <param name="topic">The topic.</param>
-    /// <seealso cref="Listener.OnTopicRequest"/>
+    /// <seealso cref="Listener.OnRecieveTopic"/>
     public delegate void TopicRequestEventHandler(string channel, string topic);
 
     /// <summary>

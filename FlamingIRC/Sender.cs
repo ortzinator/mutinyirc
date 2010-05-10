@@ -209,7 +209,7 @@ namespace FlamingIRC
         /// This allows channel members to keep track of the other channel
         /// members, as well as channel modes.</para>
         /// <para>If a JOIN is successful, the user receives a JOIN message as
-        /// confirmation and is then sent the channel's topic ( <see cref="Listener.OnTopicRequest"/> and
+        /// confirmation and is then sent the channel's topic ( <see cref="Listener.OnRecieveTopic"/> and
         /// the list of users who are on the channel ( <see cref="Listener.OnNames"/> ), which
         /// MUST include the user joining.</para>
         /// 
@@ -521,7 +521,7 @@ namespace FlamingIRC
         /// <summary>Request the topic for the given channel.</summary>
         /// <remarks>
         /// <para>
-        /// The reply will be sent via the <see cref="Listener.OnTopicRequest"/> event. If there is no topic
+        /// The reply will be sent via the <see cref="Listener.OnRecieveTopic"/> event. If there is no topic
         /// then <see cref="Listener.OnError"/> will be called with a code of <see cref="ReplyCode.RPL_NOTOPIC"/>.
         /// </para>
         /// Possible Errors
@@ -534,7 +534,7 @@ namespace FlamingIRC
         /// </remarks>
         /// <param name="channel">The target channel.</param>
         /// <exception cref="ArgumentException">If the channel name is not valid.</exception> 
-        /// <seealso cref="Listener.OnTopicRequest"/> 
+        /// <seealso cref="Listener.OnRecieveTopic"/> 
         public void RequestTopic(string channel)
         {
             lock (this)
