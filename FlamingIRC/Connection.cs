@@ -280,7 +280,7 @@ namespace FlamingIRC
             Sender.Pong(message);
         }
 
-        private void UpdateLastTime()
+        private void UpdateLastTime(object sender, EventArgs e)
         {
             lastTraffic = DateTime.Now;
         }

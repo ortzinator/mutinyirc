@@ -101,9 +101,9 @@
             AddLine(ChannelStrings.Kick.With(kickee, nick.Nick, reason));
         }
 
-        private void Channel_OnNick(User nick, string newNick)
+        private void Channel_OnNick(object sender, NickChangeEventArgs ea)
         {
-            AddLine(ChannelStrings.NickChange.With(nick.Nick, newNick));
+            AddLine(ChannelStrings.NickChange.With(ea.User.Nick, ea.NewNick));
         }
 
         private void Channel_OnUserQuitted(object sender, UserMessageEventArgs e)

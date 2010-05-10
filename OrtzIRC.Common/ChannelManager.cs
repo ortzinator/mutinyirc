@@ -36,13 +36,13 @@
         public static event EventHandler<ChannelEventArgs> ChannelCreated;
         public static event EventHandler<ChannelEventArgs> ChannelRemoved;
 
-        private void Server_OnNick(User nick, string newNick)
+        private void Server_OnNick(object sender, NickChangeEventArgs ea)
         {
             foreach (KeyValuePair<string, Channel> item in Channels)
             {
-                if (item.Value.HasUser(nick.Nick))
+                if (item.Value.HasUser(ea.User.Nick))
                 {
-                    item.Value.NickChange(nick, newNick);
+                    item.Value.NickChange(ea.User, ea.NewNick);
                 }
             }
         }
