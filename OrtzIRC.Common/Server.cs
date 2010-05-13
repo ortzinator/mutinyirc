@@ -178,7 +178,7 @@
         public event EventHandler<PartEventArgs> Part;
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
         public event UserModeChangeEventHandler UserModeChanged;
-        public event DisconnectingEventHandler Disconnecting;
+        public event EventHandler<CancelEventArgs> Disconnecting;
         public event EventHandler Disconnected;
         public event EventHandler<ChannelMessageEventArgs> UserAction;
         public event EventHandler<UserMessageEventArgs> PrivateNotice;

@@ -35,7 +35,7 @@ namespace FlamingIRC
     /// This connection is about to be closed 
     /// </summary>
     /// <seealso cref="Listener.OnDisconnecting"/>
-    public delegate void DisconnectingEventHandler();
+    //public delegate void DisconnectingEventHandler();
 
     /// <summary>
     /// A Notice type message was sent to a channel.
