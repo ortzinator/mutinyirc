@@ -117,6 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ConnectionRefused" xml:space="preserve">
+    <value>Connection refused.</value>
+    <comment>No connection could be made because the target machine actively refused it. This usually results from trying to connect to a service that is inactive on the foreign host — that is, one with no server application running.</comment>
+  </data>
   <data name="TimedOut" xml:space="preserve">
     <value>Connection timed out.</value>
     <comment>A connection attempt failed because the connected party did not properly respond after a period of time, or the established connection failed because the connected host has failed to respond.</comment>

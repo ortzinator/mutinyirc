@@ -115,5 +115,26 @@
             }
             return null;
         }
+
+        public void DisableAutoConnect(Server server)
+        {
+            var settings = GetServer(server);
+            settings.AutoConnect = false;
+        }
+
+        private ServerSettings GetServer(Server server)
+        {
+            foreach (NetworkSettings networkSettings in Networks)
+            {
+                foreach (ServerSettings serverSettings in networkSettings.Servers)
+                {
+                    if (server.Url == serverSettings.Url)
+                    {
+                        return serverSettings;
+                    }
+                }
+            }
+            return null;
+        }
     }
 }
