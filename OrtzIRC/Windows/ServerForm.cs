@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace OrtzIRC
 {
     using System;
@@ -11,6 +9,7 @@ namespace OrtzIRC
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
     using OrtzIRC.Resources;
+    using System.Reflection;
 
     public partial class ServerForm : Form
     {
@@ -272,20 +271,24 @@ namespace OrtzIRC
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            Debug.WriteLine("ServerForm Closing: " + e.CloseReason);
-
-            if (!server.IsConnected) return;
             if (e.CloseReason == CloseReason.MdiFormClosing) return;
-
             if (e.CloseReason != CloseReason.TaskManagerClosing)
             {
-                DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Url),
-                                                      CommonStrings.DialogCaption, MessageBoxButtons.OKCancel,
-                                                      MessageBoxIcon.Warning);
-
-                if (result != DialogResult.OK)
+                if (server.IsConnected)
                 {
-                    e.Cancel = true;
+                    DialogResult result = MessageBox.Show(ServerStrings.WarnDisconnect.With(Server.Url),
+                                                          CommonStrings.DialogCaption, MessageBoxButtons.OKCancel,
+                                                          MessageBoxIcon.Warning);
+
+                    if (result != DialogResult.OK)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+                else
+                {
+                    IrcSettingsManager.Instance.DisableAutoConnect(Server);
                     return;
                 }
             }

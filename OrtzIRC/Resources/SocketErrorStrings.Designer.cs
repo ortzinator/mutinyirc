@@ -61,6 +61,15 @@ namespace OrtzIRC.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connection refused..
+        /// </summary>
+        internal static string ConnectionRefused {
+            get {
+                return ResourceManager.GetString("ConnectionRefused", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connection timed out..
         /// </summary>
         internal static string TimedOut {
