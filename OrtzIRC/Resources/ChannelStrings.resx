@@ -144,4 +144,7 @@
   <data name="TopicRecieved" xml:space="preserve">
     <value>Topic: ({0})</value>
   </data>
+	<data name="ErrorMessageCaption">
+		<value xml:space="preserve">Error</value>
+	</data>
 </root>

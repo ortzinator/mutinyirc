@@ -256,7 +256,7 @@ namespace FlamingIRC
         /// 
         /// </summary>
         /// <param name="message"></param>
-        public void Parse(string message) //Hack: Made public for unit testing, should be internal
+        public void Parse(string message)
         {
             if (OnAnything != null)
                 OnAnything(this, new EventArgs());

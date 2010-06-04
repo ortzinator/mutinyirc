@@ -201,23 +201,23 @@ namespace OrtzIRC
         private void DoRegister()
         {
             string network = Server.Connection.ServerProperties["Network"];
-            var networkSettings = IrcSettingsManager.Instance.GetNetwork(Server);
+            NetworkSettings networkSettings = IrcSettingsManager.Instance.GetNetwork(Server);
 
             if (networkSettings == null)
             {
-                NetworkSettings nNet;
+                NetworkSettings tempNet;
                 if (network == String.Empty)
                 {
-                    nNet = IrcSettingsManager.Instance.AddNetwork(Server.Url); //TODO: Get domain name or something
+                    tempNet = IrcSettingsManager.Instance.AddNetwork(Server.Url); //TODO: Get domain name or something
                     network = "Network"; //HACK
                 }
                 else
                 {
-                    nNet = IrcSettingsManager.Instance.AddNetwork(network);
+                    tempNet = IrcSettingsManager.Instance.AddNetwork(network);
 
                 }
 
-                nNet.AddServer(new ServerSettings(Server.Url, "Random", Server.Port.ToString(),
+                tempNet.AddServer(new ServerSettings(Server.Url, "Random", Server.Port.ToString(),
                         Server.Connection.ConnectionData.Ssl) { AutoConnect = true });
             }
             else

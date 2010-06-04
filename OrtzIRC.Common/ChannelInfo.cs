@@ -26,7 +26,7 @@
         /// <summary>
         /// The current key
         /// </summary>
-        public string Key { get; set; } // TODO: Fully implement (wrong passwords, joining, changed key, etc.)
+        public string Key { get; set; } // TODO 2: Fully implement (wrong passwords, joining, changed key, etc.)
 
         public int Limit { get; set; }
 

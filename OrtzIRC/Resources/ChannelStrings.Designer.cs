@@ -70,6 +70,15 @@ namespace OrtzIRC.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        internal static string ErrorMessageCaption {
+            get {
+                return ResourceManager.GetString("ErrorMessageCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to -- Joined: ({0}) ({1}).
         /// </summary>
         internal static string Joined {

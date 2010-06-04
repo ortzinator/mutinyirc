@@ -83,10 +83,11 @@
 
         private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
         {
-            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, e.Data)); //TODO: Do something with the result
+            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, e.Data));
             if (result != null && result.Result == CommandResult.Fail)
             {
                 channelOutputBox.AppendError("\n" + result.Message);
+                //TODO: Log
             }
         }
 
