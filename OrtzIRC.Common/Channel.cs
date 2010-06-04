@@ -143,7 +143,7 @@
 
         public void Part()
         {
-            Part("Leaving"); //TODO: Get default part message
+            Part("Leaving"); //TODO 4: Get default part message
         }
 
         public void UserPart(User user, string message)
@@ -192,7 +192,7 @@
         public void Say(string message)
         {
             Server.Connection.Sender.PublicMessage(Name, message);
-            MessagedChannel.Fire(this, new UserMessageEventArgs(NickList.GetUser(Server.UserNick), message)); //TODO: necessary?
+            MessagedChannel.Fire(this, new UserMessageEventArgs(NickList.GetUser(Server.UserNick), message));
         }
 
         public void Act(string message)

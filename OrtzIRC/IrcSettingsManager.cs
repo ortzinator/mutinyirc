@@ -1,4 +1,6 @@
-﻿namespace OrtzIRC
+﻿using OrtzIRC.Resources;
+
+namespace OrtzIRC
 {
     using System;
     using System.Collections.Generic;
@@ -61,7 +63,7 @@
             }
             catch (Exception)
             {
-                MessageBox.Show("Could not save IRC settings to disk", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); //hack
+                MessageBox.Show("Could not save IRC settings to disk", ChannelStrings.ErrorMessageCaption, MessageBoxButtons.OK, MessageBoxIcon.Error); //hack
                 //TODO: Log, or something, instead of MessageBox.
             }
         }
