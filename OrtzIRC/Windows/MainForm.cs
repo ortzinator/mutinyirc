@@ -18,11 +18,7 @@ namespace OrtzIRC
 
         protected override void OnLoad(EventArgs e)
         {
-            //hack
-            TextLoggerManager.LoggerActive = Settings.Default.LoggerActivated;
-            TextLoggerManager.AddTimestamp = Settings.Default.LoggerTimestampsActivated;
-            TextLoggerManager.TimeFormat = Settings.Default.LoggerTimestampFormat;
-
+            Settings.Default.SettingsSaving += Default_SettingsSaving;
             ServerManager.Instance.ServerAdded += Instance_ServerCreated;
 
             windowManagerTreeView.AfterSelect += windowManagerTreeView_AfterSelect;
@@ -51,6 +47,18 @@ namespace OrtzIRC
             RandomMessages.Load();
 
             base.OnLoad(e);
+        }
+
+        private void Default_SettingsSaving(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            LoadSettings();
+        }
+
+        private void LoadSettings()
+        {
+            TextLoggerManager.LoggerActive = Settings.Default.LoggerActivated;
+            TextLoggerManager.AddTimestamp = Settings.Default.LoggerTimestampsActivated;
+            TextLoggerManager.TimeFormat = Settings.Default.LoggerTimestampFormat;
         }
 
         private void Instance_ServerCreated(object sender, ServerEventArgs e)
