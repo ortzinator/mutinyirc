@@ -64,7 +64,7 @@
                             else
                             {
                                 Trace.WriteLine(string.Format("Could not load command {0}. A command by that name already exists.", info.FullName),
-                                    TraceCategories.PluginSystem); //Hack: lousy error message :P
+                                    TraceCategories.PluginSystem);
                                 //TODO: Should let user know about this.
                             }
                         }
