@@ -208,8 +208,9 @@ namespace OrtzIRC
                 NetworkSettings tempNet;
                 if (network == String.Empty)
                 {
-                    tempNet = IrcSettingsManager.Instance.AddNetwork(Server.Url); //TODO: Get domain name or something
-                    network = "Network"; //HACK
+                    tempNet = IrcSettingsManager.Instance.AddNetwork(Server.Url);
+                    //TODO: Get domain name to use as network name, or something
+                    network = "Network";
                 }
                 else
                 {
@@ -246,7 +247,7 @@ namespace OrtzIRC
                     server.Port);
 
             if (nickRetryFailed)
-                AddLine(ServerStrings.RandomNickMessage); //TODO: Messagebox?
+                AddLine(ServerStrings.RandomNickMessage);
 
             nickRetry = 0;
             nickRetryFailed = false;

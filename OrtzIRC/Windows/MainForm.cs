@@ -87,9 +87,6 @@ namespace OrtzIRC
 
                 ServerTreeNode node = windowManagerTreeView.GetServerNode(pm.Server);
 
-                if (node == null)
-                    throw new Exception("ServerTreeNode doesn't exist!"); //hack
-
                 node.AddPmNode(new PmTreeNode(newPmForm));
                 node.Expand();
                 newPmForm.MdiParent = this;
@@ -134,9 +131,6 @@ namespace OrtzIRC
                 var newChannelForm = new ChannelForm(channel);
                 ServerTreeNode node = windowManagerTreeView.GetServerNode(channel.Server);
 
-                if (node == null)
-                    throw new Exception("ServerTreeNode doesn't exist!"); //hack
-
                 node.AddChannelNode(new ChannelTreeNode(newChannelForm));
                 node.Expand();
                 newChannelForm.MdiParent = this;
@@ -158,7 +152,7 @@ namespace OrtzIRC
             {
                 ((ChannelTreeNode)e.Node).ChannelWindow.Focus();
             }
-            //TODO: PM and other windows
+            //TODO: Create an abstract Window property to remove redundancy
         }
 
         private void loggingToolStripMenuItem_Click(object sender, EventArgs e)
@@ -182,7 +176,7 @@ namespace OrtzIRC
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("MainForm Closing: " + e.CloseReason);
-            // TODO: Stuff we should do on exit.
+
             if (ConfirmExit())
             {
                 RandomMessages.Save();

@@ -59,7 +59,7 @@
 
             ChanManager = new ChannelManager(this);
 
-            //TODO: Select port
+            //TODO: Select port??
             Connection = new Connection(args, true, false);
             Connection.HandleNickTaken = false;
         }
@@ -224,7 +224,7 @@
 
         public void Disconnect()
         {
-            Disconnect("OrtzIRC (pre-alpha) - http://www.ortzirc.com/"); //TODO: Pick random message from user-defined list of quit messages
+            Disconnect("OrtzIRC (pre-alpha) - http://www.ortzirc.com/");
         }
 
         public void Disconnect(string reason)
@@ -339,19 +339,6 @@
         {
             if (Registered != null)
                 Registered(this, e);
-
-            //TODO: Handle a taken nick
-            //TODO: Get autojoin list for the network
-            //HACK: This is for testing. It just gets a list and joins it all. Should be done by the GUI layer
-            //if (serverSettings.Channels != null)
-            //{
-            //    foreach (var channel in serverSettings.Channels)
-            //    {
-            //        if (channel.AutoJoin)
-            //            JoinChannel(channel.Name);
-            //    }
-
-            //}
         }
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
