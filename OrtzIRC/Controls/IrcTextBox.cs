@@ -33,9 +33,14 @@
             DetectUrls = false;
         }
 
+        /// <summary>
+        /// Add text from IRC which may contain colr codes and parse them.
+        /// </summary>
+        /// <param name="line">The text</param>
         private void AppendIrcText(string line)
         {
-            //Color parsing - http://www.mirc.co.uk/help/color.txt
+            //-- Color parsing: http://www.mirc.co.uk/help/color.txt
+
             int forecolor = 1;
             int backcolor = 0;
 
@@ -125,16 +130,9 @@
 
         public void AppendLine(string line, Color color)
         {
-            if (InvokeRequired)
-            {
-                Invoke(new Action<string, Color>(AppendLine), line, color);
-            }
-            else
-            {
-                SetColor(color);
-                AppendText(line);
-                SetColor(ForeColor);
-            }
+            SetColor(color);
+            AppendText(line);
+            SetColor(ForeColor);
         }
 
         public void AppendError(string error)
