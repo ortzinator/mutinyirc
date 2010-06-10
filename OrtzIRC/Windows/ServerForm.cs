@@ -3,13 +3,14 @@ namespace OrtzIRC
     using System;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.Drawing;
+    using System.Reflection;
     using System.Windows.Forms;
     using FlamingIRC;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
     using OrtzIRC.Resources;
-    using System.Reflection;
 
     public partial class ServerForm : Form
     {
@@ -175,7 +176,7 @@ namespace OrtzIRC
         private void ParentServer_OnRawMessageReceived(object sender, DataEventArgs<string> e)
         {
             //intentionally blank
-            //AddLine(e.Data);
+            AddLine(e.Data, Color.FromArgb(0, 170, 222));
         }
 
         private void ParentServer_OnPrivateNotice(object sender, UserMessageEventArgs e)
@@ -298,10 +299,15 @@ namespace OrtzIRC
             server.Disconnect();
         }
 
-        private void AddLine(String text)
+        private void AddLine(string text)
         {
             serverOutputBox.AppendLine(text);
+            TextLoggerManager.TextEntry(Server, text + '\n');
+        }
 
+        private void AddLine(string text, Color color)
+        {
+            serverOutputBox.AppendLine(text, color);
             TextLoggerManager.TextEntry(Server, text + '\n');
         }
     }
