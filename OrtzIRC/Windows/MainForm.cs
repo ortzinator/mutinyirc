@@ -31,7 +31,7 @@ namespace OrtzIRC
             if (!Directory.Exists(Settings.Default.UserPluginDirectory))
                 Directory.CreateDirectory(Settings.Default.UserPluginDirectory);
 
-            if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) //hack
             {
                 foreach (ServerSettings server in IrcSettingsManager.Instance.GetAutoConnectServers())
                 {

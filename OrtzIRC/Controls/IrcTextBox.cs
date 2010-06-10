@@ -31,8 +31,6 @@
             InitializeComponent();
             ReadOnly = true;
             DetectUrls = false;
-            //BackColor = System.Drawing.SystemColors.Window;
-            //Cursor = System.Windows.Forms.Cursors.Default;
         }
 
         private void AppendIrcText(string line)
@@ -122,6 +120,20 @@
                     System.Globalization.CultureInfo.CreateSpecificCulture("es-ES")) + " ");
                 AppendIrcText(line.Trim());
                 ScrollToBottom();
+            }
+        }
+
+        public void AppendLine(string line, Color color)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string, Color>(AppendLine), line, color);
+            }
+            else
+            {
+                SetColor(color);
+                AppendText(line);
+                SetColor(ForeColor);
             }
         }
 
