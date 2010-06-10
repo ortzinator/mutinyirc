@@ -130,9 +130,16 @@
 
         public void AppendLine(string line, Color color)
         {
-            SetColor(color);
-            AppendText(line);
-            SetColor(ForeColor);
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string, Color>(AppendLine), line, color);
+            }
+            else
+            {
+                SetColor(color);
+                AppendText(line);
+                SetColor(ForeColor);
+            }
         }
 
         public void AppendError(string error)
