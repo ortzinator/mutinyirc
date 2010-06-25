@@ -7,7 +7,7 @@
     using System.Xml;
     using OrtzIRC.Common;
 
-    public class ServerSettings : IXmlSerializable
+    public class ServerSettings : IXmlSerializable, IEquatable<ServerSettings>
     {
         public ServerSettings(string url, string description, string ports, bool ssl)
         {
@@ -125,6 +125,11 @@
             writer.WriteAttributeString("Url", Url);
             writer.WriteAttributeString("Ports", Ports);
             writer.WriteAttributeString("AutoConnect", AutoConnect.ToString());
+        }
+
+        public bool Equals(ServerSettings server)
+        {
+            return server != null && server.Url == Url;
         }
     }
 }

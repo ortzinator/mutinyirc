@@ -51,6 +51,7 @@ namespace OrtzIRC
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.deleteToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.label7 = new System.Windows.Forms.Label();
             this.addNetworkMenuStrip.SuspendLayout();
             this.serverGroupBox.SuspendLayout();
             this.networkGroupBox.SuspendLayout();
@@ -255,11 +256,22 @@ namespace OrtzIRC
             this.deleteToolStripMenuItem1.Text = "Delete";
             this.deleteToolStripMenuItem1.Click += new System.EventHandler(this.deleteToolStripMenuItem1_Click);
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.ForeColor = System.Drawing.Color.Red;
+            this.label7.Location = new System.Drawing.Point(153, 218);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(258, 13);
+            this.label7.TabIndex = 7;
+            this.label7.Text = "This is for testing only. Normal users should not use it.";
+            // 
             // ServerSettingsDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(502, 249);
+            this.Controls.Add(this.label7);
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.networkGroupBox);
             this.Controls.Add(this.serverGroupBox);
@@ -305,5 +317,6 @@ namespace OrtzIRC
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem1;
         private System.Windows.Forms.CheckBox autoConnectCheckBox;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
     }
 }

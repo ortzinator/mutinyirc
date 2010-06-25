@@ -54,9 +54,19 @@ namespace OrtzIRC
             server.ConnectionLost += server_ConnectionLost;
             server.ConnectCancelled += server_ConnectCancelled;
             server.NickError += server_NickError;
+            server.PartSelf += server_PartSelf;
 
             commandTextBox.CommandEntered += commandTextBox_CommandEntered;
             serverOutputBox.MouseUp += serverOutputBox_MouseUp;
+        }
+
+        private void server_PartSelf(object sender, PartEventArgs e)
+        {
+            NetworkSettings nwSettings = IrcSettingsManager.Instance.GetNetwork(Server);
+
+            ChannelSettings chan = nwSettings.GetChannel(e.Channel.Name);
+
+            chan.AutoJoin = false;
         }
 
         private void server_NickError(object sender, NickErrorEventArgs e)
@@ -253,23 +263,23 @@ namespace OrtzIRC
             nickRetry = 0;
             nickRetryFailed = false;
 
-            if (networkSettings != null)
+            if (networkSettings == null || networkSettings.Channels == null) return;
+            foreach (ChannelSettings channel in networkSettings.Channels)
             {
-                if (networkSettings.Channels != null)
-                {
-                    foreach (ChannelSettings channel in networkSettings.Channels)
-                    {
-                        if (channel.AutoJoin)
-                            Server.JoinChannel(channel.Name);
-                    }
-                }
+                if (channel.AutoJoin)
+                    Server.JoinChannel(channel.Name);
             }
         }
 
         private void ParentServer_OnJoinSelf(object sender, DataEventArgs<Channel> e)
         {
             ((MainForm)MdiParent).CreateChannelForm(e.Data);
-        }
+
+            NetworkSettings nwSettings = IrcSettingsManager.Instance.GetNetwork(Server);
+            ChannelSettings chan = nwSettings.GetChannel(e.Data.Name) ?? nwSettings.AddChannel(e.Data);
+            chan.AutoJoin = true;
+            
+        }   
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {

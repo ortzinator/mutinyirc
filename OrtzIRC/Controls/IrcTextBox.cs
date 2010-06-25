@@ -137,7 +137,7 @@
             else
             {
                 SetColor(color);
-                AppendText(line);
+                AppendText("\n" + line);
                 SetColor(ForeColor);
             }
         }
@@ -151,7 +151,7 @@
             else
             {
                 SetColor(Color.Red);
-                AppendText(error);
+                AppendText("\n" + error);
                 SetColor(ForeColor);
             }
         }

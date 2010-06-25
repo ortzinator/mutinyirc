@@ -7,7 +7,7 @@ namespace OrtzIRC
     using System.Xml;
     using System.Xml.Serialization;
 
-    public class NetworkSettings : IXmlSerializable
+    public class NetworkSettings : IXmlSerializable, IEquatable<NetworkSettings>
     {
         public NetworkSettings(string name)
         {
@@ -15,11 +15,14 @@ namespace OrtzIRC
             Servers = new List<ServerSettings>();
         }
 
-        public NetworkSettings() { }
+        public NetworkSettings()
+        {
+            Channels = new List<ChannelSettings>();
+        }
 
         public string Name { get; set; }
         public List<ServerSettings> Servers { get; private set; }
-        public List<ChannelSettings> Channels { get; set; }
+        public List<ChannelSettings> Channels { get; private set; }
 
         public ServerSettings GetRandomServer()
         {
@@ -43,6 +46,11 @@ namespace OrtzIRC
             return server;
         }
 
+        public bool Equals(NetworkSettings other)
+        {
+            return other != null && other.Name == Name;
+        }
+
         public override string ToString()
         {
             return Name;
@@ -62,10 +70,20 @@ namespace OrtzIRC
 
             while (reader.IsEmptyElement)
             {
-                var net = new ServerSettings();
-                net.ReadXml(reader);
-                AddServer(net);
-                reader.Read();
+                if (reader.Name == "Server")
+                {
+                    var net = new ServerSettings();
+                    net.ReadXml(reader);
+                    AddServer(net);
+                    reader.Read();
+                }
+                else if (reader.Name == "Channel")
+                {
+                    var chan = new ChannelSettings();
+                    chan.ReadXml(reader);
+                    AddChannel(chan);
+                    reader.Read();
+                }
             }
         }
 
@@ -77,6 +95,13 @@ namespace OrtzIRC
             {
                 writer.WriteStartElement("Server");
                 server.WriteXml(writer);
+                writer.WriteEndElement();
+            }
+
+            foreach (ChannelSettings channel in Channels)
+            {
+                writer.WriteStartElement("Channel");
+                channel.WriteXml(writer);
                 writer.WriteEndElement();
             }
         }
@@ -94,6 +119,32 @@ namespace OrtzIRC
                 {
                     return server;
                 }
+            }
+            return null;
+        }
+
+        public ChannelSettings AddChannel(Channel data)
+        {
+            var chan = new ChannelSettings();
+            chan.Name = data.Name;
+            AddChannel(chan);
+            return chan;
+        }
+
+        public void AddChannel(ChannelSettings channel)
+        {
+            if (Channels.Contains(channel))
+                return; //todo ???
+
+            Channels.Add(channel);
+        }
+
+        public ChannelSettings GetChannel(string name)
+        {
+            foreach (ChannelSettings channel in Channels)
+            {
+                if (channel.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
+                    return channel;
             }
             return null;
         }
