@@ -5,7 +5,7 @@
     using System.Xml.Schema;
     using System.Xml;
 
-    public class ChannelSettings : IXmlSerializable
+    public class ChannelSettings : IXmlSerializable, IEquatable<ChannelSettings>
     {
         public ChannelSettings(string name, bool autojoin, string description, string key)
             : this(name, autojoin)
@@ -46,6 +46,11 @@
             writer.WriteAttributeString("Name", Name);
             writer.WriteAttributeString("Key", Key);
             writer.WriteAttributeString("AutoJoin", AutoJoin.ToString());
+        }
+
+        public bool Equals(ChannelSettings other)
+        {
+            return other != null && other.Name == Name;
         }
     }
 }

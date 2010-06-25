@@ -176,6 +176,7 @@
         public event EventHandler<ErrorMessageEventArgs> ErrorMessageRecieved;
         public event EventHandler Registered;
         public event EventHandler<PartEventArgs> Part;
+        public event EventHandler<PartEventArgs> PartSelf;
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
         public event UserModeChangeEventHandler UserModeChanged;
         public event EventHandler<CancelEventArgs> Disconnecting;
@@ -322,12 +323,16 @@
 
         private void Listener_OnPart(User user, string channel, string reason)
         {
-            if (IsMe(user)) return;
-
             var chan = ChanManager.GetChannel(channel);
 
             if (chan == null)
                 return;
+            
+            if (IsMe(user))
+            {
+                PartSelf.Fire(this, new PartEventArgs(user, chan, String.Empty));
+                return;
+            }
 
             Part.Fire(this, new PartEventArgs(user, chan, reason));
             chan.UserPart(user, reason);

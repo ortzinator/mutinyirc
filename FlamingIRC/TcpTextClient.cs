@@ -234,7 +234,7 @@ namespace FlamingIRC
 
                 waitForData();
             }
-            catch (Exception)
+            catch (SocketException) //hack - What kind of exception?
             {
                 socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
