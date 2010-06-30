@@ -15,8 +15,6 @@
         private static Dictionary<string, CommandInfo> commands;
         private static List<PluginInfo> plugins;
 
-        private static string userPluginPath;
-
         private PluginManager()
         {
             plugins = new List<PluginInfo>();
@@ -34,19 +32,17 @@
             if (Instance == null)
                 Instance = new PluginManager();
 
-            userPluginPath = pluginPath;
-
-            FindPlugins();
+            FindPlugins(pluginPath);
         }
 
         /// <summary>
         /// Searches the plugins directory for assemblies, examines them for plugins and populates
         /// </summary>
-        private static void FindPlugins()
+        private static void FindPlugins(string path)
         {
-            Trace.WriteLine("Loading Plug-ins", TraceCategories.PluginSystem);
+            Trace.WriteLine(string.Format("Loading Plug-ins ({0})", path), TraceCategories.PluginSystem);
 
-            string[] files = System.IO.Directory.GetFileSystemEntries(userPluginPath, "*.dll");
+            string[] files = System.IO.Directory.GetFileSystemEntries(path, "*.dll");
 
             foreach (string file in files)
             {
@@ -88,7 +84,7 @@
         {
             foreach (KeyValuePair<string, CommandInfo> item in commands)
             {
-                if (item.Value.CommandName.ToUpper() == name.ToUpper())
+                if (item.Value.CommandName.Equals(name, StringComparison.CurrentCultureIgnoreCase))
                     return (ICommand)CreateInstance(item.Value);
             }
             Trace.WriteLine(String.Format("No command called {0} found", name.ToUpper()), TraceCategories.PluginSystem);
