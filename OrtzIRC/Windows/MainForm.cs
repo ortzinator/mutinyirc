@@ -23,13 +23,7 @@ namespace OrtzIRC
 
             windowManagerTreeView.AfterSelect += windowManagerTreeView_AfterSelect;
 
-            Settings.Default.UserPluginDirectory = Path.Combine(Environment.CurrentDirectory, @"Plugins");
-            Settings.Default.Save();
-
-            IrcSettingsManager.Instance.GetAutoConnectServers();
-
-            if (!Directory.Exists(Settings.Default.UserPluginDirectory))
-                Directory.CreateDirectory(Settings.Default.UserPluginDirectory);
+            LoadSettings();
 
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) //hack
             {
@@ -43,6 +37,7 @@ namespace OrtzIRC
                 }
             }
 
+            PluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
             PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
             RandomMessages.Load();
 
@@ -56,6 +51,15 @@ namespace OrtzIRC
 
         private void LoadSettings()
         {
+            if (Settings.Default.UserPluginDirectory == String.Empty)
+            {
+                Settings.Default.UserPluginDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), @"OrtzIRC/Plugins");
+                Settings.Default.Save();
+            }
+
+            if (!Directory.Exists(Settings.Default.UserPluginDirectory))
+                Directory.CreateDirectory(Settings.Default.UserPluginDirectory);
+
             TextLoggerManager.LoggerActive = Settings.Default.LoggerActivated;
             TextLoggerManager.AddTimestamp = Settings.Default.LoggerTimestampsActivated;
             TextLoggerManager.TimeFormat = Settings.Default.LoggerTimestampFormat;
