@@ -3,9 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Reflection;
     using OrtzIRC.Common;
-    using System.Linq;
 
     /// <summary>
     /// Manages plugins and commands.
