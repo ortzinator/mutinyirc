@@ -13,14 +13,12 @@ namespace OrtzIRC.Common
     {
         // The log directory (This string is simply used to avoid concatenating multiple
         // strings whenever we new the FileHandle member.
-        public static String Basedir = Environment.CurrentDirectory + '\\' + "logs";
+        public static string basedir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "OrtzIRC\\logs"); //hack
 
         // The path of the file we're logging to
-        public String Path { get; private set; }
-        // The directory of that file
-        public String Dir  { get; private set; }
+        public string LogPath { get; private set; }
         // The name of the loggable item (#luahelp, Ortzinator, etc)
-        public String Name { get; private set; }
+        public string Name { get; private set; }
 
         // Error handling:
 
@@ -28,22 +26,21 @@ namespace OrtzIRC.Common
         public bool Failed { get; private set; }
         // The last IOException thrown. Implemented, but
         // requires UI tweaking.
-        public String LastError { get; private set; }
+        public string LastError { get; private set; }
 
         // The file we're writing to
-        private FileStream FileHandle;
+        private FileStream fileHandle;
 
         /// <summary>
         /// Creates a new loggable item in the specified folder underneath the ./logs
         /// directory.
         /// </summary>
-        /// <param name="Name">The name of the log file, without extension.</param>
-        /// <param name="Folder">The folder to create the file in. It should NOT start with a \, nor end with one.</param>
-        public LoggedItem(String Name, String Folder)
+        /// <param name="name">The name of the log file, without extension.</param>
+        /// <param name="folder">The folder to create the file in. It should NOT start with a \, nor end with one.</param>
+        public LoggedItem(string name, string folder)
         {
-            this.Name = Name;
-            Dir = Basedir + '\\' + Folder;
-            Path = Dir + '\\' + Name + ".log";
+            Name = name;
+            LogPath = Path.Combine(Path.Combine(basedir, folder), name + ".log");
             Open();
         }
 
@@ -52,8 +49,8 @@ namespace OrtzIRC.Common
         /// </summary>
         public void Open()
         {
-            CreateIfNotExists(Dir);
-            FileHandle = new FileStream(Path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+            CreateIfNotExists(Path.GetDirectoryName(LogPath));
+            fileHandle = new FileStream(LogPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
         }
 
         /// <summary>
@@ -61,21 +58,21 @@ namespace OrtzIRC.Common
         /// </summary>
         public void Close()
         {
-            FileHandle.Close();
-            FileHandle = null;
+            fileHandle.Close();
+            fileHandle = null;
         }
 
         /// <summary>
         /// Writes text to the stream
         /// </summary>
-        /// <param name="Text">The String object to write to the file.</param>
-        public void Write(String Text)
+        /// <param name="text">The String object to write to the file.</param>
+        public void Write(string text)
         {
             // Check if stream is working
             if (!Failed)
             {
                 // Convert data
-                byte[] data = Text.GetBytes();
+                byte[] data = text.GetBytes();
 
                 // Try to write to the stream once
                 Failed = !TryWrite(data);
@@ -85,18 +82,18 @@ namespace OrtzIRC.Common
         /// <summary>
         /// Attempts to write to the stream
         /// </summary>
-        /// <param name="Data">The data to write</param>
+        /// <param name="data">The data to write</param>
         /// <returns>The success of the operation</returns>
-        private bool TryWrite(byte[] Data)
+        private bool TryWrite(byte[] data)
         {
             try
             {
                 // Make sure the necessary directories are in place
-                CreateIfNotExists(Dir);
+                CreateIfNotExists(Path.GetDirectoryName(LogPath));
 
                 // Attempt writing the data
-                FileHandle.Write(Data, 0, Data.Length);
-                FileHandle.Flush();
+                fileHandle.Write(data, 0, data.Length);
+                fileHandle.Flush();
 
                 return true; // Success
             }
@@ -110,7 +107,7 @@ namespace OrtzIRC.Common
 
         // Utility
 
-        private static void CreateIfNotExists(String path)
+        private static void CreateIfNotExists(string path)
         {
             if (!Directory.Exists(path))
             {
