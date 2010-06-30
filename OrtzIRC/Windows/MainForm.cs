@@ -3,11 +3,11 @@ namespace OrtzIRC
     using System;
     using System.IO;
     using System.Windows.Forms;
+    using FlamingIRC;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
     using OrtzIRC.Resources;
-    using FlamingIRC;
 
     public partial class MainForm : Form
     {

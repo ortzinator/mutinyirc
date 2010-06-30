@@ -12,6 +12,7 @@ namespace OrtzIRC
     public sealed class IrcSettingsManager
     {
         private static IrcSettingsManager instance;
+        private static string settingsPath;
 
         public NetworkSettingsList Networks { get; private set; }
 
@@ -26,6 +27,7 @@ namespace OrtzIRC
             {
                 if (instance != null) return instance;
                 instance = new IrcSettingsManager();
+                settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), @"OrtzIRC/servers.xml");
                 instance.Load();
                 return instance;
             }
@@ -55,7 +57,7 @@ namespace OrtzIRC
             try
             {
                 var serializer = new XmlSerializer(typeof(NetworkSettingsList), new XmlRootAttribute("EpicServerList"));
-                var fs = new FileStream("servers.xml", FileMode.Create); //TODO: App setting
+                var fs = new FileStream(settingsPath, FileMode.Create);
                 TextWriter writer = new StreamWriter(fs, new System.Text.UTF8Encoding());
                 serializer.Serialize(writer, Networks);
                 writer.Close();
@@ -73,7 +75,7 @@ namespace OrtzIRC
             try
             {
                 var serializer = new XmlSerializer(typeof(NetworkSettingsList), new XmlRootAttribute("EpicServerList"));
-                var fs = new FileStream("servers.xml", FileMode.Open); //TODO: App setting
+                var fs = new FileStream(settingsPath, FileMode.Open);
                 Networks = (NetworkSettingsList)serializer.Deserialize(fs);
                 fs.Close();
             }
