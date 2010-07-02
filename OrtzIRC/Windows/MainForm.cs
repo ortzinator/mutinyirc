@@ -189,7 +189,13 @@ namespace OrtzIRC
         {
             System.Diagnostics.Debug.WriteLine("MainForm Closing: " + e.CloseReason);
 
-            if (ConfirmExit())
+            bool exit;
+            if (ServerManager.Instance.AnyConnected())
+                exit = ConfirmExit();
+            else
+                exit = true;
+
+            if (exit)
             {
                 RandomMessages.Save();
                 IrcSettingsManager.Instance.Save();
