@@ -1,4 +1,6 @@
-﻿namespace OrtzIRC.Common
+﻿using System.Linq;
+
+namespace OrtzIRC.Common
 {
     using System.Collections.Generic;
     using System;
@@ -38,6 +40,11 @@
         {
             if (ServerList.Remove(ntw))
                 ServerRemoved.Fire(this, new ServerEventArgs(ntw));
+        }
+
+        public bool AnyConnected()
+        {
+            return ServerList.Any(server => server.IsConnected);
         }
 
         public void DisconnectAll()
