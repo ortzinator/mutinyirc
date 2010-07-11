@@ -189,11 +189,9 @@ namespace OrtzIRC
         {
             System.Diagnostics.Debug.WriteLine("MainForm Closing: " + e.CloseReason);
 
-            bool exit;
+            bool exit = true;
             if (ServerManager.Instance.AnyConnected())
                 exit = ConfirmExit();
-            else
-                exit = true;
 
             if (exit)
             {
@@ -217,7 +215,7 @@ namespace OrtzIRC
 
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OptionsDialog dlg = new OptionsDialog();
+            var dlg = new OptionsDialog();
             dlg.Pages.Add(new GeneralOptionsPage());
             dlg.Pages.Add(new LoggingOptionsPage());
             DialogResult result = dlg.ShowDialog();
