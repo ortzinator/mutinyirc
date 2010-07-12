@@ -31,25 +31,19 @@ namespace OrtzIRC
             this.components = new System.ComponentModel.Container();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileRootMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.serversMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowRootMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.customizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loggingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.indexToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.dockToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowManagerTreeView = new OrtzIRC.WindowManagerTreeView();
+            this.serversMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -59,8 +53,7 @@ namespace OrtzIRC
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileRootMenuItem,
             this.windowRootMenuItem,
-            this.toolsToolStripMenuItem,
-            this.helpToolStripMenuItem});
+            this.toolsToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.MdiWindowListItem = this.windowRootMenuItem;
             this.menuStrip.Name = "menuStrip";
@@ -77,17 +70,10 @@ namespace OrtzIRC
             this.fileRootMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileRootMenuItem.Text = "&File";
             // 
-            // serversMenuItem
-            // 
-            this.serversMenuItem.Name = "serversMenuItem";
-            this.serversMenuItem.Size = new System.Drawing.Size(120, 22);
-            this.serversMenuItem.Text = "Servers...";
-            this.serversMenuItem.Click += new System.EventHandler(this.serversMenuItem_Click);
-            // 
             // exitMenuItem
             // 
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(120, 22);
+            this.exitMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitMenuItem.Text = "E&xit";
             this.exitMenuItem.Click += new System.EventHandler(this.exitMenuItem_Click);
             // 
@@ -110,63 +96,22 @@ namespace OrtzIRC
             // customizeToolStripMenuItem
             // 
             this.customizeToolStripMenuItem.Name = "customizeToolStripMenuItem";
-            this.customizeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.customizeToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.customizeToolStripMenuItem.Text = "&Customize";
             // 
             // loggingToolStripMenuItem
             // 
             this.loggingToolStripMenuItem.Name = "loggingToolStripMenuItem";
-            this.loggingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loggingToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.loggingToolStripMenuItem.Text = "&Logging";
             this.loggingToolStripMenuItem.Click += new System.EventHandler(this.loggingToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.optionsToolStripMenuItem.Text = "&Options";
             this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
-            // 
-            // helpToolStripMenuItem
-            // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.contentsToolStripMenuItem,
-            this.indexToolStripMenuItem,
-            this.searchToolStripMenuItem,
-            this.toolStripSeparator5,
-            this.aboutToolStripMenuItem});
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "&Help";
-            // 
-            // contentsToolStripMenuItem
-            // 
-            this.contentsToolStripMenuItem.Name = "contentsToolStripMenuItem";
-            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
-            this.contentsToolStripMenuItem.Text = "&Contents";
-            // 
-            // indexToolStripMenuItem
-            // 
-            this.indexToolStripMenuItem.Name = "indexToolStripMenuItem";
-            this.indexToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
-            this.indexToolStripMenuItem.Text = "&Index";
-            // 
-            // searchToolStripMenuItem
-            // 
-            this.searchToolStripMenuItem.Name = "searchToolStripMenuItem";
-            this.searchToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
-            this.searchToolStripMenuItem.Text = "&Search";
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(119, 6);
-            // 
-            // aboutToolStripMenuItem
-            // 
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
-            this.aboutToolStripMenuItem.Text = "&About...";
             // 
             // splitter1
             // 
@@ -215,6 +160,13 @@ namespace OrtzIRC
             this.windowManagerTreeView.Size = new System.Drawing.Size(146, 540);
             this.windowManagerTreeView.TabIndex = 6;
             // 
+            // serversMenuItem
+            // 
+            this.serversMenuItem.Name = "serversMenuItem";
+            this.serversMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.serversMenuItem.Text = "Servers...";
+            this.serversMenuItem.Click += new System.EventHandler(this.serversMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -242,16 +194,9 @@ namespace OrtzIRC
         private System.Windows.Forms.ToolStripMenuItem fileRootMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitMenuItem;
         private System.Windows.Forms.ToolStripMenuItem windowRootMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem serversMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem customizeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem contentsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem indexToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loggingToolStripMenuItem;
         private WindowManagerTreeView windowManagerTreeView;
         private System.Windows.Forms.Splitter splitter1;
@@ -259,6 +204,7 @@ namespace OrtzIRC
         private System.Windows.Forms.ToolStripMenuItem dockToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem leftToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rightToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serversMenuItem;
     }
 }
 

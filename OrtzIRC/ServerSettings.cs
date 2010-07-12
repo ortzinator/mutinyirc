@@ -15,6 +15,7 @@
             Description = description;
             Ports = ports;
             Ssl = ssl;
+            AutoConnect = true;
         }
 
         public ServerSettings() { }

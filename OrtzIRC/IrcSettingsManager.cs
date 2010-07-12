@@ -81,11 +81,9 @@ namespace OrtzIRC
             }
             catch (FileNotFoundException)
             {
-                MessageBox.Show("Your IRC settings could not be found."); //TODO: Download default
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
+                NetworkSettings net = AddNetwork("RandomIRC");
+                net.AddServer(new ServerSettings("apps.randomirc.com", "Random", "6667", false));
+                net.AddChannel(new ChannelSettings("#ortzirc", true));
             }
         }
 
