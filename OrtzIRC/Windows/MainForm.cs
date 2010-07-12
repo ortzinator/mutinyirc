@@ -23,6 +23,12 @@ namespace OrtzIRC
 
             windowManagerTreeView.AfterSelect += windowManagerTreeView_AfterSelect;
 
+            serversMenuItem.Visible = false;
+
+#if DEBUG
+            serversMenuItem.Visible = true;
+#endif
+
             LoadSettings();
 
             if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) //hack
@@ -36,6 +42,9 @@ namespace OrtzIRC
                     newServer.Connect();
                 }
             }
+
+            if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, "plugins")))
+                Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "plugins"));
 
             PluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
             PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);

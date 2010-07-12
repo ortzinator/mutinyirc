@@ -13,12 +13,10 @@ namespace OrtzIRC
         {
             Name = name;
             Servers = new List<ServerSettings>();
-        }
-
-        public NetworkSettings()
-        {
             Channels = new List<ChannelSettings>();
         }
+
+        public NetworkSettings() : this("") { }
 
         public string Name { get; set; }
         public List<ServerSettings> Servers { get; private set; }
