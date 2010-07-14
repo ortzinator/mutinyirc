@@ -1,4 +1,6 @@
-﻿namespace OrtzIRC.Common
+﻿using System.Threading;
+
+namespace OrtzIRC.Common
 {
     using System;
     using System.Collections.Generic;
@@ -10,6 +12,8 @@
 
     public sealed class Server : MessageContext
     {
+        private DateTime serverChangeTime;
+
         public Server(ConnectionArgs settings)
         {
             SetupConnection(settings);
@@ -220,7 +224,19 @@
                 return;
             }
 
-            Connection.Connect();
+            if (DateTime.Now - serverChangeTime < TimeSpan.FromSeconds(1))
+            {
+                var th = new Thread((ThreadStart)delegate
+                {
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
+                    Connection.Connect();
+                });
+                th.Start();
+            }
+            else
+            {
+                Connection.Connect();
+            }
         }
 
         public void Disconnect()
@@ -327,7 +343,7 @@
 
             if (chan == null)
                 return;
-            
+
             if (IsMe(user))
             {
                 PartSelf.Fire(this, new PartEventArgs(user, chan, String.Empty));
@@ -404,6 +420,8 @@
             ChanManager.UnhookEvents();
             SetupConnection(args);
             HookEvents();
+
+            serverChangeTime = DateTime.Now;
         }
 
         public void ChangeServer(string nick, string url, bool ssl)

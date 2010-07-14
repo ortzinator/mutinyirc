@@ -1,7 +1,6 @@
 namespace OrtzIRC.Commands
 {
     using System;
-    using System.Threading;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Properties;
@@ -17,16 +16,13 @@ namespace OrtzIRC.Commands
         /// </summary>
         public void Execute(Server context, char[] switches, string server)
         {
-            foreach (var c in switches)
+            foreach (char c in switches)
             {
                 switch (c)
                 {
-                    case 'm': //New window and connect
+                    case 'n': //New window and connect
                         var svr = ServerManager.Instance.Create(Settings.Default.FirstNick, server, false);
                         svr.Connect();
-                        return;
-                    case 'n': //New window, don't connect
-                        ServerManager.Instance.Create(Settings.Default.FirstNick, server, false);
                         return;
                 }
             }
@@ -38,12 +34,7 @@ namespace OrtzIRC.Commands
         public void Execute(Server context, string server)
         {
             context.ChangeServer(Settings.Default.FirstNick, server, false);
-            var th = new Thread((ThreadStart)delegate
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(1));
-                context.Connect();
-            });
-            th.Start();
+            context.Connect();
         }
     }
 }
