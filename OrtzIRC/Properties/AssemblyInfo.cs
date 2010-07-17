@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("OrtzIRC")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("The Flaming Head")]
+[assembly: AssemblyCompany("Ortzinator")]
 [assembly: AssemblyProduct("OrtzIRC")]
-[assembly: AssemblyCopyright("Copyright © The Flaming Head 2008")]
+[assembly: AssemblyCopyright("© Brian Ortiz \"Ortzinator\" 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -28,5 +28,4 @@ using System.Runtime.InteropServices;
 //      Minor Version 
 //      Build Number
 //      Revision
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.0.0.*")]

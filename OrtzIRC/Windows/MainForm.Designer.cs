@@ -31,6 +31,7 @@ namespace OrtzIRC
             this.components = new System.ComponentModel.Container();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileRootMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serversMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowRootMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,7 +44,7 @@ namespace OrtzIRC
             this.leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowManagerTreeView = new OrtzIRC.WindowManagerTreeView();
-            this.serversMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -52,8 +53,9 @@ namespace OrtzIRC
             // 
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileRootMenuItem,
-            this.windowRootMenuItem,
-            this.toolsToolStripMenuItem});
+            this.serverToolStripMenuItem,
+            this.toolsToolStripMenuItem,
+            this.windowRootMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.MdiWindowListItem = this.windowRootMenuItem;
             this.menuStrip.Name = "menuStrip";
@@ -70,10 +72,17 @@ namespace OrtzIRC
             this.fileRootMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileRootMenuItem.Text = "&File";
             // 
+            // serversMenuItem
+            // 
+            this.serversMenuItem.Name = "serversMenuItem";
+            this.serversMenuItem.Size = new System.Drawing.Size(120, 22);
+            this.serversMenuItem.Text = "Servers...";
+            this.serversMenuItem.Click += new System.EventHandler(this.serversMenuItem_Click);
+            // 
             // exitMenuItem
             // 
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitMenuItem.Size = new System.Drawing.Size(120, 22);
             this.exitMenuItem.Text = "E&xit";
             this.exitMenuItem.Click += new System.EventHandler(this.exitMenuItem_Click);
             // 
@@ -96,20 +105,20 @@ namespace OrtzIRC
             // customizeToolStripMenuItem
             // 
             this.customizeToolStripMenuItem.Name = "customizeToolStripMenuItem";
-            this.customizeToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.customizeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.customizeToolStripMenuItem.Text = "&Customize";
             // 
             // loggingToolStripMenuItem
             // 
             this.loggingToolStripMenuItem.Name = "loggingToolStripMenuItem";
-            this.loggingToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.loggingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.loggingToolStripMenuItem.Text = "&Logging";
             this.loggingToolStripMenuItem.Click += new System.EventHandler(this.loggingToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.optionsToolStripMenuItem.Text = "&Options";
             this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
@@ -160,12 +169,11 @@ namespace OrtzIRC
             this.windowManagerTreeView.Size = new System.Drawing.Size(146, 540);
             this.windowManagerTreeView.TabIndex = 6;
             // 
-            // serversMenuItem
+            // serverToolStripMenuItem
             // 
-            this.serversMenuItem.Name = "serversMenuItem";
-            this.serversMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.serversMenuItem.Text = "Servers...";
-            this.serversMenuItem.Click += new System.EventHandler(this.serversMenuItem_Click);
+            this.serverToolStripMenuItem.Name = "serverToolStripMenuItem";
+            this.serverToolStripMenuItem.Size = new System.Drawing.Size(51, 20);
+            this.serverToolStripMenuItem.Text = "&Server";
             // 
             // MainForm
             // 
@@ -205,6 +213,7 @@ namespace OrtzIRC
         private System.Windows.Forms.ToolStripMenuItem leftToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rightToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem serversMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serverToolStripMenuItem;
     }
 }
 
