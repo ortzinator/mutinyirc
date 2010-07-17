@@ -238,5 +238,16 @@ namespace OrtzIRC
                 Settings.Default.Reload();
             }
         }
+
+        private void connectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var db = new InputDialog("Connect to server...", "Server Url:", "Connect");
+
+            if (db.ShowDialog() == DialogResult.OK)
+            {
+                var svr = ServerManager.Instance.Create(Settings.Default.FirstNick, db.Input, false);
+                svr.Connect();
+            }
+        }
     }
 }
