@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace OrtzIRC
 {
     using System;
@@ -15,6 +17,8 @@ namespace OrtzIRC
         {
             InitializeComponent();
         }
+
+        private Form focusedChild;
 
         protected override void OnLoad(EventArgs e)
         {
@@ -112,6 +116,7 @@ namespace OrtzIRC
                 node.Expand();
                 newPmForm.MdiParent = this;
                 newPmForm.Show();
+                newPmForm.Enter += newForm_Enter;
             }
         }
 
@@ -134,6 +139,7 @@ namespace OrtzIRC
 
                 newServerForm.Text = server.Url;
                 newServerForm.Show();
+                newServerForm.Enter += newForm_Enter;
             }
         }
 
@@ -158,6 +164,29 @@ namespace OrtzIRC
 
                 newChannelForm.Show();
                 newChannelForm.AddLine("Joined: " + channel.Name);
+
+                newChannelForm.Enter += newForm_Enter;
+            }
+        }
+
+        private void newForm_Enter(object sender, EventArgs e)
+        {
+            focusedChild = sender as Form;
+
+            if (focusedChild == null) return;
+
+            var server = focusedChild as ServerForm;
+            if (server != null)
+            {
+                connectToolStripMenuItem.Visible = !server.Server.IsConnected;
+                disconnectToolStripMenuItem.Visible = server.Server.IsConnected;
+            }
+
+            var channel = focusedChild as ChannelForm;
+            if (channel != null)
+            {
+                connectToolStripMenuItem.Visible = !channel.Channel.Server.IsConnected;
+                disconnectToolStripMenuItem.Visible = channel.Channel.Server.IsConnected;
             }
         }
 
@@ -239,7 +268,31 @@ namespace OrtzIRC
             }
         }
 
-        private void connectToolStripMenuItem_Click(object sender, EventArgs e)
+        public Form CurrentlyFocusedWindow()
+        {
+            return focusedChild;
+        }
+
+        private void disconnectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form window = CurrentlyFocusedWindow();
+
+            if (window == null) return;
+
+            var server = window as ServerForm;
+            if (server != null)
+            {
+                server.Server.Disconnect();
+            }
+
+            var channel = window as ChannelForm;
+            if (channel != null)
+            {
+                channel.Channel.Server.Disconnect();
+            }
+        }
+
+        private void newConnectionToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var db = new InputDialog("Connect to server...", "Server Url:", "Connect");
 
@@ -247,6 +300,25 @@ namespace OrtzIRC
             {
                 var svr = ServerManager.Instance.Create(Settings.Default.FirstNick, db.Input, false);
                 svr.Connect();
+            }
+        }
+
+        private void connectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form window = CurrentlyFocusedWindow();
+
+            if (window == null) return;
+
+            var server = window as ServerForm;
+            if (server != null)
+            {
+                server.Server.Connect();
+            }
+
+            var channel = window as ChannelForm;
+            if (channel != null)
+            {
+                channel.Channel.Server.Connect();
             }
         }
     }
