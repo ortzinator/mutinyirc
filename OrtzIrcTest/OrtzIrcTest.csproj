@@ -121,6 +121,10 @@
       <Project>{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}</Project>
       <Name>FlamingIRC</Name>
     </ProjectReference>
+    <ProjectReference Include="..\OrtzIRC\OrtzIRC.csproj">
+      <Project>{76E3A753-E53C-40C8-B2FD-E5E71D5432C7}</Project>
+      <Name>OrtzIRC</Name>
+    </ProjectReference>
     <ProjectReference Include="..\OrtzIRC.Common\OrtzIRC.Common.csproj">
       <Project>{1594A34C-9BB8-4334-880B-26671436D95E}</Project>
       <Name>OrtzIRC.Common</Name>
@@ -128,10 +132,6 @@
     <ProjectReference Include="..\OrtzIRC.PluginFramework\OrtzIRC.PluginFramework.csproj">
       <Project>{D8266C38-E44E-4708-89AE-3E6CA72D5987}</Project>
       <Name>OrtzIRC.PluginFramework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OrtzIRC\OrtzIRC.csproj">
-      <Project>{3F50443A-7CC6-4490-9916-523D80DEE58F}</Project>
-      <Name>OrtzIRC</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

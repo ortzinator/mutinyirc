@@ -139,6 +139,7 @@
                 SetColor(color);
                 AppendText("\n" + line);
                 SetColor(ForeColor);
+                ScrollToBottom();
             }
         }
 
@@ -179,8 +180,7 @@
 
         private void ScrollToBottom()
         {
-            SelectionStart = Text.Length;
-            SelectionLength = 0;
+            ResetSelection();
             ScrollToCaret();
         }
 
