@@ -1,6 +1,4 @@
-﻿using OrtzIRC.Resources;
-
-namespace OrtzIRC
+﻿namespace OrtzIRC
 {
     using System;
     using System.Collections.Generic;
@@ -8,6 +6,7 @@ namespace OrtzIRC
     using System.Windows.Forms;
     using System.Xml.Serialization;
     using OrtzIRC.Common;
+    using OrtzIRC.Resources;
 
     public sealed class IrcSettingsManager
     {
