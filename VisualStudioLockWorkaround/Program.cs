@@ -21,7 +21,7 @@ namespace VisualStudioLockWorkaround
                 Console.WriteLine(String.Format("File {0} not found. Exiting.", file));
                 return;
             }
-            foreach (string lockedFile in Directory.EnumerateFiles(directory, "*.locked"))
+            foreach (string lockedFile in Directory.GetFiles(directory, "*.locked"))
             {
                 try //We know IOExceptions will occur due to the locking bug.
                 {
