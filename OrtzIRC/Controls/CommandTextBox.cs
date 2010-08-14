@@ -9,6 +9,8 @@
     {
         private int _historyIndex;
 
+        private bool keyPressHandled = false;
+
         public CommandTextBox()
         {
             InitializeComponent();
@@ -21,6 +23,7 @@
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            keyPressHandled = false;
             switch (e.KeyCode)
             {
                 case Keys.Up:
@@ -28,6 +31,7 @@
                     {
                         _historyIndex--;
                         Text = CmdHistory[_historyIndex];
+                        keyPressHandled = true;
                     }
                     break;
                 case Keys.Down:
@@ -36,16 +40,19 @@
                         CmdHistory.Add(Text);
                         _historyIndex = CmdHistory.Count;
                         Clear();
+                        keyPressHandled = true;
                     }
                     else if (_historyIndex == CmdHistory.Count - 1)
                     {
                         _historyIndex++;
                         Clear();
+                        keyPressHandled = true;
                     }
                     else if (_historyIndex < CmdHistory.Count)
                     {
                         _historyIndex++;
                         Text = CmdHistory[_historyIndex];
+                        keyPressHandled = true;
                     }
                     break;
                 case Keys.Enter:
@@ -61,11 +68,22 @@
 
                         Clear();
                         _historyIndex = CmdHistory.Count;
+                        keyPressHandled = true;
                     }
                     break;
             }
 
             base.OnKeyDown(e);
+        }
+
+        protected override void OnKeyPress(KeyPressEventArgs e)
+        {
+            if (keyPressHandled)
+            {
+                e.Handled = true;
+            }
+
+            base.OnKeyPress(e);
         }
     }
 }
