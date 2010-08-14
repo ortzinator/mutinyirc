@@ -1,8 +1,9 @@
-﻿using System;
-using System.IO;
-
+﻿//Courtesy of Godeke from Stack Overflow http://stackoverflow.com/questions/3095573
 namespace VisualStudioLockWorkaround
 {
+    using System;
+    using System.IO;
+
     class Program
     {
         static void Main(string[] args)
