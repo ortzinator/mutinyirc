@@ -40,6 +40,7 @@
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
             this.splitContainer1.Name = "splitContainer1";
             // 
@@ -51,7 +52,8 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.nickListBox);
             this.splitContainer1.Size = new System.Drawing.Size(684, 542);
-            this.splitContainer1.SplitterDistance = 521;
+            this.splitContainer1.SplitterDistance = 526;
+            this.splitContainer1.SplitterWidth = 2;
             this.splitContainer1.TabIndex = 4;
             // 
             // channelOutputBox
@@ -64,7 +66,7 @@
             this.channelOutputBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.channelOutputBox.Name = "channelOutputBox";
             this.channelOutputBox.ReadOnly = true;
-            this.channelOutputBox.Size = new System.Drawing.Size(521, 542);
+            this.channelOutputBox.Size = new System.Drawing.Size(526, 542);
             this.channelOutputBox.TabIndex = 1;
             this.channelOutputBox.Text = "";
             // 
@@ -73,11 +75,12 @@
             this.nickListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.nickListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.nickListBox.FormattingEnabled = true;
+            this.nickListBox.ItemHeight = 15;
             this.nickListBox.Location = new System.Drawing.Point(0, 0);
             this.nickListBox.Name = "nickListBox";
             this.nickListBox.OpColor = System.Drawing.Color.Black;
             this.nickListBox.RegularUserColor = System.Drawing.Color.Black;
-            this.nickListBox.Size = new System.Drawing.Size(159, 537);
+            this.nickListBox.Size = new System.Drawing.Size(156, 542);
             this.nickListBox.Sorted = true;
             this.nickListBox.TabIndex = 2;
             this.nickListBox.UserList = null;

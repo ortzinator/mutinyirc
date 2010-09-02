@@ -63,7 +63,6 @@ namespace OrtzIRC.Common
 
             ChanManager = new ChannelManager(this);
 
-            //TODO: Select port??
             Connection = new Connection(args, true, false);
             Connection.HandleNickTaken = false;
         }

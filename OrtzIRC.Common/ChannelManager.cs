@@ -50,8 +50,6 @@
         private List<User> tempNicks = new List<User>();
         private void Server_OnNames(string channel, string[] nicks, bool last)
         {
-            //if (!InChannel(channel)) return;
-
             Channel chan = GetChannel(channel);
             if (!recievingNames)
             {
@@ -83,9 +81,6 @@
 
         public Channel GetChannel(string channelName)
         {
-            //if (!InChannel(channelName))
-            //   return null;
-
             return Channels[channelName];
         }
 

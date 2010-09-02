@@ -111,15 +111,19 @@
                                Result = CommandResult.Fail
                            };
 
-            var methods = commandInstance.GetType().GetMethods()
-            .Where(o => o.Name == "Execute")
-            .Where(o => o.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext));
+            IEnumerable<MethodInfo> methods = commandInstance.GetType().GetMethods()
+                .Where(o => o.Name == "Execute")
+                .Where(o => o.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext));
 
             MethodInfo[] methodInfos = methods.ToArray();
 
-            for (int i = 0; i < methodInfos.Length; i++) //Loop through the methods
+            //Sort descending by number of parameters so the more specific methods are first.
+            Array.Sort(methodInfos,
+                       (m1, m2) => -m1.GetParameters().Length.CompareTo(m2.GetParameters().Length));
+
+            foreach (MethodInfo t in methodInfos)
             {
-                ParameterInfo[] methodParameters = methodInfos[i].GetParameters();
+                ParameterInfo[] methodParameters = t.GetParameters();
 
                 for (int j = 0; j < methodParameters.Length; j++) //Loop throught the method's parameters
                 {
@@ -139,7 +143,7 @@
                                 break;
 
                             info.ParameterList.Insert(0, info.Context);
-                            return (CommandResultInfo)methodInfos[i].Invoke(commandInstance, info.ParameterList.ToArray());
+                            return (CommandResultInfo)t.Invoke(commandInstance, info.ParameterList.ToArray());
                         }
                         continue;
                     }
@@ -186,7 +190,7 @@
                         }
                     }
                     info.ParameterList.Insert(0, info.Context);
-                    return (CommandResultInfo)methodInfos[i].Invoke(commandInstance, info.ParameterList.ToArray());
+                    return (CommandResultInfo)t.Invoke(commandInstance, info.ParameterList.ToArray());
                     //TODO: Should maybe log or something before returning
                 }
             }
