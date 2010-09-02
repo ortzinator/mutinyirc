@@ -55,10 +55,5 @@ namespace OrtzIRC.Common
                     server.Disconnect();
             }
         }
-
-        public Server Create(string nick, string url, bool ssl)
-        {
-            return Create(new ConnectionArgs(nick, url, ssl));
-        }
     }
 }

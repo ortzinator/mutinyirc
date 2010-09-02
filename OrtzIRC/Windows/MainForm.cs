@@ -298,7 +298,7 @@ namespace OrtzIRC
 
             if (db.ShowDialog() == DialogResult.OK)
             {
-                var svr = ServerManager.Instance.Create(Settings.Default.FirstNick, db.Input, false);
+                var svr = ServerManager.Instance.Create(new ConnectionArgs(Settings.Default.FirstNick, db.Input, false));
                 svr.Connect();
             }
         }

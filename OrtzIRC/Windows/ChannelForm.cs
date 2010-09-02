@@ -6,6 +6,7 @@
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Resources;
+    using System.Drawing;
 
     public partial class ChannelForm : Form
     {
@@ -86,7 +87,7 @@
             CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, e.Data));
             if (result != null && result.Result == CommandResult.Fail)
             {
-                channelOutputBox.AppendError("\n" + result.Message);
+                channelOutputBox.AppendLine(result.Message, Color.Red);
                 //TODO: Log
             }
         }
@@ -155,7 +156,7 @@
             if (e.CloseReason == CloseReason.MdiFormClosing) return;
 
             UnhookEvents();
-            Channel.Part();
+            Channel.Part(); //TODO - Random part message
         }
 
         public void AddLine(string line)
@@ -163,6 +164,12 @@
             channelOutputBox.AppendLine(line);
 
             TextLoggerManager.TextEntry(Channel, line + '\n');
+        }
+
+        protected override void OnEnter(EventArgs e)
+        {
+            commandTextBox.Focus();
+            base.OnEnter(e);
         }
     }
 }

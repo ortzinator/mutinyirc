@@ -143,7 +143,7 @@
 
         public void Part()
         {
-            Part("Leaving"); //TODO 4: Get default part message
+            Part("Leaving");
         }
 
         public void UserPart(User user, string message)

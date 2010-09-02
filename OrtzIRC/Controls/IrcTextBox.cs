@@ -143,20 +143,6 @@
             }
         }
 
-        public void AppendError(string error)
-        {
-            if (InvokeRequired)
-            {
-                Invoke(new Action<string>(AppendError), error);
-            }
-            else
-            {
-                SetColor(Color.Red);
-                AppendText("\n" + error);
-                SetColor(ForeColor);
-            }
-        }
-
         private void SetColor(Color c)
         {
             SelectionColor = c;

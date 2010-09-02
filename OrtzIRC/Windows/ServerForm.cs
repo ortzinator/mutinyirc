@@ -160,11 +160,11 @@ namespace OrtzIRC
             }
             catch (TargetInvocationException ex)
             {
-                serverOutputBox.AppendError("\n" + ex.InnerException.Message);
+                serverOutputBox.AppendLine(ex.InnerException.Message, Color.Red);
             }
 
             if (result != null && result.Result == CommandResult.Fail)
-                serverOutputBox.AppendError("\n" + result.Message);
+                serverOutputBox.AppendLine(result.Message, Color.Red);
         }
 
         private void Server_Connecting(object sender, CancelEventArgs e)
@@ -319,6 +319,12 @@ namespace OrtzIRC
         {
             serverOutputBox.AppendLine(text, color);
             TextLoggerManager.TextEntry(Server, text + '\n');
+        }
+
+        protected override void OnEnter(EventArgs e)
+        {
+            commandTextBox.Focus();
+            base.OnEnter(e);
         }
     }
 }

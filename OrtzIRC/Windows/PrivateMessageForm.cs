@@ -6,6 +6,7 @@ namespace OrtzIRC
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.Resources;
+    using System.Drawing;
 
     public partial class PrivateMessageForm : Form
     {
@@ -93,7 +94,7 @@ namespace OrtzIRC
             CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(PMSession, e.Data));
             if (result != null && result.Result == CommandResult.Fail)
             {
-                serverOutputBox.AppendError("\n" + CommonStrings.CommandErrorMessage.With(result.Message));
+                serverOutputBox.AppendLine(CommonStrings.CommandErrorMessage.With(result.Message), Color.Red);
             }
         }
 
@@ -148,6 +149,12 @@ namespace OrtzIRC
             serverOutputBox.AppendLine(text);
 
             TextLoggerManager.TextEntry(pmsession.Server, pmsession.User, text + '\n');
+        }
+
+        protected override void OnEnter(EventArgs e)
+        {
+            commandTextBox.Focus();
+            base.OnEnter(e);
         }
     }
 }
