@@ -2,8 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:WPFFrontend" mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" x:Name="root">
     <ScrollViewer x:Name="scrollViewer">
         <ItemsControl ItemsSource="{Binding ElementName=root, Path=ItemsSource}">
@@ -13,7 +13,7 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate DataType="{x:Type local:ChannelMessageChatItem}">
                     <DockPanel>
                         <Border BorderBrush="Gray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
                             <TextBlock Text="{Binding Path=Time}" Padding="5" VerticalAlignment="Center"/>
