@@ -2,5 +2,5 @@
 {
     using System.Collections.ObjectModel;
 
-    public class ChatCollection : ObservableCollection<ChatRowItem> { }
+    public class ChatCollection : ObservableCollection<ChatItem> { }
 }

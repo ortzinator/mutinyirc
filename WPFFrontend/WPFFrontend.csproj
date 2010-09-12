@@ -70,7 +70,7 @@
       <DependentUpon>ChannelPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="ChatCollection.cs" />
-    <Compile Include="ChatRowItem.cs" />
+    <Compile Include="ChatItem.cs" />
     <Compile Include="CommandEventArgs.cs" />
     <Compile Include="CommandTextBox.cs" />
     <Compile Include="IrcOutputBox.xaml.cs">
@@ -109,6 +109,12 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj">
+      <Project>{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}</Project>
+      <Name>FlamingIRC</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
