@@ -78,7 +78,6 @@
                         cmdHistory.Add(Text);
 
                         RaiseEvent(new CommandEventArgs(CommandEnteredEvent, Text));
-
                         Clear();
                         historyIndex = cmdHistory.Count;
                         e.Handled = true;
