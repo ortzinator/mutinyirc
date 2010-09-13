@@ -5,6 +5,31 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:WPFFrontend" mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" x:Name="root">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type local:ChatItem}">
+            <DockPanel>
+                <Border BorderBrush="Gray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
+                    <TextBlock Text="{Binding Path=Time}" Padding="5" VerticalAlignment="Center"/>
+                </Border>
+                <Border BorderBrush="Gray" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
+                    <TextBlock Text="{Binding Path=Message}" Padding="5" TextWrapping="Wrap" />
+                </Border>
+            </DockPanel>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:ChannelMessageChatItem}">
+            <DockPanel>
+                <Border BorderBrush="Gray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
+                    <TextBlock Text="{Binding Path=Time}" Padding="5" VerticalAlignment="Center"/>
+                </Border>
+                <Border BorderBrush="Gray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightBlue">
+                    <TextBlock Text="{Binding Path=User}" Padding="5" VerticalAlignment="Center" />
+                </Border>
+                <Border BorderBrush="Gray" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
+                    <TextBlock Text="{Binding Path=Message}" Padding="5" TextWrapping="Wrap" />
+                </Border>
+            </DockPanel>
+        </DataTemplate>
+    </UserControl.Resources>
     <ScrollViewer x:Name="scrollViewer">
         <ItemsControl ItemsSource="{Binding ElementName=root, Path=ItemsSource}">
             <ItemsControl.ItemsPanel>
@@ -12,21 +37,6 @@
                     <StackPanel Orientation="Vertical" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type local:ChannelMessageChatItem}">
-                    <DockPanel>
-                        <Border BorderBrush="Gray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
-                            <TextBlock Text="{Binding Path=Time}" Padding="5" VerticalAlignment="Center"/>
-                        </Border>
-                        <Border BorderBrush="Gray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightBlue">
-                            <TextBlock Text="{Binding Path=User}" Padding="5" VerticalAlignment="Center" />
-                        </Border>
-                        <Border BorderBrush="Gray" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
-                            <TextBlock Text="{Binding Path=Message}" Padding="5" TextWrapping="Wrap" />
-                        </Border>
-                    </DockPanel>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
         </ItemsControl>
     </ScrollViewer>
 </UserControl>

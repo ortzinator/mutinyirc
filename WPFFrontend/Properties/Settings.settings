@@ -1,7 +1,33 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="WPFFrontend.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ShowTimestamps" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="PluginDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">./plugins</Value>
+    </Setting>
+    <Setting Name="UserPluginDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">plugins</Value>
+    </Setting>
+    <Setting Name="LoggerActivated" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="LoggerTimestampsActivated" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="LoggerTimestampFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">[hh:mm:ss]</Value>
+    </Setting>
+    <Setting Name="FirstNick" Type="System.String" Scope="User">
+      <Value Profile="(Default)">OrtzIRC</Value>
+    </Setting>
+    <Setting Name="SecondNick" Type="System.String" Scope="User">
+      <Value Profile="(Default)">OrtzIRC_</Value>
+    </Setting>
+    <Setting Name="ThirdNick" Type="System.String" Scope="User">
+      <Value Profile="(Default)">OrtzIRC__</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>
