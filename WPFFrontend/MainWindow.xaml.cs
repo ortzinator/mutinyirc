@@ -2,9 +2,9 @@
 using System.Windows.Input;
 using FlamingIRC;
 using OrtzIRC.Common;
-using WPFFrontend.Properties;
+using OrtzIRC.WPF.Properties;
 
-namespace WPFFrontend
+namespace OrtzIRC.WPF
 {
     using System.Windows;
 
@@ -13,7 +13,6 @@ namespace WPFFrontend
     /// </summary>
     public partial class MainWindow : Window
     {
-
         public MainWindow()
         {
             InitializeComponent();
@@ -35,18 +34,39 @@ namespace WPFFrontend
 
         private void window_Loaded(object sender, RoutedEventArgs e)
         {
-            Settings.Default.SettingsSaving += Default_SettingsSaving;
-            ServerManager.Instance.ServerAdded += Instance_ServerAdded;
+            Settings.Default.SettingsSaving += Settings_SettingsSaving;
+            ServerManager.Instance.ServerAdded += ServerManager_ServerAdded;
+
+            LoadSettings();
+
+            if (MessageBox.Show("Do you wish to connect?", "Debug", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes) //hack
+            {
+                foreach (ServerSettings server in IrcSettingsManager.Instance.GetAutoConnectServers())
+                {
+                    if (server.Nick == null)
+                        server.Nick = Settings.Default.FirstNick;
+
+                    Server newServer = ServerManager.Instance.Create(new ConnectionArgs(server.Nick, server.Url, server.Ssl));
+                    newServer.Connect();
+                }
+            }
         }
 
-        void Instance_ServerAdded(object sender, ServerEventArgs e)
+        private void ServerManager_ServerAdded(object sender, ServerEventArgs e)
         {
             throw new NotImplementedException();
         }
 
-        private void Default_SettingsSaving(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Settings_SettingsSaving(object sender, System.ComponentModel.CancelEventArgs e)
         {
             throw new NotImplementedException();
+        }
+
+        private void LoadSettings()
+        {
+            TextLoggerManager.LoggerActive = Settings.Default.LoggerActivated;
+            TextLoggerManager.AddTimestamp = Settings.Default.LoggerTimestampsActivated;
+            TextLoggerManager.TimeFormat = Settings.Default.LoggerTimestampFormat;
         }
     }
 }

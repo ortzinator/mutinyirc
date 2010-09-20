@@ -1,4 +1,4 @@
-﻿namespace WPFFrontend
+﻿namespace OrtzIRC.WPF
 {
     using System;
     using System.Collections.Generic;
