@@ -2,14 +2,16 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:OrtzIRC.WPF"
-        Title="MainWindow" Height="423" Width="769" x:Name="window" Loaded="window_Loaded">
-    <Window.Resources>
-        <local:ChatCollection x:Key="chatCollection" />
-    </Window.Resources>
+        xmlns:vm="clr-namespace:OrtzIRC.WPF.ViewModels"
+        Title="MainWindow" Height="423" Width="769" x:Name="window">
     <DockPanel LastChildFill="True">
         <TabControl x:Name="tabControl">
             <TabItem>
-                <local:ChannelPanel ItemsSource="{StaticResource chatCollection}" local:CommandTextBox.CommandEntered="ChannelPanel_CommandEntered" />
+                <local:ChannelPanel>
+                    <local:ChannelPanel.DataContext>
+                        <vm:ChannelViewModel />
+                    </local:ChannelPanel.DataContext>
+                </local:ChannelPanel>
             </TabItem>
         </TabControl>
     </DockPanel>

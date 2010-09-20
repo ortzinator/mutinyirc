@@ -5,6 +5,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
+    using OrtzIRC.WPF.ViewModels;
 
     public class CommandTextBox : TextBox
     {
@@ -76,6 +77,9 @@
                             cmdHistory.RemoveAt(historyIndex);
                         }
                         cmdHistory.Add(Text);
+
+                        var vm = DataContext as ChannelViewModel;
+                        vm.ExecuteCommand.Execute(Text);
 
                         RaiseEvent(new CommandEventArgs(CommandEnteredEvent, Text));
                         Clear();
