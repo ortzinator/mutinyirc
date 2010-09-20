@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OrtzIRC.Resources {
+namespace OrtzIRC.WPF.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace OrtzIRC.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OrtzIRC.Resources.ChannelStrings", typeof(ChannelStrings).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OrtzIRC.WPF.Resources.ChannelStrings", typeof(ChannelStrings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

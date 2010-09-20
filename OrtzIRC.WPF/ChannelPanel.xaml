@@ -8,6 +8,6 @@
              d:DesignHeight="169" d:DesignWidth="277" x:Name="channelPanel">
     <DockPanel LastChildFill="True">
         <local:CommandTextBox DockPanel.Dock="Bottom" x:Name="commandBox" MinHeight="20" CommandEntered="commandBox_CommandEntered" />
-        <local:IrcOutputBox x:Name="outputBox" ItemsSource="{Binding ElementName=channelPanel, Path=ItemsSource}" />
+        <local:IrcOutputBox x:Name="outputBox" />
     </DockPanel>
 </UserControl>
