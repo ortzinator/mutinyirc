@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC", "OrtzIRC\OrtzIRC.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudioLockWorkaround", "VisualStudioLockWorkaround\VisualStudioLockWorkaround.csproj", "{9933480B-BCBE-464F-82D8-D9A62542D0AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.WPF", "WPFFrontend\OrtzIRC.WPF.csproj", "{D8E00C29-149C-4C59-A349-537DEDAAF333}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.WPF", "OrtzIRC.WPF\OrtzIRC.WPF.csproj", "{D8E00C29-149C-4C59-A349-537DEDAAF333}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvvmFoundation.Wpf", "MvvmFoundation.Wpf\MvvmFoundation.Wpf.csproj", "{2E922430-EAAC-4589-A8F4-F35FBB9799B8}"
 EndProject
