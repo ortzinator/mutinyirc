@@ -1,4 +1,4 @@
-﻿namespace WPFFrontend
+﻿namespace OrtzIRC.WPF
 {
     using System;
     using System.Collections;
@@ -21,12 +21,14 @@
             set { SetValue(ItemsSourceProperty, value); }
         }
 
-        //public static readonly RoutedEvent CommandEnteredEvent =
-        //    CommandTextBox.CommandEnteredEvent.AddOwner(typeof(ChannelPanel));
-
         public ChannelPanel()
         {
             InitializeComponent();
+        }
+
+        private void commandBox_CommandEntered(object sender, CommandEventArgs e)
+        {
+            outputBox.scrollViewer.ScrollToBottom();
         }
     }
 }
