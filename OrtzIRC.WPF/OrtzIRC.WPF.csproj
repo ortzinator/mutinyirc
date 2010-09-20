@@ -76,6 +76,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="ServerSettings.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
     <Page Include="ChannelPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
