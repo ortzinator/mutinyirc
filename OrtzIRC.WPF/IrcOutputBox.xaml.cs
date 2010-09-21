@@ -1,10 +1,10 @@
 ﻿namespace OrtzIRC.WPF
 {
-    using System.Collections.Generic;
+    using System;
+    using System.Collections;
     using System.Windows;
     using System.Windows.Controls;
-    using System.ComponentModel;
-    using System.Collections;
+    using System.Windows.Threading;
 
     /// <summary>
     /// Interaction logic for IrcOutputBox.xaml
@@ -14,6 +14,18 @@
         public IrcOutputBox()
         {
             InitializeComponent();
+
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Interval = new TimeSpan(0, 0, 2);
+            timer.Tick += ((sender, e) =>
+            {
+                if (scrollViewer.VerticalOffset == scrollViewer.ScrollableHeight)
+                {
+                    scrollViewer.ScrollToEnd();
+                }
+            });
+            timer.Start();
+
         }
 
         public static readonly DependencyProperty ItemsSourceProperty =

@@ -4,15 +4,23 @@
         xmlns:local="clr-namespace:OrtzIRC.WPF"
         xmlns:vm="clr-namespace:OrtzIRC.WPF.ViewModels"
         Title="MainWindow" Height="423" Width="769" x:Name="window">
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <DataTemplate x:Key="PanelsTemplate">
+            <ContentPresenter Content="{Binding Name}" />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
+            <local:ChannelPanel />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ServerViewModel}">
+            <local:ServerView />
+        </DataTemplate>
+    </Window.Resources>
+
     <DockPanel LastChildFill="True">
-        <TabControl x:Name="tabControl">
-            <TabItem>
-                <local:ChannelPanel>
-                    <local:ChannelPanel.DataContext>
-                        <vm:ChannelViewModel />
-                    </local:ChannelPanel.DataContext>
-                </local:ChannelPanel>
-            </TabItem>
-        </TabControl>
+        <TabControl x:Name="tabControl" ItemsSource="{Binding Panels}" ItemTemplate="{StaticResource PanelsTemplate}" />
     </DockPanel>
 </Window>
