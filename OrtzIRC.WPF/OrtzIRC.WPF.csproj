@@ -76,6 +76,11 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="ServerSettings.cs" />
+    <Compile Include="ServerView.xaml.cs">
+      <DependentUpon>ServerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\ServerViewModel.cs" />
     <Page Include="ChannelPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -96,6 +101,7 @@
       <DependentUpon>ChannelPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ChannelViewModel.cs" />
+    <Compile Include="ViewModels\IrcViewModel.cs" />
     <Compile Include="ViewModels\ChatItemViewModel.cs" />
     <Compile Include="CommandEventArgs.cs" />
     <Compile Include="CommandTextBox.cs" />
@@ -106,6 +112,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ServerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -167,6 +177,10 @@
     <ProjectReference Include="..\OrtzIRC.Common\OrtzIRC.Common.csproj">
       <Project>{1594A34C-9BB8-4334-880B-26671436D95E}</Project>
       <Name>OrtzIRC.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OrtzIRC.PluginFramework\OrtzIRC.PluginFramework.csproj">
+      <Project>{D8266C38-E44E-4708-89AE-3E6CA72D5987}</Project>
+      <Name>OrtzIRC.PluginFramework</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

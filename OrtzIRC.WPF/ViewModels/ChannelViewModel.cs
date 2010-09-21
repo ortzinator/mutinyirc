@@ -1,33 +1,23 @@
 ﻿namespace OrtzIRC.WPF.ViewModels
 {
     using System;
-    using System.Collections.Generic;
-    using MvvmFoundation.Wpf;
-    using System.ComponentModel;
-    using System.Collections.ObjectModel;
-    using System.Windows.Input;
+    using FlamingIRC;
+    using OrtzIRC.Common;
 
-    public class ChannelViewModel : ObservableObject
+    public class ChannelViewModel : IrcViewModel
     {
-        public ObservableCollection<ChatItemViewModel> ChatLines { get; set; }
+        public Channel Channel { get; private set; }
+        
 
-        public ChannelViewModel()
+        public ChannelViewModel(Channel chan)
         {
-            ChatLines = new ObservableCollection<ChatItemViewModel>();
+            Channel = chan;
+            Name = chan.Name;
         }
 
-        private RelayCommand<string> executeCommand;
-        public ICommand ExecuteCommand
+        protected override void OnExecute(string commandLine)
         {
-            get
-            {
-                return executeCommand ?? (executeCommand = new RelayCommand<string>(OnExecute));
-            }
-        }
-
-        private void OnExecute(string commandLine)
-        {
-            ChatLines.Add(new ChatItemViewModel(DateTime.Now, commandLine));
+            ChatLines.Add(new ChannelMessageChatItemViewModel(DateTime.Now, commandLine, new User { Nick = "Ortzinator" }));
         }
     }
 }

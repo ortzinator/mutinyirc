@@ -25,12 +25,7 @@
         public CommandTextBox()
         {
             cmdHistory = new List<string>(40);
-            AddHandler(CommandTextBox.KeyDownEvent, new RoutedEventHandler(HandleHandledKeyDown), true);
-        }
-
-        static CommandTextBox()
-        {
-            //DefaultStyleKeyProperty.OverrideMetadata(typeof(CommandTextBox), new FrameworkPropertyMetadata(typeof(CommandTextBox)));
+            AddHandler(KeyDownEvent, new RoutedEventHandler(HandleHandledKeyDown), true);
         }
 
         public void HandleHandledKeyDown(object sender, RoutedEventArgs e)
@@ -45,6 +40,7 @@
                     {
                         historyIndex--;
                         Text = cmdHistory[historyIndex];
+                        CaretIndex = Text.Length;
                         e.Handled = true;
                     }
                     break;
@@ -66,6 +62,7 @@
                     {
                         historyIndex++;
                         Text = cmdHistory[historyIndex];
+                        CaretIndex = Text.Length;
                         e.Handled = true;
                     }
                     break;
@@ -78,7 +75,7 @@
                         }
                         cmdHistory.Add(Text);
 
-                        var vm = DataContext as ChannelViewModel;
+                        var vm = DataContext as IrcViewModel;
                         vm.ExecuteCommand.Execute(Text);
 
                         RaiseEvent(new CommandEventArgs(CommandEnteredEvent, Text));
