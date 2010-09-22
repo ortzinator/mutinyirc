@@ -7,29 +7,11 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" x:Name="root">
     <UserControl.Resources>
-        <DataTemplate DataType="{x:Type vm:ChatItemViewModel}">
-            <DockPanel>
-                <Border BorderBrush="LightGray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
-                    <TextBlock Text="{Binding Path=Time}" Padding="5" VerticalAlignment="Center"/>
-                </Border>
-                <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
-                    <TextBlock Text="{Binding Path=Message}" Padding="5" TextWrapping="Wrap" />
-                </Border>
-            </DockPanel>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ChannelMessageChatItemViewModel}">
-            <DockPanel>
-                <Border BorderBrush="LightGray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
-                    <TextBlock Text="{Binding Path=Time}" Padding="5" VerticalAlignment="Center"/>
-                </Border>
-                <Border BorderBrush="LightGray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightBlue">
-                    <TextBlock Text="{Binding Path=User}" Padding="5" VerticalAlignment="Center" />
-                </Border>
-                <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
-                    <TextBlock Text="{Binding Path=Message}" Padding="5" TextWrapping="Wrap" />
-                </Border>
-            </DockPanel>
-        </DataTemplate>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ChatLineTemplates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel>
         <Border DockPanel.Dock="Bottom" x:Name="scrollIndicator" >
