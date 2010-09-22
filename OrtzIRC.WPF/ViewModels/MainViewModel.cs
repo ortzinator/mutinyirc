@@ -16,6 +16,10 @@
         public MainViewModel()
         {
             Panels = new ObservableCollection<IrcViewModel>();
+            
+            System.Windows.DependencyObject dep = new System.Windows.DependencyObject();
+            if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(dep))
+                return;
 
             Settings.Default.SettingsSaving += Default_SettingsSaving;
             ServerManager.Instance.ServerAdded += Instance_ServerCreated;

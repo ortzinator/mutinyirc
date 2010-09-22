@@ -11,10 +11,5 @@
         {
             InitializeComponent();
         }
-
-        private void commandBox_CommandEntered(object sender, CommandEventArgs e)
-        {
-            outputBox.scrollViewer.ScrollToBottom();
-        }
     }
 }

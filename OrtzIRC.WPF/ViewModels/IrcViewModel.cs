@@ -1,11 +1,8 @@
 ﻿namespace OrtzIRC.WPF.ViewModels
 {
     using System;
-    using System.Collections.Generic;
-    using MvvmFoundation.Wpf;
-    using System.ComponentModel;
-    using System.Collections.ObjectModel;
     using System.Windows.Input;
+    using MvvmFoundation.Wpf;
 
     public class IrcViewModel : ObservableObject
     {

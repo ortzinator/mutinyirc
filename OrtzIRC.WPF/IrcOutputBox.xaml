@@ -9,35 +9,56 @@
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type vm:ChatItemViewModel}">
             <DockPanel>
-                <Border BorderBrush="Gray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
+                <Border BorderBrush="LightGray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
                     <TextBlock Text="{Binding Path=Time}" Padding="5" VerticalAlignment="Center"/>
                 </Border>
-                <Border BorderBrush="Gray" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
+                <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
                     <TextBlock Text="{Binding Path=Message}" Padding="5" TextWrapping="Wrap" />
                 </Border>
             </DockPanel>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ChannelMessageChatItemViewModel}">
             <DockPanel>
-                <Border BorderBrush="Gray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
+                <Border BorderBrush="LightGray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
                     <TextBlock Text="{Binding Path=Time}" Padding="5" VerticalAlignment="Center"/>
                 </Border>
-                <Border BorderBrush="Gray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightBlue">
+                <Border BorderBrush="LightGray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightBlue">
                     <TextBlock Text="{Binding Path=User}" Padding="5" VerticalAlignment="Center" />
                 </Border>
-                <Border BorderBrush="Gray" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
+                <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
                     <TextBlock Text="{Binding Path=Message}" Padding="5" TextWrapping="Wrap" />
                 </Border>
             </DockPanel>
         </DataTemplate>
     </UserControl.Resources>
-    <ScrollViewer x:Name="scrollViewer">
-        <ItemsControl ItemsSource="{Binding ChatLines}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Vertical" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>
-    </ScrollViewer>
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" x:Name="scrollIndicator" >
+            <Border.Style>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=root, Path=Scrolled}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock HorizontalAlignment="Center" Foreground="#89000000" FontSize="8">▼ ▼</TextBlock>
+            <Border.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFFFC4C4" Offset="0" />
+                    <GradientStop Color="#FFFFF2F2" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
+        <ScrollViewer x:Name="scrollViewer">
+            <ItemsControl ItemsSource="{Binding ChatLines}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
 </UserControl>
