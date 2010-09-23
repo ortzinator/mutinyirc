@@ -11,15 +11,18 @@
 
     public class MainViewModel : ObservableObject
     {
-        public ObservableCollection<IrcViewModel> Panels { get; private set; }
+        public ObservableCollection<IrcViewModel> Panels { get; protected set; }
 
         public MainViewModel()
         {
             Panels = new ObservableCollection<IrcViewModel>();
-            
+
             System.Windows.DependencyObject dep = new System.Windows.DependencyObject();
             if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(dep))
+            {
+                Panels.Add(new ServerViewModel());
                 return;
+            }
 
             Settings.Default.SettingsSaving += Default_SettingsSaving;
             ServerManager.Instance.ServerAdded += Instance_ServerCreated;
@@ -32,12 +35,18 @@
                     server.Nick = Settings.Default.FirstNick;
 
                 Server newServer = ServerManager.Instance.Create(new ConnectionArgs(server.Nick, server.Url, server.Ssl));
+                newServer.JoinSelf += Server_JoinSelf;
                 newServer.Connect();
             }
 
             //PluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
             //PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
             RandomMessages.Load();
+        }
+
+        private void Server_JoinSelf(object sender, DataEventArgs<Channel> e)
+        {
+            Panels.Add(new ChannelViewModel(e.Data));
         }
 
         private void Default_SettingsSaving(object sender, System.ComponentModel.CancelEventArgs e)

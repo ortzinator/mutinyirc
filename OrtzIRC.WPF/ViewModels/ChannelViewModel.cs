@@ -17,7 +17,7 @@
 
         protected override void OnExecute(string commandLine)
         {
-            ChatLines.Add(new ChannelMessageChatItemViewModel(DateTime.Now, commandLine, new User { Nick = "Ortzinator" }));
+            ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, commandLine, new User { Nick = "Ortzinator" }));
         }
     }
 }

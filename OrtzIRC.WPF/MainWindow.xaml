@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:OrtzIRC.WPF"
         xmlns:vm="clr-namespace:OrtzIRC.WPF.ViewModels"
-        Title="MainWindow" Height="423" Width="769" x:Name="window">
+        Title="MainWindow" Height="282" Width="550" x:Name="window">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -13,7 +13,7 @@
             <ContentPresenter Content="{Binding Name}" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
-            <local:ChannelPanel />
+            <local:ChannelView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ServerViewModel}">
             <local:ServerView />
