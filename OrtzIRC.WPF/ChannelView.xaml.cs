@@ -5,9 +5,9 @@
     /// <summary>
     /// Interaction logic for ChannelPanel.xaml
     /// </summary>
-    public partial class ChannelPanel : UserControl
+    public partial class ChannelView : UserControl
     {
-        public ChannelPanel()
+        public ChannelView()
         {
             InitializeComponent();
         }
