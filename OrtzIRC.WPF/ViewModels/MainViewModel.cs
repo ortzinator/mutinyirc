@@ -11,11 +11,11 @@
 
     public class MainViewModel : ObservableObject
     {
-        public ObservableCollection<IrcViewModel> Panels { get; protected set; }
+        public MTObservableCollection<IrcViewModel> Panels { get; protected set; }
 
         public MainViewModel()
         {
-            Panels = new ObservableCollection<IrcViewModel>();
+            Panels = new MTObservableCollection<IrcViewModel>();
 
             System.Windows.DependencyObject dep = new System.Windows.DependencyObject();
             if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(dep))

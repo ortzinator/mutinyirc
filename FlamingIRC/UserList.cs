@@ -112,7 +112,8 @@
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return List.GetEnumerator();
+            //TODO: Correct?
         }
 
         #endregion
