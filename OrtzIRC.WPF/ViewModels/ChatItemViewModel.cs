@@ -39,6 +39,11 @@
 
     public class ChannelActionViewModel : ChannelMessageViewModel
     {
+        public ChannelActionViewModel(DateTime time, string message, User user)
+            : base(time, message, user)
+        {
+        }
+
         public ChannelActionViewModel(DateTime time, string message, string nick)
             : base(time, message, nick)
         {
@@ -70,6 +75,14 @@
     {
         public ErrorMessageViewModel(DateTime time, string message)
             : base(time, message)
+        {
+        }
+    }
+
+    public class PrivateNoticeViewModel : ChannelMessageViewModel
+    {
+        public PrivateNoticeViewModel(DateTime time, string message, string nick)
+            : base(time, message, nick)
         {
         }
     }

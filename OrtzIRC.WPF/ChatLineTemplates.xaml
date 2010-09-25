@@ -83,4 +83,18 @@
             </Border>
         </DockPanel>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:PrivateNoticeViewModel}">
+        <DockPanel>
+            <Border BorderBrush="LightGray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightGray">
+                <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="5" VerticalAlignment="Center"/>
+            </Border>
+            <Border BorderBrush="LightGray" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="LightYellow">
+                <TextBlock Text="{Binding User}" Padding="5" VerticalAlignment="Center" />
+            </Border>
+            <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" DockPanel.Dock="Left" Background="LightYellow">
+                <TextBlock Text="{Binding Message}" Padding="5" TextWrapping="Wrap" />
+            </Border>
+        </DockPanel>
+    </DataTemplate>
 </ResourceDictionary>

@@ -24,17 +24,17 @@ namespace OrtzIRC.WPF.ViewModels
 
             server = newServer;
             Name = server.Url;
-            server.RawMessageReceived += Server_RawMessageReceived;
+            //server.RawMessageReceived += Server_RawMessageReceived;
             server.Registered += Server_Registered;
             server.ConnectFailed += Server_ConnectFailed;
-            //server.PrivateNotice += Server_PrivateNotice;
+            server.PrivateNotice += Server_PrivateNotice;
             server.ErrorMessageRecieved += Server_ErrorMessageRecieved;
-            //server.Connecting += Server_Connecting;
-            //server.Disconnected += Server_Disconnected;
-            //server.ConnectionLost += Server_ConnectionLost;
-            //server.ConnectCancelled += Server_ConnectCancelled;
+            server.Connecting += Server_Connecting;
+            server.Disconnected += Server_Disconnected;
+            server.ConnectionLost += Server_ConnectionLost;
+            server.ConnectCancelled += Server_ConnectCancelled;
             server.NickError += Server_NickError;
-            //server.PartSelf += Server_PartSelf;
+            server.PartSelf += Server_PartSelf;
         }
 
         public ServerViewModel()
@@ -46,6 +46,7 @@ namespace OrtzIRC.WPF.ViewModels
                 ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, "Message", "Ortzinator"));
                 ChatLines.Add(new ChannelActionViewModel(DateTime.Now, "puts a donk on it", "Ortzinator"));
                 ChatLines.Add(new IrcErrorViewModel(DateTime.Now, "Something bad happened", "14859"));
+                ChatLines.Add(new PrivateNoticeViewModel(DateTime.Now, "A notice for you", "aUser"));
                 Name = "irc.foo.com";
                 return;
             }
@@ -53,7 +54,11 @@ namespace OrtzIRC.WPF.ViewModels
 
         private void Server_PartSelf(object sender, PartEventArgs e)
         {
-            throw new NotImplementedException();
+            NetworkSettings nwSettings = IrcSettingsManager.Instance.GetNetwork(server);
+
+            ChannelSettings chan = nwSettings.GetChannel(e.Channel.Name);
+
+            chan.AutoJoin = false;
         }
 
         private void Server_NickError(object sender, NickErrorEventArgs e)
@@ -97,22 +102,28 @@ namespace OrtzIRC.WPF.ViewModels
 
         private void Server_ConnectCancelled(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            AddMessage(ServerStrings.Disconnected);
         }
 
         private void Server_ConnectionLost(object sender, DisconnectEventArgs e)
         {
-            throw new NotImplementedException();
+            AddMessage(ServerStrings.ConnectionLost.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
+
+            if (e.Reason != DisconnectReason.UserInitiated)
+            {
+                AddMessage(ServerStrings.AttemptingReconnect);
+                ThreadHelper.InvokeAfter(TimeSpan.FromSeconds(4), delegate { server.Connect(); });
+            }
         }
 
         private void Server_Disconnected(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            AddMessage(ServerStrings.Disconnected);
         }
 
         private void Server_Connecting(object sender, CancelEventArgs e)
         {
-            throw new NotImplementedException();
+            AddMessage(ServerStrings.ConnectingMessage.With(server.Url, server.Port));
         }
 
         private void Server_ErrorMessageRecieved(object sender, ErrorMessageEventArgs e)
@@ -128,7 +139,7 @@ namespace OrtzIRC.WPF.ViewModels
 
         private void Server_PrivateNotice(object sender, UserMessageEventArgs e)
         {
-            throw new NotImplementedException();
+            ChatLines.Add(new PrivateNoticeViewModel(DateTime.Now, e.Message, e.User.Nick));
         }
 
         private void Server_ConnectFailed(object sender, ConnectFailedEventArgs e)

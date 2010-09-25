@@ -4,11 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:OrtzIRC.WPF"
-             mc:Ignorable="d" 
+             xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase" mc:Ignorable="d" 
              d:DesignHeight="248" d:DesignWidth="530" x:Name="channelPanel">
+    <UserControl.Resources>
+        <CollectionViewSource x:Key="userList" Source="{Binding UserList}">
+            <CollectionViewSource.SortDescriptions>
+                <cm:SortDescription PropertyName="Nick" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </UserControl.Resources>
     <DockPanel LastChildFill="True">
         <local:CommandTextBox DockPanel.Dock="Bottom" x:Name="commandBox" MinHeight="20" />
-        <ListBox ItemsSource="{Binding UserList}" DockPanel.Dock="Right" MinWidth="100" MaxWidth="200" />
+        <ListBox ItemsSource="{Binding Source={StaticResource ResourceKey=userList}}" DockPanel.Dock="Right" MinWidth="100" MaxWidth="200" />
         <local:IrcOutputBox x:Name="outputBox" />
     </DockPanel>
 </UserControl>
