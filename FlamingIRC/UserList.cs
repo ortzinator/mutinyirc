@@ -150,6 +150,11 @@
         {
             OnUpdate();
         }
+
+        public void Sort(Comparison<User> comparison)
+        {
+            List.Sort(comparison);
+        }
     }
 
 }
