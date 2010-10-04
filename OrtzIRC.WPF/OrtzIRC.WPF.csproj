@@ -84,6 +84,7 @@
     <Compile Include="SocketErrorTranslator.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ServerViewModel.cs" />
+    <Compile Include="ViewModels\UserViewModel.cs" />
     <Page Include="ChannelView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

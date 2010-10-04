@@ -4,18 +4,37 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:OrtzIRC.WPF"
-             xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase" mc:Ignorable="d" 
+             xmlns:vm="clr-namespace:OrtzIRC.WPF.ViewModels"
+             mc:Ignorable="d" 
              d:DesignHeight="248" d:DesignWidth="530" x:Name="channelPanel">
     <UserControl.Resources>
-        <CollectionViewSource x:Key="userList" Source="{Binding UserList}">
-            <CollectionViewSource.SortDescriptions>
-                <cm:SortDescription PropertyName="Nick" />
-            </CollectionViewSource.SortDescriptions>
-        </CollectionViewSource>
+        <Style TargetType="{x:Type ListBoxItem}" x:Key="ContainerStyle">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Mode}">
+                    <DataTrigger.Value>
+                        <vm:Mode>Op</vm:Mode>
+                    </DataTrigger.Value>
+                    <Setter Property="Foreground" Value="Black" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Mode}">
+                    <DataTrigger.Value>
+                        <vm:Mode>Voice</vm:Mode>
+                    </DataTrigger.Value>
+                    <Setter Property="Foreground" Value="DarkOrange" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Mode}">
+                    <DataTrigger.Value>
+                        <vm:Mode>Regular</vm:Mode>
+                    </DataTrigger.Value>
+                    <Setter Property="Foreground" Value="Gray" />
+                </DataTrigger>
+            </Style.Triggers>
+            
+        </Style>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
         <local:CommandTextBox DockPanel.Dock="Bottom" x:Name="commandBox" MinHeight="20" />
-        <ListBox ItemsSource="{Binding Source={StaticResource ResourceKey=userList}}" DockPanel.Dock="Right" MinWidth="100" MaxWidth="200" />
+        <ListBox x:Name="userBox" ItemsSource="{Binding UserList}" DockPanel.Dock="Right" MinWidth="100" MaxWidth="200" ItemContainerStyle="{StaticResource ContainerStyle}" />
         <local:IrcOutputBox x:Name="outputBox" />
     </DockPanel>
 </UserControl>

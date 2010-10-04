@@ -29,7 +29,7 @@ namespace FlamingIRC
     /// <summary>
     /// Represents a user in a single channel
     /// </summary>
-    public class User
+    public class User : IComparable<User>
     {
         /// <summary>The user's nickname.</summary>
         public string Nick { get; set; }
@@ -114,6 +114,11 @@ namespace FlamingIRC
         public override int GetHashCode()
         {
             return (Nick != null ? Nick.GetHashCode() : 0);
+        }
+
+        public int CompareTo(User other)
+        {
+            return NamesLiteral.CompareTo(other.NamesLiteral);
         }
 
         public override string ToString()

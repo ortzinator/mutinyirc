@@ -1,6 +1,8 @@
 ﻿namespace OrtzIRC.WPF
 {
     using System.Windows.Controls;
+    using System.Windows.Data;
+using System.ComponentModel;
 
     /// <summary>
     /// Interaction logic for ChannelPanel.xaml
@@ -10,6 +12,11 @@
         public ChannelView()
         {
             InitializeComponent();
+
+            var dv = CollectionViewSource.GetDefaultView(userBox);
+
+            //dv.
+            //userBox.Items.sort
         }
     }
 }

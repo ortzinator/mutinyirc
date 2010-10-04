@@ -1,16 +1,23 @@
-﻿using OrtzIRC.WPF.Resources;
-
-namespace OrtzIRC.WPF.ViewModels
+﻿namespace OrtzIRC.WPF.ViewModels
 {
     using System;
+    using System.Collections.Generic;
     using FlamingIRC;
     using OrtzIRC.Common;
+    using OrtzIRC.WPF.Resources;
 
     public class ChannelViewModel : IrcViewModel
     {
         private Channel channel;
+        private List<UserViewModel> userList;
 
-        public UserList UserList { get { return channel.NickList; } }
+        public List<UserViewModel> UserList
+        {
+            get
+            {
+                return userList;
+            }
+        }
 
         public ChannelViewModel(Channel chan)
         {
@@ -93,6 +100,12 @@ namespace OrtzIRC.WPF.ViewModels
 
         private void NickList_Updated(object sender, EventArgs e)
         {
+            userList = new List<UserViewModel>();
+            foreach (User user in channel.NickList)
+            {
+                userList.Add(new UserViewModel(user));
+            }
+            userList.Sort((user1, user2) => user1.CompareTo(user2));
             RaisePropertyChanged("UserList");
         }
 
