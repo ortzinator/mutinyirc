@@ -1,7 +1,8 @@
-﻿namespace OrtzIRC.WPF.ViewModels
+﻿using System.Collections.Generic;
+
+namespace OrtzIRC.WPF.ViewModels
 {
     using System;
-    using System.Collections.ObjectModel;
     using System.IO;
     using FlamingIRC;
     using MvvmFoundation.Wpf;
@@ -30,7 +31,13 @@
 
             LoadSettings();
 
-            foreach (ServerSettings server in IrcSettingsManager.Instance.GetAutoConnectServers())
+            List<ServerSettings> servers = IrcSettingsManager.Instance.GetAutoConnectServers();
+            if (servers.Count == 0)
+            {
+                
+            }
+
+            foreach (ServerSettings server in servers)
             {
                 if (server.Nick == null)
                     server.Nick = Settings.Default.FirstNick;
@@ -40,7 +47,7 @@
                 newServer.Connect();
             }
 
-            //PluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
+            PluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
             //PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
             RandomMessages.Load();
         }

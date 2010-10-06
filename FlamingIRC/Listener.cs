@@ -416,7 +416,7 @@ namespace FlamingIRC
                     {
                         OnPart(
                             Rfc2812Util.UserFromString(tokens[0]),
-                            tokens[2],
+                            RemoveLeadingColon(tokens[2]),
                             tokens.Length >= 4 ? RemoveLeadingColon(CondenseStrings(tokens, 3)) : "");
                         //Trace.WriteLine("Part", "IRC");
                     }

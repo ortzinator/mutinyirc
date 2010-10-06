@@ -186,7 +186,6 @@ namespace OrtzIRC.Common
         public event EventHandler Disconnected;
         public event EventHandler<ChannelMessageEventArgs> UserAction;
         public event EventHandler<UserMessageEventArgs> PrivateNotice;
-        public event Server_TopicRequestEventHandler GotTopic;
         public event EventHandler<NickChangeEventArgs> OnNick;
         public event NamesEventHandler OnNames;
         public event EventHandler<KickEventArgs> Kick;
@@ -274,12 +273,8 @@ namespace OrtzIRC.Common
 
         private void ListenerOnRecieveTopic(string channel, string topic)
         {
-            if (GotTopic != null)
-            {
-                var chan = ChanManager.Create(channel);
-                GotTopic(chan, topic);
-                chan.ShowTopic(topic);
-            }
+            var chan = ChanManager.Create(channel);
+            chan.ShowTopic(topic);
         }
 
         private void Listener_OnPrivateNotice(User user, string notice)

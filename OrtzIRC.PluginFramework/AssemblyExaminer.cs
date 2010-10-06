@@ -31,7 +31,7 @@
                 if (type.GetInterface(typeof(ICommand).FullName) != null)
                 {
                     string docPath = asm.Location.Remove(asm.Location.Length - 4, 4) + ".xml";
-                    XmlDocsParser parser = new XmlDocsParser(docPath);
+                    //XmlDocsParser parser = new XmlDocsParser(docPath); //TODO
 
                     if (File.Exists(docPath))
                     {

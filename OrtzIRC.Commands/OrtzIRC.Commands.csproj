@@ -167,6 +167,10 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>mkdir $(SolutionDir)OrtzIRC.WPF\bin\Debug\plugins\
+copy $(TargetPath) $(SolutionDir)OrtzIRC.WPF\bin\Debug\plugins\</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
