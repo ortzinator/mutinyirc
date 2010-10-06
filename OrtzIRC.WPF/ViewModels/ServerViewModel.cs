@@ -223,5 +223,12 @@ namespace OrtzIRC.WPF.ViewModels
                     server.JoinChannel(channel.Name);
             }
         }
+
+        public override void Close()
+        {
+            base.Close();
+
+            server.Disconnect();
+        }
     }
 }

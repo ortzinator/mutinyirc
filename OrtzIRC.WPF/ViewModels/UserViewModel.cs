@@ -38,8 +38,6 @@
         {
             return FullNick;
         }
-
-
     }
 
     public enum Mode

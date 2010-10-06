@@ -85,6 +85,7 @@
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ServerViewModel.cs" />
     <Compile Include="ViewModels\UserViewModel.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
     <Page Include="ChannelView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

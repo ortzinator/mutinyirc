@@ -4,10 +4,6 @@
         xmlns:local="clr-namespace:OrtzIRC.WPF"
         xmlns:vm="clr-namespace:OrtzIRC.WPF.ViewModels"
         Title="MainWindow" Height="282" Width="550" x:Name="window">
-    <Window.DataContext>
-        <vm:MainViewModel />
-    </Window.DataContext>
-
     <Window.Resources>
         <DataTemplate x:Key="PanelsTemplate">
             <ContentPresenter Content="{Binding Name}" />
