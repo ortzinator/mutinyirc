@@ -328,6 +328,7 @@ namespace OrtzIRC.Common
             {
                 JoinOther.Fire(this, new DoubleDataEventArgs<User, Channel>(user, chan));
                 chan.UserJoin(user);
+                Connection.Sender.Names(channel);
             }
         }
 
