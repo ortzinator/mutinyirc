@@ -1,4 +1,6 @@
-﻿namespace OrtzIRC.PluginFramework
+﻿using System.IO;
+
+namespace OrtzIRC.PluginFramework
 {
     using System;
     using System.Collections.Generic;
@@ -42,7 +44,12 @@
         {
             Trace.WriteLine(string.Format("Loading Plug-ins ({0})", path), TraceCategories.PluginSystem);
 
-            string[] files = System.IO.Directory.GetFileSystemEntries(path, "*.dll");
+            if (!Directory.Exists(path))
+                return; //TODO - Errorz?
+
+            string[] files = Directory.GetFileSystemEntries(path, "*.dll");
+
+            var tempCommands = new Dictionary<string, CommandInfo>();
 
             foreach (string file in files)
             {
@@ -54,29 +61,37 @@
                         {
                             if (!commands.ContainsKey(info.FullName))
                             {
-                                commands.Add(info.FullName, info as CommandInfo);
+                                tempCommands.Add(info.FullName, info as CommandInfo);
                                 Trace.WriteLine(string.Format("Added command plugin {0} at {1}", info.FullName, info.AssemblyPath), TraceCategories.PluginSystem);
                             }
                             else
                             {
                                 Trace.WriteLine(string.Format("Could not load command {0}. A command by that name already exists.", info.FullName),
                                     TraceCategories.PluginSystem);
-                                //TODO: Should let user know about this.
+                                //TODO: Log
                             }
                         }
                         else
                         {
                             plugins.Add(info);
-                            Trace.WriteLine("Added plugin " + info.FullName + " at " + info.AssemblyPath, TraceCategories.PluginSystem);
+                            Trace.WriteLine(string.Format("Added plugin {0} at {1}", info.FullName, info.AssemblyPath), TraceCategories.PluginSystem);
                         }
-
                     }
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(string.Format("Could not load {0}{1}{2}", file, Environment.NewLine, ex), TraceCategories.PluginSystem);
+                    Trace.WriteLine(string.Format("Could not load: {0} ({1})", file, ex), TraceCategories.PluginSystem);
                 }
             }
+
+            if (tempCommands.Count == 0)
+                Trace.WriteLine(string.Format("No plugins found in directory: {0}", path), TraceCategories.PluginSystem);
+
+            foreach (KeyValuePair<string, CommandInfo> pair in tempCommands)
+            {
+                commands.Add(pair.Key, pair.Value);
+            }
+
             Trace.WriteLine("Finished loading Plug-ins", TraceCategories.PluginSystem);
         }
 

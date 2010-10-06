@@ -1,4 +1,6 @@
-﻿namespace OrtzIRC.WPF.ViewModels
+﻿using OrtzIRC.PluginFramework;
+
+namespace OrtzIRC.WPF.ViewModels
 {
     using System;
     using System.Collections.Generic;
@@ -113,7 +115,13 @@
 
         protected override void OnExecute(string commandLine)
         {
-            ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, commandLine, new User { Nick = "Ortzinator" }));
+            //ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, commandLine, new User { Nick = "Ortzinator" }));
+            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(channel, commandLine));
+            if (result != null && result.Result == CommandResult.Fail)
+            {
+                ChatLines.Add(new ErrorMessageViewModel(DateTime.Now, result.Message));
+                //TODO: Log
+            }
         }
 
         private void AddMessage(string msg)
