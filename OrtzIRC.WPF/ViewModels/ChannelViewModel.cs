@@ -6,7 +6,7 @@
     using OrtzIRC.Common;
     using OrtzIRC.WPF.Resources;
 
-    public class ChannelViewModel : IrcViewModel
+    public class ChannelViewModel : IrcViewModel, IDisposable
     {
         private Channel channel;
         private List<UserViewModel> userList;
@@ -38,6 +38,8 @@
 
             channel.Server.Disconnected += Server_Disconnected;
         }
+
+        
 
         private void Server_Disconnected(object sender, EventArgs e)
         {
@@ -75,7 +77,7 @@
 
         private void Channel_UserParted(object sender, EventArgs e)
         {
-            //TODO: Close
+            Close();
         }
 
         private void Channel_OnJoin(object sender, UserEventArgs e)
@@ -117,6 +119,24 @@
         private void AddMessage(string msg)
         {
             ChatLines.Add(new ChatItemViewModel(DateTime.Now, msg));
+        }
+
+        public void Dispose()
+        {
+            channel.NickList.Updated -= NickList_Updated;
+
+            channel.OnMessage -= Channel_OnMessage;
+            channel.OnAction -= Channel_OnAction;
+            channel.TopicReceived -= Channel_TopicReceived;
+            channel.OnJoin -= Channel_OnJoin;
+            channel.UserParted -= Channel_UserParted;
+            channel.OtherUserParted -= Channel_OtherUserParted;
+            channel.UserQuitted -= Channel_OnUserQuitted;
+            channel.NickChanged -= Channel_OnNick;
+            channel.OnKick -= Channel_OnKick;
+            channel.MessagedChannel -= Channel_MessagedChannel;
+
+            channel.Server.Disconnected -= Server_Disconnected;
         }
     }
 }

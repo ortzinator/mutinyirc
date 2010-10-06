@@ -4,10 +4,9 @@
     using System.Windows.Input;
     using MvvmFoundation.Wpf;
 
-    public class IrcViewModel : ObservableObject
+    public class IrcViewModel : ViewModelBase
     {
         public MTObservableCollection<ChatItemViewModel> ChatLines { get; set; }
-        public string Name { get; set; }
 
         public IrcViewModel()
         {

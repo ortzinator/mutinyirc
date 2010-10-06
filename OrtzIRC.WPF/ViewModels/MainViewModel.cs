@@ -9,7 +9,7 @@
     using OrtzIRC.PluginFramework;
     using OrtzIRC.WPF.Properties;
 
-    public class MainViewModel : ObservableObject
+    public class MainViewModel : ViewModelBase
     {
         public MTObservableCollection<IrcViewModel> Panels { get; protected set; }
 
@@ -20,6 +20,7 @@
             System.Windows.DependencyObject dep = new System.Windows.DependencyObject();
             if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(dep))
             {
+                //Executes in Design mode. Use for mockups.
                 Panels.Add(new ServerViewModel());
                 return;
             }
@@ -46,7 +47,16 @@
 
         private void Server_JoinSelf(object sender, DataEventArgs<Channel> e)
         {
-            Panels.Add(new ChannelViewModel(e.Data));
+            var chan = new ChannelViewModel(e.Data);
+            chan.RequestClose += Chan_RequestClose;
+            Panels.Add(chan);
+        }
+
+        private void Chan_RequestClose(object sender, EventArgs e)
+        {
+            var chan = (ChannelViewModel)sender;
+            chan.RequestClose -= Chan_RequestClose;
+            Panels.Remove(chan);
         }
 
         private void Default_SettingsSaving(object sender, System.ComponentModel.CancelEventArgs e)
@@ -70,6 +80,17 @@
         private void CreateServerPanel(Server server)
         {
             Panels.Add(new ServerViewModel(server));
+        }
+
+        public override void Close()
+        {
+            for (int i = 0; i < Panels.Count; i++)
+            {
+                IrcViewModel viewModel = Panels[i];
+                viewModel.Close();
+            }
+
+            base.Close();
         }
     }
 }
