@@ -5,7 +5,7 @@
         xmlns:vm="clr-namespace:OrtzIRC.WPF.ViewModels"
         Title="MainWindow" Height="282" Width="550" x:Name="window">
     <Window.Resources>
-        <DataTemplate x:Key="PanelsTemplate">
+        <DataTemplate DataType="{x:Type vm:ChannelViewModel}" x:Key="PanelsTemplate">
             <ContentPresenter Content="{Binding Name}" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ChannelViewModel}">

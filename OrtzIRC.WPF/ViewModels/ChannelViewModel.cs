@@ -13,6 +13,14 @@ namespace OrtzIRC.WPF.ViewModels
         private Channel channel;
         private List<UserViewModel> userList;
 
+        public new string Name
+        {
+            get
+            {
+                return string.Format("{0} ({1})", base.Name, UserList.Count);
+            }
+        }
+
         public List<UserViewModel> UserList
         {
             get
@@ -25,7 +33,7 @@ namespace OrtzIRC.WPF.ViewModels
         {
             channel = chan;
             channel.NickList.Updated += NickList_Updated;
-            Name = chan.Name;
+            base.Name = chan.Name;
 
             channel.OnMessage += Channel_OnMessage;
             channel.OnAction += Channel_OnAction;
@@ -111,6 +119,7 @@ namespace OrtzIRC.WPF.ViewModels
             }
             userList.Sort((user1, user2) => user1.CompareTo(user2));
             RaisePropertyChanged("UserList");
+            RaisePropertyChanged("Name");
         }
 
         protected override void OnExecute(string commandLine)
