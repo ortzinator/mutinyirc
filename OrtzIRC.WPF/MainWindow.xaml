@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:OrtzIRC.WPF"
         xmlns:vm="clr-namespace:OrtzIRC.WPF.ViewModels"
-        Title="MainWindow" Height="282" Width="550" x:Name="window">
+        Title="OrtzIRC" Height="282" Width="550" x:Name="window">
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:IrcViewModel}" x:Key="PanelsTemplate">
-            <ContentPresenter Content="{Binding Name}" />
+            <TextBlock Text="{Binding Name}" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
             <local:ChannelView />
@@ -17,6 +17,14 @@
     </Window.Resources>
 
     <DockPanel LastChildFill="True">
-        <TabControl x:Name="tabControl" ItemsSource="{Binding Panels}" ItemTemplate="{StaticResource PanelsTemplate}" />
+        <ListBox x:Name="navBar" ItemsSource="{Binding Panels}" ItemTemplate="{StaticResource PanelsTemplate}" DockPanel.Dock="Left" MinWidth="100" IsSynchronizedWithCurrentItem="True" />
+        <TabControl x:Name="tabControl" ItemsSource="{Binding Panels}" IsSynchronizedWithCurrentItem="True">
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="TabItem">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Setter Property="Content" Value="{Binding}" />
+                </Style>
+            </TabControl.ItemContainerStyle>
+        </TabControl>
     </DockPanel>
 </Window>
