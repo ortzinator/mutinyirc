@@ -230,5 +230,10 @@ namespace OrtzIRC.WPF.ViewModels
 
             server.Disconnect();
         }
+
+        public override void Dispose()
+        {
+            //TODO
+        }
     }
 }
