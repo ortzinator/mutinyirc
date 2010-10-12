@@ -3,5 +3,5 @@ glob:OrtzIRC.suo
 relre:^.*/bin/.*
 relre:^.*/obj/.*
 relre:^TestResults/.*
-relre:OrtzIRC\..+\.resharper
 relre:.*\.user$
+relre:OrtzIRC\.[.\d]+\.(ReSharper|resharper)
