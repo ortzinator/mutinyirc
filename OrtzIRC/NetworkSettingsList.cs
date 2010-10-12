@@ -1,4 +1,4 @@
-﻿namespace OrtzIRC.Common
+﻿namespace OrtzIRC
 {
     using System;
     using System.Collections.Generic;

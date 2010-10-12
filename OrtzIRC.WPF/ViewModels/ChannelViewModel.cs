@@ -8,7 +8,7 @@ namespace OrtzIRC.WPF.ViewModels
     using OrtzIRC.Common;
     using OrtzIRC.WPF.Resources;
 
-    public class ChannelViewModel : IrcViewModel, IDisposable
+    public class ChannelViewModel : IrcViewModel
     {
         private Channel channel;
         private List<UserViewModel> userList;
@@ -17,6 +17,8 @@ namespace OrtzIRC.WPF.ViewModels
         {
             get
             {
+                if (UserList == null || UserList.Count == 0)
+                    return base.Name;
                 return string.Format("{0} ({1})", base.Name, UserList.Count);
             }
         }
@@ -48,8 +50,6 @@ namespace OrtzIRC.WPF.ViewModels
 
             channel.Server.Disconnected += Server_Disconnected;
         }
-
-        
 
         private void Server_Disconnected(object sender, EventArgs e)
         {
@@ -138,7 +138,7 @@ namespace OrtzIRC.WPF.ViewModels
             ChatLines.Add(new ChatItemViewModel(DateTime.Now, msg));
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             channel.NickList.Updated -= NickList_Updated;
 

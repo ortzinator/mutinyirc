@@ -4,9 +4,9 @@
     using System.Windows.Input;
     using MvvmFoundation.Wpf;
 
-    public class IrcViewModel : ViewModelBase
+    public abstract class IrcViewModel : ViewModelBase, IDisposable
     {
-        public MTObservableCollection<ChatItemViewModel> ChatLines { get; set; }
+        public MTObservableCollection<ChatItemViewModel> ChatLines { get; protected set; }
 
         public IrcViewModel()
         {
@@ -26,5 +26,7 @@
         {
             ChatLines.Add(new ChatItemViewModel(DateTime.Now, commandLine));
         }
+
+        public abstract void Dispose();
     }
 }
