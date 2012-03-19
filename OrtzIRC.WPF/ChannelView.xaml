@@ -29,8 +29,8 @@
                     <Setter Property="Foreground" Value="Gray" />
                 </DataTrigger>
             </Style.Triggers>
-            
         </Style>
+        
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
         <local:CommandTextBox DockPanel.Dock="Bottom" x:Name="commandBox" MinHeight="20" />

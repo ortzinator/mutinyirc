@@ -1,11 +1,10 @@
-﻿using OrtzIRC.PluginFramework;
-
-namespace OrtzIRC.WPF.ViewModels
+﻿namespace OrtzIRC.WPF.ViewModels
 {
     using System;
     using System.Collections.Generic;
     using FlamingIRC;
     using OrtzIRC.Common;
+    using OrtzIRC.PluginFramework;
     using OrtzIRC.WPF.Resources;
 
     public class ChannelViewModel : IrcViewModel
@@ -54,7 +53,7 @@ namespace OrtzIRC.WPF.ViewModels
         private void Server_Disconnected(object sender, EventArgs e)
         {
             AddMessage(ServerStrings.Disconnected);
-            //TODO: Close
+            Close();
         }
 
         private void Channel_MessagedChannel(object sender, UserMessageEventArgs e)
@@ -124,7 +123,6 @@ namespace OrtzIRC.WPF.ViewModels
 
         protected override void OnExecute(string commandLine)
         {
-            //ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, commandLine, new User { Nick = "Ortzinator" }));
             CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(channel, commandLine));
             if (result != null && result.Result == CommandResult.Fail)
             {

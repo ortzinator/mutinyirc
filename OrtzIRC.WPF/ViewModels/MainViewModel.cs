@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace OrtzIRC.WPF.ViewModels
+﻿namespace OrtzIRC.WPF.ViewModels
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using FlamingIRC;
     using MvvmFoundation.Wpf;
