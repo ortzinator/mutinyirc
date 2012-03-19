@@ -1,13 +1,12 @@
-﻿using System.Threading;
-
-namespace OrtzIRC.Common
+﻿namespace OrtzIRC.Common
 {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using FlamingIRC;
+    using System.Threading;
 
-    public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
+    //public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
     //public delegate void Server_NickEventHandler(User nick, string newNick);
 
     public sealed class Server : MessageContext
@@ -89,8 +88,14 @@ namespace OrtzIRC.Common
             Connection.Listener.OnPrivate += Listener_OnPrivate;
             Connection.Listener.OnPing += Listener_OnPing;
             Connection.Listener.OnNickError += Listener_OnNickError;
+            Connection.Listener.OnQuit += new QuitEventHandler(Listener_OnQuit);
 
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
+        }
+
+        private void Listener_OnQuit(User user, string reason)
+        {
+            ChanManager.OnQuit(user, reason);
         }
 
         private void Listener_OnNickError(object sender, NickErrorEventArgs e)

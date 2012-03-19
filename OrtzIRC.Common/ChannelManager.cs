@@ -55,7 +55,7 @@
             {
                 recievingNames = true;
             }
-                
+
             foreach (string nick in nicks)
             {
                 tempNicks.Add(User.FromNames(nick));
@@ -94,7 +94,7 @@
                 }
 
                 TriggerChannelRemoved(Channels[channelName]);
-                if(!Channels.Remove(channelName))
+                if (!Channels.Remove(channelName))
                     Debug.WriteLine("Failed to remove channel");
                 //TODO: Is this all that needs to be done?
             }
@@ -137,6 +137,14 @@
         private void TriggerChannelRemoved(Channel chan)
         {
             ChannelRemoved.Fire(this, new ChannelEventArgs(chan));
+        }
+
+        public void OnQuit(User user, string reason)
+        {
+            foreach (KeyValuePair<string, Channel> pair in Channels)
+            {
+                pair.Value.UserQuit(user, reason);
+            }
         }
     }
 }
