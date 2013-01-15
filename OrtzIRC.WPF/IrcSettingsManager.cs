@@ -90,6 +90,10 @@ namespace OrtzIRC.WPF
                     net.AddServer(new ServerSettings("irc.freenode.net", "Random", "6667", false));
                     net.AddChannel(new ChannelSettings("#ortzirc", true));
                 }
+                else
+                {
+                    throw;
+                }
             }
         }
 
