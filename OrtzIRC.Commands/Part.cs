@@ -69,9 +69,9 @@
         /// <param name="message"></param>
         public void Execute(Server context, ChannelInfo channel, string message)
         {
-            if (context.ChanManager.InChannel(channel.Name))
+            if (context.InChannel(channel.Name))
             {
-                context.ChanManager.GetChannel(channel.Name).Part(message);
+                context.Channels[channel.Name].Part(message);
             }
             else
             {

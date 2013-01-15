@@ -81,11 +81,15 @@ namespace OrtzIRC.WPF
                 Networks = (NetworkSettingsList)serializer.Deserialize(fs);
                 fs.Close();
             }
-            catch (FileNotFoundException)
+            catch (Exception ex)
             {
-                NetworkSettings net = AddNetwork("RandomIRC");
-                net.AddServer(new ServerSettings("apps.randomirc.com", "Random", "6667", false));
-                net.AddChannel(new ChannelSettings("#ortzirc", true));
+                if (ex is DirectoryNotFoundException 
+                    || ex is FileNotFoundException)
+                {
+                    NetworkSettings net = AddNetwork("Freenode");
+                    net.AddServer(new ServerSettings("irc.freenode.net", "Random", "6667", false));
+                    net.AddChannel(new ChannelSettings("#ortzirc", true));
+                }
             }
         }
 
