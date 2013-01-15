@@ -3,8 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using FlamingIRC;
+    using System.Diagnostics;
     using System.Threading;
+    using FlamingIRC;
 
     //public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
     //public delegate void Server_NickEventHandler(User nick, string newNick);
@@ -12,6 +13,9 @@
     public sealed class Server : MessageContext
     {
         private DateTime serverChangeTime;
+
+        public static event EventHandler<ChannelEventArgs> ChannelCreated;
+        public static event EventHandler<ChannelEventArgs> ChannelRemoved;
 
         public Server(ConnectionArgs settings)
         {
@@ -22,18 +26,12 @@
 
         public string Url
         {
-            get
-            {
-                return Connection.ConnectionData.Hostname;
-            }
+            get { return Connection.ConnectionData.Hostname; }
         }
 
         public int Port
         {
-            get
-            {
-                return Connection.ConnectionData.Port;
-            }
+            get { return Connection.ConnectionData.Port; }
         }
 
         public Connection Connection { get; private set; }
@@ -53,14 +51,21 @@
             get { return Connection.ConnectionData.Nick; }
         }
 
-        public ChannelManager ChanManager { get; private set; }
+        private Dictionary<string, Channel> channels;
+
+        public Dictionary<string, Channel> Channels
+        {
+            get { return channels; }
+        }
+
+        private bool recievingNames;
 
         private void SetupConnection(ConnectionArgs args)
         {
             if (args.Nick == null)
                 throw new ArgumentException("The ServerSettings.Nick property is null");
 
-            ChanManager = new ChannelManager(this);
+            channels = new Dictionary<string, Channel>();
 
             Connection = new Connection(args, true, false);
             Connection.HandleNickTaken = false;
@@ -95,7 +100,10 @@
 
         private void Listener_OnQuit(User user, string reason)
         {
-            ChanManager.OnQuit(user, reason);
+            foreach (KeyValuePair<string, Channel> pair in channels)
+            {
+                pair.Value.UserQuit(user, reason);
+            }
         }
 
         private void Listener_OnNickError(object sender, NickErrorEventArgs e)
@@ -166,6 +174,7 @@
         /// The client joined a channel.
         /// </summary>
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
+
         public event EventHandler<CancelEventArgs> Connecting;
 
         /// <summary>
@@ -229,11 +238,11 @@
 
             if (DateTime.Now - serverChangeTime < TimeSpan.FromSeconds(1))
             {
-                var th = new Thread((ThreadStart)delegate
-                {
-                    Thread.Sleep(TimeSpan.FromSeconds(1));
-                    Connection.Connect();
-                });
+                var th = new Thread((ThreadStart) delegate
+                                                      {
+                                                          Thread.Sleep(TimeSpan.FromSeconds(1));
+                                                          Connection.Connect();
+                                                      });
                 th.Start();
             }
             else
@@ -255,7 +264,7 @@
 
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
         {
-            var chan = ChanManager.GetChannel(channel);
+            var chan = channels[channel];
             Kick.Fire(this, new KickEventArgs(user, chan, kickee, reason));
             chan.UserKick(user, kickee, reason);
 
@@ -267,18 +276,26 @@
             if (UserModeChanged != null)
                 UserModeChanged(action, mode);
 
-            foreach (KeyValuePair<string, Channel> item in ChanManager.Channels)
+            foreach (KeyValuePair<string, Channel> item in channels)
                 Connection.Sender.Names(item.Key);
         }
 
         private void Listener_OnNick(User user, string newNick)
         {
             OnNick.Fire(this, new NickChangeEventArgs(user, newNick));
+
+            foreach (KeyValuePair<string, Channel> item in channels)
+            {
+                if (item.Value.HasUser(user.Nick))
+                {
+                    item.Value.NickChange(user, newNick);
+                }
+            }
         }
 
         private void ListenerOnRecieveTopic(string channel, string topic)
         {
-            var chan = ChanManager.Create(channel);
+            var chan = CreateChannel(channel);
             chan.ShowTopic(topic);
         }
 
@@ -289,7 +306,7 @@
 
         private void Listener_OnAction(object sender, UserChannelMessageEventArgs ea)
         {
-            var chan = ChanManager.Create(ea.Channel);
+            var chan = CreateChannel(ea.Channel);
             UserAction.Fire(this, new ChannelMessageEventArgs(ea.User, chan, ea.Message));
             chan.OnNewAction(ea.User, ea.Message);
         }
@@ -311,23 +328,53 @@
 
         private void Listener_OnPublic(object sender, UserChannelMessageEventArgs ea)
         {
-            ChannelMessaged.Fire(this, new ChannelMessageEventArgs(ea.User, ChanManager.GetChannel(ea.Channel), ea.Message));
-            ChanManager.GetChannel(ea.Channel).OnNewMessage(ea.User, ea.Message);
+            ChannelMessaged.Fire(this, new ChannelMessageEventArgs(ea.User, channels[ea.Channel], ea.Message));
+            channels[ea.Channel].OnNewMessage(ea.User, ea.Message);
         }
+
+        private List<User> tempNicks = new List<User>();
 
         private void Listener_OnNames(string channel, string[] nicks, bool last)
         {
             if (OnNames != null)
                 OnNames(channel, nicks, last);
+
+            Channel chan = channels[channel];
+            if (!recievingNames)
+            {
+                recievingNames = true;
+            }
+
+            foreach (string nick in nicks)
+            {
+                tempNicks.Add(User.FromNames(nick));
+            }
+
+            Trace.WriteLine("Added chunk of " + nicks.Length + " names", "Names");
+
+            if (last)
+            {
+                chan.NickList.NotifyUpdate = false;
+                chan.NickList.Clear();
+                foreach (User nick in tempNicks)
+                {
+                    if (nick != null)
+                        chan.AddNick(nick);
+                }
+                chan.NickList.NotifyUpdate = true;
+                chan.NickList.Refresh();
+                //Trace.WriteLine("Refreshed channel nick list", "Names");
+                recievingNames = false;
+                tempNicks.Clear();
+            }
         }
 
         private void Listener_OnJoin(User user, string channel)
         {
-            var chan = ChanManager.Create(channel);
+            var chan = CreateChannel(channel);
             if (user.Nick == UserNick)
             {
                 JoinSelf.Fire(this, new DataEventArgs<Channel>(chan));
-
             }
             else
             {
@@ -339,7 +386,7 @@
 
         private void Listener_OnPart(User user, string channel, string reason)
         {
-            var chan = ChanManager.GetChannel(channel);
+            var chan = channels[channel];
 
             if (chan == null)
                 return;
@@ -353,6 +400,9 @@
             Part.Fire(this, new PartEventArgs(user, chan, reason));
             chan.UserPart(user, reason);
 
+            channels.Remove(chan.Name);
+            ChannelRemoved.Fire(this, new ChannelEventArgs(chan));
+
             Connection.Sender.Names(channel);
         }
 
@@ -364,7 +414,7 @@
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
         {
-            ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, ChanManager.GetChannel(channel), modes, raw));
+            ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, channels[channel], modes, raw));
 
             Connection.Sender.Names(channel);
         }
@@ -382,9 +432,10 @@
 
         public Channel JoinChannel(string channelToJoin, string key)
         {
-            Channel newChan = ChanManager.Create(channelToJoin);
+            Channel newChan = CreateChannel(channelToJoin);
 
-            Connection.Sender.Join(channelToJoin, key); // TODO: Figure out what happens when you join with a wrong key, and fix up channel manager integrity afterwards.
+            Connection.Sender.Join(channelToJoin, key);
+                // TODO: Figure out what happens when you join with a wrong key, and fix up channel manager integrity afterwards.
 
             return newChan;
         }
@@ -417,7 +468,6 @@
             }
 
             UnhookEvents();
-            ChanManager.UnhookEvents();
             SetupConnection(args);
             HookEvents();
 
@@ -432,6 +482,41 @@
         private bool IsMe(User user)
         {
             return user.Nick == Connection.ConnectionData.Nick;
+        }
+
+
+        public Channel CreateChannel(string channelName)
+        {
+            if (channels.ContainsKey(channelName))
+            {
+                return channels[channelName];
+            }
+
+            if (!Rfc2812Util.IsValidChannelName(channelName))
+                return null;
+
+            var newChan = new Channel(this, channelName);
+            channels.Add(channelName, newChan);
+            ChannelCreated.Fire(this, new ChannelEventArgs(newChan));
+
+            return newChan;
+        }
+
+        public bool InChannel(string channelName)
+        {
+            if (channels.ContainsKey(channelName))
+            {
+                if (channels[channelName].Joined)
+                {
+                    return true;
+                }
+
+                ChannelRemoved.Fire(this, new ChannelEventArgs(channels[channelName]));
+                if (!channels.Remove(channelName))
+                    Debug.WriteLine("Failed to remove channel");
+                //TODO: Is this all that needs to be done?
+            }
+            return false;
         }
     }
 }

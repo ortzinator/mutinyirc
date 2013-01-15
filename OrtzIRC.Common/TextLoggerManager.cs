@@ -62,8 +62,8 @@
 
         public static void TurnOn()
         {
-            ChannelManager.ChannelCreated += ChannelManager_ElementCreated;
-            ChannelManager.ChannelRemoved += ChannelManager_ElementRemoved;
+            Server.ChannelCreated += ChannelManager_ElementCreated;
+            Server.ChannelRemoved += ChannelManager_ElementRemoved;
 
             ServerManager.Instance.ServerAdded += ServerManager_ElementCreated;
             ServerManager.Instance.ServerRemoved += ServerManager_ElementRemoved;
@@ -72,15 +72,15 @@
             {
                 TextLogger.AddLoggable(ntw);
 
-                foreach (Channel chan in ntw.ChanManager.Channels.Values)
+                foreach (Channel chan in ntw.Channels.Values)
                     TextLogger.AddLoggable(chan);
             }
         }
 
         public static void TurnOff()
         {
-            ChannelManager.ChannelCreated -= ChannelManager_ElementCreated;
-            ChannelManager.ChannelRemoved -= ChannelManager_ElementRemoved;
+            Server.ChannelCreated -= ChannelManager_ElementCreated;
+            Server.ChannelRemoved -= ChannelManager_ElementRemoved;
 
             ServerManager.Instance.ServerAdded -= ServerManager_ElementCreated;
             ServerManager.Instance.ServerRemoved -= ServerManager_ElementRemoved;

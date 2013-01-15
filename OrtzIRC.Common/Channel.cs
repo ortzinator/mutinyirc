@@ -163,7 +163,12 @@
                 UserQuitted.Fire(this, new UserMessageEventArgs(n, message));
             }
         }
-
+        
+        /// <summary>
+        /// Changes the nick of a user in the channel. Usually only used when triggered by a NICK event.
+        /// </summary>
+        /// <param name="nick">The user</param>
+        /// <param name="newNick">The user's new nick.</param>
         public void NickChange(User nick, string newNick)
         {
             foreach (User n in NickList)
@@ -176,6 +181,11 @@
             }
         }
 
+        /// <summary>
+        /// Checks if a user with the provided nick is in the channel.
+        /// </summary>
+        /// <param name="nick">The nick to look for.</param>
+        /// <returns></returns>
         public bool HasUser(string nick)
         {
             return NickList.Contains(User.FromNames(nick));

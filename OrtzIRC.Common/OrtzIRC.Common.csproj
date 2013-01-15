@@ -125,7 +125,6 @@
     <Compile Include="TextLogger.cs" />
     <Compile Include="Channel.cs" />
     <Compile Include="ChannelInfo.cs" />
-    <Compile Include="ChannelManager.cs" />
     <Compile Include="ChannelMessageEventArgs.cs" />
     <Compile Include="ChannelModeChangeEventArgs.cs" />
     <Compile Include="DataEventArgs.cs" />
