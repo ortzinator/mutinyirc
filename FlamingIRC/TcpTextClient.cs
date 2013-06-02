@@ -98,6 +98,10 @@ namespace FlamingIRC
         /// <summary>
         /// Close the connection to the server.
         /// </summary>
+        /// <remarks>
+        /// The client need not be actually connected. This method will also "give up" an
+        ///  attept to connect or revert to a disconnected state after an error.
+        /// </remarks>
         public void Disconnect(DisconnectReason reason)
         {
             socket.Shutdown(SocketShutdown.Both);
@@ -185,7 +189,7 @@ namespace FlamingIRC
             {
                 stream.BeginRead(byteBuffer, 0, bufferLength, onDataReceived, null);
             }
-            catch (Exception )
+            catch (Exception)
             {
                 socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
@@ -234,11 +238,13 @@ namespace FlamingIRC
 
                 waitForData();
             }
+            catch (IOException)
+            {
+                Disconnect(DisconnectReason.SocketError);
+            }
             catch (SocketException) //hack - What kind of exception?
             {
-                socket.Shutdown(SocketShutdown.Both);
-                Connected = false;
-                OnDisconnect(DisconnectReason.SocketError, null);
+                Disconnect(DisconnectReason.SocketError);
                 throw; //Wasn't really handled so pass it through
             }
         }
