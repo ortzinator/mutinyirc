@@ -1,7 +1,0 @@
-relre:^_ReSharper\.OrtzIRC.*
-glob:OrtzIRC.suo
-relre:^.*/bin/.*
-relre:^.*/obj/.*
-relre:^TestResults/.*
-relre:.*\.user$
-relre:OrtzIRC\.[.\d]+\.(ReSharper|resharper)
