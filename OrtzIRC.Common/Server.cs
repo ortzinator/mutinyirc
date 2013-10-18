@@ -1,26 +1,25 @@
-﻿namespace OrtzIRC.Common
-{
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Diagnostics;
-    using System.Threading;
-    using FlamingIRC;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Threading;
+using FlamingIRC;
 
+namespace OrtzIRC.Common
+{
     //public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
     //public delegate void Server_NickEventHandler(User nick, string newNick);
 
     public sealed class Server : MessageContext
     {
-        private DateTime serverChangeTime;
-
-        public static event EventHandler<ChannelEventArgs> ChannelCreated;
-        public static event EventHandler<ChannelEventArgs> ChannelRemoved;
+        private List<PrivateMessageSession> _pmSessions = new List<PrivateMessageSession>();
+        private DateTime _serverChangeTime;
+        private Dictionary<string, Channel> _channels;
+        private bool _recievingNames;
 
         public Server(ConnectionArgs settings)
         {
             SetupConnection(settings);
-            PMSessions = new List<PrivateMessageSession>();
             HookEvents();
         }
 
@@ -36,7 +35,10 @@
 
         public Connection Connection { get; private set; }
 
-        public List<PrivateMessageSession> PMSessions { get; private set; }
+        public List<PrivateMessageSession> PMSessions
+        {
+            get { return _pmSessions; }
+        }
 
         public bool IsConnected
         {
@@ -44,31 +46,29 @@
         }
 
         /// <summary>
-        /// The nick of the connected user
+        ///   The nick of the connected user
         /// </summary>
         public string UserNick
         {
             get { return Connection.ConnectionData.Nick; }
         }
 
-        private Dictionary<string, Channel> channels;
-
         public Dictionary<string, Channel> Channels
         {
-            get { return channels; }
+            get { return _channels; }
         }
 
-        private bool recievingNames;
+        public static event EventHandler<ChannelEventArgs> ChannelCreated;
+        public static event EventHandler<ChannelEventArgs> ChannelRemoved;
 
         private void SetupConnection(ConnectionArgs args)
         {
             if (args.Nick == null)
                 throw new ArgumentException("The ServerSettings.Nick property is null");
 
-            channels = new Dictionary<string, Channel>();
+            _channels = new Dictionary<string, Channel>();
 
-            Connection = new Connection(args, true, false);
-            Connection.HandleNickTaken = false;
+            Connection = new Connection(args, true, false) { HandleNickTaken = false };
         }
 
         private void HookEvents()
@@ -93,14 +93,14 @@
             Connection.Listener.OnPrivate += Listener_OnPrivate;
             Connection.Listener.OnPing += Listener_OnPing;
             Connection.Listener.OnNickError += Listener_OnNickError;
-            Connection.Listener.OnQuit += new QuitEventHandler(Listener_OnQuit);
+            Connection.Listener.OnQuit += Listener_OnQuit;
 
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
         }
 
         private void Listener_OnQuit(User user, string reason)
         {
-            foreach (KeyValuePair<string, Channel> pair in channels)
+            foreach (KeyValuePair<string, Channel> pair in _channels)
             {
                 pair.Value.UserQuit(user, reason);
             }
@@ -171,19 +171,19 @@
         }
 
         /// <summary>
-        /// The client joined a channel.
+        ///   The client joined a channel.
         /// </summary>
         public event EventHandler<DataEventArgs<Channel>> JoinSelf;
 
         public event EventHandler<CancelEventArgs> Connecting;
 
         /// <summary>
-        /// Another user joined a channel.
+        ///   Another user joined a channel.
         /// </summary>
         public event EventHandler<DoubleDataEventArgs<User, Channel>> JoinOther;
 
         /// <summary>
-        /// A connect attempt failed.
+        ///   A connect attempt failed.
         /// </summary>
         public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
 
@@ -236,9 +236,9 @@
                 return;
             }
 
-            if (DateTime.Now - serverChangeTime < TimeSpan.FromSeconds(1))
+            if (DateTime.Now - _serverChangeTime < TimeSpan.FromSeconds(1))
             {
-                var th = new Thread((ThreadStart) delegate
+                var th = new Thread((ThreadStart)delegate
                                                       {
                                                           Thread.Sleep(TimeSpan.FromSeconds(1));
                                                           Connection.Connect();
@@ -264,7 +264,7 @@
 
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
         {
-            var chan = channels[channel];
+            var chan = _channels[channel];
             Kick.Fire(this, new KickEventArgs(user, chan, kickee, reason));
             chan.UserKick(user, kickee, reason);
 
@@ -276,7 +276,7 @@
             if (UserModeChanged != null)
                 UserModeChanged(action, mode);
 
-            foreach (KeyValuePair<string, Channel> item in channels)
+            foreach (KeyValuePair<string, Channel> item in _channels)
                 Connection.Sender.Names(item.Key);
         }
 
@@ -284,7 +284,7 @@
         {
             OnNick.Fire(this, new NickChangeEventArgs(user, newNick));
 
-            foreach (KeyValuePair<string, Channel> item in channels)
+            foreach (KeyValuePair<string, Channel> item in _channels)
             {
                 if (item.Value.HasUser(user.Nick))
                 {
@@ -328,21 +328,20 @@
 
         private void Listener_OnPublic(object sender, UserChannelMessageEventArgs ea)
         {
-            ChannelMessaged.Fire(this, new ChannelMessageEventArgs(ea.User, channels[ea.Channel], ea.Message));
-            channels[ea.Channel].OnNewMessage(ea.User, ea.Message);
+            ChannelMessaged.Fire(this, new ChannelMessageEventArgs(ea.User, _channels[ea.Channel], ea.Message));
+            _channels[ea.Channel].OnNewMessage(ea.User, ea.Message);
         }
 
         private List<User> tempNicks = new List<User>();
-
         private void Listener_OnNames(string channel, string[] nicks, bool last)
         {
             if (OnNames != null)
                 OnNames(channel, nicks, last);
 
-            Channel chan = channels[channel];
-            if (!recievingNames)
+            Channel chan = _channels[channel];
+            if (!_recievingNames)
             {
-                recievingNames = true;
+                _recievingNames = true;
             }
 
             foreach (string nick in nicks)
@@ -364,7 +363,7 @@
                 chan.NickList.NotifyUpdate = true;
                 chan.NickList.Refresh();
                 //Trace.WriteLine("Refreshed channel nick list", "Names");
-                recievingNames = false;
+                _recievingNames = false;
                 tempNicks.Clear();
             }
         }
@@ -386,7 +385,7 @@
 
         private void Listener_OnPart(User user, string channel, string reason)
         {
-            var chan = channels[channel];
+            var chan = _channels[channel];
 
             if (chan == null)
                 return;
@@ -400,7 +399,7 @@
             Part.Fire(this, new PartEventArgs(user, chan, reason));
             chan.UserPart(user, reason);
 
-            channels.Remove(chan.Name);
+            _channels.Remove(chan.Name);
             ChannelRemoved.Fire(this, new ChannelEventArgs(chan));
 
             Connection.Sender.Names(channel);
@@ -414,7 +413,7 @@
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
         {
-            ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, channels[channel], modes, raw));
+            ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, _channels[channel], modes, raw));
 
             Connection.Sender.Names(channel);
         }
@@ -435,7 +434,7 @@
             Channel newChan = CreateChannel(channelToJoin);
 
             Connection.Sender.Join(channelToJoin, key);
-                // TODO: Figure out what happens when you join with a wrong key, and fix up channel manager integrity afterwards.
+            // TODO: Figure out what happens when you join with a wrong key, and fix up channel manager integrity afterwards.
 
             return newChan;
         }
@@ -471,7 +470,7 @@
             SetupConnection(args);
             HookEvents();
 
-            serverChangeTime = DateTime.Now;
+            _serverChangeTime = DateTime.Now;
         }
 
         public void ChangeServer(string nick, string url, bool ssl)
@@ -487,16 +486,16 @@
 
         public Channel CreateChannel(string channelName)
         {
-            if (channels.ContainsKey(channelName))
+            if (_channels.ContainsKey(channelName))
             {
-                return channels[channelName];
+                return _channels[channelName];
             }
 
             if (!Rfc2812Util.IsValidChannelName(channelName))
                 return null;
 
             var newChan = new Channel(this, channelName);
-            channels.Add(channelName, newChan);
+            _channels.Add(channelName, newChan);
             ChannelCreated.Fire(this, new ChannelEventArgs(newChan));
 
             return newChan;
@@ -504,15 +503,15 @@
 
         public bool InChannel(string channelName)
         {
-            if (channels.ContainsKey(channelName))
+            if (_channels.ContainsKey(channelName))
             {
-                if (channels[channelName].Joined)
+                if (_channels[channelName].Joined)
                 {
                     return true;
                 }
 
-                ChannelRemoved.Fire(this, new ChannelEventArgs(channels[channelName]));
-                if (!channels.Remove(channelName))
+                ChannelRemoved.Fire(this, new ChannelEventArgs(_channels[channelName]));
+                if (!_channels.Remove(channelName))
                     Debug.WriteLine("Failed to remove channel");
                 //TODO: Is this all that needs to be done?
             }
