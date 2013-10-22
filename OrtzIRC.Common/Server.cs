@@ -10,7 +10,7 @@ namespace OrtzIRC.Common
     //public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
     //public delegate void Server_NickEventHandler(User nick, string newNick);
 
-    public sealed class Server : MessageContext
+    public class Server : MessageContext
     {
         private List<PrivateMessageSession> _pmSessions = new List<PrivateMessageSession>();
         private DateTime _serverChangeTime;
@@ -21,6 +21,11 @@ namespace OrtzIRC.Common
         {
             SetupConnection(settings);
             HookEvents();
+        }
+
+        public Server()
+        {
+            
         }
 
         public string Url
@@ -61,7 +66,7 @@ namespace OrtzIRC.Common
         public static event EventHandler<ChannelEventArgs> ChannelCreated;
         public static event EventHandler<ChannelEventArgs> ChannelRemoved;
 
-        private void SetupConnection(ConnectionArgs args)
+        public void SetupConnection(ConnectionArgs args)
         {
             if (args.Nick == null)
                 throw new ArgumentException("The ServerSettings.Nick property is null");
@@ -71,7 +76,7 @@ namespace OrtzIRC.Common
             Connection = new Connection(args, true, false) { HandleNickTaken = false };
         }
 
-        private void HookEvents()
+        public void HookEvents()
         {
             Connection.ConnectionEstablished += Connection_OnConnectSuccess;
             Connection.ConnectFailed += Connection_ConnectFailed;
