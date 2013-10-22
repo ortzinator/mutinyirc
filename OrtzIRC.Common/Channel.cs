@@ -31,7 +31,7 @@
         /// At the moment, this is kept up to date by requesting a NAMES list for the channel 
         /// whenever someone joins, parts, quits, or their mode is changed (and thus their prefix symbol).
         /// </remarks>
-        public UserList NickList { get; private set; }
+        public UserList NickList { get; set; }
 
         /// <summary>
         /// Returns true if the user is in the channel
