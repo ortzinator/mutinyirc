@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Commands", "OrtzIRC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.PluginFramework", "OrtzIRC.PluginFramework\OrtzIRC.PluginFramework.csproj", "{D8266C38-E44E-4708-89AE-3E6CA72D5987}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIrcTest", "OrtzIrcTest\OrtzIrcTest.csproj", "{BADD5B62-D031-469A-8876-1701509AB9A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Tests", "OrtzIrcTest\OrtzIRC.Tests.csproj", "{BADD5B62-D031-469A-8876-1701509AB9A4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC", "OrtzIRC\OrtzIRC.csproj", "{76E3A753-E53C-40C8-B2FD-E5E71D5432C7}"
 EndProject
@@ -26,6 +26,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.WPF", "OrtzIRC.WPF\OrtzIRC.WPF.csproj", "{D8E00C29-149C-4C59-A349-537DEDAAF333}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvvmFoundation.Wpf", "MvvmFoundation.Wpf\MvvmFoundation.Wpf.csproj", "{2E922430-EAAC-4589-A8F4-F35FBB9799B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.Tests", "MutinyIRC.Tests\MutinyIRC.Tests.csproj", "{F929430B-C58C-41AD-A1F0-BDC38E49447C}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -167,6 +169,18 @@ Global
 		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Release|x64.ActiveCfg = Release|Any CPU
 		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Release|x86.ActiveCfg = Release|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Release|x64.ActiveCfg = Release|Any CPU
+		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
