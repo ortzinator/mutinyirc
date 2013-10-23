@@ -66,14 +66,19 @@ namespace OrtzIRC.Common
         public static event EventHandler<ChannelEventArgs> ChannelCreated;
         public static event EventHandler<ChannelEventArgs> ChannelRemoved;
 
+        public void SetupConnection(Connection connection)
+        {
+            _channels = new Dictionary<string, Channel>();
+
+            Connection = connection;
+        }
+
         public void SetupConnection(ConnectionArgs args)
         {
             if (args.Nick == null)
                 throw new ArgumentException("The ServerSettings.Nick property is null");
 
-            _channels = new Dictionary<string, Channel>();
-
-            Connection = new Connection(args, true, false) { HandleNickTaken = false };
+            SetupConnection(new Connection(args, true, false) { HandleNickTaken = false });
         }
 
         public void HookEvents()
