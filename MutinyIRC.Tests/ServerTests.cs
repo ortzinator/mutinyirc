@@ -24,7 +24,7 @@ namespace MutinyIRC.Tests
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
-        public void SetupConnection_NickNotSet_ArgumentExceptionThrown()
+        public void SetupConnection_GivenConnectionArgsAndNickNotSet_ArgumentExceptionThrown()
         {
             _server.SetupConnection(new ConnectionArgs());
         }

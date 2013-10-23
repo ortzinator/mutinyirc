@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Commands", "OrtzIRC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.PluginFramework", "OrtzIRC.PluginFramework\OrtzIRC.PluginFramework.csproj", "{D8266C38-E44E-4708-89AE-3E6CA72D5987}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Tests", "OrtzIrcTest\OrtzIRC.Tests.csproj", "{BADD5B62-D031-469A-8876-1701509AB9A4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC", "OrtzIRC\OrtzIRC.csproj", "{76E3A753-E53C-40C8-B2FD-E5E71D5432C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudioLockWorkaround", "VisualStudioLockWorkaround\VisualStudioLockWorkaround.csproj", "{9933480B-BCBE-464F-82D8-D9A62542D0AA}"
@@ -107,17 +105,6 @@ Global
 		{D8266C38-E44E-4708-89AE-3E6CA72D5987}.Release|x64.Build.0 = Release|x64
 		{D8266C38-E44E-4708-89AE-3E6CA72D5987}.Release|x86.ActiveCfg = Release|x86
 		{D8266C38-E44E-4708-89AE-3E6CA72D5987}.Release|x86.Build.0 = Release|x86
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Debug|x64.ActiveCfg = Debug|x64
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Debug|x86.ActiveCfg = Debug|x86
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Release|Mixed Platforms.Build.0 = Release|x86
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Release|x64.ActiveCfg = Release|x64
-		{BADD5B62-D031-469A-8876-1701509AB9A4}.Release|x86.ActiveCfg = Release|x86
 		{76E3A753-E53C-40C8-B2FD-E5E71D5432C7}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{76E3A753-E53C-40C8-B2FD-E5E71D5432C7}.Debug|Any CPU.Build.0 = Debug|x86
 		{76E3A753-E53C-40C8-B2FD-E5E71D5432C7}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
