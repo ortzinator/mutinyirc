@@ -1,4 +1,5 @@
 ﻿using System;
+using FakeItEasy;
 using FlamingIRC;
 using NUnit.Framework;
 using OrtzIRC.Common;
@@ -13,7 +14,9 @@ namespace MutinyIRC.Tests
         [SetUp]
         public void Setup()
         {
-            _server = new Server();
+            var args = new ConnectionArgs("test", "irc.fake.com", false);
+            var connMock = A.Fake<Connection>(x => x.WithArgumentsForConstructor(() => new Connection(args, false, false)));
+            _server = new Server(connMock);
         }
 
         [TearDown]
