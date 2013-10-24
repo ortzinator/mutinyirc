@@ -1,10 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using FlamingIRC;
 
 namespace OrtzIRC.Common
 {
-    public delegate void ReceivedNamesEventHandler(UserList nickList);
-
     public delegate void ChannelKickEventHandler(User nick, string kickee, string reason);
 
     /// <summary>
@@ -105,7 +104,7 @@ namespace OrtzIRC.Common
         /// <summary>
         ///   A NAMES list was recieved for the channel.
         /// </summary>
-        public event ReceivedNamesEventHandler OnReceivedNames;
+        public event EventHandler<DataEventArgs<UserList>> OnReceivedNames;
 
         /// <summary>
         ///   A user was kicked from the channel
@@ -239,6 +238,25 @@ namespace OrtzIRC.Common
         {
             Server.Connection.Sender.Action(Name, message);
             MessagedChannel.Fire(this, new UserMessageEventArgs(Users.GetUser(Server.UserNick), message));
+        }
+
+        /// <summary>
+        ///   Loads a new list of user that replaces the old list
+        /// </summary>
+        /// <param name="users">The list of users</param>
+        public void LoadNewNames(List<User> users)
+        {
+            Users.NotifyUpdate = false;
+            Users.Clear();
+            foreach (User nick in users)
+            {
+                if (nick != null)
+                    AddNick(nick);
+            }
+            Users.NotifyUpdate = true;
+            Users.Refresh();
+
+            OnReceivedNames.Fire(this, new DataEventArgs<UserList>(new UserList(users)));
         }
     }
 }

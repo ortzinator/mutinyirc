@@ -22,6 +22,12 @@
             NotifyUpdate = true;
         }
 
+        public UserList(List<User> userList)
+        {
+            List = userList;
+            NotifyUpdate = true;
+        }
+
         #region IList<User> Members
 
         public int IndexOf(User item)
