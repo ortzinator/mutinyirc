@@ -7,16 +7,13 @@ using FlamingIRC;
 
 namespace OrtzIRC.Common
 {
-    //public delegate void Server_TopicRequestEventHandler(Channel chan, string topic);
-    //public delegate void Server_NickEventHandler(User nick, string newNick);
-
     public class Server : MessageContext
     {
         private Dictionary<string, Channel> _channels;
         private List<PrivateMessageSession> _pmSessions = new List<PrivateMessageSession>();
         private bool _recievingNames;
         private DateTime _serverChangeTime;
-        private List<User> tempNicks = new List<User>();
+        private List<User> _tempNames = new List<User>();
 
         public Server(ConnectionArgs settings)
         {
@@ -355,25 +352,16 @@ namespace OrtzIRC.Common
 
             foreach (string nick in nicks)
             {
-                tempNicks.Add(User.FromNames(nick));
+                _tempNames.Add(User.FromNames(nick));
             }
 
             Trace.WriteLine("Added chunk of " + nicks.Length + " names", "Names");
 
             if (last)
             {
-                chan.Users.NotifyUpdate = false;
-                chan.Users.Clear();
-                foreach (User nick in tempNicks)
-                {
-                    if (nick != null)
-                        chan.AddNick(nick);
-                }
-                chan.Users.NotifyUpdate = true;
-                chan.Users.Refresh();
-                //Trace.WriteLine("Refreshed channel nick list", "Names");
+                chan.LoadNewNames(_tempNames);
                 _recievingNames = false;
-                tempNicks.Clear();
+                _tempNames.Clear();
             }
         }
 
