@@ -9,11 +9,12 @@ namespace OrtzIRC.Common
 {
     public class Server : MessageContext
     {
-        private Dictionary<string, Channel> _channels;
+        private Dictionary<string, Channel> _channels = new Dictionary<string, Channel>();
         private List<PrivateMessageSession> _pmSessions = new List<PrivateMessageSession>();
         private bool _recievingNames;
         private DateTime _serverChangeTime;
         private List<User> _tempNames = new List<User>();
+        private Connection _connection;
 
         public Server(ConnectionArgs settings)
         {
@@ -21,8 +22,9 @@ namespace OrtzIRC.Common
             HookEvents();
         }
 
-        public Server()
+        public Server(Connection connection)
         {
+            Connection = connection;
         }
 
         public string Url
@@ -35,7 +37,15 @@ namespace OrtzIRC.Common
             get { return Connection.ConnectionData.Port; }
         }
 
-        public Connection Connection { get; private set; }
+        public Connection Connection
+        {
+            get { return _connection; }
+            set
+            {
+                Channels.Clear();
+                _connection = value;
+            }
+        }
 
         public List<PrivateMessageSession> PMSessions
         {
@@ -63,19 +73,12 @@ namespace OrtzIRC.Common
         public static event EventHandler<ChannelEventArgs> ChannelCreated;
         public static event EventHandler<ChannelEventArgs> ChannelRemoved;
 
-        public void SetupConnection(Connection connection)
-        {
-            _channels = new Dictionary<string, Channel>();
-
-            Connection = connection;
-        }
-
         public void SetupConnection(ConnectionArgs args)
         {
             if (args.Nick == null)
                 throw new ArgumentException("The ServerSettings.Nick property is null");
 
-            SetupConnection(new Connection(args, true, false) { HandleNickTaken = false });
+            Connection = new Connection(args, true, false) { HandleNickTaken = false };
         }
 
         public void HookEvents()

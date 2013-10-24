@@ -39,7 +39,7 @@ namespace FlamingIRC
     /// This class manages the connection to the IRC server and provides
     /// access to all the objects needed to send and receive messages.
     /// </summary>
-    public sealed class Connection : TcpTextClient
+    public class Connection : TcpTextClient
     {
         private readonly Timer activityTimer;
         private readonly ArrayList parsers;
