@@ -12,10 +12,11 @@ namespace OrtzIRC.Common
 
     public class Server : MessageContext
     {
-        private List<PrivateMessageSession> _pmSessions = new List<PrivateMessageSession>();
-        private DateTime _serverChangeTime;
         private Dictionary<string, Channel> _channels;
+        private List<PrivateMessageSession> _pmSessions = new List<PrivateMessageSession>();
         private bool _recievingNames;
+        private DateTime _serverChangeTime;
+        private List<User> tempNicks = new List<User>();
 
         public Server(ConnectionArgs settings)
         {
@@ -25,7 +26,6 @@ namespace OrtzIRC.Common
 
         public Server()
         {
-            
         }
 
         public string Url
@@ -159,7 +159,7 @@ namespace OrtzIRC.Common
             return tmpsession;
         }
 
-        private void UnhookEvents()
+        public void UnhookEvents()
         {
             Connection.Listener.OnJoin -= Listener_OnJoin;
             Connection.Listener.OnPart -= Listener_OnPart;
@@ -342,7 +342,6 @@ namespace OrtzIRC.Common
             _channels[ea.Channel].OnNewMessage(ea.User, ea.Message);
         }
 
-        private List<User> tempNicks = new List<User>();
         private void Listener_OnNames(string channel, string[] nicks, bool last)
         {
             if (OnNames != null)
@@ -363,15 +362,15 @@ namespace OrtzIRC.Common
 
             if (last)
             {
-                chan.NickList.NotifyUpdate = false;
-                chan.NickList.Clear();
+                chan.Users.NotifyUpdate = false;
+                chan.Users.Clear();
                 foreach (User nick in tempNicks)
                 {
                     if (nick != null)
                         chan.AddNick(nick);
                 }
-                chan.NickList.NotifyUpdate = true;
-                chan.NickList.Refresh();
+                chan.Users.NotifyUpdate = true;
+                chan.Users.Refresh();
                 //Trace.WriteLine("Refreshed channel nick list", "Names");
                 _recievingNames = false;
                 tempNicks.Clear();

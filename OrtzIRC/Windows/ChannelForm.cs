@@ -18,7 +18,7 @@
 
             HookEvents();
 
-            nickListBox.UserList = Channel.NickList;
+            nickListBox.UserList = Channel.Users;
 
             commandTextBox.Focus();
         }
