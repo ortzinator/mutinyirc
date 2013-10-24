@@ -33,7 +33,7 @@
         public ChannelViewModel(Channel chan)
         {
             channel = chan;
-            channel.NickList.Updated += NickList_Updated;
+            channel.Users.Updated += NickList_Updated;
             base.Name = chan.Name;
 
             channel.OnMessage += Channel_OnMessage;
@@ -112,7 +112,7 @@
         private void NickList_Updated(object sender, EventArgs e)
         {
             userList = new List<UserViewModel>();
-            foreach (User user in channel.NickList)
+            foreach (User user in channel.Users)
             {
                 userList.Add(new UserViewModel(user));
             }
@@ -138,7 +138,7 @@
 
         public override void Dispose()
         {
-            channel.NickList.Updated -= NickList_Updated;
+            channel.Users.Updated -= NickList_Updated;
 
             channel.OnMessage -= Channel_OnMessage;
             channel.OnAction -= Channel_OnAction;
