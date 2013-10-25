@@ -248,11 +248,11 @@ namespace OrtzIRC.Common
 
             if (DateTime.Now - _serverChangeTime < TimeSpan.FromSeconds(1))
             {
-                var th = new Thread((ThreadStart)delegate
-                                                      {
-                                                          Thread.Sleep(TimeSpan.FromSeconds(1));
-                                                          Connection.Connect();
-                                                      });
+                var th = new Thread(() =>
+                                        {
+                                            Thread.Sleep(TimeSpan.FromSeconds(1));
+                                            Connection.Connect();
+                                        });
                 th.Start();
             }
             else
