@@ -113,99 +113,102 @@ namespace OrtzIRC.PluginFramework
             return (IPlugin)asm.CreateInstance(pluginInfo.FullName);
         }
 
-        public static CommandResultInfo ExecuteCommand(CommandExecutionInfo info)
+        public static CommandResultInfo ExecuteCommand(CommandExecutionInfo commandInput)
         {
             //TODO: This should handle errors
             //TODO: Pretty complex, maybe could use some commenting
 
-            ICommand commandInstance = GetCommandInstance(info.Name);
+            ICommand commandInstance = GetCommandInstance(commandInput.Name);
             if (commandInstance == null)
                 return new CommandResultInfo
                            {
-                               Message = String.Format("{0} is an invalid command", info.Name.ToUpper()),
+                               Message = String.Format("{0} is an invalid command", commandInput.Name.ToUpper()),
                                Result = CommandResult.Fail
                            };
 
-            IEnumerable<MethodInfo> methods = commandInstance.GetType().GetMethods()
+            MethodInfo[] commandMethods = commandInstance.GetType().GetMethods()
                 .Where(o => o.Name == "Execute")
-                .Where(o => o.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext));
+                .Where(o => o.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext)).ToArray();
 
-            MethodInfo[] methodInfos = methods.ToArray();
-
-            //Sort descending by number of parameters so the more specific methods are first.
-            Array.Sort(methodInfos,
+            //Sort descending by number of parameters so the more "specific" methods are given priority
+            Array.Sort(commandMethods,
                        (m1, m2) => -m1.GetParameters().Length.CompareTo(m2.GetParameters().Length));
 
-            foreach (MethodInfo t in methodInfos)
+            foreach (MethodInfo methodInfo in commandMethods)
             {
-                ParameterInfo[] methodParameters = t.GetParameters();
+                ParameterInfo[] methodParameters = methodInfo.GetParameters();
+                int parameterCount = methodParameters.Length - 1;
 
-                for (int j = 0; j < methodParameters.Length; j++) //Loop throught the method's parameters
+                //Loop throught the method's parameters
+                for (int p = 0; p < methodParameters.Length; p++)
                 {
-                    ParameterInfo methodParameter = methodParameters[j];
+                    ParameterInfo methodParameter = methodParameters[p];
 
-                    if (info.ParameterList.Count < methodParameters.Length - 1)
+                    if (commandInput.ParameterList.Count < parameterCount)
                         break;
 
-                    if (j == 0)
+                    if (p == 0)
                     {
-                        if (methodParameter.ParameterType != info.Context.GetType()) //First parameter must be a context
+                        //First parameter must be a context
+                        if (methodParameter.ParameterType != commandInput.Context.GetType())
                             break;
 
-                        if (info.ParameterList.Count == 0) //Handle parameterless command
+                        //Handle parameterless command
+                        if (commandInput.ParameterList.Count == 0)
                         {
-                            if (methodParameters.Length - 1 != 0)
+                            if (parameterCount != 0)
                                 break;
 
-                            info.ParameterList.Insert(0, info.Context);
-                            return (CommandResultInfo)t.Invoke(commandInstance, info.ParameterList.ToArray());
+                            commandInput.ParameterList.Insert(0, commandInput.Context);
+                            return (CommandResultInfo)methodInfo.Invoke(commandInstance, commandInput.ParameterList.ToArray());
                         }
                         continue;
                     }
 
-                    if (FlamingIRC.Rfc2812Util.IsValidChannelName(info.ParameterList[j - 1] as string))
-                        info.ParameterList[j - 1] = new ChannelInfo(info.ParameterList[j - 1] as string);
+                    // If it's a channel, convert the string into a ChannelInfo object
+                    if (FlamingIRC.Rfc2812Util.IsValidChannelName(commandInput.ParameterList[p - 1] as string))
+                        commandInput.ParameterList[p - 1] = new ChannelInfo(commandInput.ParameterList[p - 1] as string);
 
-                    var sp = (info.ParameterList[j - 1] as string);
+                    var sp = (commandInput.ParameterList[p - 1] as string);
                     if (sp != null && sp.StartsWith("-")) // Check for switches
                     {
                         sp = sp.Remove(0, 1);
-                        info.ParameterList[j - 1] = sp.ToCharArray();
+                        commandInput.ParameterList[p - 1] = sp.ToCharArray();
                     }
 
-                    if (methodParameter.ParameterType != info.ParameterList[j - 1].GetType())
+                    if (methodParameter.ParameterType != commandInput.ParameterList[p - 1].GetType())
                         break; //Parameter mismatch. Break parameter loop and go the the next method
 
-                    if (j != methodParameters.Length - 1) continue; //If this isn't the last parameter then keep looping
+                    if (p != parameterCount) continue; //If this isn't the last parameter then keep looping
 
                     //Checks for an "open-ended" string parameter.
                     if (methodParameter.ParameterType == typeof(string))
                     {
                         bool allStrings = true;
-                        System.Text.StringBuilder openString = new System.Text.StringBuilder();
+                        var openString = new System.Text.StringBuilder();
 
                         int numberOpenEnded = 0;
-                        for (int k = j - 1; k < info.ParameterList.Count; k++)
+                        for (int k = p - 1; k < commandInput.ParameterList.Count; k++)
                         {
-                            if (info.ParameterList[k].GetType() != typeof(string))
+                            if (commandInput.ParameterList[k].GetType() != typeof(string))
                             {
                                 allStrings = false;
                                 break;
                             }
 
-                            openString.Append(info.ParameterList[k] + " ");
+                            openString.Append(commandInput.ParameterList[k] + " ");
                             numberOpenEnded++;
                         }
 
-                        if (allStrings && j != info.ParameterList.Count)
+                        if (allStrings && p != commandInput.ParameterList.Count)
                         {
                             openString.Remove(openString.Length - 1, 1);
-                            info.ParameterList.RemoveRange(j - 1, numberOpenEnded);
-                            info.ParameterList.Add(openString.ToString());
+                            commandInput.ParameterList.RemoveRange(p - 1, numberOpenEnded);
+                            commandInput.ParameterList.Add(openString.ToString());
                         }
                     }
-                    info.ParameterList.Insert(0, info.Context);
-                    return (CommandResultInfo)t.Invoke(commandInstance, info.ParameterList.ToArray());
+                    commandInput.ParameterList.Insert(0, commandInput.Context);
+                    return (CommandResultInfo)methodInfo.Invoke(commandInstance, commandInput.ParameterList.ToArray());
                     //TODO: Should maybe log or something before returning
                 }
             }
