@@ -26,10 +26,17 @@ namespace MutinyIRC.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
-        public void SetupConnection_GivenConnectionArgsAndNickNotSet_ArgumentExceptionThrown()
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void SetupConnection_GivenConnectionArgsAndNickNotSet_ArgumentNullExceptionThrown()
         {
             _server.SetupConnection(new ConnectionArgs());
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Connection_SetToNull_ArgumentNullExceptionThrown()
+        {
+            _server.Connection = null;
         }
     }
 }

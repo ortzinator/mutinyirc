@@ -4,7 +4,14 @@
 
     public class ErrorMessageEventArgs : EventArgs
     {
+        /// <summary>
+        /// The RFC 2812 or custom numeric code.
+        /// </summary>
         public ReplyCode Code;
+
+        /// <summary>
+        /// The error message text.
+        /// </summary>
         public string Message;
 
         /// <summary>

@@ -25,6 +25,7 @@ namespace OrtzIRC.Common
         public Server(Connection connection)
         {
             Connection = connection;
+            HookEvents();
         }
 
         public string Url
@@ -42,6 +43,9 @@ namespace OrtzIRC.Common
             get { return _connection; }
             set
             {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+
                 Channels.Clear();
                 _connection = value;
             }
@@ -76,7 +80,7 @@ namespace OrtzIRC.Common
         public void SetupConnection(ConnectionArgs args)
         {
             if (args.Nick == null)
-                throw new ArgumentException("The ServerSettings.Nick property is null");
+                throw new ArgumentNullException("ConnectionArgs.Nick");
 
             Connection = new Connection(args, true, false) { HandleNickTaken = false };
         }
@@ -138,9 +142,9 @@ namespace OrtzIRC.Common
             }
         }
 
-        private void Listener_OnPrivate(User user, string message)
+        private void Listener_OnPrivate(object sender, UserMessageEventArgs e)
         {
-            GetPM(user).OnMessageReceived(new DataEventArgs<string>(message));
+            GetPM(e.User).OnMessageReceived(new DataEventArgs<string>(e.Message));
         }
 
         private PrivateMessageSession GetPM(User user)
@@ -206,12 +210,11 @@ namespace OrtzIRC.Common
         public event EventHandler<PartEventArgs> PartSelf;
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
         public event UserModeChangeEventHandler UserModeChanged;
-        public event EventHandler<CancelEventArgs> Disconnecting;
         public event EventHandler Disconnected;
         public event EventHandler<ChannelMessageEventArgs> UserAction;
         public event EventHandler<UserMessageEventArgs> PrivateNotice;
         public event EventHandler<NickChangeEventArgs> OnNick;
-        public event NamesEventHandler OnNames;
+        public event EventHandler<NamesEventArgs> OnNames;
         public event EventHandler<KickEventArgs> Kick;
         public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
         public event EventHandler<DisconnectEventArgs> ConnectionLost;
@@ -290,15 +293,15 @@ namespace OrtzIRC.Common
                 Connection.Sender.Names(item.Key);
         }
 
-        private void Listener_OnNick(User user, string newNick)
+        private void Listener_OnNick(object sender, NickChangeEventArgs e)
         {
-            OnNick.Fire(this, new NickChangeEventArgs(user, newNick));
+            OnNick.Fire(this, new NickChangeEventArgs(e.User, e.NewNick));
 
             foreach (KeyValuePair<string, Channel> item in _channels)
             {
-                if (item.Value.HasUser(user.Nick))
+                if (item.Value.HasUser(e.User.Nick))
                 {
-                    item.Value.NickChange(user, newNick);
+                    item.Value.NickChange(e.User, e.NewNick);
                 }
             }
         }
@@ -309,9 +312,9 @@ namespace OrtzIRC.Common
             chan.ShowTopic(topic);
         }
 
-        private void Listener_OnPrivateNotice(User user, string notice)
+        private void Listener_OnPrivateNotice(object sender, UserMessageEventArgs e)
         {
-            PrivateNotice.Fire(this, new UserMessageEventArgs(user, notice));
+            PrivateNotice.Fire(this, new UserMessageEventArgs(e.User, e.Message));
         }
 
         private void Listener_OnAction(object sender, UserChannelMessageEventArgs ea)
@@ -342,25 +345,25 @@ namespace OrtzIRC.Common
             _channels[ea.Channel].OnNewMessage(ea.User, ea.Message);
         }
 
-        private void Listener_OnNames(string channel, string[] nicks, bool last)
+        private void Listener_OnNames(object sender, NamesEventArgs e)
         {
             if (OnNames != null)
-                OnNames(channel, nicks, last);
+                OnNames(this, new NamesEventArgs(e.Channel, e.Nicks, e.Last));
 
-            Channel chan = _channels[channel];
+            Channel chan = _channels[e.Channel];
             if (!_recievingNames)
             {
                 _recievingNames = true;
             }
 
-            foreach (string nick in nicks)
+            foreach (string nick in e.Nicks)
             {
                 _tempNames.Add(User.FromNames(nick));
             }
 
-            Trace.WriteLine("Added chunk of " + nicks.Length + " names", "Names");
+            Trace.WriteLine("Added chunk of " + e.Nicks.Length + " names", "Names");
 
-            if (last)
+            if (e.Last)
             {
                 chan.LoadNewNames(_tempNames);
                 _recievingNames = false;
