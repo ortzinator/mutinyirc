@@ -4,7 +4,14 @@
 
     public class InviteSentEventArgs : EventArgs
     {
+        /// <summary>
+        /// The nick of the user who was invited
+        /// </summary>
         public string Nick;
+
+        /// <summary>
+        /// The name of the channel the user was invited to join
+        /// </summary>
         public string Channel;
 
         /// <summary>

@@ -52,7 +52,7 @@ namespace FlamingIRC
     /// <param name="user">The user who sent the message.</param>
     /// <param name="notice">A message.</param>
     /// <seealso cref="Listener.OnPrivateNotice"/>
-    public delegate void PrivateNoticeEventHandler(User user, string notice);
+    //public delegate void PrivateNoticeEventHandler(User user, string notice);
 
     /// <summary>
     /// Someone has joined a channel.
@@ -77,7 +77,7 @@ namespace FlamingIRC
     /// <param name="user">The user who expresses the action.</param>
     /// <param name="description">An action.</param>
     /// <seealso cref="Listener.OnPrivateAction"/>
-    public delegate void PrivateActionEventHandler(User user, string description);
+    //public delegate void PrivateActionEventHandler(User user, string description);
 
     /// <summary>
     /// A public message was sent to a channel.
@@ -94,7 +94,7 @@ namespace FlamingIRC
     /// <param name="user">The user who is changing his nick.</param>
     /// <param name="newNick">The new nickname.</param>
     /// <seealso cref="Listener.OnNick"/>
-    public delegate void NickEventHandler(User user, string newNick);
+    //public delegate void NickEventHandler(User user, string newNick);
 
     /// <summary>
     /// A private message was sent to the user.
@@ -102,7 +102,7 @@ namespace FlamingIRC
     /// <param name="user">Who sent the message.</param>
     /// <param name="message">The message.</param>
     /// <seealso cref="Listener.OnPrivate"/>
-    public delegate void PrivateMessageEventHandler(User user, string message);
+    //public delegate void PrivateMessageEventHandler(User user, string message);
 
     /// <summary>
     /// A channel's topic has changed.
@@ -167,7 +167,7 @@ namespace FlamingIRC
     /// a moderated channel, i.e. they are allowed to send public messages.</param>
     /// <param name="last">True if this is the last names reply.</param>
     /// <seealso cref="Listener.OnNames"/>
-    public delegate void NamesEventHandler(string channel, string[] nicks, bool last);
+    //public delegate void NamesEventHandler(string channel, string[] nicks, bool last);
 
     /// <summary>
     /// The response to a <see cref="Sender.List"/> request.

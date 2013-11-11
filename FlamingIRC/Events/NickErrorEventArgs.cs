@@ -4,7 +4,14 @@
 
     public class NickErrorEventArgs : EventArgs
     {
+        /// <summary>
+        /// The nick which caused the problem.
+        /// </summary>
         public string BadNick;
+
+        /// <summary>
+        /// A message explaining the error.
+        /// </summary>
         public string Reason;
 
         /// <summary>

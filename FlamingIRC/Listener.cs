@@ -86,7 +86,7 @@ namespace FlamingIRC
         /// <summary>
         /// A private Notice type message was sent to the user.
         /// </summary>
-        public event PrivateNoticeEventHandler OnPrivateNotice;
+        public event EventHandler<UserMessageEventArgs> OnPrivateNotice;
         /// <summary>
         /// Someone has joined a channel.
         /// </summary>
@@ -102,15 +102,15 @@ namespace FlamingIRC
         /// <summary>
         /// A private action message was sent to the user.
         /// </summary>
-        public event PrivateActionEventHandler OnPrivateAction;
+        public event EventHandler<UserMessageEventArgs> OnPrivateAction;
         /// <summary>
         /// A user changed his nickname.
         /// </summary>
-        public event NickEventHandler OnNick;
+        public event EventHandler<NickChangeEventArgs> OnNick;
         /// <summary>
         /// A private message was sent to the user.
         /// </summary>
-        public event PrivateMessageEventHandler OnPrivate;
+        public event EventHandler<UserMessageEventArgs> OnPrivate;
         /// <summary>
         /// A channel's topic has changed.
         /// </summary>
@@ -138,7 +138,7 @@ namespace FlamingIRC
         /// <summary>
         /// The response to a <see cref="Sender.Names"/> request.
         /// </summary>
-        public event NamesEventHandler OnNames;
+        public event EventHandler<NamesEventArgs> OnNames;
         /// <summary>
         /// The response to a <see cref="Sender.List"/> request.
         /// </summary>
@@ -275,9 +275,7 @@ namespace FlamingIRC
                 case NOTICE:
                     if (OnPrivateNotice != null)
                     {
-                        OnPrivateNotice(
-                            User.Empty,
-                            CondenseStrings(tokens, 2));
+                        OnPrivateNotice(this, new UserMessageEventArgs(User.Empty, CondenseStrings(tokens, 2)));
                     }
                     break;
                 case ERROR:
@@ -339,9 +337,9 @@ namespace FlamingIRC
                     {
                         if (OnPrivateNotice != null)
                         {
-                            OnPrivateNotice(
+                            OnPrivateNotice(this, new UserMessageEventArgs(
                                 Rfc2812Util.UserFromString(tokens[0]),
-                                CondenseStrings(tokens, 3));
+                                CondenseStrings(tokens, 3)));
                             //Trace.WriteLine("Private notice", "IRC");
                         }
                     }
@@ -373,7 +371,7 @@ namespace FlamingIRC
                             {
                                 int last = tokens.Length - 1;
                                 tokens[last] = RemoveTrailingQuote(tokens[last]);
-                                OnPrivateAction(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 4));
+                                OnPrivateAction(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 4)));
                                 //Trace.WriteLine("Private action", "IRC");
                             }
                         }
@@ -390,7 +388,7 @@ namespace FlamingIRC
                     {
                         if (OnPrivate != null)
                         {
-                            OnPrivate(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 3));
+                            OnPrivate(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 3)));
                             //Trace.WriteLine("Private msg", "IRC");
                         }
                     }
@@ -398,7 +396,7 @@ namespace FlamingIRC
                 case NICK:
                     if (OnNick != null)
                     {
-                        OnNick(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
+                        OnNick(this, new NickChangeEventArgs(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2])));
                         //Trace.WriteLine("Nick", "IRC");
                     }
                     break;
@@ -550,14 +548,14 @@ namespace FlamingIRC
                         int numberOfUsers = tokens.Length - 5;
                         string[] users = new string[numberOfUsers];
                         Array.Copy(tokens, 5, users, 0, numberOfUsers);
-                        OnNames(tokens[4], users, false);
+                        OnNames(this, new NamesEventArgs(tokens[4], users, false));
                         //Trace.WriteLine("Names", "IRC");
                     }
                     break;
                 case ReplyCode.RPL_ENDOFNAMES:
                     if (OnNames != null)
                     {
-                        OnNames(tokens[3], new string[0], true);
+                        OnNames(this, new NamesEventArgs(tokens[3], new string[0], true));
                         //Trace.WriteLine("Names end", "IRC");
                     }
                     break;

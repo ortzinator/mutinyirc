@@ -291,10 +291,10 @@ namespace FlamingIRC
         /// </summary>
         /// <param name="user">Who changed their nick</param>
         /// <param name="newNick">The new nick name</param>
-        private void MyNickChanged(User user, string newNick)
+        private void MyNickChanged(object sender, NickChangeEventArgs e)
         {
-            if (connectionArgs.Nick == user.Nick)
-                connectionArgs.Nick = newNick;
+            if (connectionArgs.Nick == e.User.Nick)
+                connectionArgs.Nick = e.NewNick;
         }
 
         private void OnRegistered(object sender, EventArgs e)

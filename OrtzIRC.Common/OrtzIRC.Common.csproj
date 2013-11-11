@@ -140,7 +140,6 @@
     <Compile Include="TextLoggerManager.cs" />
     <Compile Include="TraceCategories.cs" />
     <Compile Include="UserInfo.cs" />
-    <Compile Include="UserMessageEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj">
