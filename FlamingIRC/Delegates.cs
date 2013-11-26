@@ -32,86 +32,12 @@ namespace FlamingIRC
     public delegate void PingEventHandler(string message);
 
     /// <summary>
-    /// This connection is about to be closed 
-    /// </summary>
-    /// <seealso cref="Listener.OnDisconnecting"/>
-    //public delegate void DisconnectingEventHandler();
-
-    /// <summary>
-    /// A Notice type message was sent to a channel.
-    /// </summary>
-    /// <param name="user">The user who sent the message.</param>
-    /// <param name="channel">The target channel.</param>
-    /// <param name="notice">A message.</param>
-    /// <seealso cref="Listener.OnPublicNotice"/>
-    //public delegate void PublicNoticeEventHandler(User user, string channel, string notice);
-
-    /// <summary>
-    /// A private Notice type message was sent to the user.
-    /// </summary>
-    /// <param name="user">The user who sent the message.</param>
-    /// <param name="notice">A message.</param>
-    /// <seealso cref="Listener.OnPrivateNotice"/>
-    //public delegate void PrivateNoticeEventHandler(User user, string notice);
-
-    /// <summary>
     /// Someone has joined a channel.
     /// </summary>
     /// <param name="user">Who joined.</param>
     /// <param name="channel">The channel name.</param>
     /// <seealso cref="Listener.OnJoin"/>
     public delegate void JoinEventHandler(User user, string channel);
-
-    /// <summary>
-    /// An action message was sent to a channel.
-    /// </summary>
-    /// <param name="user">The user who expresses the action.</param>
-    /// <param name="channel">The target channel.</param>
-    /// <param name="description">An action.</param>
-    /// <seealso cref="Listener.OnAction"/>
-    //public delegate void ActionEventHandler(User user, string channel, string description);
-
-    /// <summary>
-    /// A private action message was sent to the user.
-    /// </summary>
-    /// <param name="user">The user who expresses the action.</param>
-    /// <param name="description">An action.</param>
-    /// <seealso cref="Listener.OnPrivateAction"/>
-    //public delegate void PrivateActionEventHandler(User user, string description);
-
-    /// <summary>
-    /// A public message was sent to a channel.
-    /// </summary>
-    /// <param name="user">The user who sent the message.</param>
-    /// <param name="channel">The taregt channel.</param>
-    /// <param name="message">A message.</param>
-    /// <seealso cref="Listener.OnPublic"/>
-    //public delegate void PublicMessageEventHandler(User user, string channel, string message);
-
-    /// <summary>
-    /// A user changed his nickname.
-    /// </summary>
-    /// <param name="user">The user who is changing his nick.</param>
-    /// <param name="newNick">The new nickname.</param>
-    /// <seealso cref="Listener.OnNick"/>
-    //public delegate void NickEventHandler(User user, string newNick);
-
-    /// <summary>
-    /// A private message was sent to the user.
-    /// </summary>
-    /// <param name="user">Who sent the message.</param>
-    /// <param name="message">The message.</param>
-    /// <seealso cref="Listener.OnPrivate"/>
-    //public delegate void PrivateMessageEventHandler(User user, string message);
-
-    /// <summary>
-    /// A channel's topic has changed.
-    /// </summary>
-    /// <param name="user">Who changed the topic.</param>
-    /// <param name="channel">Which channel had its topic changed.</param>
-    /// <param name="newTopic">The new topic.</param>
-    /// <seealso cref="Listener.OnTopicChanged"/>
-    //public delegate void TopicEventHandler(User user, string channel, string newTopic);
 
     /// <summary>
     /// The response to a <see cref="Sender.RequestTopic"/> command.
@@ -155,19 +81,6 @@ namespace FlamingIRC
     /// <param name="reason">Why the person was kicked.</param>
     /// <seealso cref="Listener.OnKick"/>
     public delegate void KickEventHandler(User user, string channel, string kickee, string reason);
-
-    /// <summary>
-    /// The response to a <see cref="Sender.Names"/> request.
-    /// </summary>
-    /// <param name="channel">The channel the user is on. "@" is used for secret channels, "*" for private
-    /// channels, and "=" for public channels.</param>
-    /// <param name="nicks">A list of nicks on the channel. If this is the last reply
-    /// then it will be empty. Nicks prefixed with a '@' are channel
-    /// operators. Nicks prefixed with a '+' have voice privileges on
-    /// a moderated channel, i.e. they are allowed to send public messages.</param>
-    /// <param name="last">True if this is the last names reply.</param>
-    /// <seealso cref="Listener.OnNames"/>
-    //public delegate void NamesEventHandler(string channel, string[] nicks, bool last);
 
     /// <summary>
     /// The response to a <see cref="Sender.List"/> request.
@@ -216,14 +129,6 @@ namespace FlamingIRC
     /// <param name="last">True if this is the final reply.</param>
     /// <seealso cref="Listener.OnWhowas"/>
     public delegate void WhowasEventHandler(User user, string realName, bool last);
-
-    /// <summary>
-    /// This user's mode has changed.
-    /// </summary>
-    /// <param name="action">Whether a mode was added or removed.</param>
-    /// <param name="mode">The mode that was changed.</param>
-    /// <seealso cref="Listener.OnUserModeChange"/>
-    public delegate void UserModeChangeEventHandler(ModeAction action, UserMode mode);
 
     /// <summary>
     /// The response to a <see cref="Sender.RequestUserModes"/> command for this user.

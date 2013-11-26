@@ -138,6 +138,7 @@
     <Compile Include="Events\ReplyEventArgs.cs" />
     <Compile Include="Events\UserChannelMessageEventArgs.cs" />
     <Compile Include="Events\UserMessageEventArgs.cs" />
+    <Compile Include="Events\UserModeChangeEventArgs.cs" />
     <Compile Include="EventUtil.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Identd.cs" />
