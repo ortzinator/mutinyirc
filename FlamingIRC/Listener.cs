@@ -162,7 +162,7 @@ namespace FlamingIRC
         /// <summary>
         /// Someone's user mode has changed.
         /// </summary>
-        public event UserModeChangeEventHandler OnUserModeChange;
+        public event EventHandler<UserModeChangeEventArgs> OnUserModeChange;
         /// <summary>
         /// The response to a <see cref="Sender.RequestUserModes"/> command for this user.
         /// </summary>
@@ -471,8 +471,8 @@ namespace FlamingIRC
                         if (OnUserModeChange != null)
                         {
                             tokens[3] = RemoveLeadingColon(tokens[3]);
-                            OnUserModeChange(Rfc2812Util.CharToModeAction(tokens[3][0]),
-                                Rfc2812Util.CharToUserMode(tokens[3][1]));
+                            OnUserModeChange(this, new UserModeChangeEventArgs(Rfc2812Util.CharToModeAction(tokens[3][0]),
+                                Rfc2812Util.CharToUserMode(tokens[3][1])));
                             //Trace.WriteLine("User mode change", "IRC");
                         }
                     }

@@ -209,7 +209,7 @@ namespace OrtzIRC.Common
         public event EventHandler<PartEventArgs> Part;
         public event EventHandler<PartEventArgs> PartSelf;
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
-        public event UserModeChangeEventHandler UserModeChanged;
+        public event EventHandler<UserModeChangeEventArgs> UserModeChanged;
         public event EventHandler Disconnected;
         public event EventHandler<ChannelMessageEventArgs> UserAction;
         public event EventHandler<UserMessageEventArgs> PrivateNotice;
@@ -284,10 +284,10 @@ namespace OrtzIRC.Common
             Connection.Sender.Names(channel);
         }
 
-        private void Listener_OnUserModeChange(ModeAction action, UserMode mode)
+        private void Listener_OnUserModeChange(object sender, UserModeChangeEventArgs e)
         {
             if (UserModeChanged != null)
-                UserModeChanged(action, mode);
+                UserModeChanged(this, e);
 
             foreach (KeyValuePair<string, Channel> item in _channels)
                 Connection.Sender.Names(item.Key);
