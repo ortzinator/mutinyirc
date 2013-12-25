@@ -47,7 +47,21 @@ namespace FlamingIRC
         public string NamesLiteral { get { return Prefix != '\0' ? Prefix + Nick : Nick; } }
 
         /// <summary> The channel mode symbol prefix from NAMES</summary>
-        public char Prefix { get; set; }
+        public char Prefix
+        {
+            get
+            {
+                return _prefix;
+            }
+            set
+            {
+                if (!UserModeValidator.IsValid(value))
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                _prefix = value;
+            }
+        }
 
         public static User Empty
         {
@@ -76,6 +90,8 @@ namespace FlamingIRC
             HostMask = host;
         }
 
+        private char _prefix;
+
         /// <summary>
         ///   Takes a nick string from a NAMES and parses it as a User object
         /// </summary>
@@ -84,12 +100,12 @@ namespace FlamingIRC
             if (nick == String.Empty)
                 return null;
 
-            char firstChar = nick[0];
-            char[] modes = new char[] { '@', '+', '%', '&', '~' };
+            char mode = nick[0];
 
-            foreach (char c in modes)
-                if (firstChar == c)
-                    return new User(firstChar, nick.Substring(1), String.Empty, String.Empty);
+            if (UserModeValidator.IsValid(mode))
+            {
+                return new User(mode, nick.Substring(1), String.Empty, String.Empty);
+            }
 
             return new User(nick, String.Empty, String.Empty);
         }
@@ -98,9 +114,9 @@ namespace FlamingIRC
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (User)) return false;
+            if (obj.GetType() != typeof(User)) return false;
 
-            return Equals((User) obj);
+            return Equals((User)obj);
         }
 
         public bool Equals(User other)
