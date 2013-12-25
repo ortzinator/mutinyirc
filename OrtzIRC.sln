@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{998BC590-6C47-4FB7-8A05-A2F68DA34BA5}"
 	ProjectSection(SolutionItems) = preProject
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
@@ -23,14 +25,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudioLockWorkaround"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.WPF", "OrtzIRC.WPF\OrtzIRC.WPF.csproj", "{D8E00C29-149C-4C59-A349-537DEDAAF333}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvvmFoundation.Wpf", "MvvmFoundation.Wpf\MvvmFoundation.Wpf.csproj", "{2E922430-EAAC-4589-A8F4-F35FBB9799B8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.Tests", "MutinyIRC.Tests\MutinyIRC.Tests.csproj", "{F929430B-C58C-41AD-A1F0-BDC38E49447C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlamingIRC.Tests", "FlamingIRC.Tests\FlamingIRC.Tests.csproj", "{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.WPF.Tests", "MutinyIRC.WPF.Tests\MutinyIRC.WPF.Tests.csproj", "{51ABB532-0ECE-453C-AD51-49C3B095FB5C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{705281C4-D49D-4766-9A2C-07A143E0F100}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = OrtzIRC2.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -144,18 +150,6 @@ Global
 		{D8E00C29-149C-4C59-A349-537DEDAAF333}.Release|x64.ActiveCfg = Release|x86
 		{D8E00C29-149C-4C59-A349-537DEDAAF333}.Release|x86.ActiveCfg = Release|x86
 		{D8E00C29-149C-4C59-A349-537DEDAAF333}.Release|x86.Build.0 = Release|x86
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Release|x64.ActiveCfg = Release|Any CPU
-		{2E922430-EAAC-4589-A8F4-F35FBB9799B8}.Release|x86.ActiveCfg = Release|Any CPU
 		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -168,8 +162,35 @@ Global
 		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Release|x64.ActiveCfg = Release|Any CPU
 		{F929430B-C58C-41AD-A1F0-BDC38E49447C}.Release|x86.ActiveCfg = Release|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Release|x64.ActiveCfg = Release|Any CPU
+		{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}.Release|x86.ActiveCfg = Release|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Release|x64.ActiveCfg = Release|Any CPU
+		{51ABB532-0ECE-453C-AD51-49C3B095FB5C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = OrtzIRC2.vsmdi
 	EndGlobalSection
 EndGlobal

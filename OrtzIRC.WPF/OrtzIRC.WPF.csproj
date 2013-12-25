@@ -20,7 +20,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -39,6 +39,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MvvmFoundation.Wpf, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MvvmFoundation.Wpf.1.0.0\lib\net40\MvvmFoundation.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -57,6 +61,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="IrcSettingsManager.cs" />
+    <Compile Include="MTObservableCollection.cs" />
     <Compile Include="NetworkSettings.cs" />
     <Compile Include="NetworkSettingsList.cs" />
     <Compile Include="Resources\ChannelStrings.Designer.cs">
@@ -170,6 +175,7 @@
       <LastGenOutput>SocketErrorStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -180,10 +186,6 @@
     <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj">
       <Project>{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}</Project>
       <Name>FlamingIRC</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MvvmFoundation.Wpf\MvvmFoundation.Wpf.csproj">
-      <Project>{2E922430-EAAC-4589-A8F4-F35FBB9799B8}</Project>
-      <Name>MvvmFoundation.Wpf</Name>
     </ProjectReference>
     <ProjectReference Include="..\OrtzIRC.Common\OrtzIRC.Common.csproj">
       <Project>{1594A34C-9BB8-4334-880B-26671436D95E}</Project>
