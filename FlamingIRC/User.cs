@@ -47,7 +47,7 @@ namespace FlamingIRC
         public string NamesLiteral { get { return Prefix != '\0' ? Prefix + Nick : Nick; } }
 
         /// <summary> The channel mode symbol prefix from NAMES</summary>
-        public char Prefix { get; private set; }
+        public char Prefix { get; set; }
 
         public static User Empty
         {

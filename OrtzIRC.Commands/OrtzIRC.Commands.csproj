@@ -82,7 +82,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DocumentationFile>..\OrtzIRC\bin\x86\Debug\Plugins\OrtzIRC.Commands.XML</DocumentationFile>
     <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
