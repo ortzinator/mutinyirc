@@ -3,7 +3,7 @@ using FakeItEasy;
 using FlamingIRC;
 using NUnit.Framework;
 
-namespace MutinyIRC.Tests
+namespace FlamingIRC.Tests
 {
     [TestFixture]
     public class UserTests

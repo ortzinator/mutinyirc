@@ -156,6 +156,7 @@
     <Compile Include="ServerProperties.cs" />
     <Compile Include="TextColor.cs" />
     <Compile Include="UserList.cs" />
+    <Compile Include="UserModeValidator.cs" />
     <Compile Include="WhoisInfo.cs" />
   </ItemGroup>
   <ItemGroup>
