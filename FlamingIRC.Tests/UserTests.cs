@@ -37,5 +37,20 @@ namespace FlamingIRC.Tests
             Assert.AreEqual(u.Nick, "Ortzinator");
             Assert.AreEqual(u.Prefix, '\0');
         }
+
+        [Test]
+        public void PrefixSetter_NullChar_NoException()
+        {
+            User user = new User();
+            user.Prefix = '\0';
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void PrefixSetter_InvalidChar_ArgumentOutOfRangeException()
+        {
+            User user = new User();
+            user.Prefix = 'X';
+        }
     }
 }

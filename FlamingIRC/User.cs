@@ -55,7 +55,7 @@ namespace FlamingIRC
             }
             set
             {
-                if (!UserModeValidator.IsValid(value))
+                if (value != '\0' && !UserModeValidator.IsValid(value))
                 {
                     throw new ArgumentOutOfRangeException();
                 }
