@@ -31,6 +31,7 @@ namespace FlamingIRC
     /// </summary>
     public class User : IComparable<User>
     {
+        private string _nick = String.Empty;
         /// <summary>The user's nickname.</summary>
         public string Nick { get; set; }
 
@@ -78,16 +79,11 @@ namespace FlamingIRC
         /// <param name="user">user</param>
         /// <param name="host">host</param>
         public User(string nick, string user, string host)
-            : this('\0', nick, user, host)
         {
-        }
-
-        public User(char prefix, string nick, string user, string host)
-        {
-            Prefix = prefix;
             Nick = nick;
             UserName = user;
             HostMask = host;
+            Prefix = '\0';
         }
 
         private char _prefix;
@@ -101,13 +97,19 @@ namespace FlamingIRC
                 return null;
 
             char mode = nick[0];
+            var user = new User();
 
             if (UserModeValidator.IsValid(mode))
             {
-                return new User(mode, nick.Substring(1), String.Empty, String.Empty);
+                user.Nick = nick.Substring(1);
+                user.Prefix = mode;
+            }
+            else
+            {
+                user.Nick = nick;
             }
 
-            return new User(nick, String.Empty, String.Empty);
+            return user;
         }
 
         public override bool Equals(object obj)
