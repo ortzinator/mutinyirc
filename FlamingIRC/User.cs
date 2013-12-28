@@ -1,6 +1,6 @@
 ﻿/*
  * FlamingIRC IRC library
- * Copyright (C) 2008 Brian Ortiz & Max Schmeling <http://code.google.com/p/ortzirc>
+ * Copyright (C) 2008 Brian Ortiz & Max Schmeling <https://github.com/ortzinator/mutinyirc>
  * 
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
