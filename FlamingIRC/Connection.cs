@@ -257,12 +257,12 @@ namespace FlamingIRC
         /// Receive all the messages, unparsed, sent by the IRC server. This is typically only
         /// required for debugging purposes.
         /// </summary>
-        public event EventHandler<FlamingDataEventArgs<string>> RawMessageReceived;
+        public event EventHandler<DataEventArgs<string>> RawMessageReceived;
 
         /// <summary>
         /// Receive all the raw messages sent to the IRC from this connection
         /// </summary>
-        public event EventHandler<FlamingDataEventArgs<string>> RawMessageSent;
+        public event EventHandler<DataEventArgs<string>> RawMessageSent;
 
         public event EventHandler ConnectionEstablished;
 
@@ -433,7 +433,7 @@ namespace FlamingIRC
             else
                 Listener.Parse(line);
 
-            RawMessageReceived.Fire(this, new FlamingDataEventArgs<string>(line));
+            RawMessageReceived.Fire(this, new DataEventArgs<string>(line));
         }
 
         /// <summary>
@@ -455,7 +455,7 @@ namespace FlamingIRC
                                   string.Format("[{0}] Connection::SendCommand() exception={1}", Thread.CurrentThread.Name, ex));
             }
 
-            RawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
+            RawMessageSent.Fire(this, new DataEventArgs<string>(command.ToString()));
             Trace.WriteLine("Sent command: " + command, "IRC");
 
             command.Remove(0, command.Length);

@@ -82,7 +82,7 @@
             AddLine(ChannelStrings.PublicMessage.With(e.User.NamesLiteral, e.Message));
         }
 
-        private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
+        private void commandTextBox_CommandEntered(object sender, Common.DataEventArgs<string> e)
         {
             CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, e.Data));
             if (result != null && result.Result == CommandResult.Fail)
@@ -134,7 +134,7 @@
             AddLine(ChannelStrings.Joined.With(e.User.Nick, e.User.HostMask));
         }
 
-        private void Channel_TopicReceived(object sender, DataEventArgs<string> e)
+        private void Channel_TopicReceived(object sender, Common.DataEventArgs<string> e)
         {
             AddLine(ChannelStrings.TopicRecieved.With(e.Data));
         }

@@ -94,7 +94,7 @@
             AddMessage(ChannelStrings.Joined.With(e.User.Nick, e.User.HostMask));
         }
 
-        private void Channel_TopicReceived(object sender, DataEventArgs<string> e)
+        private void Channel_TopicReceived(object sender, Common.DataEventArgs<string> e)
         {
             AddMessage(ChannelStrings.TopicRecieved.With(e.Data));
         }

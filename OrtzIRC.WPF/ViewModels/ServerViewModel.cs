@@ -153,7 +153,7 @@ namespace OrtzIRC.WPF.ViewModels
             DoRegister();
         }
 
-        private void Server_RawMessageReceived(object sender, DataEventArgs<string> e)
+        private void Server_RawMessageReceived(object sender, Common.DataEventArgs<string> e)
         {
             AddMessage(e.Data);
         }
