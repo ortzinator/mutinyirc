@@ -264,13 +264,34 @@ namespace FlamingIRC
         /// </summary>
         public event EventHandler<DataEventArgs<string>> RawMessageSent;
 
+        /// <summary>
+        /// Indicates that a connection has been made with the server.
+        /// </summary>
+        /// <remarks>
+        /// Does not mean you are ready to use the server. For that, see 
+        /// <see cref="Listener.OnRegistered" />.
+        /// </remarks>
         public event EventHandler ConnectionEstablished;
 
+        /// <summary>
+        /// We were unable to connect to the server.
+        /// </summary>
         public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
 
+        /// <summary>
+        /// The connection to the server was lost.
+        /// </summary>
         public event EventHandler<DisconnectEventArgs> ConnectionLost;
 
         private void activityTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            SendKeepAlive();
+        }
+
+        /// <summary>
+        /// Sends the keep alive, if appropriate.
+        /// </summary>
+        private void SendKeepAlive()
         {
             if (DateTime.Now - _lastTraffic > TimeSpan.FromSeconds(30))
                 Sender.Ping();
