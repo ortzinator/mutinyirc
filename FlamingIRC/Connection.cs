@@ -243,7 +243,7 @@ namespace FlamingIRC
             {
                 if (value == null)
                     throw new ArgumentNullException();
-                
+
                 _connectionArgs.Nick = value;
             }
         }
@@ -254,8 +254,8 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Receive all the messages, unparsed, sent by the IRC server. This is not
-        /// normally needed but provided for those who are interested.
+        /// Receive all the messages, unparsed, sent by the IRC server. This is typically only
+        /// required for debugging purposes.
         /// </summary>
         public event EventHandler<FlamingDataEventArgs<string>> RawMessageReceived;
 
@@ -304,11 +304,8 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Update the ConnectionArgs object when the user
-        /// changes his nick.
+        /// Update the ConnectionArgs object when the user changes his nick.
         /// </summary>
-        /// <param name="user">Who changed their nick</param>
-        /// <param name="newNick">The new nick name</param>
         private void MyNickChanged(object sender, NickChangeEventArgs e)
         {
             if (_connectionArgs.Nick == e.User.Nick)
