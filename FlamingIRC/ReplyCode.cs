@@ -22,6 +22,7 @@
  * the archive of this library for complete text of license.
 */
 
+// ReSharper disable InconsistentNaming
 namespace FlamingIRC
 {
 	/// <summary>
