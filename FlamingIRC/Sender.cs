@@ -1416,9 +1416,9 @@ namespace FlamingIRC
         /// <seealso cref="NameGenerator"/>
         public void Register(string newNick)
         {
-            Connection.connectionArgs.Nick = newNick;
-            Nick(Connection.connectionArgs.Nick);
-            User(Connection.connectionArgs);
+            Connection.Nick = newNick;
+            Nick(Connection.Nick);
+            User(Connection.ConnectionArgs);
         }
         /// <summary>
         /// Send an arbitrary text message to the IRC server.
