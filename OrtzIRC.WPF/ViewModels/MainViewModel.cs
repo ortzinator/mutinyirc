@@ -51,7 +51,7 @@
             RandomMessages.Load();
         }
 
-        private void Server_JoinSelf(object sender, DataEventArgs<Channel> e)
+        private void Server_JoinSelf(object sender, Common.DataEventArgs<Channel> e)
         {
             var chan = new ChannelViewModel(e.Data);
             chan.RequestClose += Chan_RequestClose;

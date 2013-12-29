@@ -2,11 +2,11 @@
 {
     using System;
 
-    public class FlamingDataEventArgs<T> : EventArgs
+    public class DataEventArgs<T> : EventArgs
     {
         public T Data { get; private set; }
 
-        public FlamingDataEventArgs(T data)
+        public DataEventArgs(T data)
         {
             this.Data = data;
         }

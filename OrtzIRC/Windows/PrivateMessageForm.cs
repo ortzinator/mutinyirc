@@ -67,14 +67,14 @@ namespace OrtzIRC
             pmsession.MessageReceived -= pmsession_MessageReceived;
         }
 
-        private void pmsession_MessageSent(object sender, DataEventArgs<string> e)
+        private void pmsession_MessageSent(object sender, Common.DataEventArgs<string> e)
         {
             string nick = PMSession.Server.Connection.ConnectionData.Nick;
 
             AddLine(ChannelStrings.PublicMessage.With(nick, e.Data));
         }
 
-        private void pmsession_MessageReceived(object sender, DataEventArgs<string> e)
+        private void pmsession_MessageReceived(object sender, Common.DataEventArgs<string> e)
         {
             AddLine(ChannelStrings.PublicMessage.With(pmsession.User.Nick, e.Data));
         }
@@ -89,7 +89,7 @@ namespace OrtzIRC
             AddLine(ServerStrings.Disconnected);
         }
 
-        private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
+        private void commandTextBox_CommandEntered(object sender, Common.DataEventArgs<string> e)
         {
             CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(PMSession, e.Data));
             if (result != null && result.Result == CommandResult.Fail)

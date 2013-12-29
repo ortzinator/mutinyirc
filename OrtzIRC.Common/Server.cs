@@ -324,7 +324,7 @@ namespace OrtzIRC.Common
             chan.OnNewAction(ea.User, ea.Message);
         }
 
-        private void Connection_OnRawMessageReceived(object sender, FlamingDataEventArgs<string> e)
+        private void Connection_OnRawMessageReceived(object sender, FlamingIRC.DataEventArgs<string> e)
         {
             RawMessageReceived.Fire(this, new DataEventArgs<string>(e.Data));
         }

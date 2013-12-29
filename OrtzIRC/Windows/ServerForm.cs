@@ -151,7 +151,7 @@ namespace OrtzIRC
             AddLine(ServerStrings.Disconnected);
         }
 
-        private void commandTextBox_CommandEntered(object sender, DataEventArgs<string> e)
+        private void commandTextBox_CommandEntered(object sender, Common.DataEventArgs<string> e)
         {
             CommandResultInfo result = new CommandResultInfo();
             try
@@ -183,7 +183,7 @@ namespace OrtzIRC
             AddLine(string.Format("{0} {1}", a.Code, a.Message));
         }
 
-        private void ParentServer_OnRawMessageReceived(object sender, DataEventArgs<string> e)
+        private void ParentServer_OnRawMessageReceived(object sender, Common.DataEventArgs<string> e)
         {
             //intentionally blank
             AddLine(e.Data, Color.FromArgb(0, 170, 222));
@@ -271,7 +271,7 @@ namespace OrtzIRC
             }
         }
 
-        private void ParentServer_OnJoinSelf(object sender, DataEventArgs<Channel> e)
+        private void ParentServer_OnJoinSelf(object sender, Common.DataEventArgs<Channel> e)
         {
             ((MainForm)MdiParent).CreateChannelForm(e.Data);
 
