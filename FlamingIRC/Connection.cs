@@ -1,14 +1,14 @@
 /*
  * FlamingIRC IRC library
  * Copyright (C) 2008 Brian Ortiz & Max Schmeling <https://github.com/ortzinator/mutinyirc>
- * 
+ *
  * Based on code copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
+ *
  * See the gpl.txt file located in the top-level-directory of
  * the archive of this library for complete text of license.
 */
@@ -33,7 +33,6 @@ namespace FlamingIRC
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Timers;
-    using Timer = System.Timers.Timer;
 
     /// <summary>
     /// This class manages the connection to the IRC server and provides
@@ -41,16 +40,16 @@ namespace FlamingIRC
     /// </summary>
     public class Connection : TcpTextClient
     {
-        private readonly Timer activityTimer;
-        private readonly ArrayList parsers;
-        private readonly Regex propertiesRegex;
-        internal ConnectionArgs connectionArgs;
-        private bool ctcpEnabled;
-        private CtcpListener ctcpListener;
-        private CtcpResponder ctcpResponder;
-        private DateTime lastTraffic;
-        private ServerProperties properties;
-        private DateTime timeLastSent;
+        private readonly System.Timers.Timer _activityTimer;
+        private readonly ArrayList _parsers;
+        private readonly Regex _propertiesRegex;
+        private ConnectionArgs _connectionArgs;
+        private bool _ctcpEnabled;
+        private CtcpListener _ctcpListener;
+        private CtcpResponder _ctcpResponder;
+        private DateTime _lastTraffic;
+        private ServerProperties _properties;
+        private DateTime _timeLastSent;
 
         /// <summary>
         /// Used for internal test purposes only.
@@ -66,24 +65,24 @@ namespace FlamingIRC
         /// <param name="enableDcc">True if this Connection should support DCC.</param>
         public Connection(ConnectionArgs args, bool enableCtcp, bool enableDcc)
         {
-            propertiesRegex = new Regex("([A-Z]+)=([^\\s]+)", RegexOptions.Compiled | RegexOptions.Singleline);
+            _propertiesRegex = new Regex("([A-Z]+)=([^\\s]+)", RegexOptions.Compiled | RegexOptions.Singleline);
             Registered = false;
             HandleNickTaken = true;
-            connectionArgs = args;
-            parsers = new ArrayList();
+            _connectionArgs = args;
+            _parsers = new ArrayList();
             Sender = new Sender(this);
             Listener = new Listener();
             RegisterDelegates();
-            timeLastSent = DateTime.Now;
+            _timeLastSent = DateTime.Now;
             EnableCtcp = enableCtcp;
             EnableDcc = enableDcc;
             TextEncoding = Encoding.Default;
 
-            lastTraffic = DateTime.Now;
+            _lastTraffic = DateTime.Now;
 
-            activityTimer = new Timer { Interval = TimeSpan.FromSeconds(30).TotalMilliseconds };
-            activityTimer.Elapsed += activityTimer_Elapsed;
-            activityTimer.Start();
+            _activityTimer = new System.Timers.Timer { Interval = TimeSpan.FromSeconds(30).TotalMilliseconds };
+            _activityTimer.Elapsed += activityTimer_Elapsed;
+            _activityTimer.Start();
         }
 
         /// <summary>
@@ -100,8 +99,8 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// A read-only property indicating whether the connection 
-        /// has been opened with the IRC server and the 
+        /// A read-only property indicating whether the connection
+        /// has been opened with the IRC server and the
         /// socket has been successfully registered.
         /// </summary>
         /// <value>True if the socket is connected and registered.</value>
@@ -111,7 +110,7 @@ namespace FlamingIRC
         /// By default the connection itself will handle the case
         /// where, while attempting to register the socket's nick
         /// is already in use. It does this by simply appending
-        /// 2 random numbers to the end of the nick. 
+        /// 2 random numbers to the end of the nick.
         /// </summary>
         /// <remarks>
         /// The NickError event is shows that the nick collision has happened
@@ -128,7 +127,7 @@ namespace FlamingIRC
         /// <value>Read only string</value>
         public string Name
         {
-            get { return connectionArgs.Nick + "@" + connectionArgs.Hostname; }
+            get { return _connectionArgs.Nick + "@" + _connectionArgs.Hostname; }
         }
 
         /// <summary>
@@ -139,25 +138,25 @@ namespace FlamingIRC
         /// false will cause their property calls to return null.</value>
         public bool EnableCtcp
         {
-            get { return ctcpEnabled; }
+            get { return _ctcpEnabled; }
             set
             {
-                if (value && !ctcpEnabled)
+                if (value && !_ctcpEnabled)
                 {
-                    ctcpListener = new CtcpListener(this);
+                    _ctcpListener = new CtcpListener(this);
                     CtcpSender = new CtcpSender(this);
                 }
                 else if (!value)
                 {
-                    ctcpListener = null;
+                    _ctcpListener = null;
                     CtcpSender = null;
                 }
-                ctcpEnabled = value;
+                _ctcpEnabled = value;
             }
         }
 
         /// <summary>
-        /// Whether DCC requests should be processed or ignored 
+        /// Whether DCC requests should be processed or ignored
         /// by this Connection. Since the DccListener is a singleton and
         /// shared by all Connections, listeners to DccListener events should
         /// be manually removed when no longer needed.
@@ -171,12 +170,12 @@ namespace FlamingIRC
         /// <value>Once this is set it can be removed by setting it to null.</value>
         public CtcpResponder CtcpResponder
         {
-            get { return ctcpResponder; }
+            get { return _ctcpResponder; }
             set
             {
-                if (value == null && ctcpResponder != null)
-                    ctcpResponder.Disable();
-                ctcpResponder = value;
+                if (value == null && _ctcpResponder != null)
+                    _ctcpResponder.Disable();
+                _ctcpResponder = value;
             }
         }
 
@@ -187,7 +186,7 @@ namespace FlamingIRC
         /// <value>Read only TimeSpan</value>
         public TimeSpan IdleTime
         {
-            get { return DateTime.Now - timeLastSent; }
+            get { return DateTime.Now - _timeLastSent; }
         }
 
         /// <summary>
@@ -214,7 +213,7 @@ namespace FlamingIRC
         /// <value>Read only CtcpListener. Null if CtcpEnabled is false.</value>
         public CtcpListener CtcpListener
         {
-            get { return ctcpEnabled ? ctcpListener : null; }
+            get { return _ctcpEnabled ? _ctcpListener : null; }
         }
 
         /// <summary>
@@ -223,18 +222,35 @@ namespace FlamingIRC
         /// <value>Read only ConnectionArgs.</value>
         public ConnectionArgs ConnectionData
         {
-            get { return connectionArgs; }
+            get { return _connectionArgs; }
         }
 
         /// <summary>
         /// A read-only collection of string key/value pairs
         /// representing IRC server proprties.
         /// </summary>
-        /// <value>This connection's ServerProperties object is null if it 
+        /// <value>This connection's ServerProperties object is null if it
         /// has not been created.</value>
         public ServerProperties ServerProperties
         {
-            get { return properties; }
+            get { return _properties; }
+        }
+
+        public string Nick
+        {
+            get { return _connectionArgs.Nick; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException();
+                
+                _connectionArgs.Nick = value;
+            }
+        }
+
+        internal ConnectionArgs ConnectionArgs
+        {
+            get { return _connectionArgs; }
         }
 
         /// <summary>
@@ -249,18 +265,20 @@ namespace FlamingIRC
         public event EventHandler<FlamingDataEventArgs<string>> RawMessageSent;
 
         public event EventHandler ConnectionEstablished;
+
         public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
+
         public event EventHandler<DisconnectEventArgs> ConnectionLost;
 
         private void activityTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (DateTime.Now - lastTraffic > TimeSpan.FromSeconds(30))
+            if (DateTime.Now - _lastTraffic > TimeSpan.FromSeconds(30))
                 Sender.Ping();
         }
 
         private bool CustomParse(string line)
         {
-            foreach (IParser parser in parsers)
+            foreach (IParser parser in _parsers)
             {
                 if (parser.CanParse(line))
                 {
@@ -282,7 +300,7 @@ namespace FlamingIRC
 
         private void UpdateLastTime(object sender, EventArgs e)
         {
-            lastTraffic = DateTime.Now;
+            _lastTraffic = DateTime.Now;
         }
 
         /// <summary>
@@ -293,8 +311,8 @@ namespace FlamingIRC
         /// <param name="newNick">The new nick name</param>
         private void MyNickChanged(object sender, NickChangeEventArgs e)
         {
-            if (connectionArgs.Nick == e.User.Nick)
-                connectionArgs.Nick = e.NewNick;
+            if (_connectionArgs.Nick == e.User.Nick)
+                _connectionArgs.Nick = e.NewNick;
         }
 
         private void OnRegistered(object sender, EventArgs e)
@@ -304,7 +322,7 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private void OnNickError(object sender, NickErrorEventArgs ea)
         {
@@ -331,11 +349,11 @@ namespace FlamingIRC
             if (a.ReplyCode != ReplyCode.RPL_BOUNCE) return;
 
             //Populate properties from name/value matches
-            MatchCollection matches = propertiesRegex.Matches(a.Message);
+            MatchCollection matches = _propertiesRegex.Matches(a.Message);
             if (matches.Count > 0)
             {
                 foreach (Match match in matches)
-                    properties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
+                    _properties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
             }
             //Extract ones we are interested in
             ExtractProperties();
@@ -346,9 +364,9 @@ namespace FlamingIRC
             //For the moment the only one we care about is NickLen
             //In fact we don't cae about any but keep here as an example
             /*
-            if( properties.ContainsKey("NICKLEN") ) 
+            if( properties.ContainsKey("NICKLEN") )
             {
-                try 
+                try
                 {
                     maxNickLength = int.Parse( properties[ "NICKLEN" ] );
                 }
@@ -378,28 +396,26 @@ namespace FlamingIRC
             {
                 if (Connected)
                     throw new Exception("Connection with IRC server already opened.");
-                properties = new ServerProperties();
-                activityTimer.Start();
+                _properties = new ServerProperties();
+                _activityTimer.Start();
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                                  "[" + Thread.CurrentThread.Name + "] Connection::Connect()");
+                                  string.Format("[{0}] Connection::Connect()", Thread.CurrentThread.Name));
 
-                Connect(connectionArgs.Hostname, connectionArgs.Port, connectionArgs.Ssl);
+                Connect(_connectionArgs.Hostname, _connectionArgs.Port, _connectionArgs.Ssl);
             }
         }
 
         /// <summary>
-        /// Read in message lines from the IRC server
-        /// and send them to a parser for processing.
-        /// Discard CTCP and DCC messages if these protocols
-        /// are not enabled.
+        /// Read in message lines from the IRC server and send them to a parser for processing.
+        /// Discard CTCP and DCC messages if these protocols are not enabled.
         /// </summary>
         internal void ReceiveIRCMessages(string line)
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                              "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages()");
+                              string.Format("[{0}] Connection::ReceiveIRCMessages()", Thread.CurrentThread.Name));
 
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                              "[" + Thread.CurrentThread.Name + "] Connection::ReceiveIRCMessages() rec'd:" + line);
+                              string.Format("[{0}] Connection::ReceiveIRCMessages() rec'd:{1}", Thread.CurrentThread.Name, line));
             //Try any custom parsers first
             if (CustomParse(line))
             {
@@ -414,8 +430,8 @@ namespace FlamingIRC
             }
             else if (CtcpListener.IsCtcpMessage(line))
             {
-                if (ctcpEnabled)
-                    ctcpListener.Parse(line);
+                if (_ctcpEnabled)
+                    _ctcpListener.Parse(line);
             }
             else
                 Listener.Parse(line);
@@ -433,13 +449,13 @@ namespace FlamingIRC
                 Send(command.ToString());
 
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                                  "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() sent= " + command);
-                timeLastSent = DateTime.Now;
+                                  string.Format("[{0}] Connection::SendCommand() sent= {1}", Thread.CurrentThread.Name, command));
+                _timeLastSent = DateTime.Now;
             }
             catch (Exception ex)
             {
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                                  "[" + Thread.CurrentThread.Name + "] Connection::SendCommand() exception=" + ex);
+                                  string.Format("[{0}] Connection::SendCommand() exception={1}", Thread.CurrentThread.Name, ex));
             }
 
             RawMessageSent.Fire(this, new FlamingDataEventArgs<string>(command.ToString()));
@@ -460,13 +476,12 @@ namespace FlamingIRC
                 Send(command.ToString());
 
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                                  "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() message=" +
-                                  command);
+                                  string.Format("[{0}] Connection::SendAutomaticReply() message={1}", Thread.CurrentThread.Name, command));
             }
             catch (Exception ex)
             {
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                                  "[" + Thread.CurrentThread.Name + "] Connection::SendAutomaticReply() exception=" + ex);
+                                  string.Format("[{0}] Connection::SendAutomaticReply() exception={1}", Thread.CurrentThread.Name, ex));
             }
             command.Remove(0, command.Length);
         }
@@ -486,9 +501,9 @@ namespace FlamingIRC
 
                 Sender.Quit(reason);
                 Disconnect(DisconnectReason.UserInitiated);
-                activityTimer.Stop();
+                _activityTimer.Stop();
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                                  "[" + Thread.CurrentThread.Name + "] Connection::Disconnect()");
+                                  string.Format("[{0}] Connection::Disconnect()", Thread.CurrentThread.Name));
             }
         }
 
@@ -502,7 +517,7 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Adds a parser class to a list of custom parsers. 
+        /// Adds a parser class to a list of custom parsers.
         /// Any number can be added. The custom parsers
         /// will be tested using <c>CanParse()</c> before
         /// the default parsers. The last parser to be added
@@ -511,7 +526,7 @@ namespace FlamingIRC
         /// <param name="parser">Any class that implements IParser.</param>
         public void AddParser(IParser parser)
         {
-            parsers.Insert(0, parser);
+            _parsers.Insert(0, parser);
         }
 
         /// <summary>
@@ -520,13 +535,13 @@ namespace FlamingIRC
         /// <param name="parser">Any class that implements IParser.</param>
         public void RemoveParser(IParser parser)
         {
-            parsers.Remove(parser);
+            _parsers.Remove(parser);
         }
 
         protected override void OnConnect()
         {
             ConnectionEstablished.Fire(this, new EventArgs());
-            Sender.RegisterConnection(connectionArgs);
+            Sender.RegisterConnection(_connectionArgs);
             Connected = true;
         }
 
@@ -538,24 +553,22 @@ namespace FlamingIRC
 
         protected override void OnDisconnect(DisconnectReason reason, int? socketErrorCode)
         {
-            if (ConnectionLost != null)
-            {
-                if (socketErrorCode == null)
-                    ConnectionLost(this, new DisconnectEventArgs(reason));
-                else
-                    ConnectionLost(this, new DisconnectEventArgs(reason, (int)socketErrorCode));
-            }
+            if (ConnectionLost == null) return;
+
+            if (socketErrorCode == null)
+                ConnectionLost(this, new DisconnectEventArgs(reason));
+            else
+                ConnectionLost(this, new DisconnectEventArgs(reason, (int)socketErrorCode));
         }
 
         protected override void OnConnectFailed(ConnectError reason, int? socketErrorCode)
         {
-            if (ConnectFailed != null)
-            {
-                if (socketErrorCode == null)
-                    ConnectFailed(this, new ConnectFailedEventArgs(reason));
-                else
-                    ConnectFailed(this, new ConnectFailedEventArgs(reason, (int)socketErrorCode));
-            }
+            if (ConnectFailed == null) return;
+
+            if (socketErrorCode == null)
+                ConnectFailed(this, new ConnectFailedEventArgs(reason));
+            else
+                ConnectFailed(this, new ConnectFailedEventArgs(reason, (int)socketErrorCode));
         }
 
         protected override void OnReceiveLine(string line)
