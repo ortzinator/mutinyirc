@@ -91,7 +91,7 @@ namespace FlamingIRC
             {
                 if (value != '\0' && !UserModeValidator.IsValid(value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException("value");
                 }
                 _prefix = value;
             }
@@ -142,9 +142,7 @@ namespace FlamingIRC
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof(User)) return false;
-
-            return Equals((User)obj);
+            return obj.GetType() == typeof(User) && Equals((User)obj);
         }
 
         public bool Equals(User other)
