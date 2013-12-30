@@ -8,9 +8,9 @@ namespace OrtzIRC.WPF
     {
         public override void Load()
         {
-            Bind<MainViewModel>().To(typeof(MainViewModel));
-            Bind<ChannelViewModel>().To(typeof(ChannelViewModel));
-            Bind<PluginManager>().To(typeof(PluginManager));
+            Bind<MainViewModel>().ToSelf();
+            Bind<ChannelViewModel>().ToSelf();
+            Bind<PluginManager>().ToSelf().InSingletonScope();
         }
     }
 }

@@ -17,7 +17,6 @@ namespace OrtzIRC.WPF.ViewModels
         private PluginManager _pluginManager;
         public MTObservableCollection<IrcViewModel> Panels { get; protected set; }
 
-        [Inject]
         public MainViewModel(PluginManager pluginManager)
         {
             _pluginManager = pluginManager;
@@ -62,6 +61,7 @@ namespace OrtzIRC.WPF.ViewModels
             var chan = CompositionRoot.Resolve<ChannelViewModel>(new ConstructorArgument("channel", e.Data));
             chan.RequestClose += Chan_RequestClose;
             Panels.Add(chan);
+            var same = _pluginManager.Equals(chan.PluginManager);
         }
 
         private void Chan_RequestClose(object sender, EventArgs e)
