@@ -1,4 +1,6 @@
-﻿namespace OrtzIRC.WPF.ViewModels
+﻿using Ninject;
+
+namespace OrtzIRC.WPF.ViewModels
 {
     using System;
     using System.Collections.Generic;
@@ -11,6 +13,7 @@
     {
         private Channel channel;
         private List<UserViewModel> userList;
+        private PluginManager _pluginManager;
 
         public new string Name
         {
@@ -30,8 +33,11 @@
             }
         }
 
-        public ChannelViewModel(Channel chan)
+        [Inject]
+        public ChannelViewModel(Channel chan, PluginManager pluginManager)
         {
+            _pluginManager = pluginManager;
+
             channel = chan;
             channel.Users.Updated += NickList_Updated;
             base.Name = chan.Name;
@@ -123,7 +129,7 @@
 
         protected override void OnExecute(string commandLine)
         {
-            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(channel, commandLine));
+            CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(channel, commandLine));
             if (result != null && result.Result == CommandResult.Fail)
             {
                 ChatLines.Add(new ErrorMessageViewModel(DateTime.Now, result.Message));

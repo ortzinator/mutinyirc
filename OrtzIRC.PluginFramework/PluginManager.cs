@@ -1,46 +1,42 @@
-﻿using System.IO;
+﻿using OrtzIRC.Common;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace OrtzIRC.PluginFramework
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Reflection;
-    using OrtzIRC.Common;
-
     /// <summary>
     /// Manages plugins and commands.
     /// </summary>
     public sealed class PluginManager
     {
-        private static Dictionary<string, CommandInfo> commands;
-        private static List<PluginInfo> plugins;
+        private Dictionary<string, CommandInfo> _commands;
+        private List<PluginInfo> _plugins;
 
-        private PluginManager()
+        public PluginManager()
         {
-            plugins = new List<PluginInfo>();
-            commands = new Dictionary<string, CommandInfo>();
+            _plugins = new List<PluginInfo>();
+            _commands = new Dictionary<string, CommandInfo>();
         }
-
-        public static PluginManager Instance { get; private set; }
 
         /// <summary>
         /// Instantiates the PluginManager and loads any plugins found.
         /// </summary>
-        /// <remarks>Must be called first</remarks>
-        public static void LoadPlugins(string pluginPath)
+        /// <remarks>
+        /// Must be called first
+        /// </remarks>
+        public void LoadPlugins(string pluginPath)
         {
-            if (Instance == null)
-                Instance = new PluginManager();
-
             FindPlugins(pluginPath);
         }
 
         /// <summary>
         /// Searches the plugins directory for assemblies, examines them for plugins and populates
         /// </summary>
-        private static void FindPlugins(string path)
+        private void FindPlugins(string path)
         {
             Trace.WriteLine(string.Format("Loading Plug-ins ({0})", path), TraceCategories.PluginSystem);
 
@@ -59,7 +55,7 @@ namespace OrtzIRC.PluginFramework
                     {
                         if (info is CommandInfo)
                         {
-                            if (!commands.ContainsKey(info.FullName))
+                            if (!_commands.ContainsKey(info.FullName))
                             {
                                 tempCommands.Add(info.FullName, info as CommandInfo);
                                 Trace.WriteLine(string.Format("Added command plugin {0} at {1}", info.FullName, info.AssemblyPath), TraceCategories.PluginSystem);
@@ -73,7 +69,7 @@ namespace OrtzIRC.PluginFramework
                         }
                         else
                         {
-                            plugins.Add(info);
+                            _plugins.Add(info);
                             Trace.WriteLine(string.Format("Added plugin {0} at {1}", info.FullName, info.AssemblyPath), TraceCategories.PluginSystem);
                         }
                     }
@@ -89,15 +85,15 @@ namespace OrtzIRC.PluginFramework
 
             foreach (KeyValuePair<string, CommandInfo> pair in tempCommands)
             {
-                commands.Add(pair.Key, pair.Value);
+                _commands.Add(pair.Key, pair.Value);
             }
 
             Trace.WriteLine("Finished loading Plug-ins", TraceCategories.PluginSystem);
         }
 
-        private static ICommand GetCommandInstance(string name)
+        private ICommand GetCommandInstance(string name)
         {
-            foreach (KeyValuePair<string, CommandInfo> item in commands)
+            foreach (KeyValuePair<string, CommandInfo> item in _commands)
             {
                 if (item.Value.CommandName.Equals(name, StringComparison.CurrentCultureIgnoreCase))
                     return (ICommand)CreateInstance(item.Value);
@@ -106,14 +102,14 @@ namespace OrtzIRC.PluginFramework
             return null;
         }
 
-        private static IPlugin CreateInstance(PluginInfo pluginInfo)
+        private IPlugin CreateInstance(PluginInfo pluginInfo)
         {
             Assembly asm = Assembly.LoadFile(pluginInfo.AssemblyPath);
 
             return (IPlugin)asm.CreateInstance(pluginInfo.FullName);
         }
 
-        public static CommandResultInfo ExecuteCommand(CommandExecutionInfo commandInput)
+        public CommandResultInfo ExecuteCommand(CommandExecutionInfo commandInput)
         {
             //TODO: This should handle errors
             //TODO: Pretty complex, maybe could use some commenting
@@ -215,7 +211,7 @@ namespace OrtzIRC.PluginFramework
             return null;
         }
 
-        public static CommandExecutionInfo ParseCommand(MessageContext context, string line)
+        public CommandExecutionInfo ParseCommand(MessageContext context, string line)
         {
             if (line.StartsWith("/"))
             {

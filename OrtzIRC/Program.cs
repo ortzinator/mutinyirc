@@ -14,7 +14,9 @@ namespace OrtzIRC
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.Run(new MainForm());
+            CompositionRoot.Wire(new Bindings());
+            var form = CompositionRoot.Resolve<MainForm>();
+            Application.Run(form);
         }
     }
 }

@@ -1,3 +1,5 @@
+using Ninject;
+
 namespace OrtzIRC
 {
     using System;
@@ -17,9 +19,12 @@ namespace OrtzIRC
         private int nickRetry;
         private bool nickRetryFailed;
         private Server server;
+        private PluginManager _pluginManager;
 
-        public ServerForm()
+        [Inject]
+        public ServerForm(PluginManager pluginManager)
         {
+            _pluginManager = pluginManager;
             InitializeComponent();
 
             commandTextBox.Focus();
@@ -156,7 +161,7 @@ namespace OrtzIRC
             CommandResultInfo result = new CommandResultInfo();
             try
             {
-                result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Server, e.Data));
+                result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(Server, e.Data));
             }
             catch (TargetInvocationException ex)
             {

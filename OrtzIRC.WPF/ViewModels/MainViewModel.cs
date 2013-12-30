@@ -1,4 +1,7 @@
-﻿namespace OrtzIRC.WPF.ViewModels
+﻿using Ninject;
+using Ninject.Parameters;
+
+namespace OrtzIRC.WPF.ViewModels
 {
     using System;
     using System.Collections.Generic;
@@ -11,10 +14,13 @@
 
     public class MainViewModel : ViewModelBase
     {
+        private PluginManager _pluginManager;
         public MTObservableCollection<IrcViewModel> Panels { get; protected set; }
 
-        public MainViewModel()
+        [Inject]
+        public MainViewModel(PluginManager pluginManager)
         {
+            _pluginManager = pluginManager;
             Panels = new MTObservableCollection<IrcViewModel>();
 
             System.Windows.DependencyObject dep = new System.Windows.DependencyObject();
@@ -46,14 +52,14 @@
                 newServer.Connect();
             }
 
-            PluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
+            _pluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
             //PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
             RandomMessages.Load();
         }
 
         private void Server_JoinSelf(object sender, Common.DataEventArgs<Channel> e)
         {
-            var chan = new ChannelViewModel(e.Data);
+            var chan = CompositionRoot.Resolve<ChannelViewModel>(new ConstructorArgument("channel", e.Data));
             chan.RequestClose += Chan_RequestClose;
             Panels.Add(chan);
         }
