@@ -2,18 +2,20 @@
 {
     using System;
     using System.Windows;
-    using OrtzIRC.WPF.ViewModels;
+    using ViewModels;
 
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
     {
-        private MainViewModel viewModel = new MainViewModel();
+        private MainViewModel viewModel;
         private MainWindow window = new MainWindow();
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            CompositionRoot.Wire(new Bindings());
+            viewModel = CompositionRoot.Resolve<MainViewModel>();
             base.OnStartup(e);
 
             viewModel.RequestClose += ViewModelRequestClose;

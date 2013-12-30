@@ -1,4 +1,6 @@
-﻿namespace OrtzIRC
+﻿using Ninject;
+
+namespace OrtzIRC
 {
     using System;
     using System.Windows.Forms;
@@ -10,7 +12,10 @@
 
     public partial class ChannelForm : Form
     {
-        public ChannelForm(Channel channel)
+        private PluginManager _pluginManager;
+
+        [Inject]
+        public ChannelForm(Channel channel, PluginManager pluginManager)
         {
             InitializeComponent();
 
@@ -21,6 +26,7 @@
             nickListBox.UserList = Channel.Users;
 
             commandTextBox.Focus();
+            _pluginManager = pluginManager;
         }
 
         public Channel Channel { get; private set; }
@@ -84,7 +90,7 @@
 
         private void commandTextBox_CommandEntered(object sender, Common.DataEventArgs<string> e)
         {
-            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, e.Data));
+            CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(Channel, e.Data));
             if (result != null && result.Result == CommandResult.Fail)
             {
                 channelOutputBox.AppendLine(result.Message, Color.Red);

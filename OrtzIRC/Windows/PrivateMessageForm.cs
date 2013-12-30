@@ -11,9 +11,11 @@ namespace OrtzIRC
     public partial class PrivateMessageForm : Form
     {
         private PrivateMessageSession pmsession;
+        private PluginManager _pluginManager;
 
-        public PrivateMessageForm()
+        public PrivateMessageForm(PluginManager pluginManager)
         {
+            _pluginManager = pluginManager;
             InitializeComponent();
 
             commandTextBox.Focus();
@@ -91,7 +93,7 @@ namespace OrtzIRC
 
         private void commandTextBox_CommandEntered(object sender, Common.DataEventArgs<string> e)
         {
-            CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(PMSession, e.Data));
+            CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(PMSession, e.Data));
             if (result != null && result.Result == CommandResult.Fail)
             {
                 serverOutputBox.AppendLine(CommonStrings.CommandErrorMessage.With(result.Message), Color.Red);

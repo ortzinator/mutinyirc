@@ -1,22 +1,27 @@
+using System;
+using System.IO;
+using System.Windows.Forms;
+using FlamingIRC;
+using Ninject.Parameters;
+using OrtzIRC.Common;
+using OrtzIRC.PluginFramework;
+using OrtzIRC.Properties;
+using OrtzIRC.Resources;
+using Ninject;
+
 namespace OrtzIRC
 {
-    using System;
-    using System.IO;
-    using System.Windows.Forms;
-    using FlamingIRC;
-    using OrtzIRC.Common;
-    using OrtzIRC.PluginFramework;
-    using OrtzIRC.Properties;
-    using OrtzIRC.Resources;
-
     public partial class MainForm : Form
     {
-        public MainForm()
+        [Inject]
+        public MainForm(PluginManager pluginManager)
         {
+            _pluginManager = pluginManager;
             InitializeComponent();
         }
 
         private Form focusedChild;
+        private PluginManager _pluginManager;
 
         protected override void OnLoad(EventArgs e)
         {
@@ -48,8 +53,8 @@ namespace OrtzIRC
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, "plugins")))
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "plugins"));
 
-            PluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
-            PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
+            _pluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
+            _pluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
             RandomMessages.Load();
 
             base.OnLoad(e);
@@ -106,7 +111,8 @@ namespace OrtzIRC
             }
             else
             {
-                var newPmForm = new PrivateMessageForm { PMSession = pm };
+                var newPmForm = CompositionRoot.Resolve<PrivateMessageForm>();
+                newPmForm.PMSession = pm;
 
                 ServerTreeNode node = windowManagerTreeView.GetServerNode(pm.Server);
 
@@ -130,7 +136,8 @@ namespace OrtzIRC
             }
             else
             {
-                var newServerForm = new ServerForm { Server = server };
+                var newServerForm = CompositionRoot.Resolve<ServerForm>();
+                newServerForm.Server = server;
 
                 windowManagerTreeView.AddServerNode(new ServerTreeNode(newServerForm));
                 newServerForm.MdiParent = this;
@@ -153,7 +160,7 @@ namespace OrtzIRC
             }
             else
             {
-                var newChannelForm = new ChannelForm(channel);
+                var newChannelForm = CompositionRoot.Resolve<ChannelForm>(new ConstructorArgument("channel", channel));
                 ServerTreeNode node = windowManagerTreeView.GetServerNode(channel.Server);
 
                 node.AddChannelNode(new ChannelTreeNode(newChannelForm));
