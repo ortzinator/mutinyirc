@@ -5,15 +5,17 @@ namespace OrtzIRC.WPF.ViewModels
     using System;
     using System.Collections.Generic;
     using FlamingIRC;
-    using OrtzIRC.Common;
-    using OrtzIRC.PluginFramework;
-    using OrtzIRC.WPF.Resources;
+    using Common;
+    using PluginFramework;
+    using Resources;
 
     public class ChannelViewModel : IrcViewModel
     {
-        private Channel channel;
+        private Channel _channel;
         private List<UserViewModel> userList;
         private PluginManager _pluginManager;
+
+        public PluginManager PluginManager { get { return _pluginManager; } }
 
         public new string Name
         {
@@ -33,27 +35,26 @@ namespace OrtzIRC.WPF.ViewModels
             }
         }
 
-        [Inject]
-        public ChannelViewModel(Channel chan, PluginManager pluginManager)
+        public ChannelViewModel(Channel channel, PluginManager pluginManager)
         {
             _pluginManager = pluginManager;
 
-            channel = chan;
-            channel.Users.Updated += NickList_Updated;
-            base.Name = chan.Name;
+            _channel = channel;
+            _channel.Users.Updated += NickList_Updated;
+            base.Name = channel.Name;
 
-            channel.OnMessage += Channel_OnMessage;
-            channel.OnAction += Channel_OnAction;
-            channel.TopicReceived += Channel_TopicReceived;
-            channel.OnJoin += Channel_OnJoin;
-            channel.UserParted += Channel_UserParted;
-            channel.OtherUserParted += Channel_OtherUserParted;
-            channel.UserQuitted += Channel_OnUserQuitted;
-            channel.NickChanged += Channel_OnNick;
-            channel.OnKick += Channel_OnKick;
-            channel.MessagedChannel += Channel_MessagedChannel;
+            _channel.OnMessage += Channel_OnMessage;
+            _channel.OnAction += Channel_OnAction;
+            _channel.TopicReceived += Channel_TopicReceived;
+            _channel.OnJoin += Channel_OnJoin;
+            _channel.UserParted += Channel_UserParted;
+            _channel.OtherUserParted += Channel_OtherUserParted;
+            _channel.UserQuitted += Channel_OnUserQuitted;
+            _channel.NickChanged += Channel_OnNick;
+            _channel.OnKick += Channel_OnKick;
+            _channel.MessagedChannel += Channel_MessagedChannel;
 
-            channel.Server.Disconnected += Server_Disconnected;
+            _channel.Server.Disconnected += Server_Disconnected;
         }
 
         private void Server_Disconnected(object sender, EventArgs e)
@@ -118,7 +119,7 @@ namespace OrtzIRC.WPF.ViewModels
         private void NickList_Updated(object sender, EventArgs e)
         {
             userList = new List<UserViewModel>();
-            foreach (User user in channel.Users)
+            foreach (User user in _channel.Users)
             {
                 userList.Add(new UserViewModel(user));
             }
@@ -129,7 +130,7 @@ namespace OrtzIRC.WPF.ViewModels
 
         protected override void OnExecute(string commandLine)
         {
-            CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(channel, commandLine));
+            CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(_channel, commandLine));
             if (result != null && result.Result == CommandResult.Fail)
             {
                 ChatLines.Add(new ErrorMessageViewModel(DateTime.Now, result.Message));
@@ -144,20 +145,20 @@ namespace OrtzIRC.WPF.ViewModels
 
         public override void Dispose()
         {
-            channel.Users.Updated -= NickList_Updated;
+            _channel.Users.Updated -= NickList_Updated;
 
-            channel.OnMessage -= Channel_OnMessage;
-            channel.OnAction -= Channel_OnAction;
-            channel.TopicReceived -= Channel_TopicReceived;
-            channel.OnJoin -= Channel_OnJoin;
-            channel.UserParted -= Channel_UserParted;
-            channel.OtherUserParted -= Channel_OtherUserParted;
-            channel.UserQuitted -= Channel_OnUserQuitted;
-            channel.NickChanged -= Channel_OnNick;
-            channel.OnKick -= Channel_OnKick;
-            channel.MessagedChannel -= Channel_MessagedChannel;
+            _channel.OnMessage -= Channel_OnMessage;
+            _channel.OnAction -= Channel_OnAction;
+            _channel.TopicReceived -= Channel_TopicReceived;
+            _channel.OnJoin -= Channel_OnJoin;
+            _channel.UserParted -= Channel_UserParted;
+            _channel.OtherUserParted -= Channel_OtherUserParted;
+            _channel.UserQuitted -= Channel_OnUserQuitted;
+            _channel.NickChanged -= Channel_OnNick;
+            _channel.OnKick -= Channel_OnKick;
+            _channel.MessagedChannel -= Channel_MessagedChannel;
 
-            channel.Server.Disconnected -= Server_Disconnected;
+            _channel.Server.Disconnected -= Server_Disconnected;
         }
     }
 }
