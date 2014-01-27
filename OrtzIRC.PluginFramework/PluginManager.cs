@@ -83,7 +83,7 @@ namespace OrtzIRC.PluginFramework
             if (tempCommands.Count == 0)
                 Trace.WriteLine(string.Format("No plugins found in directory: {0}", path), TraceCategories.PluginSystem);
 
-            foreach (KeyValuePair<string, CommandInfo> pair in tempCommands)
+            foreach (var pair in tempCommands)
             {
                 _commands.Add(pair.Key, pair.Value);
             }
@@ -91,9 +91,19 @@ namespace OrtzIRC.PluginFramework
             Trace.WriteLine("Finished loading Plug-ins", TraceCategories.PluginSystem);
         }
 
+        /// <summary>
+        /// Gets command instance.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when name argument is null.
+        /// </exception>
+        /// <param name="name">The command name.</param>
+        /// <returns>The command instance.</returns>
         private ICommand GetCommandInstance(string name)
         {
-            foreach (KeyValuePair<string, CommandInfo> item in _commands)
+            if (name == null) throw new ArgumentNullException("name");
+
+            foreach (var item in _commands)
             {
                 if (item.Value.CommandName.Equals(name, StringComparison.CurrentCultureIgnoreCase))
                     return (ICommand)CreateInstance(item.Value);
@@ -213,12 +223,15 @@ namespace OrtzIRC.PluginFramework
 
         public CommandExecutionInfo ParseCommand(MessageContext context, string line)
         {
+            if (line == null) throw new ArgumentNullException("line");
+
             if (line.StartsWith("/"))
             {
                 string[] exploded = line.Split(new Char[] { ' ' });
                 string name = exploded[0].TrimStart('/');
                 string[] parameters = new string[exploded.Length - 1];
                 Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
+
                 return new CommandExecutionInfo
                 {
                     Context = context,
