@@ -168,7 +168,7 @@ namespace OrtzIRC
                 serverOutputBox.AppendLine(ex.InnerException.Message, Color.Red);
             }
 
-            if (result != null && result.Result == CommandResult.Fail)
+            if (result != null && result.Result == Result.Fail)
                 serverOutputBox.AppendLine(result.Message, Color.Red);
         }
 

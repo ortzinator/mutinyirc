@@ -94,7 +94,7 @@ namespace OrtzIRC
         private void commandTextBox_CommandEntered(object sender, Common.DataEventArgs<string> e)
         {
             CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(PMSession, e.Data));
-            if (result != null && result.Result == CommandResult.Fail)
+            if (result != null && result.Result == Result.Fail)
             {
                 serverOutputBox.AppendLine(CommonStrings.CommandErrorMessage.With(result.Message), Color.Red);
             }

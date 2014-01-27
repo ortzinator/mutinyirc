@@ -129,7 +129,7 @@ namespace OrtzIRC.PluginFramework
                 return new CommandResultInfo
                            {
                                Message = String.Format("{0} is an invalid command", commandInput.Name.ToUpper()),
-                               Result = CommandResult.Fail
+                               Result = Result.Fail
                            };
 
             MethodInfo[] commandMethods = commandInstance.GetType().GetMethods()
