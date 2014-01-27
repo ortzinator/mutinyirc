@@ -91,7 +91,7 @@ namespace OrtzIRC
         private void commandTextBox_CommandEntered(object sender, Common.DataEventArgs<string> e)
         {
             CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(Channel, e.Data));
-            if (result != null && result.Result == CommandResult.Fail)
+            if (result != null && result.Result == Result.Fail)
             {
                 channelOutputBox.AppendLine(result.Message, Color.Red);
                 //TODO: Log

@@ -131,7 +131,7 @@ namespace OrtzIRC.WPF.ViewModels
         protected override void OnExecute(string commandLine)
         {
             CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(_channel, commandLine));
-            if (result != null && result.Result == CommandResult.Fail)
+            if (result != null && result.Result == Result.Fail)
             {
                 ChatLines.Add(new ErrorMessageViewModel(DateTime.Now, result.Message));
                 //TODO: Log

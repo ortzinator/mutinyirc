@@ -113,7 +113,7 @@
     <Compile Include="AssemblyExaminer.cs" />
     <Compile Include="CommandExecutionInfo.cs" />
     <Compile Include="CommandInfo.cs" />
-    <Compile Include="CommandResult.cs" />
+    <Compile Include="Result.cs" />
     <Compile Include="CommandResultInfo.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="IPlugin.cs" />

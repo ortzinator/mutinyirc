@@ -18,7 +18,7 @@
         public CommandResultInfo Execute(Channel channel, string user, string message)
         {
             channel.Server.MessageUser(user, message);
-            return new CommandResultInfo { Message = "", Result = CommandResult.Success };
+            return new CommandResultInfo { Message = "", Result = Result.Success };
         }
     }
 }
