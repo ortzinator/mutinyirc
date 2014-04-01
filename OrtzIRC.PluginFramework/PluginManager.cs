@@ -126,11 +126,7 @@ namespace OrtzIRC.PluginFramework
 
             ICommand commandInstance = GetCommandInstance(commandInput.Name);
             if (commandInstance == null)
-                return new CommandResultInfo
-                           {
-                               Message = String.Format("{0} is an invalid command", commandInput.Name.ToUpper()),
-                               Result = Result.Fail
-                           };
+                return CommandResultInfo.Fail(String.Format("{0} is an invalid command", commandInput.Name.ToUpper()));
 
             MethodInfo[] commandMethods = commandInstance.GetType().GetMethods()
                 .Where(o => o.Name == "Execute")
@@ -155,7 +151,7 @@ namespace OrtzIRC.PluginFramework
 
                     if (p == 0)
                     {
-                        //First parameter must be a context
+                        //First parameter must match the current context type
                         if (methodParameter.ParameterType != commandInput.Context.GetType())
                             break;
 
