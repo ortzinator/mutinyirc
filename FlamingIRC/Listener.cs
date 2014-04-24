@@ -321,173 +321,37 @@ namespace FlamingIRC
                 case PONG:
                     break;
                 case NOTICE:
-                    tokens[3] = RemoveLeadingColon(tokens[3]);
-                    if (Rfc2812Util.IsValidChannelName(tokens[2]))
-                    {
-                        if (OnPublicNotice != null)
-                        {
-                            OnPublicNotice(this, new UserChannelMessageEventArgs(
-                                Rfc2812Util.UserFromString(tokens[0]),
-                                tokens[2],
-                                CondenseStrings(tokens, 3)));
-                            //Trace.WriteLine("Public notice", "IRC");
-                        }
-                    }
-                    else
-                    {
-                        if (OnPrivateNotice != null)
-                        {
-                            OnPrivateNotice(this, new UserMessageEventArgs(
-                                Rfc2812Util.UserFromString(tokens[0]),
-                                CondenseStrings(tokens, 3)));
-                            //Trace.WriteLine("Private notice", "IRC");
-                        }
-                    }
+                    ProcessNoticeCommand(tokens);
                     break;
                 case JOIN:
-                    if (OnJoin != null)
-                    {
-                        OnJoin(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
-                        //Trace.WriteLine("Join", "IRC");
-                    }
+                    ProcessJoinCommand(tokens);
                     break;
                 case PRIVMSG:
-                    tokens[3] = RemoveLeadingColon(tokens[3]);
-                    if (tokens[3] == ACTION)
-                    {
-                        if (Rfc2812Util.IsValidChannelName(tokens[2]))
-                        {
-                            if (OnAction != null)
-                            {
-                                int last = tokens.Length - 1;
-                                tokens[last] = RemoveTrailingQuote(tokens[last]);
-                                OnAction(this, new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 4)));
-                                //Trace.WriteLine("Channel action", "IRC");
-                            }
-                        }
-                        else
-                        {
-                            if (OnPrivateAction != null)
-                            {
-                                int last = tokens.Length - 1;
-                                tokens[last] = RemoveTrailingQuote(tokens[last]);
-                                OnPrivateAction(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 4)));
-                                //Trace.WriteLine("Private action", "IRC");
-                            }
-                        }
-                    }
-                    else if (channelPattern.IsMatch(tokens[2]))
-                    {
-                        if (OnPublic != null)
-                        {
-                            OnPublic(this, new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3)));
-                            Trace.WriteLine("Public msg", "IRC");
-                        }
-                    }
-                    else
-                    {
-                        if (OnPrivate != null)
-                        {
-                            OnPrivate(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 3)));
-                            //Trace.WriteLine("Private msg", "IRC");
-                        }
-                    }
+                    ProcessPrivmsgCommand(tokens);
                     break;
                 case NICK:
-                    if (OnNick != null)
-                    {
-                        OnNick(this, new NickChangeEventArgs(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2])));
-                        //Trace.WriteLine("Nick", "IRC");
-                    }
+                    ProcessNickCommand(tokens);
                     break;
                 case TOPIC:
-                    if (OnTopicChanged != null)
-                    {
-                        tokens[3] = RemoveLeadingColon(tokens[3]);
-                        OnTopicChanged(this, new UserChannelMessageEventArgs(
-                            Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3)));
-                        //Trace.WriteLine("Topic changed", "IRC");
-                    }
+                    ProcessTopicCommand(tokens);
                     break;
                 case PART:
-                    if (OnPart != null)
-                    {
-                        OnPart(
-                            Rfc2812Util.UserFromString(tokens[0]),
-                            RemoveLeadingColon(tokens[2]),
-                            tokens.Length >= 4 ? RemoveLeadingColon(CondenseStrings(tokens, 3)) : "");
-                        //Trace.WriteLine("Part", "IRC");
-                    }
+                    ProcessPartCommand(tokens);
                     break;
                 case QUIT:
-                    if (OnQuit != null)
-                    {
-                        tokens[2] = RemoveLeadingColon(tokens[2]);
-                        OnQuit(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 2));
-                        //Trace.WriteLine("Quit", "IRC");
-                    }
+                    ProcessQuitCommand(tokens);
                     break;
                 case INVITE:
-                    if (OnInvite != null)
-                    {
-                        OnInvite(
-                            Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[3]));
-                        //Trace.WriteLine("Invite", "IRC");
-                    }
+                    ProcessInviteCommand(tokens);
                     break;
                 case KICK:
-                    if (OnKick != null)
-                    {
-                        tokens[4] = RemoveLeadingColon(tokens[4]);
-                        OnKick(Rfc2812Util.UserFromString(tokens[0]), tokens[2], tokens[3], CondenseStrings(tokens, 4));
-                        //Trace.WriteLine("Kick", "IRC");
-                    }
+                    ProcessKickCommand(tokens);
                     break;
                 case MODE:
-                    if (channelPattern.IsMatch(tokens[2]))
-                    {
-                        if (OnChannelModeChange != null)
-                        {
-                            User who = Rfc2812Util.UserFromString(tokens[0]);
-                            try
-                            {
-                                ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 3);
-                                string raw = CondenseStrings(tokens, 3);
-                                OnChannelModeChange(who, tokens[2], modes, raw);
-                                Trace.WriteLine("Channel mode change", "IRC");
-                            }
-                            catch (Exception)
-                            {
-                                if (OnError != null)
-                                {
-                                    OnError(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0)));
-                                }
-                                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Bad IRC MODE string=" + tokens[0]);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (OnUserModeChange != null)
-                        {
-                            tokens[3] = RemoveLeadingColon(tokens[3]);
-                            OnUserModeChange(this, new UserModeChangeEventArgs(Rfc2812Util.CharToModeAction(tokens[3][0]),
-                                Rfc2812Util.CharToUserMode(tokens[3][1])));
-                            //Trace.WriteLine("User mode change", "IRC");
-                        }
-                    }
+                    ProcessModeCommand(tokens);
                     break;
                 case KILL:
-                    if (OnKill != null)
-                    {
-                        string reason = "";
-                        if (tokens.Length >= 4)
-                        {
-                            tokens[3] = RemoveLeadingColon(tokens[3]);
-                            reason = CondenseStrings(tokens, 3);
-                        }
-                        OnKill(Rfc2812Util.UserFromString(tokens[0]), tokens[2], reason);
-                    }
+                    ProcessKillCommand(tokens);
                     break;
                 default:
                     if (OnError != null)
@@ -497,6 +361,186 @@ namespace FlamingIRC
                     Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Unknown IRC command=" + tokens[1]);
                     //Trace.WriteLine("Unknown command", "IRC");
                     break;
+            }
+        }
+
+        private void ProcessKillCommand(string[] tokens)
+        {
+            if (OnKill == null) return;
+
+            string reason = "";
+            if (tokens.Length >= 4)
+            {
+                tokens[3] = RemoveLeadingColon(tokens[3]);
+                reason = CondenseStrings(tokens, 3);
+            }
+            OnKill(Rfc2812Util.UserFromString(tokens[0]), tokens[2], reason);
+        }
+
+        private void ProcessModeCommand(string[] tokens)
+        {
+            if (channelPattern.IsMatch(tokens[2]))
+            {
+                if (OnChannelModeChange == null) return;
+
+                User who = Rfc2812Util.UserFromString(tokens[0]);
+                try
+                {
+                    ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 3);
+                    string raw = CondenseStrings(tokens, 3);
+                    OnChannelModeChange(who, tokens[2], modes, raw);
+                    Trace.WriteLine("Channel mode change", "IRC");
+                }
+                catch (Exception)
+                {
+                    if (OnError != null)
+                    {
+                        OnError(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0)));
+                    }
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                        "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Bad IRC MODE string=" + tokens[0]);
+                }
+            }
+            else
+            {
+                if (OnUserModeChange == null) return;
+
+                tokens[3] = RemoveLeadingColon(tokens[3]);
+                OnUserModeChange(this, new UserModeChangeEventArgs(Rfc2812Util.CharToModeAction(tokens[3][0]),
+                    Rfc2812Util.CharToUserMode(tokens[3][1])));
+                //Trace.WriteLine("User mode change", "IRC");
+            }
+        }
+
+        private void ProcessKickCommand(string[] tokens)
+        {
+            if (OnKick == null) return;
+
+            tokens[4] = RemoveLeadingColon(tokens[4]);
+            OnKick(Rfc2812Util.UserFromString(tokens[0]), tokens[2], tokens[3], CondenseStrings(tokens, 4));
+            //Trace.WriteLine("Kick", "IRC");
+        }
+
+        private void ProcessInviteCommand(string[] tokens)
+        {
+            if (OnInvite == null) return;
+
+            OnInvite(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[3]));
+            //Trace.WriteLine("Invite", "IRC");
+        }
+
+        private void ProcessQuitCommand(string[] tokens)
+        {
+            if (OnQuit == null) return;
+
+            tokens[2] = RemoveLeadingColon(tokens[2]);
+            OnQuit(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 2));
+            //Trace.WriteLine("Quit", "IRC");
+        }
+
+        private void ProcessPartCommand(string[] tokens)
+        {
+            if (OnPart == null) return;
+
+            OnPart(
+                Rfc2812Util.UserFromString(tokens[0]),
+                RemoveLeadingColon(tokens[2]),
+                tokens.Length >= 4 ? RemoveLeadingColon(CondenseStrings(tokens, 3)) : "");
+            //Trace.WriteLine("Part", "IRC");
+        }
+
+        private void ProcessTopicCommand(string[] tokens)
+        {
+            if (OnTopicChanged == null) return;
+
+            tokens[3] = RemoveLeadingColon(tokens[3]);
+            OnTopicChanged(this, new UserChannelMessageEventArgs(
+                Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3)));
+            //Trace.WriteLine("Topic changed", "IRC");
+        }
+
+        private void ProcessNickCommand(string[] tokens)
+        {
+            if (OnNick == null) return;
+
+            OnNick(this, new NickChangeEventArgs(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2])));
+            //Trace.WriteLine("Nick", "IRC");
+        }
+
+        private void ProcessJoinCommand(string[] tokens)
+        {
+            if (OnJoin == null) return;
+
+            OnJoin(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
+            //Trace.WriteLine("Join", "IRC");
+        }
+
+        private void ProcessNoticeCommand(string[] tokens)
+        {
+            tokens[3] = RemoveLeadingColon(tokens[3]);
+            if (Rfc2812Util.IsValidChannelName(tokens[2]))
+            {
+                if (OnPublicNotice == null) return;
+
+                OnPublicNotice(this, new UserChannelMessageEventArgs(
+                    Rfc2812Util.UserFromString(tokens[0]),
+                    tokens[2],
+                    CondenseStrings(tokens, 3)));
+                //Trace.WriteLine("Public notice", "IRC");
+            }
+            else
+            {
+                if (OnPrivateNotice == null) return;
+
+                OnPrivateNotice(this, new UserMessageEventArgs(
+                    Rfc2812Util.UserFromString(tokens[0]),
+                    CondenseStrings(tokens, 3)));
+                //Trace.WriteLine("Private notice", "IRC");
+            }
+        }
+
+        private void ProcessPrivmsgCommand(string[] tokens)
+        {
+            tokens[3] = RemoveLeadingColon(tokens[3]);
+            if (tokens[3] == ACTION)
+            {
+                if (Rfc2812Util.IsValidChannelName(tokens[2]))
+                {
+                    if (OnAction == null) return;
+
+                    int last = tokens.Length - 1;
+                    tokens[last] = RemoveTrailingQuote(tokens[last]);
+                    OnAction(this,
+                        new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2],
+                            CondenseStrings(tokens, 4)));
+                    //Trace.WriteLine("Channel action", "IRC");
+                }
+                else
+                {
+                    if (OnPrivateAction == null) return;
+
+                    int last = tokens.Length - 1;
+                    tokens[last] = RemoveTrailingQuote(tokens[last]);
+                    OnPrivateAction(this,
+                        new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 4)));
+                    //Trace.WriteLine("Private action", "IRC");
+                }
+            }
+            else if (channelPattern.IsMatch(tokens[2]))
+            {
+                if (OnPublic == null) return;
+
+                OnPublic(this,
+                    new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2],
+                        CondenseStrings(tokens, 3)));
+                Trace.WriteLine("Public msg", "IRC");
+            }
+            else
+            {
+                if (OnPrivate == null) return;
+
+                OnPrivate(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 3)));
+                //Trace.WriteLine("Private msg", "IRC");
             }
         }
 
@@ -534,30 +578,10 @@ namespace FlamingIRC
                     }
                     break;
                 case ReplyCode.RPL_NAMREPLY:
-                    if (OnNames != null)
-                    {
-                        if (tokens[2].EndsWith("=")) //hack: Gamesurge sometimes does this
-                        {
-                            var newtokens = new List<string>(tokens);
-                            newtokens.RemoveAt(2);
-                            newtokens.Insert(2, tokens[2].Remove(tokens[2].Length - 1));
-                            newtokens.Insert(3, "=");
-                            tokens = newtokens.ToArray();
-                        }
-                        tokens[5] = RemoveLeadingColon(tokens[5]);
-                        int numberOfUsers = tokens.Length - 5;
-                        string[] users = new string[numberOfUsers];
-                        Array.Copy(tokens, 5, users, 0, numberOfUsers);
-                        OnNames(this, new NamesEventArgs(tokens[4], users, false));
-                        //Trace.WriteLine("Names", "IRC");
-                    }
+                    ProcessNamesReply(tokens, false);
                     break;
                 case ReplyCode.RPL_ENDOFNAMES:
-                    if (OnNames != null)
-                    {
-                        OnNames(this, new NamesEventArgs(tokens[3], new string[0], true));
-                        //Trace.WriteLine("Names end", "IRC");
-                    }
+                    ProcessNamesReply(tokens, true);
                     break;
                 case ReplyCode.RPL_LIST:
                     if (OnList != null)
@@ -829,6 +853,34 @@ namespace FlamingIRC
                     break;
             }
         }
+
+        private void ProcessNamesReply(string[] tokens, bool end)
+        {
+            if (OnNames == null) return;
+
+            if (end)
+            {
+                OnNames(this, new NamesEventArgs(tokens[3], new string[0], true));
+            }
+            else
+            {
+                if (tokens[2].EndsWith("=")) //hack: Gamesurge sometimes does this
+                {
+                    var newtokens = new List<string>(tokens);
+                    newtokens.RemoveAt(2);
+                    newtokens.Insert(2, tokens[2].Remove(tokens[2].Length - 1));
+                    newtokens.Insert(3, "=");
+                    tokens = newtokens.ToArray();
+                }
+                tokens[5] = RemoveLeadingColon(tokens[5]);
+                int numberOfUsers = tokens.Length - 5;
+                string[] users = new string[numberOfUsers];
+                Array.Copy(tokens, 5, users, 0, numberOfUsers);
+                OnNames(this, new NamesEventArgs(tokens[4], users, false));
+                //Trace.WriteLine("Names", "IRC");
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
