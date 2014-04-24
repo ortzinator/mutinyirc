@@ -424,40 +424,6 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Read in message lines from the IRC server and send them to a parser for processing.
-        /// Discard CTCP and DCC messages if these protocols are not enabled.
-        /// </summary>
-        internal void ReceiveIRCMessages(string line)
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                              string.Format("[{0}] Connection::ReceiveIRCMessages()", Thread.CurrentThread.Name));
-
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                              string.Format("[{0}] Connection::ReceiveIRCMessages() rec'd:{1}", Thread.CurrentThread.Name, line));
-            //Try any custom parsers first
-            if (CustomParse(line))
-            {
-                //One of the custom parsers handled this message so
-                //we go back to listening
-                return;
-            }
-            if (DccListener.IsDccRequest(line))
-            {
-                if (EnableDcc)
-                    DccListener.DefaultInstance.Parse(this, line);
-            }
-            else if (CtcpListener.IsCtcpMessage(line))
-            {
-                if (_ctcpEnabled)
-                    _ctcpListener.Parse(line);
-            }
-            else
-                Listener.Parse(line);
-
-            RawMessageReceived.Fire(this, new DataEventArgs<string>(line));
-        }
-
-        /// <summary>
         /// Send a message to the IRC server and clear the command buffer.
         /// </summary>
         internal void SendCommand(StringBuilder command)
@@ -589,9 +555,40 @@ namespace FlamingIRC
                 ConnectFailed(this, new ConnectFailedEventArgs(reason, (int)socketErrorCode));
         }
 
+        /// <summary>
+        /// Read in message lines from the IRC server and send them to a parser for processing.
+        /// Discard CTCP and DCC messages if these protocols are not enabled.
+        /// </summary>
         protected override void OnReceiveLine(string line)
         {
-            ReceiveIRCMessages(line);
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                              string.Format("[{0}] Connection::ReceiveIRCMessages()", Thread.CurrentThread.Name));
+
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                              string.Format("[{0}] Connection::ReceiveIRCMessages() rec'd:{1}", Thread.CurrentThread.Name, line));
+            //Try any custom parsers first
+            if (CustomParse(line))
+            {
+                //One of the custom parsers handled this message so
+                //we go back to listening
+                return;
+            }
+            if (DccListener.IsDccRequest(line))
+            {
+                if (EnableDcc)
+                    DccListener.DefaultInstance.Parse(this, line);
+            }
+            else if (CtcpListener.IsCtcpMessage(line))
+            {
+                if (_ctcpEnabled)
+                    _ctcpListener.Parse(line);
+            }
+            else
+            {
+                Listener.Parse(line);
+            }
+
+            RawMessageReceived.Fire(this, new DataEventArgs<string>(line));
         }
     }
 }
