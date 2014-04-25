@@ -53,6 +53,8 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="ConnectionTests.cs" />
+    <Compile Include="ListenerTests.cs" />
     <Compile Include="UserModeValidatorTests.cs" />
     <Compile Include="UserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -234,7 +234,7 @@ namespace FlamingIRC
         private readonly char[] Separator = { ' ' };
         private readonly Regex userPattern;
         private readonly Regex channelPattern;
-        private readonly Regex replyRegex;
+        private readonly Regex _replyRegex;
         /// <summary>
         /// Table to hold WhoIsInfos while they are being created. The key is the
         /// nick and the value if the WhoisInfo struct.
@@ -249,7 +249,7 @@ namespace FlamingIRC
         {
             userPattern = new Regex("([\\w\\-" + Rfc2812Util.specialReg + "]+![\\~\\w]+@[\\w\\.\\-]+)", RegexOptions.Compiled | RegexOptions.Singleline);
             channelPattern = new Regex("([#!+&]\\w+)", RegexOptions.Compiled | RegexOptions.Singleline);
-            replyRegex = new Regex("^:([^\\s]*) ([\\d]{3}) ([^\\s]*) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
+            _replyRegex = new Regex("^:([^\\s]*) ([\\d]{3}) ([^\\s]*) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
         }
 
         /// <summary>
@@ -259,7 +259,10 @@ namespace FlamingIRC
         public void Parse(string message)
         {
             if (OnAnything != null)
+            {
                 OnAnything(this, new EventArgs());
+            }
+            Debug.WriteLine(string.Format("RAW: \"{0}\"", message));
 
             string[] tokens = message.Split(Separator);
 
@@ -283,7 +286,7 @@ namespace FlamingIRC
                     Error(ReplyCode.IrcServerError, CondenseStrings(tokens, 1));
                     break;
                 default:
-                    if (replyRegex.IsMatch(message))
+                    if (_replyRegex.IsMatch(message))
                     {
                         ParseReply(tokens);
                     }
@@ -936,7 +939,7 @@ namespace FlamingIRC
                 return String.Join(" ", strings, start, (strings.Length - start));
             }
         }
-        private string RemoveLeadingColon(string text)
+        public string RemoveLeadingColon(string text)
         {
             if (text[0] == ':')
             {
@@ -972,5 +975,34 @@ namespace FlamingIRC
             }
         }
 
+        public IrcMessage ParseIrcMessage(string message)
+        {
+            var msg = new IrcMessage();
+
+            string[] tokens = message.Split(Separator);
+
+            msg.From = RemoveLeadingColon(tokens[0]);
+            msg.Command = tokens[1];
+
+            var colonPos = message.IndexOf(" :");
+            if (colonPos != -1)
+            {
+                msg.Message = message.Substring(colonPos + 2);
+            }
+
+            if (_replyRegex.IsMatch(message))
+            {
+                try
+                {
+                    msg.ReplyCode = (ReplyCode)int.Parse(tokens[1]);
+                }
+                catch (FormatException)
+                {
+                    msg.ReplyCode = ReplyCode.Null;
+                }
+            }
+
+            return msg;
+        }
     }
 }
