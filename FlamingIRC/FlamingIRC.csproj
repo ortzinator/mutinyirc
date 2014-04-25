@@ -144,6 +144,7 @@
     <Compile Include="Identd.cs" />
     <Compile Include="INotifyUpdate.cs" />
     <Compile Include="IParser.cs" />
+    <Compile Include="IrcMessage.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="NameGenerator.cs" />
     <Compile Include="TcpTextClient.cs" />
