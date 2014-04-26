@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
@@ -46,6 +47,7 @@ namespace FlamingIRC.Tests
             IrcMessage msg = _listener.ParseIrcMessage(_pong);
             Assert.AreEqual("PONG", msg.Command);
             Assert.AreEqual("hitchcock.freenode.net", msg.From);
+            Assert.AreEqual(ReplyCode.Null, msg.ReplyCode);
         }
 
         [Test]
@@ -64,6 +66,7 @@ namespace FlamingIRC.Tests
             Assert.AreEqual("hitchcock.freenode.net", msg.From);
             Assert.AreEqual(ReplyCode.RPL_NAMREPLY, msg.ReplyCode);
             Assert.AreEqual("Ortzinator OrtzIRC @ChanServ", msg.Message);
+            Assert.AreEqual(_names.Split(new []{' '}), msg.Tokens);
         }
 
         [Test]
@@ -71,6 +74,23 @@ namespace FlamingIRC.Tests
         {
             Assert.AreEqual("foobar", _listener.RemoveLeadingColon(":foobar"));
             Assert.AreEqual("foobar", _listener.RemoveLeadingColon("foobar"));
+        }
+
+        [Test]
+        public void ProcessNamesReply_IrcMessage()
+        {
+            IrcMessage msg = _listener.ParseIrcMessage(_names);
+            NamesEventArgs expectedArgs = new NamesEventArgs("#ortzirc", new[] { "Ortzinator", "OrtzIRC", "@ChanServ" }, false);
+            NamesEventArgs givenArgs = null;
+
+            _listener.OnNames += delegate(object sender, NamesEventArgs args)
+                                 {
+                                     givenArgs = args;
+                                 };
+            _listener.ProcessNamesReply(msg);
+            Assert.AreEqual(expectedArgs.Nicks, givenArgs.Nicks);
+            Assert.AreEqual(expectedArgs.Channel, givenArgs.Channel);
+            Assert.AreEqual(expectedArgs.Last, givenArgs.Last);
         }
     }
 }

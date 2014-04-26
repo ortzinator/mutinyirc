@@ -11,6 +11,7 @@ namespace FlamingIRC
         private string _from;
         private string _message;
         private ReplyCode _replyCode;
+        private string[] _tokens;
 
         public string Command
         {
@@ -34,6 +35,12 @@ namespace FlamingIRC
         {
             get { return _replyCode; }
             set { _replyCode = value; }
+        }
+
+        public string[] Tokens
+        {
+            get { return _tokens; }
+            set { _tokens = value; }
         }
     }
 }

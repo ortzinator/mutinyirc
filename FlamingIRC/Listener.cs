@@ -857,7 +857,7 @@ namespace FlamingIRC
             }
         }
 
-        private void ProcessNamesReply(string[] tokens, bool end)
+        public void ProcessNamesReply(string[] tokens, bool end)
         {
             if (OnNames == null) return;
 
@@ -980,6 +980,7 @@ namespace FlamingIRC
             var msg = new IrcMessage();
 
             string[] tokens = message.Split(Separator);
+            msg.Tokens = tokens;
 
             msg.From = RemoveLeadingColon(tokens[0]);
             msg.Command = tokens[1];
@@ -1003,6 +1004,28 @@ namespace FlamingIRC
             }
 
             return msg;
+        }
+
+        public void ProcessNamesReply(IrcMessage ircMessage)
+        {
+            if (OnNames == null) return;
+
+            var tokens = ircMessage.Tokens;
+
+            if (tokens[2].EndsWith("=")) //hack: Gamesurge sometimes does this
+            {
+                var newtokens = new List<string>(tokens);
+                newtokens.RemoveAt(2);
+                newtokens.Insert(2, tokens[2].Remove(tokens[2].Length - 1));
+                newtokens.Insert(3, "=");
+                tokens = newtokens.ToArray();
+            }
+            tokens[5] = RemoveLeadingColon(tokens[5]);
+            int numberOfUsers = tokens.Length - 5;
+            string[] users = new string[numberOfUsers];
+            Array.Copy(tokens, 5, users, 0, numberOfUsers);
+            OnNames(this, new NamesEventArgs(tokens[4], users, false));
+            //Trace.WriteLine("Names", "IRC");
         }
     }
 }
