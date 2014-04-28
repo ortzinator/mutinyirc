@@ -512,7 +512,7 @@ namespace FlamingIRC
                     if (OnAction == null) return;
 
                     int last = tokens.Length - 1;
-                    tokens[last] = RemoveTrailingQuote(tokens[last]);
+                    tokens[last] = RemoveTrailingChar(tokens[last]);
                     OnAction(this,
                         new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2],
                             CondenseStrings(tokens, 4)));
@@ -523,7 +523,7 @@ namespace FlamingIRC
                     if (OnPrivateAction == null) return;
 
                     int last = tokens.Length - 1;
-                    tokens[last] = RemoveTrailingQuote(tokens[last]);
+                    tokens[last] = RemoveTrailingChar(tokens[last]);
                     OnPrivateAction(this,
                         new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 4)));
                     //Trace.WriteLine("Private action", "IRC");
@@ -984,7 +984,7 @@ namespace FlamingIRC
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        private string RemoveTrailingQuote(string text)
+        private string RemoveTrailingChar(string text)
         {
             return text.Substring(0, text.Length - 1);
         }
@@ -1068,7 +1068,7 @@ namespace FlamingIRC
         /// <returns>The cleaned message</returns>
         public string CleanActionMessage(string message)
         {
-            string cleaned = RemoveTrailingQuote(message);
+            string cleaned = RemoveTrailingChar(message);
             return cleaned.Substring(8);
         }
     }
