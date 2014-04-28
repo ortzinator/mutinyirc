@@ -199,5 +199,11 @@ namespace FlamingIRC.Tests
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("foobar", givenArgs.Message);
         }
+
+        [Test]
+        public void CleanActionMessage()
+        {
+            Assert.AreEqual("foobars", _listener.CleanActionMessage("\u0001ACTION foobars\u0001"));
+        }
     }
 }
