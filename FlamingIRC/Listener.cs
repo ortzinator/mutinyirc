@@ -554,18 +554,14 @@ namespace FlamingIRC
             {
                 if (Rfc2812Util.IsValidChannelName(message.Target))
                 {
-                    int last = msgTokens.Length - 1;
-                    msgTokens[last] = RemoveTrailingQuote(msgTokens[last]);
                     OnAction.Fire(this, new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Target,
-                            CondenseStrings(msgTokens, 1)));
+                            CleanActionMessage(message.Message)));
                     //Trace.WriteLine("Channel action", "IRC");
                 }
                 else
                 {
-                    int last = msgTokens.Length - 1;
-                    msgTokens[last] = RemoveTrailingQuote(msgTokens[last]);
                     OnPrivateAction.Fire(this,
-                        new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), CondenseStrings(msgTokens, 1)));
+                        new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), CleanActionMessage(message.Message)));
                     //Trace.WriteLine("Private action", "IRC");
                 }
             }
@@ -1063,6 +1059,17 @@ namespace FlamingIRC
             Array.Copy(tokens, 5, users, 0, numberOfUsers);
             OnNames(this, new NamesEventArgs(tokens[4], users, false));
             //Trace.WriteLine("Names", "IRC");
+        }
+
+        /// <summary>
+        /// Cleans an ACTION PRIVMSG so that only the text to be displayed remains
+        /// </summary>
+        /// <param name="message">The raw message</param>
+        /// <returns>The cleaned message</returns>
+        public string CleanActionMessage(string message)
+        {
+            string cleaned = RemoveTrailingQuote(message);
+            return cleaned.Substring(8);
         }
     }
 }
