@@ -565,7 +565,7 @@ namespace FlamingIRC
                     int last = msgTokens.Length - 1;
                     msgTokens[last] = RemoveTrailingQuote(msgTokens[last]);
                     OnPrivateAction.Fire(this,
-                        new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Message));
+                        new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), CondenseStrings(msgTokens, 1)));
                     //Trace.WriteLine("Private action", "IRC");
                 }
             }

@@ -19,9 +19,10 @@ namespace FlamingIRC.Tests
         private const string _join = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com JOIN #ortzirc";
         private const string _notice = ":hitchcock.freenode.net NOTICE * :*** Looking up your hostname...";
         private const string _privmsg = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :foobar";
-
         private const string _privmsgAction =
             ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :\u0001ACTION foobars\u0001";
+        private const string _userString = "Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com";
+        private readonly User _testUser = Rfc2812Util.UserFromString(_userString);
 
         [TestFixtureSetUp]
         public void SetupMethods()
@@ -105,7 +106,7 @@ namespace FlamingIRC.Tests
         public void ParseIrcMessage_Privmsg()
         {
             IrcMessage msg = _listener.ParseIrcMessage(_privmsg);
-            Assert.AreEqual("Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com", msg.From);
+            Assert.AreEqual(_userString, msg.From);
             Assert.AreEqual("foobar", msg.Message);
             Assert.AreEqual(_privmsg.Split(new[] { ' ' }), msg.Tokens);
             Assert.AreEqual("#ortzirc", msg.Target);
@@ -115,7 +116,7 @@ namespace FlamingIRC.Tests
         public void ParseIrcMessage_PrivmsgAction()
         {
             IrcMessage msg = _listener.ParseIrcMessage(_privmsgAction);
-            Assert.AreEqual("Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com", msg.From);
+            Assert.AreEqual(_userString, msg.From);
             Assert.AreEqual("\u0001ACTION foobars\u0001", msg.Message);
             Assert.AreEqual(_privmsgAction.Split(new[] { ' ' }), msg.Tokens);
             Assert.AreEqual("#ortzirc", msg.Target);
@@ -127,7 +128,7 @@ namespace FlamingIRC.Tests
             IrcMessage msg = new IrcMessage
                              {
                                  Command = "PRIVMSG",
-                                 From = "Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com",
+                                 From = _userString,
                                  Message = "\u0001ACTION foobars\u0001",
                                  Target = "#ortzirc",
                                  Tokens = _privmsgAction.Split(new[] { ' ' })
@@ -136,10 +137,67 @@ namespace FlamingIRC.Tests
 
             _listener.OnAction += delegate(object sender, UserChannelMessageEventArgs args) { givenArgs = args; };
             _listener.ProcessPrivmsgCommand(msg);
-            Assert.AreEqual(Rfc2812Util.UserFromString("Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com"),
-                givenArgs.User);
+            Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
             Assert.AreEqual("foobars", givenArgs.Message);
+        }
+
+        [Test]
+        public void ProcessPrivmsgCommand_PrivateAction()
+        {
+            IrcMessage msg = new IrcMessage
+            {
+                Command = "PRIVMSG",
+                From = _userString,
+                Message = "\u0001ACTION foobars\u0001",
+                Target = "Buster",
+                Tokens = _privmsg.Split(new[] { ' ' })
+            };
+            UserMessageEventArgs givenArgs = null;
+
+            _listener.OnPrivateAction += delegate(object sender, UserMessageEventArgs args) { givenArgs = args; };
+            _listener.ProcessPrivmsgCommand(msg);
+            Assert.AreEqual(_testUser, givenArgs.User);
+            Assert.AreEqual("foobars", givenArgs.Message);
+        }
+
+        [Test]
+        public void ProcessPrivmsgCommand_PublicMessage()
+        {
+            IrcMessage msg = new IrcMessage
+            {
+                Command = "PRIVMSG",
+                From = _userString,
+                Message = "foobar",
+                Target = "#ortzirc",
+                Tokens = _privmsg.Split(new[] { ' ' })
+            };
+            UserChannelMessageEventArgs givenArgs = null;
+
+            _listener.OnPublic += delegate(object sender, UserChannelMessageEventArgs args) { givenArgs = args; };
+            _listener.ProcessPrivmsgCommand(msg);
+            Assert.AreEqual(_testUser, givenArgs.User);
+            Assert.AreEqual("#ortzirc", givenArgs.Channel);
+            Assert.AreEqual("foobar", givenArgs.Message);
+        }
+
+        [Test]
+        public void ProcessPrivmsgCommand_PrivateMessage()
+        {
+            IrcMessage msg = new IrcMessage
+            {
+                Command = "PRIVMSG",
+                From = _userString,
+                Message = "foobar",
+                Target = "Buster",
+                Tokens = _privmsg.Split(new[] { ' ' })
+            };
+            UserMessageEventArgs givenArgs = null;
+
+            _listener.OnPrivate += delegate(object sender, UserMessageEventArgs args) { givenArgs = args; };
+            _listener.ProcessPrivmsgCommand(msg);
+            Assert.AreEqual(_testUser, givenArgs.User);
+            Assert.AreEqual("foobar", givenArgs.Message);
         }
     }
 }
