@@ -980,7 +980,7 @@ namespace FlamingIRC
             return text;
         }
         /// <summary>
-        /// Strip off the trailing CTCP quote.
+        /// Strip off the trailing char, usually a CTCP quote.
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
