@@ -502,7 +502,7 @@ namespace FlamingIRC
             }
         }
 
-        private void ProcessPrivmsgCommand(string[] tokens)
+        public void ProcessPrivmsgCommand(string[] tokens)
         {
             tokens[3] = RemoveLeadingColon(tokens[3]);
             if (tokens[3] == ACTION)
@@ -543,6 +543,42 @@ namespace FlamingIRC
                 if (OnPrivate == null) return;
 
                 OnPrivate(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 3)));
+                //Trace.WriteLine("Private msg", "IRC");
+            }
+        }
+
+        public void ProcessPrivmsgCommand(IrcMessage message)
+        {
+            var msgTokens = message.Message.Split(Separator);
+            if (RemoveLeadingColon(msgTokens[0]) == ACTION)
+            {
+                if (Rfc2812Util.IsValidChannelName(message.Target))
+                {
+                    int last = msgTokens.Length - 1;
+                    msgTokens[last] = RemoveTrailingQuote(msgTokens[last]);
+                    OnAction.Fire(this, new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Target,
+                            CondenseStrings(msgTokens, 1)));
+                    //Trace.WriteLine("Channel action", "IRC");
+                }
+                else
+                {
+                    int last = msgTokens.Length - 1;
+                    msgTokens[last] = RemoveTrailingQuote(msgTokens[last]);
+                    OnPrivateAction.Fire(this,
+                        new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Message));
+                    //Trace.WriteLine("Private action", "IRC");
+                }
+            }
+            else if (channelPattern.IsMatch(message.Target))
+            {
+                OnPublic.Fire(this,
+                    new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Target,
+                        message.Message));
+                Trace.WriteLine("Public msg", "IRC");
+            }
+            else
+            {
+                OnPrivate.Fire(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Message));
                 //Trace.WriteLine("Private msg", "IRC");
             }
         }
@@ -984,6 +1020,7 @@ namespace FlamingIRC
 
             msg.From = RemoveLeadingColon(tokens[0]);
             msg.Command = tokens[1];
+            msg.Target = tokens[2];
 
             var colonPos = message.IndexOf(" :");
             if (colonPos != -1)
