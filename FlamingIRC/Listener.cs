@@ -54,7 +54,7 @@ namespace FlamingIRC
         /// <summary>
         /// An <see cref="Sender.Invite"/> message was successfully sent to another user. 
         /// </summary>
-        public event EventHandler<InviteSentEventArgs> OnInviteSent;
+        public event EventHandler<InviteEventArgs> OnInviteSent;
         /// <summary>
         /// The user tried to change his nick but it failed.
         /// </summary>
@@ -130,7 +130,7 @@ namespace FlamingIRC
         /// <summary>
         /// The user has been invited to a channel.
         /// </summary>
-        public event InviteEventHandler OnInvite;
+        public event EventHandler<InviteEventArgs> OnInvite;
         /// <summary>
         /// Someone has been kicked from a channel. 
         /// </summary>
@@ -424,11 +424,9 @@ namespace FlamingIRC
             //Trace.WriteLine("Kick", "IRC");
         }
 
-        private void ProcessInviteCommand(string[] tokens)
+        public void ProcessInviteCommand(string[] tokens)
         {
-            if (OnInvite == null) return;
-
-            OnInvite(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[3]));
+            OnInvite.Fire(this, new InviteEventArgs(tokens[0], RemoveLeadingColon(tokens[3])));
             //Trace.WriteLine("Invite", "IRC");
         }
 
@@ -481,6 +479,13 @@ namespace FlamingIRC
 
             OnJoin(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
             //Trace.WriteLine("Join", "IRC");
+        }
+
+        public void ProcessJoinCommand(IrcMessage ircMessage)
+        {
+            if (OnJoin == null) return;
+
+            OnJoin(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target);
         }
 
         public void ProcessNoticeCommand(string[] tokens)
@@ -665,7 +670,7 @@ namespace FlamingIRC
                 case ReplyCode.RPL_INVITING:
                     if (OnInviteSent != null)
                     {
-                        OnInviteSent(this, new InviteSentEventArgs(tokens[3], tokens[4]));
+                        OnInviteSent(this, new InviteEventArgs(tokens[3], tokens[4]));
                     }
                     break;
                 case ReplyCode.RPL_AWAY:
@@ -1093,6 +1098,12 @@ namespace FlamingIRC
                 OnPrivateNotice.Fire(this, new UserMessageEventArgs(fromUser, ircMessage.Message));
                 //Trace.WriteLine("Private notice", "IRC");
             }
+        }
+
+        public void ProcessInviteCommand(IrcMessage ircMessage)
+        {
+            var fromUser = Rfc2812Util.UserFromString(ircMessage.From);
+            OnInvite.Fire(this, new InviteEventArgs(fromUser.Nick, ircMessage.Message));
         }
     }
 }
