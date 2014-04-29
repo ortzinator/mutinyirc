@@ -131,7 +131,7 @@
     <Compile Include="Events\ConnectFailedEventArgs.cs" />
     <Compile Include="Events\DisconnectEventArgs.cs" />
     <Compile Include="Events\ErrorMessageEventArgs.cs" />
-    <Compile Include="Events\InviteSentEventArgs.cs" />
+    <Compile Include="Events\InviteEventArgs.cs" />
     <Compile Include="Events\NamesEventArgs.cs" />
     <Compile Include="Events\NickChangeEventArgs.cs" />
     <Compile Include="Events\NickErrorEventArgs.cs" />

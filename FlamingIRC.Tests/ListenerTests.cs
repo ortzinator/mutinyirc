@@ -214,6 +214,14 @@ namespace FlamingIRC.Tests
         }
 
         [Test]
+        public void ParseIrcMessage_JoinCommand()
+        {
+            IrcMessage msg = _listener.ParseIrcMessage(_join);
+            Assert.AreEqual(_userString, msg.From);
+            Assert.AreEqual("#ortzirc", msg.Target);
+        }
+
+        [Test]
         public void ProcessNoticeCommand_PrivateNotice()
         {
             IrcMessage msg = new IrcMessage
@@ -247,6 +255,40 @@ namespace FlamingIRC.Tests
             _listener.ProcessNickCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("Ortz", givenArgs.NewNick);
+        }
+
+        [Test]
+        public void ProcessInviteCommand()
+        {
+            IrcMessage msg = new IrcMessage
+            {
+                Command = "INVITE",
+                From = _userString,
+                Message = "#ortzirc"
+            };
+            InviteEventArgs givenArgs = null;
+            _listener.OnInvite += delegate(object sender, InviteEventArgs args) { givenArgs = args; };
+            _listener.ProcessInviteCommand(msg);
+            Assert.AreEqual("#ortzirc", givenArgs.Channel);
+            Assert.AreEqual("Ortzinator", givenArgs.Nick);
+        }
+
+        [Test]
+        public void ProcessJoinCommand()
+        {
+            IrcMessage msg = new IrcMessage
+            {
+                Command = "JOIN",
+                From = _userString,
+                Target = "#ortzirc"
+            };
+            _listener.OnJoin += delegate(User user, string channel)
+                                        {
+                                            Assert.AreEqual(_testUser, user);
+                                            Assert.AreEqual("#ortzirc", channel);
+                                        };
+            _listener.ProcessJoinCommand(msg);
+            
         }
     }
 }
