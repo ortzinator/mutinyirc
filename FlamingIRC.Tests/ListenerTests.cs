@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using FakeItEasy;
 
 namespace FlamingIRC.Tests
@@ -12,17 +7,19 @@ namespace FlamingIRC.Tests
     public class ListenerTests
     {
         private Listener _listener;
-        private const string _pong = ":hitchcock.freenode.net PONG hitchcock.freenode.net :ping";
-        private const string _names = ":hitchcock.freenode.net 353 OrtzIRC = #ortzirc :Ortzinator OrtzIRC @ChanServ";
-        private const string _namesEnd = ":hitchcock.freenode.net 366 OrtzIRC #ortzirc :End of /NAMES list.";
-        private const string _quit = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT :Quit: Leaving";
-        private const string _join = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com JOIN #ortzirc";
-        private const string _notice = ":hitchcock.freenode.net NOTICE * :*** Looking up your hostname...";
-        private const string _privmsg = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :foobar";
-        private const string _privmsgAction =
+        private static readonly string _pong = ":hitchcock.freenode.net PONG hitchcock.freenode.net :ping";
+        private static readonly string _names = ":hitchcock.freenode.net 353 OrtzIRC = #ortzirc :Ortzinator OrtzIRC @ChanServ";
+        private static readonly string _namesEnd = ":hitchcock.freenode.net 366 OrtzIRC #ortzirc :End of /NAMES list.";
+        private static readonly string _quit = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT :Quit: Leaving";
+        private static readonly string _join = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com JOIN #ortzirc";
+        private static readonly string _noticePrivate = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NOTICE OrtzIRC :foobar";
+        private static readonly string _privmsg = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :foobar";
+        private static readonly string _privmsgAction =
             ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :\u0001ACTION foobars\u0001";
-        private const string _userString = "Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com";
-        private readonly User _testUser = Rfc2812Util.UserFromString(_userString);
+        private static readonly string _nick = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NICK :Ortz";
+
+        private static readonly string _userString = "Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com";
+        private static readonly User _testUser = Rfc2812Util.UserFromString(_userString);
 
         [TestFixtureSetUp]
         public void SetupMethods()
@@ -58,10 +55,10 @@ namespace FlamingIRC.Tests
         [Test]
         public void ParseIrcMessage_NoticeMessage()
         {
-            IrcMessage msg = _listener.ParseIrcMessage(_notice);
-            Assert.AreEqual("hitchcock.freenode.net", msg.From);
+            IrcMessage msg = _listener.ParseIrcMessage(_noticePrivate);
+            Assert.AreEqual(_userString, msg.From);
             Assert.AreEqual("NOTICE", msg.Command);
-            Assert.AreEqual("*** Looking up your hostname...", msg.Message);
+            Assert.AreEqual("foobar", msg.Message);
         }
 
         [Test]
@@ -204,6 +201,52 @@ namespace FlamingIRC.Tests
         public void CleanActionMessage()
         {
             Assert.AreEqual("foobars", _listener.CleanActionMessage("\u0001ACTION foobars\u0001"));
+        }
+
+        [Test]
+        public void ParseIrcMessage_PrivateNotice()
+        {
+            IrcMessage msg = _listener.ParseIrcMessage(_noticePrivate);
+            Assert.AreEqual(_userString, msg.From);
+            Assert.AreEqual("foobar", msg.Message);
+            Assert.AreEqual(_noticePrivate.Split(new[] { ' ' }), msg.Tokens);
+            Assert.AreEqual("OrtzIRC", msg.Target);
+        }
+
+        [Test]
+        public void ProcessNoticeCommand_PrivateNotice()
+        {
+            IrcMessage msg = new IrcMessage
+            {
+                Command = "NOTICE",
+                From = _userString,
+                Message = "foobar",
+                Target = "OrtzIRC",
+                Tokens = _privmsg.Split(new[] { ' ' })
+            };
+            UserMessageEventArgs givenArgs = null;
+
+            _listener.OnPrivateNotice += delegate(object sender, UserMessageEventArgs args) { givenArgs = args; };
+            _listener.ProcessNoticeCommand(msg);
+            Assert.AreEqual(_testUser, givenArgs.User);
+            Assert.AreEqual("foobar", givenArgs.Message);
+        }
+
+        [Test]
+        public void ProcessNickCommand()
+        {
+            IrcMessage msg = new IrcMessage
+            {
+                Command = "NICK",
+                From = _userString,
+                Message = "Ortz",
+                Tokens = _nick.Split(new[] { ' ' })
+            };
+            NickChangeEventArgs givenArgs = null;
+            _listener.OnNick += delegate(object sender, NickChangeEventArgs args) { givenArgs = args; };
+            _listener.ProcessNickCommand(msg);
+            Assert.AreEqual(_testUser, givenArgs.User);
+            Assert.AreEqual("Ortz", givenArgs.NewNick);
         }
     }
 }

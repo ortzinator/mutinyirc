@@ -470,6 +470,11 @@ namespace FlamingIRC
             //Trace.WriteLine("Nick", "IRC");
         }
 
+        public void ProcessNickCommand(IrcMessage message)
+        {
+            OnNick.Fire(this, new NickChangeEventArgs(Rfc2812Util.UserFromString(message.From), message.Message));
+        }
+
         private void ProcessJoinCommand(string[] tokens)
         {
             if (OnJoin == null) return;
@@ -478,7 +483,7 @@ namespace FlamingIRC
             //Trace.WriteLine("Join", "IRC");
         }
 
-        private void ProcessNoticeCommand(string[] tokens)
+        public void ProcessNoticeCommand(string[] tokens)
         {
             tokens[3] = RemoveLeadingColon(tokens[3]);
             if (Rfc2812Util.IsValidChannelName(tokens[2]))
@@ -1070,6 +1075,24 @@ namespace FlamingIRC
         {
             string cleaned = RemoveTrailingChar(message);
             return cleaned.Substring(8);
+        }
+
+        public void ProcessNoticeCommand(IrcMessage ircMessage)
+        {
+            var fromUser = Rfc2812Util.UserFromString(ircMessage.From);
+            if (Rfc2812Util.IsValidChannelName(ircMessage.Target))
+            {
+                OnPublicNotice.Fire(this, new UserChannelMessageEventArgs(
+                    fromUser,
+                    ircMessage.Target,
+                    ircMessage.Message));
+                //Trace.WriteLine("Public notice", "IRC");
+            }
+            else
+            {
+                OnPrivateNotice.Fire(this, new UserMessageEventArgs(fromUser, ircMessage.Message));
+                //Trace.WriteLine("Private notice", "IRC");
+            }
         }
     }
 }
