@@ -17,6 +17,7 @@ namespace FlamingIRC.Tests
         private static readonly string _privmsgAction =
             ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :\u0001ACTION foobars\u0001";
         private static readonly string _nick = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NICK :Ortz";
+        private static readonly string _kick = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com KICK #ortzirc OrtzIRC :OrtzIRC";
 
         private static readonly string _userString = "Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com";
         private static readonly User _testUser = Rfc2812Util.UserFromString(_userString);
@@ -222,6 +223,14 @@ namespace FlamingIRC.Tests
         }
 
         [Test]
+        public void ParseIrcMessage_KickCommand()
+        {
+            IrcMessage msg = _listener.ParseIrcMessage(_kick);
+            Assert.AreEqual(_userString, msg.From);
+            Assert.AreEqual("#ortzirc", msg.Target);
+        }
+
+        [Test]
         public void ProcessNoticeCommand_PrivateNotice()
         {
             IrcMessage msg = new IrcMessage
@@ -282,13 +291,46 @@ namespace FlamingIRC.Tests
                 From = _userString,
                 Target = "#ortzirc"
             };
+            User expectedUser = null;
+            string expectedChannel = null;
             _listener.OnJoin += delegate(User user, string channel)
-                                        {
-                                            Assert.AreEqual(_testUser, user);
-                                            Assert.AreEqual("#ortzirc", channel);
-                                        };
+                                {
+                                    expectedUser = user;
+                                    expectedChannel = channel;
+                                };
             _listener.ProcessJoinCommand(msg);
+            Assert.AreEqual(_testUser, expectedUser);
+            Assert.AreEqual("#ortzirc", expectedChannel);
             
+        }
+
+        [Test]
+        public void ProcessKickCommand()
+        {
+            IrcMessage msg = new IrcMessage
+            {
+                Command = "KICK",
+                From = _userString,
+                Target = "OrtzIRC",
+                Message = "noob",
+                Tokens = _kick.Split(new[] { ' ' })
+            };
+            User givenUser = null;
+            string givenChannel = null;
+            string givenKickee = null;
+            string givenReason = null;
+            _listener.OnKick += delegate(User user, string channel, string kickee, string reason)
+                                {
+                                    givenUser = user;
+                                    givenChannel = channel;
+                                    givenKickee = kickee;
+                                    givenReason = reason;
+                                };
+            _listener.ProcessKickCommand(msg);
+            Assert.AreEqual(_testUser, givenUser);
+            Assert.AreEqual(givenChannel, "#ortzirc");
+            Assert.AreEqual(givenKickee, "OrtzIRC");
+            Assert.AreEqual(givenReason, "noob");
         }
     }
 }
