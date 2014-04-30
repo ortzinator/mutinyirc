@@ -424,6 +424,13 @@ namespace FlamingIRC
             //Trace.WriteLine("Kick", "IRC");
         }
 
+        public void ProcessKickCommand(IrcMessage ircMessage)
+        {
+            if (OnKick == null) return;
+
+            OnKick(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Tokens[2], ircMessage.Tokens[3], ircMessage.Message);
+        }
+
         public void ProcessInviteCommand(string[] tokens)
         {
             OnInvite.Fire(this, new InviteEventArgs(tokens[0], RemoveLeadingColon(tokens[3])));
