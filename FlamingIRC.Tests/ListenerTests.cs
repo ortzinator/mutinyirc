@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using FakeItEasy;
 
 namespace FlamingIRC.Tests
@@ -294,10 +295,10 @@ namespace FlamingIRC.Tests
             User expectedUser = null;
             string expectedChannel = null;
             _listener.OnJoin += delegate(User user, string channel)
-                                {
-                                    expectedUser = user;
-                                    expectedChannel = channel;
-                                };
+            {
+                expectedUser = user;
+                expectedChannel = channel;
+            };
             _listener.ProcessJoinCommand(msg);
             Assert.AreEqual(_testUser, expectedUser);
             Assert.AreEqual("#ortzirc", expectedChannel);
@@ -331,6 +332,42 @@ namespace FlamingIRC.Tests
             Assert.AreEqual(givenChannel, "#ortzirc");
             Assert.AreEqual(givenKickee, "OrtzIRC");
             Assert.AreEqual(givenReason, "noob");
+        }
+
+        [Test]
+        public void Parse_Ping_OnPingFires()
+        {
+            string givenMsg = String.Empty;
+            _listener.OnPing += delegate(string message)
+            {
+                givenMsg = message;
+            };
+            _listener.Parse("PING :irc.funet.fi");
+            Assert.AreEqual("irc.funet.fi", givenMsg);
+        }
+
+        [Test]
+        public void Parse_Notice_OnPrivateNoticeFires()
+        {
+            string givenMsg = String.Empty;
+            _listener.OnPrivateNotice += delegate(object sender, UserMessageEventArgs args)
+            {
+                givenMsg = args.Message;
+            };
+            _listener.Parse("NOTICE OrtzIRC :foobar");
+            Assert.AreEqual("foobar", givenMsg);
+        }
+
+        [Test]
+        public void Parse_Error_OnErrorFires()
+        {
+            string givenMsg = String.Empty;
+            _listener.OnError += delegate(object sender, ErrorMessageEventArgs args)
+            {
+                givenMsg = args.Message;
+            };
+            _listener.Parse("ERROR :the end is nigh");
+            Assert.AreEqual("the end is nigh", givenMsg);
         }
     }
 }
