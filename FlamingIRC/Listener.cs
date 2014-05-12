@@ -37,7 +37,7 @@ namespace FlamingIRC
     /// This class parses messages received from the IRC server and
     /// raises the appropriate event. 
     /// </summary>
-    public sealed class Listener
+    public class Listener
     {
         /// <summary>
         /// Messages that are not handled by other events and are not errors.
@@ -258,42 +258,86 @@ namespace FlamingIRC
         /// <param name="message"></param>
         public void Parse(string message)
         {
-            if (OnAnything != null)
-            {
-                OnAnything(this, new EventArgs());
-            }
+            OnAnything.Fire(this, new EventArgs());
             Debug.WriteLine(string.Format("RAW: \"{0}\"", message));
 
-            string[] tokens = message.Split(Separator);
+            IrcMessage ircMessage = ParseIrcMessage(message);
 
-            switch (tokens[0])
+            switch (ircMessage.Tokens[0])
             {
                 case PING:
                     if (OnPing != null)
                     {
-                        tokens[1] = RemoveLeadingColon(tokens[1]);
-                        OnPing(CondenseStrings(tokens, 1));
+                        OnPing(ircMessage.Message);
                     }
                     break;
                 case NOTICE:
-                    if (OnPrivateNotice != null)
-                    {
-                        OnPrivateNotice(this, new UserMessageEventArgs(User.Empty, CondenseStrings(tokens, 2)));
-                    }
+                    OnPrivateNotice.Fire(this, new UserMessageEventArgs(User.Empty, ircMessage.Message));
                     break;
                 case ERROR:
-                    tokens[1] = RemoveLeadingColon(tokens[1]);
-                    Error(ReplyCode.IrcServerError, CondenseStrings(tokens, 1));
+                    Error(ReplyCode.IrcServerError, ircMessage.Message);
                     break;
                 default:
                     if (_replyRegex.IsMatch(message))
                     {
-                        ParseReply(tokens);
+                        ParseReply(ircMessage.Tokens);
                     }
                     else
                     {
-                        ParseCommand(tokens);
+                        ParseCommand(ircMessage.Tokens);
                     }
+                    break;
+            }
+        }
+
+        private void ParseCommand(IrcMessage ircMessage)
+        {
+            switch (ircMessage.Command)
+            {
+                case PONG:
+                    break;
+                case NOTICE:
+                    ProcessNoticeCommand(ircMessage);
+                    break;
+                case JOIN:
+                    ProcessJoinCommand(ircMessage);
+                    break;
+                case PRIVMSG:
+                    ProcessPrivmsgCommand(ircMessage);
+                    break;
+                case NICK:
+                    ProcessNickCommand(ircMessage);
+                    break;
+                case TOPIC:
+                    //ProcessTopicCommand(ircMessage);
+                    break;
+                case PART:
+                    //ProcessPartCommand(ircMessage);
+                    break;
+                case QUIT:
+                    //ProcessQuitCommand(ircMessage);
+                    break;
+                case INVITE:
+                    ProcessInviteCommand(ircMessage);
+                    break;
+                case KICK:
+                    ProcessKickCommand(ircMessage);
+                    break;
+                case MODE:
+                    //ProcessModeCommand(ircMessage);
+                    break;
+                case KILL:
+                    //ProcessKillCommand(ircMessage);
+                    break;
+                default:
+                    if (OnError != null)
+                    {
+                        OnError(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, ircMessage.Message));
+                    }
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                        string.Format("[{0}] Listener::ParseCommand() Unknown IRC command={1}",
+                            Thread.CurrentThread.Name, ircMessage.Command));
+                    //Trace.WriteLine("Unknown command", "IRC");
                     break;
             }
         }
@@ -1033,7 +1077,10 @@ namespace FlamingIRC
 
             msg.From = RemoveLeadingColon(tokens[0]);
             msg.Command = tokens[1];
-            msg.Target = tokens[2];
+            if (tokens.Length >= 3)
+            {
+                msg.Target = tokens[2];
+            }
 
             var colonPos = message.IndexOf(" :");
             if (colonPos != -1)
