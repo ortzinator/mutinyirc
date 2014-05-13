@@ -99,26 +99,24 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// A read-only property indicating whether the connection
-        /// has been opened with the IRC server and the
-        /// socket has been successfully registered.
+        /// A read-only property indicating whether the connection has been opened with the IRC
+        /// server and the socket has been successfully registered.
         /// </summary>
         /// <value>True if the socket is connected and registered.</value>
         public bool Registered { get; private set; }
 
         /// <summary>
-        /// By default the connection itself will handle the case
-        /// where, while attempting to register the socket's nick
-        /// is already in use. It does this by simply appending
-        /// 2 random numbers to the end of the nick.
+        /// By default the connection itself will handle the case where, while attempting to
+        /// register the socket's nick is already in use. It does this by simply appending 2 random
+        /// numbers to the end of the nick.
         /// </summary>
         /// <remarks>
-        /// The NickError event is shows that the nick collision has happened
-        /// and it is fixed by calling Sender's Register() method passing
-        /// in the replacement nickname.
+        /// The NickError event is shows that the nick collision has happened and it is fixed by
+        /// calling Sender's Register() method passing in the replacement nickname.
         /// </remarks>
-        /// <value>True if the connection should handle this case and
-        /// false if the socket will handle it itself.</value>
+        /// <value>
+        /// True if the connection should handle this case and false if the socket will handle it itself.
+        /// </value>
         public bool HandleNickTaken { get; set; }
 
         /// <summary>
@@ -131,11 +129,12 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Whether Ctcp commands should be processed and if
-        /// Ctcp events will be raised.
+        /// Whether Ctcp commands should be processed and if Ctcp events will be raised.
         /// </summary>
-        /// <value>True will enable the CTCP sender and listener and
-        /// false will cause their property calls to return null.</value>
+        /// <value>
+        /// True will enable the CTCP sender and listener and false will cause their property calls
+        /// to return null.
+        /// </value>
         public bool EnableCtcp
         {
             get { return _ctcpEnabled; }
@@ -156,10 +155,9 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Whether DCC requests should be processed or ignored
-        /// by this Connection. Since the DccListener is a singleton and
-        /// shared by all Connections, listeners to DccListener events should
-        /// be manually removed when no longer needed.
+        /// Whether DCC requests should be processed or ignored by this Connection. Since the
+        /// DccListener is a singleton and shared by all Connections, listeners to DccListener
+        /// events should be manually removed when no longer needed.
         /// </summary>
         /// <value>True to process DCC requests.</value>
         public bool EnableDcc { get; set; }
@@ -180,8 +178,7 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// The amount of time that has passed since the socket
-        /// sent a command to the IRC server.
+        /// The amount of time that has passed since the socket sent a command to the IRC server.
         /// </summary>
         /// <value>Read only TimeSpan</value>
         public TimeSpan IdleTime
@@ -226,11 +223,11 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// A read-only collection of string key/value pairs
-        /// representing IRC server proprties.
+        /// A read-only collection of string key/value pairs representing IRC server proprties.
         /// </summary>
-        /// <value>This connection's ServerProperties object is null if it
-        /// has not been created.</value>
+        /// <value>
+        /// This connection's ServerProperties object is null if it has not been created.
+        /// </value>
         public ServerProperties ServerProperties
         {
             get { return _properties; }
@@ -268,8 +265,8 @@ namespace FlamingIRC
         /// Indicates that a connection has been made with the server.
         /// </summary>
         /// <remarks>
-        /// Does not mean you are ready to use the server. For that, see 
-        /// <see cref="Listener.OnRegistered" />.
+        /// Does not mean you are ready to use the server. For that, see <see
+        /// cref="Listener.OnRegistered" />.
         /// </remarks>
         public event EventHandler ConnectionEstablished;
 
@@ -359,8 +356,8 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Listen for the 005 info messages sent during registration so that the maximum lengths
-        /// of certain items (Nick, Away, Topic) can be determined dynamically.
+        /// Listen for the 005 info messages sent during registration so that the maximum lengths of
+        /// certain items (Nick, Away, Topic) can be determined dynamically.
         /// </summary>
         private void OnReply(object sender, ReplyEventArgs a)
         {
@@ -449,9 +446,8 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Send a message to the IRC server which does
-        /// not affect the socket's idle time. Used for automatic replies
-        /// such as PONG or Ctcp repsones.
+        /// Send a message to the IRC server which does not affect the socket's idle time. Used for
+        /// automatic replies such as PONG or Ctcp repsones.
         /// </summary>
         internal void SendAutomaticReply(StringBuilder command)
         {
@@ -473,8 +469,10 @@ namespace FlamingIRC
         /// <summary>
         /// Sends a 'Quit' message to the server, and closes the connection.
         /// </summary>
-        /// <remarks>The state of the connection will remain the same even after a disconnect,
-        /// so the connection can be reopened. All the event handlers will remain registered.</remarks>
+        /// <remarks>
+        /// The state of the connection will remain the same even after a disconnect, so the
+        /// connection can be reopened. All the event handlers will remain registered.
+        /// </remarks>
         /// <param name="reason">A message displayed to other IRC users upon disconnect.</param>
         public void Disconnect(string reason)
         {
@@ -501,11 +499,9 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Adds a parser class to a list of custom parsers.
-        /// Any number can be added. The custom parsers
-        /// will be tested using <c>CanParse()</c> before
-        /// the default parsers. The last parser to be added
-        /// will be the first to process a message.
+        /// Adds a parser class to a list of custom parsers. Any number can be added. The custom
+        /// parsers will be tested using <c>CanParse()</c> before the default parsers. The last
+        /// parser to be added will be the first to process a message.
         /// </summary>
         /// <param name="parser">Any class that implements IParser.</param>
         public void AddParser(IParser parser)
