@@ -1,9 +1,9 @@
-﻿using System;
+﻿using FlamingIRC;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
-using FlamingIRC;
 
 namespace OrtzIRC.Common
 {
@@ -44,7 +44,9 @@ namespace OrtzIRC.Common
             set
             {
                 if (value == null)
+                {
                     throw new ArgumentNullException("value");
+                }
 
                 Channels.Clear();
                 _connection = value;
@@ -75,12 +77,15 @@ namespace OrtzIRC.Common
         }
 
         public static event EventHandler<ChannelEventArgs> ChannelCreated;
+
         public static event EventHandler<ChannelEventArgs> ChannelRemoved;
 
         public void SetupConnection(ConnectionArgs args)
         {
             if (args.Nick == null)
+            {
                 throw new ArgumentNullException("ConnectionArgs.Nick");
+            }
 
             Connection = new Connection(args, true, false) { HandleNickTaken = false };
         }
@@ -202,24 +207,43 @@ namespace OrtzIRC.Common
         public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
 
         public event EventHandler<DataEventArgs<string>> RawMessageReceived;
+
         public event EventHandler<ChannelMessageEventArgs> ChannelMessaged;
+
         public event EventHandler<EventArgs> Connected;
+
         public event EventHandler<ErrorMessageEventArgs> ErrorMessageRecieved;
+
         public event EventHandler Registered;
+
         public event EventHandler<PartEventArgs> Part;
+
         public event EventHandler<PartEventArgs> PartSelf;
+
         public event EventHandler<ChannelModeChangeEventArgs> ChannelModeChange;
+
         public event EventHandler<UserModeChangeEventArgs> UserModeChanged;
+
         public event EventHandler Disconnected;
+
         public event EventHandler<ChannelMessageEventArgs> UserAction;
+
         public event EventHandler<UserMessageEventArgs> PrivateNotice;
+
         public event EventHandler<NickChangeEventArgs> OnNick;
+
         public event EventHandler<NamesEventArgs> OnNames;
+
         public event EventHandler<KickEventArgs> Kick;
+
         public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
+
         public event EventHandler<DisconnectEventArgs> ConnectionLost;
+
         public event EventHandler ConnectCancelled;
+
         public event EventHandler<DataEventArgs<string>> PingReceived;
+
         public event EventHandler<NickErrorEventArgs> NickError;
 
         // hack - should call dispose
@@ -249,13 +273,14 @@ namespace OrtzIRC.Common
                 return;
             }
 
+            //Don't attept to connect more often than once a second
             if (DateTime.Now - _serverChangeTime < TimeSpan.FromSeconds(1))
             {
                 var th = new Thread(() =>
-                                        {
-                                            Thread.Sleep(TimeSpan.FromSeconds(1));
-                                            Connection.Connect();
-                                        });
+                                    {
+                                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                                        Connection.Connect();
+                                    });
                 th.Start();
             }
             else
@@ -485,7 +510,6 @@ namespace OrtzIRC.Common
         {
             return user.Nick == Connection.ConnectionData.Nick;
         }
-
 
         public Channel CreateChannel(string channelName)
         {
