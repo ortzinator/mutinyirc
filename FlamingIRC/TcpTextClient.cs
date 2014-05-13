@@ -53,22 +53,21 @@ namespace FlamingIRC
 
     public abstract class TcpTextClient
     {
-        private const int bufferLength = 512;
-        private byte[] byteBuffer;
-        private Socket socket;
-        private StringBuilder textBuffer;
-        private string serverName;
-        private SslStream sslStream;
-        private Stream stream;
-        private bool usesSSL;
-
+        private const int BufferLength = 512;
+        private readonly byte[] _byteBuffer;
+        private Socket _socket;
+        private readonly StringBuilder _textBuffer;
+        private string _serverName;
+        private SslStream _sslStream;
+        private Stream _stream;
+        private bool _usesSsl;
 
         protected TcpTextClient()
         {
-            byteBuffer = new byte[bufferLength];
-            textBuffer = new StringBuilder();
+            _byteBuffer = new byte[BufferLength];
+            _textBuffer = new StringBuilder();
             TextEncoding = Encoding.UTF8;
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
         public Encoding TextEncoding { get; protected set; }
@@ -76,37 +75,31 @@ namespace FlamingIRC
         public bool Connected { get; protected set; }
 
         /// <summary>
-        /// Create a new connection to the server.
-        /// Will call OnConnected or OnDisconnected depending on connection attempt outcome.
+        /// Create a new connection to the server. Will call OnConnected or OnDisconnected depending
+        /// on connection attempt outcome.
         /// </summary>
-        /// <param name="server">
-        /// A <see cref="System.String"/>
-        /// </param>
-        /// <param name="port">
-        /// A <see cref="System.Int32"/>
-        /// </param>
-        /// <param name="ssl">
-        /// A <see cref="System.Boolean"/>
-        /// </param>
+        /// <param name="server">A <see cref="System.String" /></param>
+        /// <param name="port">A <see cref="System.Int32" /></param>
+        /// <param name="ssl">A <see cref="System.Boolean" /></param>
         protected void Connect(string server, int port, bool ssl)
         {
-            usesSSL = ssl;
-            serverName = server;
-            socket.BeginConnect(server, port, onConnect, null);
+            _usesSsl = ssl;
+            _serverName = server;
+            _socket.BeginConnect(server, port, OnConnect, null);
         }
 
         /// <summary>
         /// Close the connection to the server.
         /// </summary>
         /// <remarks>
-        /// The client need not be actually connected. This method will also "give up" an
-        ///  attept to connect or revert to a disconnected state after an error.
+        /// The client need not be actually connected. This method will also "give up" an attept to
+        /// connect or revert to a disconnected state after an error.
         /// </remarks>
         public void Disconnect(DisconnectReason reason)
         {
-            socket.Shutdown(SocketShutdown.Both);
-            socket.Close();
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket.Shutdown(SocketShutdown.Both);
+            _socket.Close();
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Connected = false;
             OnDisconnect(reason, null);
         }
@@ -114,34 +107,32 @@ namespace FlamingIRC
         /// <summary>
         /// Sends a string message to the server.
         /// </summary>
-        /// <param name="message">
-        /// A <see cref="System.String"/>
-        /// </param>
+        /// <param name="message">A <see cref="System.String" /></param>
         public void Send(string message)
         {
             message = message + "\r\n";
             byte[] buffer = TextEncoding.GetBytes(message);
-            stream.BeginWrite(buffer, 0, buffer.Length, onSend, null);
+            _stream.BeginWrite(buffer, 0, buffer.Length, OnSend, null);
             Console.Write("Outgoing: {0}", message);
         }
 
-        private void onConnect(IAsyncResult res)
+        private void OnConnect(IAsyncResult res)
         {
             try
             {
-                socket.EndConnect(res);
-                stream = new NetworkStream(socket);
+                _socket.EndConnect(res);
+                _stream = new NetworkStream(_socket);
 
-                if (usesSSL)
+                if (_usesSsl)
                 {
-                    sslStream = new SslStream(stream, false, onCertificateValidate);
-                    sslStream.BeginAuthenticateAsClient(serverName, onAuthenticate, null);
-                    stream = sslStream;
+                    _sslStream = new SslStream(_stream, false, OnCertificateValidate);
+                    _sslStream.BeginAuthenticateAsClient(_serverName, OnAuthenticate, null);
+                    _stream = _sslStream;
                 }
                 else
                 {
                     OnConnect();
-                    waitForData();
+                    WaitForData();
                 }
             }
             catch (SocketException e)
@@ -156,7 +147,7 @@ namespace FlamingIRC
             }
         }
 
-        private bool onCertificateValidate(object sender, X509Certificate certificate, X509Chain chain,
+        private bool OnCertificateValidate(object sender, X509Certificate certificate, X509Chain chain,
                                            SslPolicyErrors errors)
         {
             if (errors != SslPolicyErrors.None)
@@ -167,57 +158,57 @@ namespace FlamingIRC
             return true;
         }
 
-        private void onAuthenticate(IAsyncResult res)
+        private void OnAuthenticate(IAsyncResult res)
         {
             try
             {
-                sslStream.EndAuthenticateAsClient(res);
+                _sslStream.EndAuthenticateAsClient(res);
                 OnConnect();
-                waitForData();
+                WaitForData();
             }
             catch (AuthenticationException)
             {
-                socket.Shutdown(SocketShutdown.Both);
+                _socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
                 OnConnectFailed(ConnectError.AuthenticationFailed, null);
             }
         }
 
-        private void waitForData()
+        private void WaitForData()
         {
             try
             {
-                stream.BeginRead(byteBuffer, 0, bufferLength, onDataReceived, null);
+                _stream.BeginRead(_byteBuffer, 0, BufferLength, OnDataReceived, null);
             }
             catch (Exception)
             {
-                socket.Shutdown(SocketShutdown.Both);
+                _socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
                 OnDisconnect(DisconnectReason.SocketError, null);
                 throw; //Wasn't really handled so pass it through
             }
         }
 
-        private void onDataReceived(IAsyncResult res)
+        private void OnDataReceived(IAsyncResult res)
         {
-            if (!socket.Connected)
+            if (!_socket.Connected)
                 return;
 
             try
             {
-                int bytes = stream.EndRead(res);
+                int bytes = _stream.EndRead(res);
 
                 if (bytes == 0)
                 {
                     // Connection Closed!
-                    socket.Shutdown(SocketShutdown.Both);
+                    _socket.Shutdown(SocketShutdown.Both);
                     Connected = false;
                     OnDisconnect(DisconnectReason.RemoteHostClosedConnection, null);
                     return;
                 }
 
                 string text =
-                    TextEncoding.GetString((bytes == bufferLength) ? byteBuffer : byteBuffer.Slice(0, bytes));
+                    TextEncoding.GetString((bytes == BufferLength) ? _byteBuffer : _byteBuffer.Slice(0, bytes));
                 foreach (char item in text)
                 {
                     switch (item)
@@ -226,17 +217,17 @@ namespace FlamingIRC
                             continue;
 
                         case '\n':
-                            OnReceiveLine(textBuffer.ToString());
-                            textBuffer.Clear();
+                            OnReceiveLine(_textBuffer.ToString());
+                            _textBuffer.Clear();
                             break;
 
                         default:
-                            textBuffer.Append(item);
+                            _textBuffer.Append(item);
                             break;
                     }
                 }
 
-                waitForData();
+                WaitForData();
             }
             catch (IOException)
             {
@@ -249,15 +240,15 @@ namespace FlamingIRC
             }
         }
 
-        private void onSend(IAsyncResult res)
+        private void OnSend(IAsyncResult res)
         {
             try
             {
-                stream.EndWrite(res);
+                _stream.EndWrite(res);
             }
             catch (Exception)
             {
-                socket.Shutdown(SocketShutdown.Both);
+                _socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
                 OnDisconnect(DisconnectReason.SocketError, null);
                 throw; //Wasn't really handled so pass it through
@@ -270,7 +261,9 @@ namespace FlamingIRC
                                                                 SslPolicyErrors errors);
 
         protected abstract void OnDisconnect(DisconnectReason reason, int? socketErrorCode);
+
         protected abstract void OnConnectFailed(ConnectError error, int? socketErrorCode);
+
         protected abstract void OnReceiveLine(string line);
     }
 }
