@@ -20,7 +20,10 @@ namespace FlamingIRC.Tests
         private static readonly string _nick = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NICK :Ortz";
         private static readonly string _kick = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com KICK #ortzirc OrtzIRC :OrtzIRC";
 
+        private static readonly string _topic = ":hitchcock.freenode.net 332 Ortzinator #lancer :foobar";
+
         private static readonly string _userString = "Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com";
+        private static readonly string _serverString = "hitchcock.freenode.net";
         private static readonly User _testUser = Rfc2812Util.UserFromString(_userString);
 
         [TestFixtureSetUp]
@@ -70,7 +73,6 @@ namespace FlamingIRC.Tests
             Assert.AreEqual("hitchcock.freenode.net", msg.From);
             Assert.AreEqual(ReplyCode.RPL_NAMREPLY, msg.ReplyCode);
             Assert.AreEqual("Ortzinator OrtzIRC @ChanServ", msg.Message);
-            Assert.AreEqual(_names.Split(new[] { ' ' }), msg.Tokens);
         }
 
         [Test]
@@ -107,7 +109,6 @@ namespace FlamingIRC.Tests
             IrcMessage msg = _listener.ParseIrcMessage(_privmsg);
             Assert.AreEqual(_userString, msg.From);
             Assert.AreEqual("foobar", msg.Message);
-            Assert.AreEqual(_privmsg.Split(new[] { ' ' }), msg.Tokens);
             Assert.AreEqual("#ortzirc", msg.Target);
         }
 
@@ -117,7 +118,6 @@ namespace FlamingIRC.Tests
             IrcMessage msg = _listener.ParseIrcMessage(_privmsgAction);
             Assert.AreEqual(_userString, msg.From);
             Assert.AreEqual("\u0001ACTION foobars\u0001", msg.Message);
-            Assert.AreEqual(_privmsgAction.Split(new[] { ' ' }), msg.Tokens);
             Assert.AreEqual("#ortzirc", msg.Target);
         }
 
@@ -302,7 +302,7 @@ namespace FlamingIRC.Tests
             _listener.ProcessJoinCommand(msg);
             Assert.AreEqual(_testUser, expectedUser);
             Assert.AreEqual("#ortzirc", expectedChannel);
-            
+
         }
 
         [Test]
@@ -368,6 +368,17 @@ namespace FlamingIRC.Tests
             };
             _listener.Parse("ERROR :the end is nigh");
             Assert.AreEqual("the end is nigh", givenMsg);
+        }
+
+        [Test]
+        public void ParseReply_Topic()
+        {
+            string givenMsg = String.Empty;
+            _listener.OnError += delegate(object sender, ErrorMessageEventArgs args)
+            {
+                givenMsg = args.Message;
+            };
+            _listener.ParseReply(_topic.Split(new[] { ' ' }));
         }
     }
 }

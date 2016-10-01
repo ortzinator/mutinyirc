@@ -511,6 +511,8 @@ namespace FlamingIRC
             //Trace.WriteLine("Topic changed", "IRC");
         }
 
+
+
         private void ProcessNickCommand(string[] tokens)
         {
             if (OnNick == null) return;
@@ -640,7 +642,7 @@ namespace FlamingIRC
             }
         }
 
-        private void ParseReply(string[] tokens)
+        public void ParseReply(string[] tokens)
         {
             ReplyCode code = (ReplyCode)int.Parse(tokens[1], CultureInfo.InvariantCulture);
             tokens[3] = RemoveLeadingColon(tokens[3]);
