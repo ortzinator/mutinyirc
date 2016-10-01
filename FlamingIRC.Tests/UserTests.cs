@@ -46,11 +46,12 @@ namespace FlamingIRC.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void PrefixSetter_InvalidChar_ArgumentOutOfRangeException()
         {
-            User user = new User();
-            user.Prefix = 'X';
+            Assert.Throws<ArgumentOutOfRangeException>(delegate () {
+                User user = new User();
+                user.Prefix = 'X';
+            });
         }
     }
 }
