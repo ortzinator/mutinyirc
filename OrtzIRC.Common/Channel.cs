@@ -15,8 +15,6 @@ namespace OrtzIRC.Common
         {
             Server = parent;
             Name = name;
-
-            Users = new UserList();
         }
 
         /// <summary>
@@ -116,6 +114,18 @@ namespace OrtzIRC.Common
         /// </summary>
         public event EventHandler<UserMessageEventArgs> MessagedChannel;
 
+        public void Init()
+        {
+            Users = new UserList();
+            Server.OnNick += Server_OnNick;
+        }
+
+        private void Server_OnNick(object sender, NickChangeEventArgs e)
+        {
+            User user = Users.GetUser(e.User);
+            if (user != null) { user.Nick = e.NewNick; }
+        }
+
         /// <summary>
         /// Adds a user to the user list.
         /// </summary>
@@ -186,27 +196,10 @@ namespace OrtzIRC.Common
         public void UserQuit(User user, string message)
         {
             //Make sure the user is in the channel
-            foreach (User n in Users)
+            foreach (User u in Users)
             {
-                if (user.Nick != n.Nick) continue;
-                UserQuitted.Fire(this, new UserMessageEventArgs(n, message));
-            }
-        }
-
-        /// <summary>
-        ///   Changes the nick of a user in the channel. Usually only used when triggered by a NICK event.
-        /// </summary>
-        /// <param name="nick"> The user </param>
-        /// <param name="newNick"> The user's new nick. </param>
-        public void NickChange(User nick, string newNick)
-        {
-            foreach (User n in Users)
-            {
-                if (nick.Nick == n.Nick)
-                {
-                    NickChanged.Fire(this, new NickChangeEventArgs(nick, newNick));
-                    Server.Connection.Sender.Names(Name);
-                }
+                if (user.Nick != u.Nick) continue;
+                UserQuitted.Fire(this, new UserMessageEventArgs(u, message));
             }
         }
 
@@ -224,8 +217,7 @@ namespace OrtzIRC.Common
         {
             Server.Connection.Sender.Names(Name);
 
-            if (OnKick != null)
-                OnKick(nick, kickee, reason);
+            OnKick?.Invoke(nick, kickee, reason);
         }
 
         public void Say(string message)
