@@ -25,10 +25,19 @@ namespace MutinyIRC.Tests
         [Test]
         public void ShowTopic_TopicRecievedRegistered_EventFires()
         {
+
             bool eventWasRaised = false;
-            _channel.TopicReceived += (sender, args) => eventWasRaised = true;
-            _channel.ShowTopic("Topic here and stuff");
+            const string expected = "Topic here and stuff";
+
+            string topic = string.Empty;
+            _channel.TopicReceived += delegate (object sender, DataEventArgs<string> e)
+            {
+                eventWasRaised = true;
+                topic = e.Data;
+            };
+            _channel.ShowTopic(expected);
             Assert.IsTrue(eventWasRaised, "TopicRecieved event was not fired");
+            Assert.AreEqual(expected, topic);
         }
     }
 }

@@ -85,18 +85,17 @@ namespace FlamingIRC.Tests
         [Test]
         public void ProcessNamesReply_IrcMessage()
         {
-            IrcMessage msg = new IrcMessage
-                             {
-                                 Command = "PRIVMSG",
-                                 From = "hitchcock.freenode.net",
-                                 Message = "Ortzinator OrtzIRC @ChanServ",
-                                 Target = "#ortzirc",
-                                 Tokens = _names.Split(new[] { ' ' }),
-                                 ReplyCode = ReplyCode.RPL_NAMREPLY
-                             };
+            IrcMessage msg = new IrcMessage();
+            msg.Command = "PRIVMSG";
+            msg.From = "hitchcock.freenode.net";
+            msg.Message = "Ortzinator OrtzIRC @ChanServ";
+            msg.Target = "#ortzirc";
+            msg.Tokens = _names.Split(new[] { ' ' });
+            msg.ReplyCode = ReplyCode.RPL_NAMREPLY;
+
             NamesEventArgs givenArgs = null;
 
-            _listener.OnNames += delegate(object sender, NamesEventArgs args) { givenArgs = args; };
+            _listener.OnNames += delegate (object sender, NamesEventArgs args) { givenArgs = args; };
             _listener.ProcessNamesReply(msg);
             Assert.AreEqual(new[] { "Ortzinator", "OrtzIRC", "@ChanServ" }, givenArgs.Nicks);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
@@ -125,16 +124,16 @@ namespace FlamingIRC.Tests
         public void ProcessPrivmsgCommand_ActionMessage()
         {
             IrcMessage msg = new IrcMessage
-                             {
-                                 Command = "PRIVMSG",
-                                 From = _userString,
-                                 Message = "\u0001ACTION foobars\u0001",
-                                 Target = "#ortzirc",
-                                 Tokens = _privmsgAction.Split(new[] { ' ' })
-                             };
+            {
+                Command = "PRIVMSG",
+                From = _userString,
+                Message = "\u0001ACTION foobars\u0001",
+                Target = "#ortzirc",
+                Tokens = _privmsgAction.Split(new[] { ' ' })
+            };
             UserChannelMessageEventArgs givenArgs = null;
 
-            _listener.OnAction += delegate(object sender, UserChannelMessageEventArgs args) { givenArgs = args; };
+            _listener.OnAction += delegate (object sender, UserChannelMessageEventArgs args) { givenArgs = args; };
             _listener.ProcessPrivmsgCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
@@ -154,7 +153,7 @@ namespace FlamingIRC.Tests
             };
             UserMessageEventArgs givenArgs = null;
 
-            _listener.OnPrivateAction += delegate(object sender, UserMessageEventArgs args) { givenArgs = args; };
+            _listener.OnPrivateAction += delegate (object sender, UserMessageEventArgs args) { givenArgs = args; };
             _listener.ProcessPrivmsgCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("foobars", givenArgs.Message);
@@ -173,7 +172,7 @@ namespace FlamingIRC.Tests
             };
             UserChannelMessageEventArgs givenArgs = null;
 
-            _listener.OnPublic += delegate(object sender, UserChannelMessageEventArgs args) { givenArgs = args; };
+            _listener.OnPublic += delegate (object sender, UserChannelMessageEventArgs args) { givenArgs = args; };
             _listener.ProcessPrivmsgCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
@@ -193,7 +192,7 @@ namespace FlamingIRC.Tests
             };
             UserMessageEventArgs givenArgs = null;
 
-            _listener.OnPrivate += delegate(object sender, UserMessageEventArgs args) { givenArgs = args; };
+            _listener.OnPrivate += delegate (object sender, UserMessageEventArgs args) { givenArgs = args; };
             _listener.ProcessPrivmsgCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("foobar", givenArgs.Message);
@@ -244,7 +243,7 @@ namespace FlamingIRC.Tests
             };
             UserMessageEventArgs givenArgs = null;
 
-            _listener.OnPrivateNotice += delegate(object sender, UserMessageEventArgs args) { givenArgs = args; };
+            _listener.OnPrivateNotice += delegate (object sender, UserMessageEventArgs args) { givenArgs = args; };
             _listener.ProcessNoticeCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("foobar", givenArgs.Message);
@@ -261,7 +260,7 @@ namespace FlamingIRC.Tests
                 Tokens = _nick.Split(new[] { ' ' })
             };
             NickChangeEventArgs givenArgs = null;
-            _listener.OnNick += delegate(object sender, NickChangeEventArgs args) { givenArgs = args; };
+            _listener.OnNick += delegate (object sender, NickChangeEventArgs args) { givenArgs = args; };
             _listener.ProcessNickCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("Ortz", givenArgs.NewNick);
@@ -277,7 +276,7 @@ namespace FlamingIRC.Tests
                 Message = "#ortzirc"
             };
             InviteEventArgs givenArgs = null;
-            _listener.OnInvite += delegate(object sender, InviteEventArgs args) { givenArgs = args; };
+            _listener.OnInvite += delegate (object sender, InviteEventArgs args) { givenArgs = args; };
             _listener.ProcessInviteCommand(msg);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
             Assert.AreEqual("Ortzinator", givenArgs.Nick);
@@ -294,7 +293,7 @@ namespace FlamingIRC.Tests
             };
             User expectedUser = null;
             string expectedChannel = null;
-            _listener.OnJoin += delegate(User user, string channel)
+            _listener.OnJoin += delegate (User user, string channel)
             {
                 expectedUser = user;
                 expectedChannel = channel;
@@ -320,7 +319,7 @@ namespace FlamingIRC.Tests
             string givenChannel = null;
             string givenKickee = null;
             string givenReason = null;
-            _listener.OnKick += delegate(User user, string channel, string kickee, string reason)
+            _listener.OnKick += delegate (User user, string channel, string kickee, string reason)
                                 {
                                     givenUser = user;
                                     givenChannel = channel;
@@ -338,7 +337,7 @@ namespace FlamingIRC.Tests
         public void Parse_Ping_OnPingFires()
         {
             string givenMsg = String.Empty;
-            _listener.OnPing += delegate(string message)
+            _listener.OnPing += delegate (string message)
             {
                 givenMsg = message;
             };
@@ -350,7 +349,7 @@ namespace FlamingIRC.Tests
         public void Parse_Notice_OnPrivateNoticeFires()
         {
             string givenMsg = String.Empty;
-            _listener.OnPrivateNotice += delegate(object sender, UserMessageEventArgs args)
+            _listener.OnPrivateNotice += delegate (object sender, UserMessageEventArgs args)
             {
                 givenMsg = args.Message;
             };
@@ -362,7 +361,7 @@ namespace FlamingIRC.Tests
         public void Parse_Error_OnErrorFires()
         {
             string givenMsg = String.Empty;
-            _listener.OnError += delegate(object sender, ErrorMessageEventArgs args)
+            _listener.OnError += delegate (object sender, ErrorMessageEventArgs args)
             {
                 givenMsg = args.Message;
             };
@@ -374,7 +373,7 @@ namespace FlamingIRC.Tests
         public void ParseReply_Topic()
         {
             string givenMsg = String.Empty;
-            _listener.OnError += delegate(object sender, ErrorMessageEventArgs args)
+            _listener.OnError += delegate (object sender, ErrorMessageEventArgs args)
             {
                 givenMsg = args.Message;
             };
