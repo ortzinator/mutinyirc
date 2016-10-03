@@ -311,8 +311,7 @@ namespace OrtzIRC.Common
 
         private void Listener_OnUserModeChange(object sender, UserModeChangeEventArgs e)
         {
-            if (UserModeChanged != null)
-                UserModeChanged(this, e);
+            UserModeChanged?.Invoke(this, e);
 
             foreach (KeyValuePair<string, Channel> item in _channels)
                 Connection.Sender.Names(item.Key);
@@ -321,14 +320,6 @@ namespace OrtzIRC.Common
         private void Listener_OnNick(object sender, NickChangeEventArgs e)
         {
             OnNick.Fire(this, new NickChangeEventArgs(e.User, e.NewNick));
-
-            foreach (KeyValuePair<string, Channel> item in _channels)
-            {
-                if (item.Value.HasUser(e.User.Nick))
-                {
-                    item.Value.NickChange(e.User, e.NewNick);
-                }
-            }
         }
 
         private void ListenerOnRecieveTopic(string channel, string topic)
@@ -372,8 +363,7 @@ namespace OrtzIRC.Common
 
         private void Listener_OnNames(object sender, NamesEventArgs e)
         {
-            if (OnNames != null)
-                OnNames(this, new NamesEventArgs(e.Channel, e.Nicks, e.Last));
+            OnNames?.Invoke(this, new NamesEventArgs(e.Channel, e.Nicks, e.Last));
 
             Channel chan = _channels[e.Channel];
             if (!_recievingNames)
@@ -435,8 +425,7 @@ namespace OrtzIRC.Common
 
         private void Listener_OnRegistered(object sender, EventArgs e)
         {
-            if (Registered != null)
-                Registered(this, e);
+            Registered?.Invoke(this, e);
         }
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
@@ -448,8 +437,7 @@ namespace OrtzIRC.Common
 
         private void Listener_OnError(object sender, ErrorMessageEventArgs a)
         {
-            if (ErrorMessageRecieved != null)
-                ErrorMessageRecieved(sender, new ErrorMessageEventArgs(a.Code, a.Message));
+            ErrorMessageRecieved?.Invoke(sender, new ErrorMessageEventArgs(a.Code, a.Message));
         }
 
         public Channel JoinChannel(string channelToJoin)

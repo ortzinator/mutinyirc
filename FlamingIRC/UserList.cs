@@ -149,6 +149,11 @@
             return null;
         }
 
+        public User GetUser(User user)
+        {
+            return GetUser(user.Nick);
+        }
+
         /// <summary>
         /// Triggers the Updated event
         /// </summary>
