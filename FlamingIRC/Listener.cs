@@ -235,6 +235,7 @@ namespace FlamingIRC
         private readonly Regex userPattern;
         private readonly Regex channelPattern;
         private readonly Regex _replyRegex;
+
         /// <summary>
         /// Table to hold WhoIsInfos while they are being created. The key is the
         /// nick and the value if the WhoisInfo struct.
@@ -253,9 +254,9 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// 
+        /// Parses and handles raw server messages
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">The raw message from the server</param>
         public void Parse(string message)
         {
             OnAnything.Fire(this, new EventArgs());
@@ -287,6 +288,10 @@ namespace FlamingIRC
             }
         }
 
+        /// <summary>
+        /// Parses and handles incoming server commands
+        /// </summary>
+        /// <param name="ircMessage">The parsed message</param>
         private void ParseCommand(IrcMessage ircMessage)
         {
             switch (ircMessage.Command)
@@ -777,9 +782,9 @@ namespace FlamingIRC
                     break;
                 case ReplyCode.RPL_LINKS:
                     OnLinks?.Invoke(tokens[3], //mask
-            tokens[4], //hostname
-            int.Parse(RemoveLeadingColon(tokens[5]), CultureInfo.InvariantCulture), //hopcount
-            CondenseStrings(tokens, 6), false);
+                        tokens[4], //hostname
+                        int.Parse(RemoveLeadingColon(tokens[5]), CultureInfo.InvariantCulture), //hopcount
+                        CondenseStrings(tokens, 6), false);
                     break;
                 case ReplyCode.RPL_ENDOFLINKS:
                     OnLinks?.Invoke(String.Empty, String.Empty, -1, String.Empty, true);
