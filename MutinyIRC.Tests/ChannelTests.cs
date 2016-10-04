@@ -48,7 +48,9 @@ namespace MutinyIRC.Tests
             _channel.Users = A.Fake<UserList>();
             User gotUser = new User("Ortzinator", "Ortzinator", "");
             A.CallTo(() => _channel.Users.GetUser(A<User>.Ignored)).Returns(gotUser);
+
             _channel.Server_OnNick(null, new NickChangeEventArgs(null, "BillNye"));
+
             Assert.AreEqual(gotUser.Nick, "BillNye");
         }
     }
