@@ -16,6 +16,8 @@ namespace OrtzIRC.Common
         private List<User> _tempNames = new List<User>();
         private Connection _connection;
 
+        public Server() { }
+
         public Server(ConnectionArgs settings)
         {
             SetupConnection(settings);

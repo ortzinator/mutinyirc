@@ -15,6 +15,8 @@ namespace OrtzIRC.Common
         {
             Server = parent;
             Name = name;
+            Users = new UserList();
+            Server.OnNick += Server_OnNick;
         }
 
         /// <summary>
@@ -114,13 +116,7 @@ namespace OrtzIRC.Common
         /// </summary>
         public event EventHandler<UserMessageEventArgs> MessagedChannel;
 
-        public void Init()
-        {
-            Users = new UserList();
-            Server.OnNick += Server_OnNick;
-        }
-
-        private void Server_OnNick(object sender, NickChangeEventArgs e)
+        public void Server_OnNick(object sender, NickChangeEventArgs e)
         {
             User user = Users.GetUser(e.User);
             if (user != null) { user.Nick = e.NewNick; }

@@ -149,7 +149,7 @@
             return null;
         }
 
-        public User GetUser(User user)
+        public virtual User GetUser(User user)
         {
             return GetUser(user.Nick);
         }
