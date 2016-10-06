@@ -25,8 +25,9 @@
             get { return _type; }
             protected set
             {
-                if (!value.IsSubclassOf(typeof(IPlugin)))
-                    throw new ArgumentException();
+                var pluginType = typeof(IPlugin);
+                if (!pluginType.IsAssignableFrom(value))
+                    throw new ArgumentException("Type is not a Plugin");
 
                 _type = value;
             }
