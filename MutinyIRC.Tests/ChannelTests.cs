@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Assert = NUnit.Framework.Legacy.ClassicAssert;
 using OrtzIRC.Common;
 using FakeItEasy;
 using FlamingIRC;

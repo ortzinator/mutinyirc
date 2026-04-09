@@ -2,7 +2,7 @@
 {
     using System;
     using FlamingIRC;
-    using MvvmFoundation.Wpf;
+    using CommunityToolkit.Mvvm.ComponentModel;
 
     public class ChatItemViewModel : ObservableObject
     {

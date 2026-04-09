@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Assert = NUnit.Framework.Legacy.ClassicAssert;
 using FakeItEasy;
 
 namespace FlamingIRC.Tests
@@ -26,12 +27,12 @@ namespace FlamingIRC.Tests
         private static readonly string _serverString = "hitchcock.freenode.net";
         private static readonly User _testUser = Rfc2812Util.UserFromString(_userString);
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupMethods()
         {
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownMethods()
         {
         }

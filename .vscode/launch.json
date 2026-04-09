@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "OrtzIRC (WPF)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/OrtzIRC.WPF/bin/Debug/net8.0-windows/OrtzIRC.WPF.exe",
+            "cwd": "${workspaceFolder}/OrtzIRC.WPF/bin/Debug/net8.0-windows"
+        }
+    ]
+}

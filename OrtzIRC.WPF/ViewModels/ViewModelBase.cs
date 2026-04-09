@@ -2,7 +2,8 @@
 {
     using System;
     using System.Windows.Input;
-    using MvvmFoundation.Wpf;
+    using CommunityToolkit.Mvvm.ComponentModel;
+    using CommunityToolkit.Mvvm.Input;
 
     public abstract class ViewModelBase : ObservableObject
     {

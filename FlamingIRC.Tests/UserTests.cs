@@ -2,6 +2,7 @@
 using FakeItEasy;
 using FlamingIRC;
 using NUnit.Framework;
+using Assert = NUnit.Framework.Legacy.ClassicAssert;
 
 namespace FlamingIRC.Tests
 {
