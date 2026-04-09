@@ -4,8 +4,8 @@ namespace OrtzIRC.Commands
 {
     using System;
     using OrtzIRC.Common;
+    using System.Configuration;
     using OrtzIRC.PluginFramework;
-    using OrtzIRC.Properties;
 
     /// <summary>
     /// Creates new connections to IRC servers
@@ -28,7 +28,7 @@ namespace OrtzIRC.Commands
                 switch (c)
                 {
                     case 'n': //New window and connect
-                        var args = new ConnectionArgs(Settings.Default.FirstNick, server, false);
+                        var args = new ConnectionArgs(ConfigurationManager.AppSettings["FirstNick"] ?? "OrtzIRC", server, false);
                         try
                         {
                             args.Port = int.Parse(port);
@@ -49,13 +49,13 @@ namespace OrtzIRC.Commands
         /// </summary>
         public void Execute(Server context, string server)
         {
-            context.ChangeServer(Settings.Default.FirstNick, server, false);
+            context.ChangeServer(ConfigurationManager.AppSettings["FirstNick"] ?? "OrtzIRC", server, false);
             context.Connect();
         }
 
         public void Execute(Server context, string server, string port)
         {
-            var args = new ConnectionArgs(Settings.Default.FirstNick, server, false);
+            var args = new ConnectionArgs(ConfigurationManager.AppSettings["FirstNick"] ?? "OrtzIRC", server, false);
             try
             {
                 args.Port = int.Parse(port);

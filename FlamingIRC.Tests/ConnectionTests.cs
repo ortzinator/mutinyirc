@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using Assert = NUnit.Framework.Legacy.ClassicAssert;
 using FakeItEasy;
 
 namespace FlamingIRC.Tests
@@ -13,12 +14,12 @@ namespace FlamingIRC.Tests
         private Connection _connection;
         private ConnectionArgs _connectionArgs;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupMethods()
         {
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownMethods()
         {
         }

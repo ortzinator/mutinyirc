@@ -124,8 +124,8 @@ namespace OrtzIRC.WPF.ViewModels
                 userList.Add(new UserViewModel(user));
             }
             userList.Sort((user1, user2) => user1.CompareTo(user2));
-            RaisePropertyChanged("UserList");
-            RaisePropertyChanged("Name");
+            OnPropertyChanged("UserList");
+            OnPropertyChanged("Name");
         }
 
         protected override void OnExecute(string commandLine)

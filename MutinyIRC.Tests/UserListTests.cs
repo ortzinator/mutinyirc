@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using FlamingIRC;
 using NUnit.Framework;
+using Assert = NUnit.Framework.Legacy.ClassicAssert;
 
 namespace MutinyIRC.Tests
 {

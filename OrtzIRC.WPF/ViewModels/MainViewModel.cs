@@ -7,7 +7,8 @@ namespace OrtzIRC.WPF.ViewModels
     using System.Collections.Generic;
     using System.IO;
     using FlamingIRC;
-    using MvvmFoundation.Wpf;
+    using CommunityToolkit.Mvvm.ComponentModel;
+    using CommunityToolkit.Mvvm.Input;
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;
     using OrtzIRC.WPF.Properties;

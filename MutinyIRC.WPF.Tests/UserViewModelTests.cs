@@ -1,6 +1,7 @@
 ﻿using System;
 using FakeItEasy;
 using NUnit.Framework;
+using Assert = NUnit.Framework.Legacy.ClassicAssert;
 using OrtzIRC.WPF.ViewModels;
 using FlamingIRC;
 
