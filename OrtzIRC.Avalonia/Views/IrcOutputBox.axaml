@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="OrtzIRC.Avalonia.Views.IrcOutputBox"
+             x:Name="root">
+
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom"
+                IsVisible="{Binding ElementName=root, Path=Scrolled}">
+            <Border.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFFFC4C4" Offset="0" />
+                    <GradientStop Color="#FFFFF2F2" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <TextBlock HorizontalAlignment="Center" Foreground="#89000000" FontSize="8">▼ ▼</TextBlock>
+        </Border>
+        <ScrollViewer x:Name="scrollViewer">
+            <ItemsControl ItemsSource="{Binding ChatLines}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+
+</UserControl>

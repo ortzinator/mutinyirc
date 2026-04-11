@@ -1,0 +1,30 @@
+namespace OrtzIRC.Avalonia;
+
+using global::Avalonia;
+using global::Avalonia.Controls.ApplicationLifetimes;
+using global::Avalonia.Markup.Xaml;
+using OrtzIRC.Avalonia.ViewModels;
+using OrtzIRC.Avalonia.Views;
+
+public partial class App : Application
+{
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
+
+    public override void OnFrameworkInitializationCompleted()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            CompositionRoot.Wire(new Bindings());
+            var viewModel = CompositionRoot.Resolve<MainViewModel>();
+            var window = new MainWindow { DataContext = viewModel };
+            viewModel.RequestClose += (_, _) => window.Close();
+            window.Closing += (_, _) => IrcSettingsManager.Instance.Save();
+            desktop.MainWindow = window;
+        }
+
+        base.OnFrameworkInitializationCompleted();
+    }
+}

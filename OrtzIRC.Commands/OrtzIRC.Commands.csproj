@@ -18,8 +18,13 @@
   </ItemGroup>
 
   <Target Name="CopyPluginToWPF" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)OrtzIRC.WPF\bin\$(Configuration)\net8.0-windows\plugins\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(TargetDir)$(AssemblyName).xml" DestinationFolder="$(SolutionDir)OrtzIRC.WPF\bin\$(Configuration)\net8.0-windows\plugins\" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).xml')" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)..\OrtzIRC.WPF\bin\$(Configuration)\net8.0-windows\plugins\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).xml" DestinationFolder="$(MSBuildThisFileDirectory)..\OrtzIRC.WPF\bin\$(Configuration)\net8.0-windows\plugins\" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).xml')" />
+  </Target>
+
+  <Target Name="CopyPluginToAvalonia" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)..\OrtzIRC.Avalonia\bin\$(Configuration)\net8.0\plugins\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).xml" DestinationFolder="$(MSBuildThisFileDirectory)..\OrtzIRC.Avalonia\bin\$(Configuration)\net8.0\plugins\" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).xml')" />
   </Target>
 
 </Project>

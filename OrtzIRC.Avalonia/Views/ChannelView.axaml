@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:OrtzIRC.Avalonia.Controls"
+             xmlns:conv="clr-namespace:OrtzIRC.Avalonia.Converters"
+             xmlns:views="clr-namespace:OrtzIRC.Avalonia.Views"
+             mc:Ignorable="d"
+             x:Class="OrtzIRC.Avalonia.Views.ChannelView"
+             x:Name="channelPanel">
+
+    <UserControl.Resources>
+        <conv:ModeToBrushConverter x:Key="ModeToBrushConverter" />
+    </UserControl.Resources>
+
+    <DockPanel>
+        <local:CommandTextBox DockPanel.Dock="Bottom" x:Name="commandBox" MinHeight="20" />
+        <ListBox x:Name="userBox"
+                 ItemsSource="{Binding UserList}"
+                 DockPanel.Dock="Right"
+                 MinWidth="100" MaxWidth="200">
+            <ListBox.ItemContainerTheme>
+                <ControlTheme TargetType="ListBoxItem">
+                    <Setter Property="Foreground" Value="{Binding Mode, Converter={StaticResource ModeToBrushConverter}}" />
+                </ControlTheme>
+            </ListBox.ItemContainerTheme>
+        </ListBox>
+        <views:IrcOutputBox x:Name="outputBox" />
+    </DockPanel>
+
+</UserControl>

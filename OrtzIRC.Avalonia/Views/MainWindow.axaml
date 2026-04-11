@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:OrtzIRC.Avalonia.ViewModels"
+        xmlns:views="clr-namespace:OrtzIRC.Avalonia.Views"
+        mc:Ignorable="d"
+        x:Class="OrtzIRC.Avalonia.Views.MainWindow"
+        Title="OrtzIRC" Height="282" Width="550">
+
+    <DockPanel>
+        <ListBox ItemsSource="{Binding Panels}"
+                 SelectedItem="{Binding SelectedPanel}"
+                 DockPanel.Dock="Left"
+                 MinWidth="100">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ContentControl Content="{Binding SelectedPanel}">
+            <ContentControl.DataTemplates>
+                <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
+                    <views:ChannelView />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:ServerViewModel}">
+                    <views:ServerView />
+                </DataTemplate>
+            </ContentControl.DataTemplates>
+        </ContentControl>
+    </DockPanel>
+
+</Window>

@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Chat line: timestamp column -->
+    <SolidColorBrush x:Key="ChatTimestampBackground" Color="#FF2A2A2A" />
+
+    <!-- Chat line: borders between cells -->
+    <SolidColorBrush x:Key="ChatBorderBrush" Color="#FF3A3A3A" />
+
+    <!-- Chat line: nick column in channel messages -->
+    <SolidColorBrush x:Key="ChatNickBackground" Color="#FF1A3A5C" />
+
+    <!-- Chat line: action message gradient start/end -->
+    <Color x:Key="ChatActionGradientStart">#FF1A3A5C</Color>
+    <Color x:Key="ChatActionGradientEnd">#FF1E1E1E</Color>
+
+    <!-- Chat line: error and warning messages -->
+    <SolidColorBrush x:Key="ChatErrorBackground" Color="#FF4A1A1A" />
+
+    <!-- Chat line: private notice background -->
+    <SolidColorBrush x:Key="ChatNoticeBackground" Color="#FF3A3A1A" />
+
+    <!-- User list: foreground by channel mode -->
+    <SolidColorBrush x:Key="ModeOpForeground" Color="#FFE8C96E" />
+    <SolidColorBrush x:Key="ModeVoiceForeground" Color="#FF7ABFFF" />
+    <SolidColorBrush x:Key="ModeRegularForeground" Color="#FFB0B0B0" />
+
+</ResourceDictionary>

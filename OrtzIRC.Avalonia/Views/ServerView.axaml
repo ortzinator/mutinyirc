@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:OrtzIRC.Avalonia.Controls"
+             xmlns:views="clr-namespace:OrtzIRC.Avalonia.Views"
+             mc:Ignorable="d"
+             x:Class="OrtzIRC.Avalonia.Views.ServerView">
+
+    <DockPanel>
+        <local:CommandTextBox DockPanel.Dock="Bottom" x:Name="commandBox" MinHeight="20" />
+        <views:IrcOutputBox x:Name="outputBox" />
+    </DockPanel>
+
+</UserControl>
