@@ -13,7 +13,7 @@ public class ServerViewModel : IrcViewModel
 {
     private int nickRetryAttempt;
     private bool nickRetryFailed;
-    private Server server;
+    private readonly Server server = null!;
 
     public ServerViewModel(Server newServer)
     {
@@ -47,14 +47,14 @@ public class ServerViewModel : IrcViewModel
         }
     }
 
-    private void Server_PartSelf(object sender, PartEventArgs e)
+    private void Server_PartSelf(object? sender, PartEventArgs e)
     {
         NetworkSettings nwSettings = IrcSettingsManager.Instance.GetNetwork(server);
         ChannelSettings chan = nwSettings.GetChannel(e.Channel.Name);
         chan.AutoJoin = false;
     }
 
-    private void Server_NickError(object sender, NickErrorEventArgs e)
+    private void Server_NickError(object? sender, NickErrorEventArgs e)
     {
         if (server.Connection.Registered || server.Connection.HandleNickTaken) return;
         string newNick;
@@ -92,12 +92,12 @@ public class ServerViewModel : IrcViewModel
         AddMessage(ServerStrings.NickTakenMessage.With(nick, newNick));
     }
 
-    private void Server_ConnectCancelled(object sender, EventArgs e)
+    private void Server_ConnectCancelled(object? sender, EventArgs e)
     {
         AddMessage(ServerStrings.Disconnected);
     }
 
-    private void Server_ConnectionLost(object sender, DisconnectEventArgs e)
+    private void Server_ConnectionLost(object? sender, DisconnectEventArgs e)
     {
         AddMessage(ServerStrings.ConnectionLost.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
 
@@ -108,17 +108,17 @@ public class ServerViewModel : IrcViewModel
         }
     }
 
-    private void Server_Disconnected(object sender, EventArgs e)
+    private void Server_Disconnected(object? sender, EventArgs e)
     {
         AddMessage(ServerStrings.Disconnected);
     }
 
-    private void Server_Connecting(object sender, CancelEventArgs e)
+    private void Server_Connecting(object? sender, CancelEventArgs e)
     {
         AddMessage(ServerStrings.ConnectingMessage.With(server.Url, server.Port));
     }
 
-    private void Server_ErrorMessageRecieved(object sender, ErrorMessageEventArgs e)
+    private void Server_ErrorMessageRecieved(object? sender, ErrorMessageEventArgs e)
     {
         if (e.Code == ReplyCode.ERR_NOMOTD)
         {
@@ -129,7 +129,7 @@ public class ServerViewModel : IrcViewModel
         ChatLines.Add(new IrcErrorViewModel(DateTime.Now, e.Message, e.Code.ToString()));
     }
 
-    private void Server_PrivateNotice(object sender, UserMessageEventArgs e)
+    private void Server_PrivateNotice(object? sender, UserMessageEventArgs e)
     {
         // Pre-registration server NOTICEs come from User.Empty (no nick).
         // Display them as plain informational messages, not as user-to-user notices.
@@ -139,13 +139,13 @@ public class ServerViewModel : IrcViewModel
             ChatLines.Add(new PrivateNoticeViewModel(DateTime.Now, e.Message, e.User.Nick));
     }
 
-    private void Server_ConnectFailed(object sender, ConnectFailedEventArgs e)
+    private void Server_ConnectFailed(object? sender, ConnectFailedEventArgs e)
     {
         AddMessage(ServerStrings.ConnectionFailedMessage.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
         ThreadHelper.InvokeAfter(TimeSpan.FromSeconds(4), delegate { server.Connect(); });
     }
 
-    private void Server_Registered(object sender, EventArgs e)
+    private void Server_Registered(object? sender, EventArgs e)
     {
         DoRegister();
     }
@@ -174,7 +174,8 @@ public class ServerViewModel : IrcViewModel
             }
 
             tempNet.AddServer(new ServerSettings(server.Url, "Random", server.Port.ToString(),
-                    server.Connection.ConnectionData.Ssl) { AutoConnect = true });
+                    server.Connection.ConnectionData.Ssl)
+            { AutoConnect = true });
         }
         else
         {
@@ -187,7 +188,8 @@ public class ServerViewModel : IrcViewModel
             if (nServer == null)
             {
                 networkSettings.AddServer(new ServerSettings(server.Url, "Random", server.Port.ToString(),
-                    server.Connection.ConnectionData.Ssl) { AutoConnect = true });
+                    server.Connection.ConnectionData.Ssl)
+                { AutoConnect = true });
             }
         }
 
