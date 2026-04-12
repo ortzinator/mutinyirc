@@ -20,6 +20,10 @@
     <!-- Chat line: private notice background -->
     <SolidColorBrush x:Key="ChatNoticeBackground" Color="#FF3A3A1A" />
 
+    <!-- Scroll indicator bar (shown when not pinned to bottom) -->
+    <SolidColorBrush x:Key="ScrollIndicatorBackground" Color="#FF3A3A3A" />
+    <SolidColorBrush x:Key="ScrollIndicatorForeground" Color="#89FFFFFF" />
+
     <!-- User list: foreground by channel mode -->
     <SolidColorBrush x:Key="ModeOpForeground" Color="#FFE8C96E" />
     <SolidColorBrush x:Key="ModeVoiceForeground" Color="#FF7ABFFF" />

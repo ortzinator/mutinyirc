@@ -4,9 +4,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:OrtzIRC.Avalonia.ViewModels"
         xmlns:views="clr-namespace:OrtzIRC.Avalonia.Views"
+        xmlns:design="clr-namespace:OrtzIRC.Avalonia.ViewModels.Design"
         mc:Ignorable="d"
         x:Class="OrtzIRC.Avalonia.Views.MainWindow"
         Title="OrtzIRC" Height="282" Width="550">
+
+    <Design.DataContext>
+        <design:DesignMainViewModel />
+    </Design.DataContext>
 
     <DockPanel>
         <ListBox ItemsSource="{Binding Panels}"
@@ -14,7 +19,7 @@
                  DockPanel.Dock="Left"
                  MinWidth="100">
             <ListBox.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate DataType="{x:Type vm:IrcViewModel}">
                     <TextBlock Text="{Binding Name}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>

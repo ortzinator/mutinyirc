@@ -4,8 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:OrtzIRC.Avalonia.Controls"
              xmlns:views="clr-namespace:OrtzIRC.Avalonia.Views"
+             xmlns:vm="clr-namespace:OrtzIRC.Avalonia.ViewModels"
              mc:Ignorable="d"
              x:Class="OrtzIRC.Avalonia.Views.ServerView">
+
+    <Design.DataContext>
+        <vm:ServerViewModel />
+    </Design.DataContext>
 
     <DockPanel>
         <local:CommandTextBox DockPanel.Dock="Bottom" x:Name="commandBox" MinHeight="20" />

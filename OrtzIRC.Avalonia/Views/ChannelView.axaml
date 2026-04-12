@@ -5,9 +5,14 @@
              xmlns:local="clr-namespace:OrtzIRC.Avalonia.Controls"
              xmlns:conv="clr-namespace:OrtzIRC.Avalonia.Converters"
              xmlns:views="clr-namespace:OrtzIRC.Avalonia.Views"
+             xmlns:design="clr-namespace:OrtzIRC.Avalonia.ViewModels.Design"
              mc:Ignorable="d"
              x:Class="OrtzIRC.Avalonia.Views.ChannelView"
              x:Name="channelPanel">
+
+    <Design.DataContext>
+        <design:DesignChannelViewModel />
+    </Design.DataContext>
 
     <UserControl.Resources>
         <conv:ModeToBrushConverter x:Key="ModeToBrushConverter" />

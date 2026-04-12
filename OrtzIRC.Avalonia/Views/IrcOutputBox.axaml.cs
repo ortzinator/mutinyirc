@@ -1,8 +1,9 @@
 namespace OrtzIRC.Avalonia.Views;
 
-using System;
+using System.Collections.Specialized;
 using global::Avalonia;
 using global::Avalonia.Controls;
+using global::Avalonia.Input;
 using global::Avalonia.Threading;
 
 public partial class IrcOutputBox : UserControl
@@ -20,26 +21,53 @@ public partial class IrcOutputBox : UserControl
         set => SetAndRaise(ScrolledProperty, ref _scrolled, value);
     }
 
+    private bool _isPinned = true;
+    private INotifyCollectionChanged _subscribedCollection;
+
     public IrcOutputBox()
     {
         InitializeComponent();
 
-        var timer = new DispatcherTimer
+        // Track pin state whenever the scroll offset changes.
+        scrollViewer.PropertyChanged += (s, e) =>
         {
-            Interval = TimeSpan.FromSeconds(2)
+            if (e.Property != ScrollViewer.OffsetProperty) return;
+
+            var scrollableHeight = scrollViewer.Extent.Height - scrollViewer.Viewport.Height;
+            var atBottom = scrollableHeight <= 0 || scrollViewer.Offset.Y >= scrollableHeight - 1;
+            _isPinned = atBottom;
+            Scrolled = !atBottom;
         };
-        timer.Tick += (sender, e) =>
+
+        // Re-wire the collection listener whenever the ItemsSource binding resolves or changes.
+        outputItems.PropertyChanged += (s, e) =>
         {
-            if (scrollViewer.Offset.Y >= scrollViewer.Extent.Height - scrollViewer.Viewport.Height)
-            {
-                scrollViewer.ScrollToEnd();
-                Scrolled = false;
-            }
-            else
-            {
-                Scrolled = true;
-            }
+            if (e.Property != ItemsControl.ItemsSourceProperty) return;
+
+            if (_subscribedCollection != null)
+                _subscribedCollection.CollectionChanged -= OnItemsChanged;
+
+            _subscribedCollection = outputItems.ItemsSource as INotifyCollectionChanged;
+
+            if (_subscribedCollection != null)
+                _subscribedCollection.CollectionChanged += OnItemsChanged;
         };
-        timer.Start();
+    }
+
+    private void ScrollIndicator_PointerPressed(object sender, PointerPressedEventArgs e) => ScrollToBottom();
+
+    public void ScrollToBottom()
+    {
+        _isPinned = true;
+        Dispatcher.UIThread.Post(() => scrollViewer.ScrollToEnd(), DispatcherPriority.Loaded);
+    }
+
+    private void OnItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action == NotifyCollectionChangedAction.Add && _isPinned)
+        {
+            // Defer until after the new item has been measured and arranged.
+            Dispatcher.UIThread.Post(() => scrollViewer.ScrollToEnd(), DispatcherPriority.Loaded);
+        }
     }
 }

@@ -8,17 +8,16 @@
 
     <DockPanel>
         <Border DockPanel.Dock="Bottom"
-                IsVisible="{Binding ElementName=root, Path=Scrolled}">
-            <Border.Background>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#FFFFC4C4" Offset="0" />
-                    <GradientStop Color="#FFFFF2F2" Offset="1" />
-                </LinearGradientBrush>
-            </Border.Background>
-            <TextBlock HorizontalAlignment="Center" Foreground="#89000000" FontSize="8">▼ ▼</TextBlock>
+                IsVisible="{Binding ElementName=root, Path=Scrolled}"
+                Background="{DynamicResource ScrollIndicatorBackground}"
+                Cursor="Hand"
+                PointerPressed="ScrollIndicator_PointerPressed">
+            <TextBlock HorizontalAlignment="Center"
+                       Foreground="{DynamicResource ScrollIndicatorForeground}"
+                       FontSize="8">▼ ▼</TextBlock>
         </Border>
         <ScrollViewer x:Name="scrollViewer">
-            <ItemsControl ItemsSource="{Binding ChatLines}">
+            <ItemsControl x:Name="outputItems" ItemsSource="{Binding ChatLines}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Vertical" />

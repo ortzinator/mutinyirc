@@ -17,7 +17,7 @@ public class ServerViewModel : IrcViewModel
 
     public ServerViewModel(Server newServer)
     {
-        if (Design.IsDesignMode)
+        if (global::Avalonia.Controls.Design.IsDesignMode)
             return;
 
         server = newServer;
@@ -36,7 +36,7 @@ public class ServerViewModel : IrcViewModel
 
     public ServerViewModel()
     {
-        if (Design.IsDesignMode)
+        if (global::Avalonia.Controls.Design.IsDesignMode)
         {
             ChatLines.Add(new ChatItemViewModel(DateTime.Now, "Foo"));
             ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, "Message", "Ortzinator"));
