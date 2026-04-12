@@ -12,7 +12,7 @@ using OrtzIRC.Avalonia.Resources;
 public class ChannelViewModel : IrcViewModel
 {
     private Channel _channel;
-    private List<UserViewModel> userList;
+    private List<UserViewModel>? userList;
     private PluginManager _pluginManager;
 
     public PluginManager PluginManager => _pluginManager;
@@ -51,13 +51,13 @@ public class ChannelViewModel : IrcViewModel
         _channel.Server.Disconnected += Server_Disconnected;
     }
 
-    private void Server_Disconnected(object sender, EventArgs e)
+    private void Server_Disconnected(object? sender, EventArgs e)
     {
         AddMessage(ServerStrings.Disconnected);
         Close();
     }
 
-    private void Channel_MessagedChannel(object sender, UserMessageEventArgs e)
+    private void Channel_MessagedChannel(object? sender, UserMessageEventArgs e)
     {
         ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Message, e.User));
     }
@@ -67,17 +67,17 @@ public class ChannelViewModel : IrcViewModel
         AddMessage(ChannelStrings.Kick.With(kickee, nick.Nick, reason));
     }
 
-    private void Channel_OnNick(object sender, NickChangeEventArgs e)
+    private void Channel_OnNick(object? sender, NickChangeEventArgs e)
     {
         AddMessage(ChannelStrings.NickChange.With(e.User.Nick, e.NewNick));
     }
 
-    private void Channel_OnUserQuitted(object sender, UserMessageEventArgs e)
+    private void Channel_OnUserQuitted(object? sender, UserMessageEventArgs e)
     {
         AddMessage(ChannelStrings.Quit.With(e.User.Nick, e.User.HostMask, e.Message));
     }
 
-    private void Channel_OtherUserParted(object sender, UserMessageEventArgs e)
+    private void Channel_OtherUserParted(object? sender, UserMessageEventArgs e)
     {
         if (e.Message == string.Empty)
             AddMessage(ChannelStrings.Part.With(e.User.Nick, e.User.HostMask));
@@ -85,32 +85,32 @@ public class ChannelViewModel : IrcViewModel
             AddMessage(ChannelStrings.PartWithReason.With(e.User.Nick, e.User.HostMask, e.Message));
     }
 
-    private void Channel_UserParted(object sender, EventArgs e)
+    private void Channel_UserParted(object? sender, EventArgs e)
     {
         Close();
     }
 
-    private void Channel_OnJoin(object sender, UserEventArgs e)
+    private void Channel_OnJoin(object? sender, UserEventArgs e)
     {
         AddMessage(ChannelStrings.Joined.With(e.User.Nick, e.User.HostMask));
     }
 
-    private void Channel_TopicReceived(object sender, OrtzIRC.Common.DataEventArgs<string> e)
+    private void Channel_TopicReceived(object? sender, OrtzIRC.Common.DataEventArgs<string> e)
     {
         AddMessage(ChannelStrings.TopicRecieved.With(e.Data));
     }
 
-    private void Channel_OnAction(object sender, UserMessageEventArgs e)
+    private void Channel_OnAction(object? sender, UserMessageEventArgs e)
     {
         ChatLines.Add(new ChannelActionViewModel(DateTime.Now, e.Message, e.User));
     }
 
-    private void Channel_OnMessage(object sender, UserMessageEventArgs e)
+    private void Channel_OnMessage(object? sender, UserMessageEventArgs e)
     {
         ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Message, e.User));
     }
 
-    private void NickList_Updated(object sender, EventArgs e)
+    private void NickList_Updated(object? sender, EventArgs e)
     {
         userList = new List<UserViewModel>();
         foreach (User user in _channel.Users)

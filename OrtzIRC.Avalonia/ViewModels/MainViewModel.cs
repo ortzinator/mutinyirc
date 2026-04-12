@@ -17,8 +17,8 @@ public class MainViewModel : ViewModelBase
     private PluginManager _pluginManager;
     public MTObservableCollection<IrcViewModel> Panels { get; protected set; }
 
-    private IrcViewModel _selectedPanel;
-    public IrcViewModel SelectedPanel
+    private IrcViewModel? _selectedPanel;
+    public IrcViewModel? SelectedPanel
     {
         get => _selectedPanel;
         set => SetProperty(ref _selectedPanel, value);
@@ -49,16 +49,16 @@ public class MainViewModel : ViewModelBase
         RandomMessages.Load();
     }
 
-    private void Server_JoinSelf(object sender, OrtzIRC.Common.DataEventArgs<Channel> e)
+    private void Server_JoinSelf(object? sender, OrtzIRC.Common.DataEventArgs<Channel> e)
     {
         var chan = CompositionRoot.Resolve<ChannelViewModel>(new ConstructorArgument("channel", e.Data));
         chan.RequestClose += Chan_RequestClose;
         Panels.Add(chan);
     }
 
-    private void Chan_RequestClose(object sender, EventArgs e)
+    private void Chan_RequestClose(object? sender, EventArgs e)
     {
-        var chan = (ChannelViewModel)sender;
+        var chan = (ChannelViewModel)sender!;
         chan.RequestClose -= Chan_RequestClose;
         Panels.Remove(chan);
         if (SelectedPanel == chan)
@@ -72,7 +72,7 @@ public class MainViewModel : ViewModelBase
         TextLoggerManager.TimeFormat = AppSettings.Instance.LoggerTimestampFormat;
     }
 
-    private void Instance_ServerCreated(object sender, ServerEventArgs e)
+    private void Instance_ServerCreated(object? sender, ServerEventArgs e)
     {
         CreateServerPanel(e.Server);
     }

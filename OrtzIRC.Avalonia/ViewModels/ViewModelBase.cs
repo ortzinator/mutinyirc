@@ -7,15 +7,15 @@ using CommunityToolkit.Mvvm.Input;
 
 public abstract class ViewModelBase : ObservableObject
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
-    private RelayCommand closeCommand;
+    private RelayCommand? closeCommand;
     public ICommand CloseCommand
     {
         get { return closeCommand ?? (closeCommand = new RelayCommand(Close, CanClose)); }
     }
 
-    public event EventHandler RequestClose;
+    public event EventHandler? RequestClose;
 
     public virtual void Close()
     {

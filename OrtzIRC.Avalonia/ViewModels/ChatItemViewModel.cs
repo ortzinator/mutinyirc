@@ -7,7 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 public class ChatItemViewModel : ObservableObject
 {
     public DateTime Time { get; set; }
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 
     protected ChatItemViewModel() { }
 
@@ -20,7 +20,7 @@ public class ChatItemViewModel : ObservableObject
 
 public class ChannelMessageViewModel : ChatItemViewModel
 {
-    public User User { get; set; }
+    public User User { get; set; } = null!;
 
     protected ChannelMessageViewModel() { }
 

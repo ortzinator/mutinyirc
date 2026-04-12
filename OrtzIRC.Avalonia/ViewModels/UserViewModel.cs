@@ -24,7 +24,7 @@ public class UserViewModel : ObservableObject, IComparable<UserViewModel>
         };
     }
 
-    public int CompareTo(UserViewModel other) => FullNick.CompareTo(other.FullNick);
+    public int CompareTo(UserViewModel? other) => FullNick.CompareTo(other?.FullNick);
 
     public override string ToString() => FullNick;
 }

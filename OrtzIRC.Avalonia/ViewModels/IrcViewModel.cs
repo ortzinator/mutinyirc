@@ -13,7 +13,7 @@ public abstract class IrcViewModel : ViewModelBase, IDisposable
         ChatLines = new MTObservableCollection<ChatItemViewModel>();
     }
 
-    private RelayCommand<string> executeCommand;
+    private RelayCommand<string>? executeCommand;
     public ICommand ExecuteCommand
     {
         get { return executeCommand ?? (executeCommand = new RelayCommand<string>(OnExecute)); }
