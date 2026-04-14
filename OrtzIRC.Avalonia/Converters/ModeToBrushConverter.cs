@@ -27,7 +27,8 @@ public class ModeToBrushConverter : IValueConverter
 
     private static IBrush LookupBrush(string key, IBrush fallback)
     {
-        if (Application.Current?.Resources.TryGetResource(key, null, out var resource) == true
+        var theme = Application.Current?.ActualThemeVariant;
+        if (Application.Current?.Resources.TryGetResource(key, theme, out var resource) == true
             && resource is IBrush brush)
             return brush;
 

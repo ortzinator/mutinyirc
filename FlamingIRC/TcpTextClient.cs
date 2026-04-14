@@ -97,7 +97,7 @@ namespace FlamingIRC
         /// </remarks>
         public void Disconnect(DisconnectReason reason)
         {
-            _socket.Shutdown(SocketShutdown.Both);
+            try { _socket.Shutdown(SocketShutdown.Both); } catch (SocketException) { }
             _socket.Close();
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Connected = false;

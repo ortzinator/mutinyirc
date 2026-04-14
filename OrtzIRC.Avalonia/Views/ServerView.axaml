@@ -13,7 +13,15 @@
     </Design.DataContext>
 
     <DockPanel>
-        <local:CommandTextBox DockPanel.Dock="Bottom" x:Name="commandBox" MinHeight="20" />
+        <Border DockPanel.Dock="Bottom"
+                BorderBrush="{DynamicResource ChatBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="8">
+            <DockPanel>
+                <Button x:Name="sendButton" DockPanel.Dock="Right" Content="Send" Padding="12,6" />
+                <local:CommandTextBox x:Name="commandBox" BorderThickness="0" PlaceholderText="Write a message" MinHeight="20" />
+            </DockPanel>
+        </Border>
         <views:IrcOutputBox x:Name="outputBox" />
     </DockPanel>
 

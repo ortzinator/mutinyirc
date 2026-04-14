@@ -17,6 +17,8 @@ public class ChannelViewModel : IrcViewModel
 
     public PluginManager PluginManager => _pluginManager;
 
+    public string ChannelName => base.Name;
+
     public new string Name
     {
         get

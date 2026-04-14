@@ -7,7 +7,8 @@
         xmlns:design="clr-namespace:OrtzIRC.Avalonia.ViewModels.Design"
         mc:Ignorable="d"
         x:Class="OrtzIRC.Avalonia.Views.MainWindow"
-        Title="OrtzIRC" Height="282" Width="550">
+        Title="OrtzIRC" Height="282" Width="550"
+        Background="{DynamicResource AppBackground}">
 
     <Design.DataContext>
         <design:DesignMainViewModel />
@@ -17,7 +18,8 @@
         <ListBox ItemsSource="{Binding Panels}"
                  SelectedItem="{Binding SelectedPanel}"
                  DockPanel.Dock="Left"
-                 MinWidth="100">
+                 MinWidth="100"
+                 Background="{DynamicResource AppBackground}">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:IrcViewModel}">
                     <TextBlock Text="{Binding Name}" />

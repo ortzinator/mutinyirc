@@ -6,6 +6,7 @@ using FlamingIRC;
 
 public class DesignChannelViewModel : IrcViewModel
 {
+    public string ChannelName => "#general";
     public new string Name => "#general (3)";
     public List<UserViewModel> UserList { get; }
 

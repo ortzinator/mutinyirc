@@ -73,7 +73,7 @@ namespace FlamingIRC
                 }
                 running = true;
                 username = userName;
-                Thread socketThread = new Thread(Identd.Run) { Name = "Identd" };
+                Thread socketThread = new Thread(Identd.Run) { Name = "Identd", IsBackground = true };
                 socketThread.Start();
             }
         }

@@ -19,11 +19,26 @@
     </UserControl.Resources>
 
     <DockPanel>
-        <local:CommandTextBox DockPanel.Dock="Bottom" x:Name="commandBox" MinHeight="20" />
+        <Border DockPanel.Dock="Top"
+                BorderBrush="{DynamicResource ChatBorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="12,8">
+            <TextBlock Text="{Binding ChannelName}" FontWeight="SemiBold" />
+        </Border>
+        <Border DockPanel.Dock="Bottom"
+                BorderBrush="{DynamicResource ChatBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="8">
+            <DockPanel>
+                <Button x:Name="sendButton" DockPanel.Dock="Right" Content="Send" Padding="12,6" />
+                <local:CommandTextBox x:Name="commandBox" BorderThickness="0" PlaceholderText="Write a message" MinHeight="20" />
+            </DockPanel>
+        </Border>
         <ListBox x:Name="userBox"
                  ItemsSource="{Binding UserList}"
                  DockPanel.Dock="Right"
-                 MinWidth="100" MaxWidth="200">
+                 MinWidth="100" MaxWidth="200"
+                 Background="{DynamicResource AppBackground}">
             <ListBox.ItemContainerTheme>
                 <ControlTheme TargetType="ListBoxItem">
                     <Setter Property="Foreground" Value="{Binding Mode, Converter={StaticResource ModeToBrushConverter}}" />

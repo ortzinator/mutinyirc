@@ -23,17 +23,17 @@
 
         <DataTemplate DataType="{x:Type vm:ChannelActionViewModel}">
             <DockPanel>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
-                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="5" VerticalAlignment="Center"/>
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
+                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="8,5" VerticalAlignment="Center"/>
                 </Border>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,1,0" DockPanel.Dock="Left">
+                <Border DockPanel.Dock="Left">
                     <Border.Background>
                         <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
                             <GradientStop Color="{DynamicResource ChatActionGradientStart}" Offset="0.008" />
                             <GradientStop Color="{DynamicResource ChatActionGradientEnd}" Offset="1" />
                         </LinearGradientBrush>
                     </Border.Background>
-                    <TextBlock Padding="5" TextWrapping="Wrap">
+                    <TextBlock Padding="8,5" TextWrapping="Wrap">
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0} {1}">
                                 <Binding Path="User.Nick" />
@@ -47,39 +47,39 @@
 
         <DataTemplate DataType="{x:Type vm:PrivateNoticeViewModel}">
             <DockPanel>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
-                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="5" VerticalAlignment="Center"/>
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
+                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="8,5" VerticalAlignment="Center"/>
                 </Border>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="{DynamicResource ChatNoticeBackground}">
-                    <TextBlock Text="{Binding User.NamesLiteral}" Padding="5" VerticalAlignment="Center" />
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatNoticeBackground}">
+                    <TextBlock Text="{Binding User.NamesLiteral}" Padding="8,5" VerticalAlignment="Center" />
                 </Border>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,0,1" DockPanel.Dock="Left" Background="{DynamicResource ChatNoticeBackground}">
-                    <TextBlock Text="{Binding Message}" Padding="5" TextWrapping="Wrap" />
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatNoticeBackground}">
+                    <TextBlock Text="{Binding Message}" Padding="8,5" TextWrapping="Wrap" />
                 </Border>
             </DockPanel>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type vm:ChannelMessageViewModel}">
             <DockPanel>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
-                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="5" VerticalAlignment="Center"/>
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
+                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="8,5" VerticalAlignment="Center"/>
                 </Border>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="{DynamicResource ChatNickBackground}">
-                    <TextBlock Text="{Binding User.NamesLiteral}" Padding="5" VerticalAlignment="Center" />
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatNickBackground}">
+                    <TextBlock Text="{Binding User.NamesLiteral}" Padding="8,5" VerticalAlignment="Center" />
                 </Border>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
-                    <TextBlock Text="{Binding Message}" Padding="5" TextWrapping="Wrap" />
+                <Border DockPanel.Dock="Left">
+                    <TextBlock Text="{Binding Message}" Padding="8,5" TextWrapping="Wrap" />
                 </Border>
             </DockPanel>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type vm:IrcErrorViewModel}">
             <DockPanel>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
-                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="5" VerticalAlignment="Center"/>
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
+                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="8,5" VerticalAlignment="Center"/>
                 </Border>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,0,1" DockPanel.Dock="Left" Background="{DynamicResource ChatErrorBackground}">
-                    <TextBlock Padding="5" TextWrapping="Wrap">
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatErrorBackground}">
+                    <TextBlock Padding="8,5" TextWrapping="Wrap">
                         <TextBlock.Text>
                             <MultiBinding StringFormat="Error {0}: {1}">
                                 <Binding Path="Code" />
@@ -93,22 +93,22 @@
 
         <DataTemplate DataType="{x:Type vm:ErrorMessageViewModel}">
             <DockPanel>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
-                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="5" VerticalAlignment="Center"/>
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
+                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="8,5" VerticalAlignment="Center"/>
                 </Border>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,0,1" DockPanel.Dock="Left" Background="{DynamicResource ChatErrorBackground}">
-                    <TextBlock Text="{Binding Message}" Padding="5" TextWrapping="Wrap" />
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatErrorBackground}">
+                    <TextBlock Text="{Binding Message}" Padding="8,5" TextWrapping="Wrap" />
                 </Border>
             </DockPanel>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type vm:ChatItemViewModel}">
             <DockPanel>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,1,1" DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
-                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="5" VerticalAlignment="Center"/>
+                <Border DockPanel.Dock="Left" Background="{DynamicResource ChatTimestampBackground}">
+                    <TextBlock Text="{Binding Time, StringFormat='HH:mm:ss'}" Padding="8,5" VerticalAlignment="Center"/>
                 </Border>
-                <Border BorderBrush="{DynamicResource ChatBorderBrush}" BorderThickness="0,0,0,1" DockPanel.Dock="Left">
-                    <TextBlock Text="{Binding Message}" Padding="5" TextWrapping="Wrap" />
+                <Border DockPanel.Dock="Left">
+                    <TextBlock Text="{Binding Message}" Padding="8,5" TextWrapping="Wrap" />
                 </Border>
             </DockPanel>
         </DataTemplate>

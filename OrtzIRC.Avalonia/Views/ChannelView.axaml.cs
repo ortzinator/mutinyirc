@@ -9,5 +9,10 @@ public partial class ChannelView : UserControl
     {
         InitializeComponent();
         commandBox.CommandEntered += (_, _) => outputBox.ScrollToBottom();
+        sendButton.Click += (_, _) =>
+        {
+            commandBox.Submit();
+            commandBox.Focus();
+        };
     }
 }

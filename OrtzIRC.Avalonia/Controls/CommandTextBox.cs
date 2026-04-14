@@ -21,6 +21,23 @@ public class CommandTextBox : TextBox
         AddHandler(KeyDownEvent, HandleKeyDown, handledEventsToo: true);
     }
 
+    public void Submit()
+    {
+        if (Text?.Trim() != string.Empty)
+        {
+            if (historyIndex != cmdHistory.Count)
+                cmdHistory.RemoveAt(historyIndex);
+            cmdHistory.Add(Text);
+
+            var vm = DataContext as IrcViewModel;
+            vm?.ExecuteCommand.Execute(Text);
+
+            CommandEntered?.Invoke(this, new CommandEventArgs(Text));
+            Clear();
+            historyIndex = cmdHistory.Count;
+        }
+    }
+
     private void HandleKeyDown(object sender, KeyEventArgs e)
     {
         switch (e.Key)
@@ -59,20 +76,8 @@ public class CommandTextBox : TextBox
                 break;
 
             case Key.Enter:
-                if (Text?.Trim() != string.Empty)
-                {
-                    if (historyIndex != cmdHistory.Count)
-                        cmdHistory.RemoveAt(historyIndex);
-                    cmdHistory.Add(Text);
-
-                    var vm = DataContext as IrcViewModel;
-                    vm?.ExecuteCommand.Execute(Text);
-
-                    CommandEntered?.Invoke(this, new CommandEventArgs(Text));
-                    Clear();
-                    historyIndex = cmdHistory.Count;
-                    e.Handled = true;
-                }
+                Submit();
+                e.Handled = true;
                 break;
         }
     }

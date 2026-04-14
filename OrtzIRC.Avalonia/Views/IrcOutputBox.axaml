@@ -16,7 +16,7 @@
                        Foreground="{DynamicResource ScrollIndicatorForeground}"
                        FontSize="8">▼ ▼</TextBlock>
         </Border>
-        <ScrollViewer x:Name="scrollViewer">
+        <ScrollViewer x:Name="scrollViewer" Background="{DynamicResource AppBackground}">
             <ItemsControl x:Name="outputItems" ItemsSource="{Binding ChatLines}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

@@ -20,8 +20,15 @@ public partial class App : Application
             CompositionRoot.Wire(new Bindings());
             var viewModel = CompositionRoot.Resolve<MainViewModel>();
             var window = new MainWindow { DataContext = viewModel };
+            bool closing = false;
             viewModel.RequestClose += (_, _) => window.Close();
-            window.Closing += (_, _) => IrcSettingsManager.Instance.Save();
+            window.Closing += (_, _) =>
+            {
+                if (closing) return;
+                closing = true;
+                viewModel.Close();
+                IrcSettingsManager.Instance.Save();
+            };
             desktop.MainWindow = window;
         }
 
