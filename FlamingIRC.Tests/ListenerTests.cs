@@ -384,5 +384,37 @@ namespace FlamingIRC.Tests
             Assert.That(givenChannel, Is.EqualTo("#lancer"));
             Assert.That(givenTopic, Is.EqualTo("foobar"));
         }
+
+        [Test]
+        public void Parse_ChannelMode_FiresOnChannelModeChange()
+        {
+            User givenWho = null;
+            string givenChannel = null;
+            ChannelModeInfo[] givenModes = null;
+
+            _listener.OnChannelModeChange += (who, channel, modes, raw) =>
+            {
+                givenWho = who;
+                givenChannel = channel;
+                givenModes = modes;
+            };
+            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com MODE #ortzirc +m");
+            Assert.AreEqual(_testUser, givenWho);
+            Assert.AreEqual("#ortzirc", givenChannel);
+            Assert.AreEqual(1, givenModes.Length);
+            Assert.AreEqual(ModeAction.Add, givenModes[0].Action);
+            Assert.AreEqual(ChannelMode.Moderated, givenModes[0].Mode);
+        }
+
+        [Test]
+        public void Parse_UserMode_FiresOnUserModeChange()
+        {
+            UserModeChangeEventArgs givenArgs = null;
+            _listener.OnUserModeChange += (sender, args) => givenArgs = args;
+            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com MODE Ortzinator +i");
+            Assert.IsNotNull(givenArgs);
+            Assert.AreEqual(ModeAction.Add, givenArgs.Action);
+            Assert.AreEqual(UserMode.Invisible, givenArgs.Mode);
+        }
     }
 }
