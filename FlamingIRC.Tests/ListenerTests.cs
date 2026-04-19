@@ -416,5 +416,89 @@ namespace FlamingIRC.Tests
             Assert.AreEqual(ModeAction.Add, givenArgs.Action);
             Assert.AreEqual(UserMode.Invisible, givenArgs.Mode);
         }
+
+        [Test]
+        public void Parse_Quit_FiresOnQuit()
+        {
+            User givenUser = null;
+            string givenReason = null;
+            _listener.OnQuit += (user, reason) => { givenUser = user; givenReason = reason; };
+            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT :Quit: Leaving");
+            Assert.AreEqual(_testUser, givenUser);
+            Assert.AreEqual("Quit: Leaving", givenReason);
+        }
+
+        [Test]
+        public void Parse_Quit_NoMessage_ReasonIsEmpty()
+        {
+            User givenUser = null;
+            string givenReason = null;
+            _listener.OnQuit += (user, reason) => { givenUser = user; givenReason = reason; };
+            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT");
+            Assert.AreEqual(_testUser, givenUser);
+            Assert.AreEqual("", givenReason);
+        }
+
+        [Test]
+        public void Parse_Part_FiresOnPart()
+        {
+            User givenUser = null;
+            string givenChannel = null;
+            string givenReason = null;
+            _listener.OnPart += (user, channel, reason) => { givenUser = user; givenChannel = channel; givenReason = reason; };
+            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PART #ortzirc :Goodbye");
+            Assert.AreEqual(_testUser, givenUser);
+            Assert.AreEqual("#ortzirc", givenChannel);
+            Assert.AreEqual("Goodbye", givenReason);
+        }
+
+        [Test]
+        public void Parse_Part_NoMessage_ReasonIsEmpty()
+        {
+            User givenUser = null;
+            string givenChannel = null;
+            string givenReason = null;
+            _listener.OnPart += (user, channel, reason) => { givenUser = user; givenChannel = channel; givenReason = reason; };
+            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PART #ortzirc");
+            Assert.AreEqual(_testUser, givenUser);
+            Assert.AreEqual("#ortzirc", givenChannel);
+            Assert.AreEqual("", givenReason);
+        }
+
+        [Test]
+        public void Parse_Topic_FiresOnTopicChanged()
+        {
+            UserChannelMessageEventArgs givenArgs = null;
+            _listener.OnTopicChanged += (sender, args) => givenArgs = args;
+            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com TOPIC #ortzirc :New topic here");
+            Assert.AreEqual(_testUser, givenArgs.User);
+            Assert.AreEqual("#ortzirc", givenArgs.Channel);
+            Assert.AreEqual("New topic here", givenArgs.Message);
+        }
+
+        [Test]
+        public void Parse_Kill_FiresOnKill()
+        {
+            User givenUser = null;
+            string givenNick = null;
+            string givenReason = null;
+            _listener.OnKill += (user, nick, reason) => { givenUser = user; givenNick = nick; givenReason = reason; };
+            _listener.Parse(":irc.server.net KILL Ortzinator :Killed by operator");
+            Assert.AreEqual("irc.server.net", givenUser.Nick);
+            Assert.AreEqual("Ortzinator", givenNick);
+            Assert.AreEqual("Killed by operator", givenReason);
+        }
+
+        [Test]
+        public void Parse_Kill_NoMessage_ReasonIsEmpty()
+        {
+            User givenUser = null;
+            string givenNick = null;
+            string givenReason = null;
+            _listener.OnKill += (user, nick, reason) => { givenUser = user; givenNick = nick; givenReason = reason; };
+            _listener.Parse(":irc.server.net KILL Ortzinator");
+            Assert.AreEqual("Ortzinator", givenNick);
+            Assert.AreEqual("", givenReason);
+        }
     }
 }
