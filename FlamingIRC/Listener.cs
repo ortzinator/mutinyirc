@@ -282,16 +282,17 @@ namespace FlamingIRC
                     }
                     else
                     {
-                        ParseCommand(ircMessage.Tokens);
+                        ParseCommand(ircMessage);
                     }
                     break;
             }
         }
 
         /// <summary>
-        /// Parses and handles incoming server commands
+        /// Dispatches an incoming server command to the appropriate handler
+        /// based on <see cref="IrcMessage.Command"/>.
         /// </summary>
-        /// <param name="ircMessage">The parsed message</param>
+        /// <param name="ircMessage">The parsed message, with From, Target, and Message pre-populated by <see cref="ParseIrcMessage"/>.</param>
         private void ParseCommand(IrcMessage ircMessage)
         {
             switch (ircMessage.Command)
@@ -311,13 +312,13 @@ namespace FlamingIRC
                     ProcessNickCommand(ircMessage);
                     break;
                 case TOPIC:
-                    //ProcessTopicCommand(ircMessage);
+                    ProcessTopicCommand(ircMessage);
                     break;
                 case PART:
-                    //ProcessPartCommand(ircMessage);
+                    ProcessPartCommand(ircMessage);
                     break;
                 case QUIT:
-                    //ProcessQuitCommand(ircMessage);
+                    ProcessQuitCommand(ircMessage);
                     break;
                 case INVITE:
                     ProcessInviteCommand(ircMessage);
@@ -326,10 +327,10 @@ namespace FlamingIRC
                     ProcessKickCommand(ircMessage);
                     break;
                 case MODE:
-                    //ProcessModeCommand(ircMessage);
+                    ProcessModeCommand(ircMessage);
                     break;
                 case KILL:
-                    //ProcessKillCommand(ircMessage);
+                    ProcessKillCommand(ircMessage);
                     break;
                 default:
                     OnError.Fire(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, ircMessage.Message));
@@ -349,107 +350,37 @@ namespace FlamingIRC
             OnError.Fire(this, new ErrorMessageEventArgs(code, message));
         }
 
-        /// <summary>
-        /// Parse the message and call the callback methods
-        /// on the listeners.
-        /// 
-        /// </summary>
-        /// <param name="tokens">The text received from the IRC server</param>
-        private void ParseCommand(string[] tokens)
+        private void ProcessKillCommand(IrcMessage ircMessage)
         {
-            //Remove colon user info string
-            tokens[0] = RemoveLeadingColon(tokens[0]);
-            switch (tokens[1])
-            {
-                case PONG:
-                    break;
-                case NOTICE:
-                    ProcessNoticeCommand(tokens);
-                    break;
-                case JOIN:
-                    ProcessJoinCommand(tokens);
-                    break;
-                case PRIVMSG:
-                    ProcessPrivmsgCommand(tokens);
-                    break;
-                case NICK:
-                    ProcessNickCommand(tokens);
-                    break;
-                case TOPIC:
-                    ProcessTopicCommand(tokens);
-                    break;
-                case PART:
-                    ProcessPartCommand(tokens);
-                    break;
-                case QUIT:
-                    ProcessQuitCommand(tokens);
-                    break;
-                case INVITE:
-                    ProcessInviteCommand(tokens);
-                    break;
-                case KICK:
-                    ProcessKickCommand(tokens);
-                    break;
-                case MODE:
-                    ProcessModeCommand(tokens);
-                    break;
-                case KILL:
-                    ProcessKillCommand(tokens);
-                    break;
-                default:
-                    OnError.Fire(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0)));
-                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Unknown IRC command=" + tokens[1]);
-                    //Trace.WriteLine("Unknown command", "IRC");
-                    break;
-            }
+            OnKill?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message ?? "");
         }
 
-        private void ProcessKillCommand(string[] tokens)
+        private void ProcessModeCommand(IrcMessage ircMessage)
         {
-            string reason = "";
-            if (tokens.Length >= 4)
-            {
-                tokens[3] = RemoveLeadingColon(tokens[3]);
-                reason = CondenseStrings(tokens, 3);
-            }
-            OnKill?.Invoke(Rfc2812Util.UserFromString(tokens[0]), tokens[2], reason);
-        }
-
-        private void ProcessModeCommand(string[] tokens)
-        {
-            if (channelPattern.IsMatch(tokens[2]))
+            if (channelPattern.IsMatch(ircMessage.Target))
             {
                 if (OnChannelModeChange == null) return;
 
-                User who = Rfc2812Util.UserFromString(tokens[0]);
+                User who = Rfc2812Util.UserFromString(ircMessage.From);
                 try
                 {
-                    ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 3);
-                    string raw = CondenseStrings(tokens, 3);
-                    OnChannelModeChange(who, tokens[2], modes, raw);
-                    Trace.WriteLine("Channel mode change", "IRC");
+                    ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(ircMessage.Tokens, 3);
+                    string raw = CondenseStrings(ircMessage.Tokens, 3);
+                    OnChannelModeChange(who, ircMessage.Target, modes, raw);
                 }
                 catch (Exception)
                 {
-                    OnError.Fire(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0)));
+                    OnError.Fire(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, ircMessage.Message));
                     Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                        "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Bad IRC MODE string=" + tokens[0]);
+                        "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Bad IRC MODE string=" + ircMessage.From);
                 }
             }
             else
             {
-                tokens[3] = RemoveLeadingColon(tokens[3]);
-                OnUserModeChange?.Invoke(this, new UserModeChangeEventArgs(Rfc2812Util.CharToModeAction(tokens[3][0]),
-                    Rfc2812Util.CharToUserMode(tokens[3][1])));
-                //Trace.WriteLine("User mode change", "IRC");
+                string modeStr = RemoveLeadingColon(ircMessage.Tokens[3]);
+                OnUserModeChange?.Invoke(this, new UserModeChangeEventArgs(Rfc2812Util.CharToModeAction(modeStr[0]),
+                    Rfc2812Util.CharToUserMode(modeStr[1])));
             }
-        }
-
-        private void ProcessKickCommand(string[] tokens)
-        {
-            tokens[4] = RemoveLeadingColon(tokens[4]);
-            OnKick?.Invoke(Rfc2812Util.UserFromString(tokens[0]), tokens[2], tokens[3], CondenseStrings(tokens, 4));
-            //Trace.WriteLine("Kick", "IRC");
         }
 
         public void ProcessKickCommand(IrcMessage ircMessage)
@@ -463,28 +394,20 @@ namespace FlamingIRC
             //Trace.WriteLine("Invite", "IRC");
         }
 
-        private void ProcessQuitCommand(string[] tokens)
+        private void ProcessQuitCommand(IrcMessage ircMessage)
         {
-            tokens[2] = RemoveLeadingColon(tokens[2]);
-            OnQuit?.Invoke(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 2));
-            //Trace.WriteLine("Quit", "IRC");
+            OnQuit?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Message ?? "");
         }
 
-        private void ProcessPartCommand(string[] tokens)
+        private void ProcessPartCommand(IrcMessage ircMessage)
         {
-            OnPart?.Invoke(
-                Rfc2812Util.UserFromString(tokens[0]),
-                RemoveLeadingColon(tokens[2]),
-                tokens.Length >= 4 ? RemoveLeadingColon(CondenseStrings(tokens, 3)) : "");
-            //Trace.WriteLine("Part", "IRC");
+            OnPart?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message ?? "");
         }
 
-        private void ProcessTopicCommand(string[] tokens)
+        private void ProcessTopicCommand(IrcMessage ircMessage)
         {
-            tokens[3] = RemoveLeadingColon(tokens[3]);
             OnTopicChanged?.Invoke(this, new UserChannelMessageEventArgs(
-                Rfc2812Util.UserFromString(tokens[0]), tokens[2], CondenseStrings(tokens, 3)));
-            //Trace.WriteLine("Topic changed", "IRC");
+                Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message));
         }
 
 
@@ -571,7 +494,7 @@ namespace FlamingIRC
         public void ProcessPrivmsgCommand(IrcMessage message)
         {
             var msgTokens = message.Message.Split(Separator);
-            if (RemoveLeadingColon(msgTokens[0]) == ACTION)
+            if (msgTokens[0] == ACTION)
             {
                 if (Rfc2812Util.IsValidChannelName(message.Target))
                 {
