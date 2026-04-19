@@ -1,0 +1,124 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:OrtzIRC.Avalonia.ViewModels"
+        x:Class="OrtzIRC.Avalonia.Views.SettingsWindow"
+        Title="Settings"
+        Width="640" Height="420"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="8">
+
+        <!-- OK / Cancel -->
+        <StackPanel DockPanel.Dock="Bottom"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="6"
+                    Margin="0,8,0,0">
+            <Button Content="OK" Width="80" Click="OkButton_Click" />
+            <Button Content="Cancel" Width="80" Click="CancelButton_Click" />
+        </StackPanel>
+
+        <!-- Main content: Networks (left) + Servers/Detail (right) -->
+        <Grid ColumnDefinitions="180,*" ColumnSpacing="8">
+
+            <!-- Networks column -->
+            <DockPanel Grid.Column="0">
+                <TextBlock DockPanel.Dock="Top" Text="Networks" FontWeight="SemiBold" Margin="0,0,0,4" />
+                <StackPanel DockPanel.Dock="Bottom"
+                            Orientation="Horizontal"
+                            Spacing="4"
+                            Margin="0,4,0,0">
+                    <Button Content="Add"
+                            Command="{Binding AddNetworkCommand}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center" />
+                    <Button Content="Remove"
+                            Command="{Binding RemoveNetworkCommand}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center" />
+                </StackPanel>
+                <ListBox ItemsSource="{Binding Networks}"
+                         SelectedItem="{Binding SelectedNetwork}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:NetworkSettingsViewModel}">
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- Servers + detail column -->
+            <DockPanel Grid.Column="1"
+                       IsEnabled="{Binding SelectedNetwork, Converter={x:Static ObjectConverters.IsNotNull}}">
+
+                <TextBlock DockPanel.Dock="Top"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,4">
+                    <Run Text="Servers in " />
+                    <Run Text="{Binding SelectedNetwork.Name}" />
+                </TextBlock>
+
+                <!-- Server detail form -->
+                <Border DockPanel.Dock="Bottom"
+                        BorderThickness="1"
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                        CornerRadius="4"
+                        Padding="8"
+                        Margin="0,4,0,0"
+                        IsVisible="{Binding SelectedNetwork.SelectedServer, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                          ColumnDefinitions="90,*"
+                          RowSpacing="4"
+                          ColumnSpacing="6">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="URL" VerticalAlignment="Center" />
+                        <TextBox   Grid.Row="0" Grid.Column="1"
+                                   Text="{Binding SelectedNetwork.SelectedServer.Url}" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Description" VerticalAlignment="Center" />
+                        <TextBox   Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding SelectedNetwork.SelectedServer.Description}" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Ports" VerticalAlignment="Center" />
+                        <TextBox   Grid.Row="2" Grid.Column="1"
+                                   Text="{Binding SelectedNetwork.SelectedServer.Ports}" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Nick" VerticalAlignment="Center" />
+                        <TextBox   Grid.Row="3" Grid.Column="1"
+                                   Text="{Binding SelectedNetwork.SelectedServer.Nick}" />
+
+                        <CheckBox  Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Content="Use SSL"
+                                   IsChecked="{Binding SelectedNetwork.SelectedServer.Ssl}" />
+
+                        <CheckBox  Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Content="Auto-connect"
+                                   IsChecked="{Binding SelectedNetwork.SelectedServer.AutoConnect}" />
+                    </Grid>
+                </Border>
+
+                <!-- Server list + add/remove -->
+                <StackPanel DockPanel.Dock="Bottom"
+                            Orientation="Horizontal"
+                            Spacing="4"
+                            Margin="0,4,0,0">
+                    <Button Content="Add Server"
+                            Command="{Binding SelectedNetwork.AddServerCommand}" />
+                    <Button Content="Remove Server"
+                            Command="{Binding SelectedNetwork.RemoveServerCommand}" />
+                </StackPanel>
+
+                <ListBox ItemsSource="{Binding SelectedNetwork.Servers}"
+                         SelectedItem="{Binding SelectedNetwork.SelectedServer}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:ServerSettingsViewModel}">
+                            <TextBlock Text="{Binding Url}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+        </Grid>
+    </DockPanel>
+
+</Window>

@@ -15,6 +15,12 @@
     </Design.DataContext>
 
     <DockPanel>
+        <StackPanel DockPanel.Dock="Top"
+                    Orientation="Horizontal"
+                    Background="{DynamicResource AppBackground}">
+            <Button Content="Settings" Click="SettingsButton_Click" Margin="4,2" />
+        </StackPanel>
+
         <ListBox ItemsSource="{Binding Panels}"
                  SelectedItem="{Binding SelectedPanel}"
                  DockPanel.Dock="Left"
