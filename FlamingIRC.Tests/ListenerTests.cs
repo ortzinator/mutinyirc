@@ -373,12 +373,16 @@ namespace FlamingIRC.Tests
         [Test]
         public void ParseReply_Topic()
         {
-            string givenMsg = String.Empty;
-            _listener.OnError += delegate (object sender, ErrorMessageEventArgs args)
+            string givenChannel = string.Empty;
+            string givenTopic = string.Empty;
+            _listener.OnRecieveTopic += (channel, topic) =>
             {
-                givenMsg = args.Message;
+                givenChannel = channel;
+                givenTopic = topic;
             };
             _listener.ParseReply(_topic.Split(new[] { ' ' }));
+            Assert.That(givenChannel, Is.EqualTo("#lancer"));
+            Assert.That(givenTopic, Is.EqualTo("foobar"));
         }
     }
 }
