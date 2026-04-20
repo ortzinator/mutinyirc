@@ -260,7 +260,8 @@ namespace FlamingIRC
         public void Parse(string message)
         {
             OnAnything.Fire(this, new EventArgs());
-            Debug.WriteLine(string.Format("RAW: \"{0}\"", message));
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::Parse() RAW: \"{1}\"", Thread.CurrentThread.Name, message));
 
             IrcMessage ircMessage = ParseIrcMessage(message);
 
@@ -337,7 +338,6 @@ namespace FlamingIRC
                     Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                         string.Format("[{0}] Listener::ParseCommand() Unknown IRC command={1}",
                             Thread.CurrentThread.Name, ircMessage.Command));
-                    //Trace.WriteLine("Unknown command", "IRC");
                     break;
             }
         }
@@ -352,6 +352,8 @@ namespace FlamingIRC
 
         private void ProcessKillCommand(IrcMessage ircMessage)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessKillCommand() target={1}", Thread.CurrentThread.Name, ircMessage.Target));
             OnKill?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message ?? "");
         }
 
@@ -385,27 +387,36 @@ namespace FlamingIRC
 
         public void ProcessKickCommand(IrcMessage ircMessage)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessKickCommand() channel={1}", Thread.CurrentThread.Name, ircMessage.Tokens[2]));
             OnKick?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Tokens[2], ircMessage.Tokens[3], ircMessage.Message);
         }
 
         public void ProcessInviteCommand(string[] tokens)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessInviteCommand()", Thread.CurrentThread.Name));
             OnInvite.Fire(this, new InviteEventArgs(tokens[0], RemoveLeadingColon(tokens[3])));
-            //Trace.WriteLine("Invite", "IRC");
         }
 
         private void ProcessQuitCommand(IrcMessage ircMessage)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessQuitCommand() from={1}", Thread.CurrentThread.Name, ircMessage.From));
             OnQuit?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Message ?? "");
         }
 
         private void ProcessPartCommand(IrcMessage ircMessage)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessPartCommand() channel={1}", Thread.CurrentThread.Name, ircMessage.Target));
             OnPart?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message ?? "");
         }
 
         private void ProcessTopicCommand(IrcMessage ircMessage)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessTopicCommand() channel={1}", Thread.CurrentThread.Name, ircMessage.Target));
             OnTopicChanged?.Invoke(this, new UserChannelMessageEventArgs(
                 Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message));
         }
@@ -414,23 +425,29 @@ namespace FlamingIRC
 
         private void ProcessNickCommand(string[] tokens)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessNickCommand()", Thread.CurrentThread.Name));
             OnNick.Fire(this, new NickChangeEventArgs(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2])));
-            //Trace.WriteLine("Nick", "IRC");
         }
 
         public void ProcessNickCommand(IrcMessage message)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessNickCommand()", Thread.CurrentThread.Name));
             OnNick.Fire(this, new NickChangeEventArgs(Rfc2812Util.UserFromString(message.From), message.Message));
         }
 
         private void ProcessJoinCommand(string[] tokens)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessJoinCommand()", Thread.CurrentThread.Name));
             OnJoin?.Invoke(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
-            //Trace.WriteLine("Join", "IRC");
         }
 
         public void ProcessJoinCommand(IrcMessage ircMessage)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessJoinCommand() channel={1}", Thread.CurrentThread.Name, ircMessage.Target));
             OnJoin?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target);
         }
 
@@ -443,14 +460,16 @@ namespace FlamingIRC
                     Rfc2812Util.UserFromString(tokens[0]),
                     tokens[2],
                     CondenseStrings(tokens, 3)));
-                //Trace.WriteLine("Public notice", "IRC");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                    string.Format("[{0}] Listener::ProcessNoticeCommand() public channel={1}", Thread.CurrentThread.Name, tokens[2]));
             }
             else
             {
                 OnPrivateNotice.Fire(this, new UserMessageEventArgs(
                     Rfc2812Util.UserFromString(tokens[0]),
                     CondenseStrings(tokens, 3)));
-                //Trace.WriteLine("Private notice", "IRC");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                    string.Format("[{0}] Listener::ProcessNoticeCommand() private", Thread.CurrentThread.Name));
             }
         }
 
@@ -466,7 +485,8 @@ namespace FlamingIRC
                     OnAction.Fire(this,
                         new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2],
                             CondenseStrings(tokens, 4)));
-                    //Trace.WriteLine("Channel action", "IRC");
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                        string.Format("[{0}] Listener::ProcessPrivmsgCommand() channel action channel={1}", Thread.CurrentThread.Name, tokens[2]));
                 }
                 else
                 {
@@ -474,7 +494,8 @@ namespace FlamingIRC
                     tokens[last] = RemoveTrailingChar(tokens[last]);
                     OnPrivateAction.Fire(this,
                         new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 4)));
-                    //Trace.WriteLine("Private action", "IRC");
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                        string.Format("[{0}] Listener::ProcessPrivmsgCommand() private action", Thread.CurrentThread.Name));
                 }
             }
             else if (channelPattern.IsMatch(tokens[2]))
@@ -482,12 +503,14 @@ namespace FlamingIRC
                 OnPublic.Fire(this,
                     new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2],
                         CondenseStrings(tokens, 3)));
-                Trace.WriteLine("Public msg", "IRC");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                    string.Format("[{0}] Listener::ProcessPrivmsgCommand() public channel={1}", Thread.CurrentThread.Name, tokens[2]));
             }
             else
             {
                 OnPrivate.Fire(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 3)));
-                //Trace.WriteLine("Private msg", "IRC");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                    string.Format("[{0}] Listener::ProcessPrivmsgCommand() private", Thread.CurrentThread.Name));
             }
         }
 
@@ -500,13 +523,15 @@ namespace FlamingIRC
                 {
                     OnAction.Fire(this, new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Target,
                             CleanActionMessage(message.Message)));
-                    //Trace.WriteLine("Channel action", "IRC");
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                        string.Format("[{0}] Listener::ProcessPrivmsgCommand() channel action channel={1}", Thread.CurrentThread.Name, message.Target));
                 }
                 else
                 {
                     OnPrivateAction.Fire(this,
                         new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), CleanActionMessage(message.Message)));
-                    //Trace.WriteLine("Private action", "IRC");
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                        string.Format("[{0}] Listener::ProcessPrivmsgCommand() private action", Thread.CurrentThread.Name));
                 }
             }
             else if (channelPattern.IsMatch(message.Target))
@@ -514,12 +539,14 @@ namespace FlamingIRC
                 OnPublic.Fire(this,
                     new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Target,
                         message.Message));
-                Trace.WriteLine("Public msg", "IRC");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                    string.Format("[{0}] Listener::ProcessPrivmsgCommand() public channel={1}", Thread.CurrentThread.Name, message.Target));
             }
             else
             {
                 OnPrivate.Fire(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Message));
-                //Trace.WriteLine("Private msg", "IRC");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                    string.Format("[{0}] Listener::ProcessPrivmsgCommand() private", Thread.CurrentThread.Name));
             }
         }
 
@@ -532,6 +559,8 @@ namespace FlamingIRC
                 //Messages sent upon successful registration 
                 case ReplyCode.RPL_WELCOME:
                 case ReplyCode.RPL_YOURESERVICE:
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                        string.Format("[{0}] Listener::ParseReply() Registered", Thread.CurrentThread.Name));
                     OnRegistered.Fire(this, new EventArgs());
                     break;
                 case ReplyCode.RPL_MOTDSTART:
@@ -565,7 +594,8 @@ namespace FlamingIRC
                 case ReplyCode.ERR_NICKCOLLISION:
                     tokens[4] = RemoveLeadingColon(tokens[4]);
                     OnNickError.Fire(this, new NickErrorEventArgs(tokens[3], CondenseStrings(tokens, 4)));
-                    //Trace.WriteLine("Nick collision", "IRC");
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                        string.Format("[{0}] Listener::ParseReply() Nick collision nick={1}", Thread.CurrentThread.Name, tokens[3]));
                     break;
                 case ReplyCode.RPL_NOTOPIC:
                     OnError.Fire(this, new ErrorMessageEventArgs(code, CondenseStrings(tokens, 3)));
@@ -748,12 +778,13 @@ namespace FlamingIRC
                 string[] users = new string[numberOfUsers];
                 Array.Copy(tokens, 5, users, 0, numberOfUsers);
                 OnNames(this, new NamesEventArgs(tokens[4], users, false));
-                //Trace.WriteLine("Names", "IRC");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                    string.Format("[{0}] Listener::ProcessNamesReply() channel={1} count={2}", Thread.CurrentThread.Name, tokens[4], numberOfUsers));
             }
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="code"></param>
         /// <param name="tokens"></param>
@@ -894,7 +925,8 @@ namespace FlamingIRC
             string[] users = new string[numberOfUsers];
             Array.Copy(tokens, 5, users, 0, numberOfUsers);
             OnNames?.Invoke(this, new NamesEventArgs(tokens[4], users, false));
-            //Trace.WriteLine("Names", "IRC");
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessNamesReply() channel={1} count={2}", Thread.CurrentThread.Name, tokens[4], numberOfUsers));
         }
 
         /// <summary>
@@ -917,17 +949,21 @@ namespace FlamingIRC
                     fromUser,
                     ircMessage.Target,
                     ircMessage.Message));
-                //Trace.WriteLine("Public notice", "IRC");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                    string.Format("[{0}] Listener::ProcessNoticeCommand() public channel={1}", Thread.CurrentThread.Name, ircMessage.Target));
             }
             else
             {
                 OnPrivateNotice.Fire(this, new UserMessageEventArgs(fromUser, ircMessage.Message));
-                //Trace.WriteLine("Private notice", "IRC");
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                    string.Format("[{0}] Listener::ProcessNoticeCommand() private", Thread.CurrentThread.Name));
             }
         }
 
         public void ProcessInviteCommand(IrcMessage ircMessage)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] Listener::ProcessInviteCommand() channel={1}", Thread.CurrentThread.Name, ircMessage.Message));
             var fromUser = Rfc2812Util.UserFromString(ircMessage.From);
             OnInvite.Fire(this, new InviteEventArgs(fromUser.Nick, ircMessage.Message));
         }

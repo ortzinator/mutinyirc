@@ -440,7 +440,6 @@ namespace FlamingIRC
             }
 
             RawMessageSent.Fire(this, new DataEventArgs<string>(command.ToString()));
-            Trace.WriteLine("Sent command: " + command, "IRC");
 
             command.Remove(0, command.Length);
         }

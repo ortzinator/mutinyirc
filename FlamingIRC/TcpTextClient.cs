@@ -27,12 +27,14 @@
 namespace FlamingIRC
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Net.Security;
     using System.Net.Sockets;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
+    using System.Threading;
 
     public enum ConnectError
     {
@@ -97,6 +99,8 @@ namespace FlamingIRC
         /// </remarks>
         public void Disconnect(DisconnectReason reason)
         {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                string.Format("[{0}] TcpTextClient::Disconnect() reason={1}", Thread.CurrentThread.Name, reason));
             try { _socket.Shutdown(SocketShutdown.Both); } catch (SocketException) { }
             _socket.Close();
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -113,7 +117,8 @@ namespace FlamingIRC
             message = message + "\r\n";
             byte[] buffer = TextEncoding.GetBytes(message);
             _stream.BeginWrite(buffer, 0, buffer.Length, OnSend, null);
-            Console.Write("Outgoing: {0}", message);
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                string.Format("[{0}] TcpTextClient::Send() {1}", Thread.CurrentThread.Name, message.TrimEnd()));
         }
 
         private void OnConnect(IAsyncResult res)
@@ -131,18 +136,23 @@ namespace FlamingIRC
                 }
                 else
                 {
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                        string.Format("[{0}] TcpTextClient::OnConnect() TCP connected to {1}", Thread.CurrentThread.Name, _serverName));
                     OnConnect();
                     WaitForData();
                 }
             }
             catch (SocketException e)
             {
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                    string.Format("[{0}] TcpTextClient::OnConnect() SocketException={1}", Thread.CurrentThread.Name, e.SocketErrorCode));
                 OnConnectFailed(ConnectError.SocketError, e.ErrorCode);
             }
             catch (Exception e)
             {
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                    string.Format("[{0}] TcpTextClient::OnConnect() exception={1}", Thread.CurrentThread.Name, e.Message));
                 OnConnectFailed(ConnectError.SocketError, null);
-                System.Diagnostics.Debug.WriteLine("Connect failed: " + e.Message);
                 throw;
             }
         }
@@ -163,11 +173,15 @@ namespace FlamingIRC
             try
             {
                 _sslStream.EndAuthenticateAsClient(res);
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                    string.Format("[{0}] TcpTextClient::OnAuthenticate() SSL authenticated to {1}", Thread.CurrentThread.Name, _serverName));
                 OnConnect();
                 WaitForData();
             }
-            catch (AuthenticationException)
+            catch (AuthenticationException e)
             {
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                    string.Format("[{0}] TcpTextClient::OnAuthenticate() SSL authentication failed={1}", Thread.CurrentThread.Name, e.Message));
                 _socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
                 OnConnectFailed(ConnectError.AuthenticationFailed, null);
@@ -200,7 +214,8 @@ namespace FlamingIRC
 
                 if (bytes == 0)
                 {
-                    // Connection Closed!
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                        string.Format("[{0}] TcpTextClient::OnDataReceived() remote host closed connection", Thread.CurrentThread.Name));
                     _socket.Shutdown(SocketShutdown.Both);
                     Connected = false;
                     OnDisconnect(DisconnectReason.RemoteHostClosedConnection, null);
