@@ -6,6 +6,7 @@ namespace OrtzIRC.Avalonia.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows.Input;
 using FlamingIRC;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,7 +16,10 @@ using OrtzIRC.PluginFramework;
 public class MainViewModel : ViewModelBase
 {
     private PluginManager _pluginManager;
+    private Dictionary<Server, ServerViewModel> _serverMap = new();
+
     public MTObservableCollection<IrcViewModel> Panels { get; protected set; }
+    public MTObservableCollection<ServerViewModel> Servers { get; }
 
     private IrcViewModel? _selectedPanel;
     public IrcViewModel? SelectedPanel
@@ -24,10 +28,20 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _selectedPanel, value);
     }
 
+    private RelayCommand<IrcViewModel?>? _selectPanelCommand;
+    public System.Windows.Input.ICommand SelectPanelCommand =>
+        _selectPanelCommand ??= new RelayCommand<IrcViewModel?>(panel =>
+        {
+            if (_selectedPanel != null) _selectedPanel.IsSelected = false;
+            SelectedPanel = panel;
+            if (panel != null) panel.IsSelected = true;
+        });
+
     public MainViewModel(PluginManager pluginManager)
     {
         _pluginManager = pluginManager;
         Panels = new MTObservableCollection<IrcViewModel>();
+        Servers = new MTObservableCollection<ServerViewModel>();
 
         ServerManager.Instance.ServerAdded += Instance_ServerCreated;
 
@@ -51,9 +65,23 @@ public class MainViewModel : ViewModelBase
 
     private void Server_JoinSelf(object? sender, OrtzIRC.Common.DataEventArgs<Channel> e)
     {
-        var chan = CompositionRoot.Resolve<ChannelViewModel>(new ConstructorArgument("channel", e.Data));
-        chan.RequestClose += Chan_RequestClose;
-        Panels.Add(chan);
+        try
+        {
+            var chan = CompositionRoot.Resolve<ChannelViewModel>(new ConstructorArgument("channel", e.Data));
+            chan.RequestClose += Chan_RequestClose;
+            Panels.Add(chan);
+
+            if (_serverMap.TryGetValue(e.Data.Server, out var serverVm))
+                serverVm.Channels.Add(chan);
+
+            if (_selectedPanel != null) _selectedPanel.IsSelected = false;
+            SelectedPanel = chan;
+            chan.IsSelected = true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"!!!!Server_JoinSelf threw: {ex}");
+        }
     }
 
     private void Chan_RequestClose(object? sender, EventArgs e)
@@ -61,8 +89,17 @@ public class MainViewModel : ViewModelBase
         var chan = (ChannelViewModel)sender!;
         chan.RequestClose -= Chan_RequestClose;
         Panels.Remove(chan);
+
+        foreach (var sv in Servers)
+            sv.Channels.Remove(chan);
+
         if (SelectedPanel == chan)
-            SelectedPanel = Panels.Count > 0 ? Panels[0] : null;
+        {
+            chan.IsSelected = false;
+            var next = Panels.Count > 0 ? Panels[0] : null;
+            SelectedPanel = next;
+            if (next != null) next.IsSelected = true;
+        }
     }
 
     private void LoadSettings()
@@ -80,9 +117,14 @@ public class MainViewModel : ViewModelBase
     private void CreateServerPanel(Server server)
     {
         var vm = new ServerViewModel(server);
+        _serverMap[server] = vm;
         Panels.Add(vm);
+        Servers.Add(vm);
         if (SelectedPanel == null)
+        {
             SelectedPanel = vm;
+            vm.IsSelected = true;
+        }
     }
 
     public override void Close()

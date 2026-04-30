@@ -8,6 +8,13 @@ public abstract class IrcViewModel : ViewModelBase, IDisposable
 {
     public MTObservableCollection<ChatItemViewModel> ChatLines { get; protected set; }
 
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
+
     public IrcViewModel()
     {
         ChatLines = new MTObservableCollection<ChatItemViewModel>();

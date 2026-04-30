@@ -15,6 +15,9 @@ public class ServerViewModel : IrcViewModel
     private bool nickRetryFailed;
     private readonly Server server = null!;
 
+    public MTObservableCollection<ChannelViewModel> Channels { get; } = new MTObservableCollection<ChannelViewModel>();
+    internal Server? ServerInstance => server;
+
     public ServerViewModel(Server newServer)
     {
         if (global::Avalonia.Controls.Design.IsDesignMode)

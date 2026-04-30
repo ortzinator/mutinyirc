@@ -129,6 +129,78 @@ public class IrcOutputBoxTests
     }
 
     /// <summary>
+    /// The scroll indicator Border is bound to Scrolled via ElementName binding.
+    /// When Scrolled is false (the default), the indicator must not be visible.
+    /// </summary>
+    [AvaloniaTest]
+    public void IrcOutputBox_ScrollIndicator_HiddenWhenScrolledIsFalse()
+    {
+        var window = new Window { Width = 400, Height = 300 };
+        var box = new IrcOutputBox();
+        window.Content = box;
+        window.Show();
+        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        // Ensure Scrolled is false (default state)
+        box.Scrolled = false;
+        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        // The scroll indicator is the first child of the DockPanel (a Border)
+        var dockPanel = (DockPanel)box.Content!;
+        var indicator = (Border)dockPanel.Children[0];
+
+        Assert.That(indicator.IsVisible, Is.False,
+            "Scroll indicator must be hidden when Scrolled is false");
+    }
+
+    /// <summary>
+    /// When Scrolled is set to true the scroll indicator Border must become visible.
+    /// </summary>
+    [AvaloniaTest]
+    public void IrcOutputBox_ScrollIndicator_VisibleWhenScrolledIsTrue()
+    {
+        var window = new Window { Width = 400, Height = 300 };
+        var box = new IrcOutputBox();
+        window.Content = box;
+        window.Show();
+        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        box.Scrolled = true;
+        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        var dockPanel = (DockPanel)box.Content!;
+        var indicator = (Border)dockPanel.Children[0];
+
+        Assert.That(indicator.IsVisible, Is.True,
+            "Scroll indicator must be visible when Scrolled is true");
+    }
+
+    /// <summary>
+    /// Setting Scrolled back to false after it was true must hide the indicator again.
+    /// </summary>
+    [AvaloniaTest]
+    public void IrcOutputBox_ScrollIndicator_HiddenAfterScrolledResetToFalse()
+    {
+        var window = new Window { Width = 400, Height = 300 };
+        var box = new IrcOutputBox();
+        window.Content = box;
+        window.Show();
+        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        box.Scrolled = true;
+        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        box.Scrolled = false;
+        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        var dockPanel = (DockPanel)box.Content!;
+        var indicator = (Border)dockPanel.Children[0];
+
+        Assert.That(indicator.IsVisible, Is.False,
+            "Scroll indicator must be hidden after Scrolled is reset to false");
+    }
+
+    /// <summary>
     /// Minimal DataContext stub that exposes a ChatLines collection so that
     /// IrcOutputBox's ItemsSource binding (bound to ChatLines) resolves.
     /// </summary>

@@ -19,6 +19,13 @@ public class ChannelViewModel : IrcViewModel
 
     public string ChannelName => base.Name;
 
+    private string _topic = string.Empty;
+    public string Topic
+    {
+        get => _topic;
+        private set => SetProperty(ref _topic, value);
+    }
+
     public new string Name
     {
         get
@@ -99,6 +106,7 @@ public class ChannelViewModel : IrcViewModel
 
     private void Channel_TopicReceived(object? sender, OrtzIRC.Common.DataEventArgs<string> e)
     {
+        Topic = e.Data;
         AddMessage(ChannelStrings.TopicRecieved.With(e.Data));
     }
 

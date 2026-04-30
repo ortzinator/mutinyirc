@@ -4,69 +4,97 @@
     <ResourceDictionary.ThemeDictionaries>
 
         <ResourceDictionary x:Key="Dark">
-            <!-- Main application background -->
-            <SolidColorBrush x:Key="AppBackground" Color="#FF252525" />
+            <!-- Sidebar -->
+            <SolidColorBrush x:Key="SidebarBackground"            Color="#1E1F22" />
+            <SolidColorBrush x:Key="SidebarBorderBrush"           Color="#2B2D31" />
+            <SolidColorBrush x:Key="SidebarItemHoverBackground"    Color="#2E3035" />
+            <SolidColorBrush x:Key="SidebarItemSelectedBackground" Color="#35373C" />
+            <SolidColorBrush x:Key="SidebarForeground"             Color="#B5BAC1" />
+            <SolidColorBrush x:Key="SidebarMutedForeground"        Color="#6D6F78" />
+            <SolidColorBrush x:Key="SidebarHeaderForeground"       Color="#FFFFFF" />
 
-            <!-- Chat line: timestamp column -->
-            <SolidColorBrush x:Key="ChatTimestampBackground" Color="#FF2D2D2D" />
+            <!-- Channel header -->
+            <SolidColorBrush x:Key="ChannelHeaderBackground"       Color="#2B2D31" />
+            <SolidColorBrush x:Key="ChannelHeaderBorderBrush"      Color="#3A3C43" />
 
-            <!-- Chat line: borders between cells -->
-            <SolidColorBrush x:Key="ChatBorderBrush" Color="#FF3D3D3D" />
+            <!-- Chat area -->
+            <SolidColorBrush x:Key="AppBackground"                 Color="#313338" />
+            <SolidColorBrush x:Key="ChatBorderBrush"               Color="#3A3C43" />
 
-            <!-- Chat line: nick column in channel messages -->
-            <SolidColorBrush x:Key="ChatNickBackground" Color="#FF1A3F6E" />
+            <!-- Message input -->
+            <SolidColorBrush x:Key="ChatInputAreaBackground"       Color="#383A40" />
+            <SolidColorBrush x:Key="ChatInputBorderBrush"          Color="#222327" />
 
-            <!-- Chat line: action message gradient start/end -->
-            <Color x:Key="ChatActionGradientStart">#FF1A3F6E</Color>
-            <Color x:Key="ChatActionGradientEnd">#FF252525</Color>
+            <!-- Message text -->
+            <SolidColorBrush x:Key="ChatTimestampForeground"       Color="#72767D" />
+            <SolidColorBrush x:Key="SystemMessageForeground"       Color="#80848E" />
+            <SolidColorBrush x:Key="ActionMessageForeground"       Color="#A8C8A0" />
+            <SolidColorBrush x:Key="NoticeForeground"              Color="#FFEF8C" />
+            <SolidColorBrush x:Key="ErrorForeground"               Color="#FF6B6B" />
 
-            <!-- Chat line: error and warning messages -->
-            <SolidColorBrush x:Key="ChatErrorBackground" Color="#FF4A1E1E" />
+            <!-- Message type backgrounds -->
+            <SolidColorBrush x:Key="ChatTimestampBackground"       Color="Transparent" />
+            <SolidColorBrush x:Key="ChatNickBackground"            Color="Transparent" />
+            <SolidColorBrush x:Key="ChatErrorBackground"           Color="#3D1515" />
+            <SolidColorBrush x:Key="ChatNoticeBackground"          Color="#2E2C1A" />
+            <Color x:Key="ChatActionGradientStart">#00000000</Color>
+            <Color x:Key="ChatActionGradientEnd">#00000000</Color>
 
-            <!-- Chat line: private notice background -->
-            <SolidColorBrush x:Key="ChatNoticeBackground" Color="#FF3A3A1E" />
+            <!-- Scroll indicator -->
+            <SolidColorBrush x:Key="ScrollIndicatorBackground"     Color="#3A3C43" />
+            <SolidColorBrush x:Key="ScrollIndicatorForeground"     Color="#89FFFFFF" />
 
-            <!-- Scroll indicator bar (shown when not pinned to bottom) -->
-            <SolidColorBrush x:Key="ScrollIndicatorBackground" Color="#FF3D3D3D" />
-            <SolidColorBrush x:Key="ScrollIndicatorForeground" Color="#89FFFFFF" />
-
-            <!-- User list: ops are white to stand out; voice and regular are grey -->
-            <SolidColorBrush x:Key="ModeOpForeground" Color="#FFFFFFFF" />
-            <SolidColorBrush x:Key="ModeVoiceForeground" Color="#FFCCCCCC" />
-            <SolidColorBrush x:Key="ModeRegularForeground" Color="#FFCCCCCC" />
+            <!-- User list: mode colours -->
+            <SolidColorBrush x:Key="ModeOpForeground"              Color="#F1C40F" />
+            <SolidColorBrush x:Key="ModeVoiceForeground"           Color="#57F287" />
+            <SolidColorBrush x:Key="ModeRegularForeground"         Color="#B5BAC1" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Light">
-            <!-- Main application background -->
-            <SolidColorBrush x:Key="AppBackground" Color="#FFF3F3F3" />
+            <!-- Sidebar -->
+            <SolidColorBrush x:Key="SidebarBackground"            Color="#F2F3F5" />
+            <SolidColorBrush x:Key="SidebarBorderBrush"           Color="#E3E5E8" />
+            <SolidColorBrush x:Key="SidebarItemHoverBackground"    Color="#E3E5E8" />
+            <SolidColorBrush x:Key="SidebarItemSelectedBackground" Color="#D7D9DC" />
+            <SolidColorBrush x:Key="SidebarForeground"             Color="#2C2F33" />
+            <SolidColorBrush x:Key="SidebarMutedForeground"        Color="#868A92" />
+            <SolidColorBrush x:Key="SidebarHeaderForeground"       Color="#060607" />
 
-            <!-- Chat line: timestamp column -->
-            <SolidColorBrush x:Key="ChatTimestampBackground" Color="#FFE8E8E8" />
+            <!-- Channel header -->
+            <SolidColorBrush x:Key="ChannelHeaderBackground"       Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ChannelHeaderBorderBrush"      Color="#E3E5E8" />
 
-            <!-- Chat line: borders between cells -->
-            <SolidColorBrush x:Key="ChatBorderBrush" Color="#FFCCCCCC" />
+            <!-- Chat area -->
+            <SolidColorBrush x:Key="AppBackground"                 Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ChatBorderBrush"               Color="#E3E5E8" />
 
-            <!-- Chat line: nick column in channel messages -->
-            <SolidColorBrush x:Key="ChatNickBackground" Color="#FFD0E8FF" />
+            <!-- Message input -->
+            <SolidColorBrush x:Key="ChatInputAreaBackground"       Color="#EDEEF0" />
+            <SolidColorBrush x:Key="ChatInputBorderBrush"          Color="#C7C9CF" />
 
-            <!-- Chat line: action message gradient start/end -->
-            <Color x:Key="ChatActionGradientStart">#FFD0E8FF</Color>
-            <Color x:Key="ChatActionGradientEnd">#FFF3F3F3</Color>
+            <!-- Message text -->
+            <SolidColorBrush x:Key="ChatTimestampForeground"       Color="#A3A6AA" />
+            <SolidColorBrush x:Key="SystemMessageForeground"       Color="#A3A6AA" />
+            <SolidColorBrush x:Key="ActionMessageForeground"       Color="#2D6A1E" />
+            <SolidColorBrush x:Key="NoticeForeground"              Color="#7A5800" />
+            <SolidColorBrush x:Key="ErrorForeground"               Color="#C0392B" />
 
-            <!-- Chat line: error and warning messages -->
-            <SolidColorBrush x:Key="ChatErrorBackground" Color="#FFFFDDDD" />
+            <!-- Message type backgrounds -->
+            <SolidColorBrush x:Key="ChatTimestampBackground"       Color="Transparent" />
+            <SolidColorBrush x:Key="ChatNickBackground"            Color="Transparent" />
+            <SolidColorBrush x:Key="ChatErrorBackground"           Color="#FDEAEA" />
+            <SolidColorBrush x:Key="ChatNoticeBackground"          Color="#FFFCDC" />
+            <Color x:Key="ChatActionGradientStart">#00000000</Color>
+            <Color x:Key="ChatActionGradientEnd">#00000000</Color>
 
-            <!-- Chat line: private notice background -->
-            <SolidColorBrush x:Key="ChatNoticeBackground" Color="#FFFFFACC" />
+            <!-- Scroll indicator -->
+            <SolidColorBrush x:Key="ScrollIndicatorBackground"     Color="#E3E5E8" />
+            <SolidColorBrush x:Key="ScrollIndicatorForeground"     Color="#89000000" />
 
-            <!-- Scroll indicator bar (shown when not pinned to bottom) -->
-            <SolidColorBrush x:Key="ScrollIndicatorBackground" Color="#FFCCCCCC" />
-            <SolidColorBrush x:Key="ScrollIndicatorForeground" Color="#89000000" />
-
-            <!-- User list: foreground by channel mode -->
-            <SolidColorBrush x:Key="ModeOpForeground" Color="#FF8B6200" />
-            <SolidColorBrush x:Key="ModeVoiceForeground" Color="#FF1A5FA8" />
-            <SolidColorBrush x:Key="ModeRegularForeground" Color="#FF444444" />
+            <!-- User list: mode colours -->
+            <SolidColorBrush x:Key="ModeOpForeground"              Color="#8B5A00" />
+            <SolidColorBrush x:Key="ModeVoiceForeground"           Color="#1A7A42" />
+            <SolidColorBrush x:Key="ModeRegularForeground"         Color="#444444" />
         </ResourceDictionary>
 
     </ResourceDictionary.ThemeDictionaries>

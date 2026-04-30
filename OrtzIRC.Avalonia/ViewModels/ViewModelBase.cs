@@ -7,7 +7,12 @@ using CommunityToolkit.Mvvm.Input;
 
 public abstract class ViewModelBase : ObservableObject
 {
-    public string Name { get; set; } = string.Empty;
+    private string _name = string.Empty;
+    public string Name
+    {
+        get => _name;
+        set => SetProperty(ref _name, value);
+    }
 
     private RelayCommand? closeCommand;
     public ICommand CloseCommand
