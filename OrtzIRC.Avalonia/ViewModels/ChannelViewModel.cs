@@ -17,7 +17,7 @@ public class ChannelViewModel : IrcViewModel
 
     public PluginManager PluginManager => _pluginManager;
 
-    public string ChannelName => base.Name;
+    public string ChannelName => base.Name.TrimStart('#', '&', '+', '!');
 
     private string _topic = string.Empty;
     public string Topic
