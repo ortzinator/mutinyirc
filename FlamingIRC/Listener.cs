@@ -448,7 +448,7 @@ namespace FlamingIRC
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
                 string.Format("[{0}] Listener::ProcessJoinCommand() channel={1}", Thread.CurrentThread.Name, ircMessage.Target));
-            OnJoin?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target);
+            OnJoin?.Invoke(Rfc2812Util.UserFromString(ircMessage.From), RemoveLeadingColon(ircMessage.Target));
         }
 
         public void ProcessNoticeCommand(string[] tokens)

@@ -306,6 +306,23 @@ namespace FlamingIRC.Tests
         }
 
         [Test]
+        public void ProcessJoinCommand_TargetWithLeadingColon_StripsColon()
+        {
+            // Real servers send "JOIN :#channel"; ParseIrcMessage sets Target = ":#channel" (colon not stripped).
+            // ProcessJoinCommand must strip it so CreateChannel receives a valid channel name.
+            IrcMessage msg = new IrcMessage
+            {
+                Command = "JOIN",
+                From = _userString,
+                Target = ":#ortzirc"
+            };
+            string receivedChannel = null;
+            _listener.OnJoin += (_, channel) => receivedChannel = channel;
+            _listener.ProcessJoinCommand(msg);
+            Assert.AreEqual("#ortzirc", receivedChannel);
+        }
+
+        [Test]
         public void ProcessKickCommand()
         {
             IrcMessage msg = new IrcMessage
