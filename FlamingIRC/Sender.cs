@@ -53,7 +53,7 @@ namespace FlamingIRC
     /// //No need to keep a separate reference to the Sender object
     /// connection.Sender.PublicMessage("#thresher", "hello");
     /// </code></example>
-    public class Sender : CommandBuilder
+    public class Sender : CommandBuilder, ISender
     {
         /// <summary>
         /// Create a new Sender for a specific connection.

@@ -42,14 +42,15 @@ namespace MutinyIRC.Tests
             Assert.AreEqual(expected, topic);
         }
 
-        // The faked Server from SetUp has a null Connection, so Act() tests need a real
-        // (but non-connected) Connection. SendCommand() swallows socket errors, so the
-        // send call exits cleanly and the event fires as expected.
         private static Channel CreateChannelWithConnection()
         {
-            var args = new ConnectionArgs("TestUser", "irc.example.com", false);
-            var conn = new Connection(args, false, false);
-            return new Channel(new Server(conn), "#mutiny");
+            var fakeSender = A.Fake<ISender>();
+            var fakeConn = A.Fake<IConnection>();
+            A.CallTo(() => fakeConn.Sender).Returns(fakeSender);
+            var server = A.Fake<Server>();
+            A.CallTo(() => server.Connection).Returns(fakeConn);
+            A.CallTo(() => server.UserNick).Returns("TestUser");
+            return new Channel(server, "#mutiny");
         }
 
         [Test]

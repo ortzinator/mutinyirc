@@ -38,7 +38,7 @@ namespace FlamingIRC
     /// This class manages the connection to the IRC server and provides
     /// access to all the objects needed to send and receive messages.
     /// </summary>
-    public class Connection : TcpTextClient
+    public class Connection : TcpTextClient, IConnection
     {
         private readonly System.Timers.Timer _activityTimer;
         private readonly ArrayList _parsers;
@@ -70,7 +70,7 @@ namespace FlamingIRC
             HandleNickTaken = true;
             _connectionArgs = args;
             _parsers = new ArrayList();
-            Sender = new Sender(this);
+            _sender = new Sender(this);
             Listener = new Listener();
             RegisterDelegates();
             _timeLastSent = DateTime.Now;
@@ -190,7 +190,8 @@ namespace FlamingIRC
         /// The object used to send commands to the IRC server.
         /// </summary>
         /// <value>Read-only Sender.</value>
-        public Sender Sender { get; private set; }
+        private Sender _sender;
+        public ISender Sender => _sender;
 
         /// <summary>
         /// The object that parses messages and notifies the appropriate delegate.
@@ -313,7 +314,7 @@ namespace FlamingIRC
         /// <param name="message">The message that should be echoed back</param>
         private void KeepAlive(string message)
         {
-            Sender.Pong(message);
+            _sender.Pong(message);
         }
 
         private void UpdateLastTime(object sender, EventArgs e)
@@ -480,7 +481,7 @@ namespace FlamingIRC
                 if (!Connected)
                     return;
 
-                Sender.Quit(reason);
+                _sender.Quit(reason);
                 Disconnect(DisconnectReason.UserInitiated);
                 _activityTimer.Stop();
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
@@ -520,7 +521,7 @@ namespace FlamingIRC
         protected override void OnConnect()
         {
             ConnectionEstablished.Fire(this, new EventArgs());
-            Sender.RegisterConnection(_connectionArgs);
+            _sender.RegisterConnection(_connectionArgs);
             Connected = true;
         }
 

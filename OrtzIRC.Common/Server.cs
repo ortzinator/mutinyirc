@@ -14,7 +14,7 @@ namespace OrtzIRC.Common
         private bool _recievingNames;
         private DateTime _serverChangeTime;
         private List<User> _tempNames = new List<User>();
-        private Connection _connection;
+        private IConnection _connection;
 
         public Server() { }
 
@@ -40,7 +40,7 @@ namespace OrtzIRC.Common
             get { return Connection.ConnectionData.Port; }
         }
 
-        public Connection Connection
+        public virtual IConnection Connection
         {
             get { return _connection; }
             set
@@ -68,7 +68,7 @@ namespace OrtzIRC.Common
         /// <summary>
         ///   The nick of the connected user
         /// </summary>
-        public string UserNick
+        public virtual string UserNick
         {
             get { return Connection.ConnectionData.Nick; }
         }
@@ -89,7 +89,8 @@ namespace OrtzIRC.Common
                 throw new ArgumentNullException("ConnectionArgs.Nick");
             }
 
-            Connection = new Connection(args, true, false) { HandleNickTaken = false };
+            var conn = new Connection(args, true, false) { HandleNickTaken = false };
+            Connection = conn;
         }
 
         public void HookEvents()
