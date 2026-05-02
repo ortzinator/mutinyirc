@@ -42,6 +42,41 @@ namespace MutinyIRC.Tests
             Assert.AreEqual(expected, topic);
         }
 
+        // The faked Server from SetUp has a null Connection, so Act() tests need a real
+        // (but non-connected) Connection. SendCommand() swallows socket errors, so the
+        // send call exits cleanly and the event fires as expected.
+        private static Channel CreateChannelWithConnection()
+        {
+            var args = new ConnectionArgs("TestUser", "irc.example.com", false);
+            var conn = new Connection(args, false, false);
+            return new Channel(new Server(conn), "#mutiny");
+        }
+
+        [Test]
+        public void Act_Always_FiresOnAction()
+        {
+            var channel = CreateChannelWithConnection();
+            bool onActionFired = false;
+            channel.OnAction += (_, _) => onActionFired = true;
+
+            channel.Act("waves");
+
+            Assert.IsTrue(onActionFired, "OnAction must fire when the local user calls Act()");
+        }
+
+        [Test]
+        public void Act_Always_DoesNotFireMessagedChannel()
+        {
+            var channel = CreateChannelWithConnection();
+            bool messagedChannelFired = false;
+            channel.MessagedChannel += (_, _) => messagedChannelFired = true;
+
+            channel.Act("waves");
+
+            Assert.IsFalse(messagedChannelFired,
+                "Act() must not fire MessagedChannel; actions are not regular messages");
+        }
+
         [Test]
         [Category("Profile")]
         public void Server_OnNick_Updates_Nick()
