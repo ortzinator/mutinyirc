@@ -31,14 +31,15 @@
                            Foreground="{DynamicResource ChatTimestampForeground}"
                            FontSize="11" Width="40" TextAlignment="Right"
                            VerticalAlignment="Top" Margin="0,2,10,0"/>
-                <TextBlock Foreground="{DynamicResource ActionMessageForeground}"
-                           FontStyle="Italic" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0,2">
-                    <TextBlock.Text>
-                        <MultiBinding StringFormat="* {0} {1}">
-                            <Binding Path="User.Nick" />
-                            <Binding Path="Message" />
-                        </MultiBinding>
-                    </TextBlock.Text>
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Top" Margin="0,2"
+                           FontStyle="Italic">
+                    <Run Text="* "
+                         Foreground="{Binding User.Nick, Converter={StaticResource NickColorConverter}}"/>
+                    <Run Text="{Binding User.Nick}"
+                         Foreground="{Binding User.Nick, Converter={StaticResource NickColorConverter}}"
+                         FontWeight="SemiBold"/>
+                    <Run Text=" "/>
+                    <Run Text="{Binding Message}"/>
                 </TextBlock>
             </DockPanel>
         </DataTemplate>

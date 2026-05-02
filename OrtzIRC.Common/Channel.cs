@@ -225,7 +225,7 @@ namespace OrtzIRC.Common
         public void Act(string message)
         {
             Server.Connection.Sender.Action(Name, message);
-            MessagedChannel.Fire(this, new UserMessageEventArgs(Users.GetUser(Server.UserNick), message));
+            OnAction.Fire(this, new UserMessageEventArgs(Users.GetUser(Server.UserNick), message));
         }
 
         /// <summary>
