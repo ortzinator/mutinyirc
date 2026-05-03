@@ -55,6 +55,10 @@
                     <Button Content="+ Add"
                             Command="{Binding AddNetworkCommand}"
                             Padding="10,5" FontSize="12"/>
+                    <Button Content="Edit"
+                            IsEnabled="{Binding SelectedNetwork, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            Click="EditNetworkButton_Click"
+                            Padding="10,5" FontSize="12"/>
                     <Button Content="Remove"
                             Command="{Binding RemoveNetworkCommand}"
                             Padding="10,5" FontSize="12"/>
@@ -64,7 +68,8 @@
                         BorderBrush="{DynamicResource ChatBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="6">
-                    <ListBox ItemsSource="{Binding Networks}"
+                    <ListBox x:Name="networksListBox"
+                             ItemsSource="{Binding Networks}"
                              SelectedItem="{Binding SelectedNetwork}"
                              Background="Transparent"
                              BorderThickness="0"
@@ -93,7 +98,23 @@
                         </ListBox.ItemContainerTheme>
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:NetworkSettingsViewModel}">
-                                <TextBlock Text="{Binding Name}" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                <Grid>
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="13" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center"
+                                               IsVisible="{Binding !IsEditing}"/>
+                                    <TextBox Text="{Binding EditName}"
+                                             FontSize="13"
+                                             BorderThickness="0" Background="Transparent" Padding="1,0"
+                                             VerticalAlignment="Center"
+                                             VerticalContentAlignment="Center"
+                                             IsVisible="{Binding IsEditing}">
+                                        <TextBox.KeyBindings>
+                                            <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}"/>
+                                            <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}"/>
+                                        </TextBox.KeyBindings>
+                                    </TextBox>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -135,7 +156,8 @@
                                 BorderBrush="{DynamicResource ChatBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedServer.Url}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"/>
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
                         </Border>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Description"
@@ -146,7 +168,8 @@
                                 BorderBrush="{DynamicResource ChatBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedServer.Description}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"/>
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
                         </Border>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Ports"
@@ -157,7 +180,8 @@
                                 BorderBrush="{DynamicResource ChatBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedServer.Ports}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"/>
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
                         </Border>
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Nick"
@@ -168,7 +192,8 @@
                                 BorderBrush="{DynamicResource ChatBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedServer.Nick}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"/>
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
                         </Border>
 
                         <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"

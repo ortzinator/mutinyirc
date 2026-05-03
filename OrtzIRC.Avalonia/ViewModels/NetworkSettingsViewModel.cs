@@ -9,6 +9,24 @@ public partial class NetworkSettingsViewModel : ObservableObject
 {
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private ServerSettingsViewModel? _selectedServer;
+    [ObservableProperty] private bool _isEditing;
+    [ObservableProperty] private string _editName = string.Empty;
+
+    public void BeginEdit()
+    {
+        EditName = Name;
+        IsEditing = true;
+    }
+
+    [RelayCommand]
+    private void CommitEdit()
+    {
+        Name = EditName;
+        IsEditing = false;
+    }
+
+    [RelayCommand]
+    private void CancelEdit() => IsEditing = false;
 
     public ObservableCollection<ServerSettingsViewModel> Servers { get; } = new();
 

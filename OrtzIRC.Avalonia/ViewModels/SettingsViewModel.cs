@@ -15,6 +15,9 @@ public partial class SettingsViewModel : ObservableObject
     {
         foreach (var network in IrcSettingsManager.Instance.Networks)
             Networks.Add(new NetworkSettingsViewModel(network));
+        SelectedNetwork = Networks.Count > 0 ? Networks[0] : null;
+        if (SelectedNetwork is not null && SelectedNetwork.Servers.Count > 0)
+            SelectedNetwork.SelectedServer = SelectedNetwork.Servers[0];
     }
 
     [RelayCommand]
