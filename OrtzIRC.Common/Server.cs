@@ -9,7 +9,7 @@ namespace OrtzIRC.Common
 {
     public class Server : MessageContext
     {
-        private Dictionary<string, Channel> _channels = new Dictionary<string, Channel>();
+        private Dictionary<string, Channel> _channels = new Dictionary<string, Channel>(StringComparer.OrdinalIgnoreCase);
         private List<PrivateMessageSession> _pmSessions = new List<PrivateMessageSession>();
         private bool _recievingNames;
         private DateTime _serverChangeTime;

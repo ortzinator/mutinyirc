@@ -1,19 +1,25 @@
-using System.IO.IsolatedStorage;
-
 namespace OrtzIRC.Avalonia;
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Xml.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using OrtzIRC.Common;
 
 public sealed class IrcSettingsManager
 {
-    private static IrcSettingsManager instance;
-    private static string settingsPath;
-    private static IsolatedStorageFile isolatedStorage;
+    private static IrcSettingsManager? instance;
+    private static readonly string SettingsPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+        "OrtzIRC", "servers.json");
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        ReferenceHandler = ReferenceHandler.IgnoreCycles,
+    };
 
     public NetworkSettingsList Networks { get; private set; }
 
@@ -28,18 +34,16 @@ public sealed class IrcSettingsManager
         {
             if (instance != null) return instance;
             instance = new IrcSettingsManager();
-            isolatedStorage = IsolatedStorageFile.GetMachineStoreForAssembly();
-            settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), @"OrtzIRC/servers.xml");
             instance.Load();
             return instance;
         }
     }
 
-    public NetworkSettings AddNetwork(string networkName) => Networks.AddNetwork(networkName);
+    public NetworkSettings? AddNetwork(string networkName) => Networks.AddNetwork(networkName);
 
     public bool RemoveNetwork(NetworkSettings network) => Networks.Remove(network);
 
-    public NetworkSettings GetNetwork(string name)
+    public NetworkSettings? GetNetwork(string name)
     {
         foreach (NetworkSettings network in Networks)
             if (network.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
@@ -51,15 +55,12 @@ public sealed class IrcSettingsManager
     {
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(settingsPath)!);
-            var serializer = new XmlSerializer(typeof(NetworkSettingsList), new XmlRootAttribute("EpicServerList"));
-            using var fs = new FileStream(settingsPath, FileMode.Create);
-            using TextWriter writer = new StreamWriter(fs, new System.Text.UTF8Encoding());
-            serializer.Serialize(writer, Networks);
+            Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
+            string json = JsonSerializer.Serialize(Networks, JsonOptions);
+            File.WriteAllText(SettingsPath, json);
         }
         catch (Exception ex)
         {
-            // TODO: Surface this through a proper error dialog once an IErrorReporter is added
             Console.Error.WriteLine($"Could not save IRC settings to disk: {ex.Message}");
             Debug.WriteLine($"IrcSettingsManager.Save failed: {ex}");
         }
@@ -69,23 +70,43 @@ public sealed class IrcSettingsManager
     {
         try
         {
-            var serializer = new XmlSerializer(typeof(NetworkSettingsList), new XmlRootAttribute("EpicServerList"));
-            using var fs = new FileStream(settingsPath, FileMode.Open);
-            Networks = (NetworkSettingsList)serializer.Deserialize(fs);
+            if (!File.Exists(SettingsPath))
+            {
+                LoadDefaults();
+                return;
+            }
+
+            string json = File.ReadAllText(SettingsPath);
+            var networks = JsonSerializer.Deserialize<List<NetworkSettings>>(json, JsonOptions);
+            if (networks == null)
+            {
+                LoadDefaults();
+                return;
+            }
+
+            Networks = new NetworkSettingsList();
+            foreach (var network in networks)
+            {
+                foreach (var server in network.Servers)
+                    server.Network = network;
+                Networks.Add(network);
+            }
         }
         catch (Exception ex)
         {
-            if (ex is DirectoryNotFoundException || ex is FileNotFoundException)
-            {
-                NetworkSettings net = AddNetwork("Freenode");
-                net.AddServer(new ServerSettings("irc.freenode.net", "Random", "6667", false));
-                net.AddChannel(new ChannelSettings("#ortzirc", true));
-            }
-            else
-            {
-                throw;
-            }
+            Console.Error.WriteLine($"Could not load IRC settings: {ex.Message}");
+            Debug.WriteLine($"IrcSettingsManager.Load failed: {ex}");
+            LoadDefaults();
         }
+    }
+
+    private void LoadDefaults()
+    {
+        Networks = new NetworkSettingsList();
+        var net = new NetworkSettings("Libera");
+        net.AddServer(new ServerSettings("irc.libera.chat", "Libera", "6667", false));
+        net.AddChannel(new ChannelSettings("#MutinyIRC", true));
+        Networks.Add(net);
     }
 
     public List<ServerSettings> GetAutoConnectServers()
@@ -98,7 +119,7 @@ public sealed class IrcSettingsManager
         return tmp;
     }
 
-    public NetworkSettings GetNetwork(Server server)
+    public NetworkSettings? GetNetwork(Server server)
     {
         foreach (NetworkSettings networkSettings in Networks)
             foreach (ServerSettings serverSettings in networkSettings.Servers)
@@ -110,10 +131,11 @@ public sealed class IrcSettingsManager
     public void DisableAutoConnect(Server server)
     {
         var settings = GetServer(server);
-        settings.AutoConnect = false;
+        if (settings != null)
+            settings.AutoConnect = false;
     }
 
-    private ServerSettings GetServer(Server server)
+    private ServerSettings? GetServer(Server server)
     {
         foreach (NetworkSettings networkSettings in Networks)
             foreach (ServerSettings serverSettings in networkSettings.Servers)

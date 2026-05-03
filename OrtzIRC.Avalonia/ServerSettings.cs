@@ -2,12 +2,9 @@ namespace OrtzIRC.Avalonia;
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
-using System.Xml.Schema;
-using System.Xml.Serialization;
-using OrtzIRC.Common;
+using System.Text.Json.Serialization;
 
-public class ServerSettings : IXmlSerializable, IEquatable<ServerSettings>
+public class ServerSettings : IEquatable<ServerSettings>
 {
     public ServerSettings(string url, string description, string ports, bool ssl)
     {
@@ -20,26 +17,29 @@ public class ServerSettings : IXmlSerializable, IEquatable<ServerSettings>
 
     public ServerSettings() { }
 
-    public string Url { get; set; }
-    public string Description { get; set; }
-    public string Ports { get; set; }
+    public string Url { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Ports { get; set; } = string.Empty;
     public bool Ssl { get; set; }
     public bool AutoConnect { get; set; }
-    public string Nick { get; set; }
-    public NetworkSettings Network { get; set; }
+    public string? Nick { get; set; }
+    [JsonIgnore]
+    public NetworkSettings? Network { get; set; }
 
     public int RandomPort
     {
         get
         {
-            Random r = new Random();
-            return PortList[r.Next(0, PortList.Length - 1)];
+            var list = PortList;
+            if (list == null || list.Length == 0)
+                throw new InvalidOperationException("No ports configured.");
+            return list[new Random().Next(0, list.Length - 1)];
         }
     }
 
-    private int[] PortList => PortsStringToArray(Ports);
+    private int[]? PortList => PortsStringToArray(Ports);
 
-    private static int[] PortsStringToArray(string ports)
+    private static int[]? PortsStringToArray(string ports)
     {
         if (ports == string.Empty)
             return null;
@@ -94,23 +94,5 @@ public class ServerSettings : IXmlSerializable, IEquatable<ServerSettings>
         return portList.ToArray();
     }
 
-    public XmlSchema GetSchema() => null;
-
-    public void ReadXml(XmlReader reader)
-    {
-        Description = reader.GetAttribute("Description") ?? string.Empty;
-        Url = reader.GetAttribute("Url");
-        Ports = reader.GetAttribute("Ports");
-        AutoConnect = reader.GetAttribute("AutoConnect") == "True";
-    }
-
-    public void WriteXml(XmlWriter writer)
-    {
-        writer.WriteAttributeString("Description", Description);
-        writer.WriteAttributeString("Url", Url);
-        writer.WriteAttributeString("Ports", Ports);
-        writer.WriteAttributeString("AutoConnect", AutoConnect.ToString());
-    }
-
-    public bool Equals(ServerSettings server) => server != null && server.Url == Url;
+    public bool Equals(ServerSettings? server) => server != null && server.Url == Url;
 }

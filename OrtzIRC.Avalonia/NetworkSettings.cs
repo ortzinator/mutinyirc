@@ -2,11 +2,9 @@ namespace OrtzIRC.Avalonia;
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
-using System.Xml.Serialization;
 using OrtzIRC.Common;
 
-public class NetworkSettings : IXmlSerializable, IEquatable<NetworkSettings>
+public class NetworkSettings : IEquatable<NetworkSettings>
 {
     public NetworkSettings(string name)
     {
@@ -18,8 +16,8 @@ public class NetworkSettings : IXmlSerializable, IEquatable<NetworkSettings>
     public NetworkSettings() : this("") { }
 
     public string Name { get; set; }
-    public List<ServerSettings> Servers { get; private set; }
-    public List<ChannelSettings> Channels { get; private set; }
+    public List<ServerSettings> Servers { get; set; }
+    public List<ChannelSettings> Channels { get; set; }
 
     public ServerSettings GetRandomServer()
     {
@@ -49,53 +47,6 @@ public class NetworkSettings : IXmlSerializable, IEquatable<NetworkSettings>
     }
 
     public override string ToString() => Name;
-
-    public System.Xml.Schema.XmlSchema GetSchema() => null;
-
-    public void ReadXml(XmlReader reader)
-    {
-        Name = reader.GetAttribute("Name");
-        reader.Read();
-
-        Servers = new List<ServerSettings>();
-
-        while (reader.IsEmptyElement)
-        {
-            if (reader.Name == "Server")
-            {
-                var net = new ServerSettings();
-                net.ReadXml(reader);
-                AddServer(net);
-                reader.Read();
-            }
-            else if (reader.Name == "Channel")
-            {
-                var chan = new ChannelSettings();
-                chan.ReadXml(reader);
-                AddChannel(chan);
-                reader.Read();
-            }
-        }
-    }
-
-    public void WriteXml(XmlWriter writer)
-    {
-        writer.WriteAttributeString("Name", Name);
-
-        foreach (ServerSettings server in Servers)
-        {
-            writer.WriteStartElement("Server");
-            server.WriteXml(writer);
-            writer.WriteEndElement();
-        }
-
-        foreach (ChannelSettings channel in Channels)
-        {
-            writer.WriteStartElement("Channel");
-            channel.WriteXml(writer);
-            writer.WriteEndElement();
-        }
-    }
 
     public bool RemoveServer(ServerSettings serverSettings) => Servers.Remove(serverSettings);
 

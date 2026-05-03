@@ -52,9 +52,10 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_PartSelf(object? sender, PartEventArgs e)
     {
-        NetworkSettings nwSettings = IrcSettingsManager.Instance.GetNetwork(server);
-        ChannelSettings chan = nwSettings.GetChannel(e.Channel.Name);
-        chan.AutoJoin = false;
+        var nwSettings = IrcSettingsManager.Instance.GetNetwork(server);
+        var chan = nwSettings?.GetChannel(e.Channel.Name);
+        if (chan != null)
+            chan.AutoJoin = false;
     }
 
     private void Server_NickError(object? sender, NickErrorEventArgs e)
