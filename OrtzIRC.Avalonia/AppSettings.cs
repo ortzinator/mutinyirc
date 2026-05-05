@@ -22,8 +22,6 @@ public sealed class AppSettings
     }
 
     public bool ShowTimestamps { get; set; } = true;
-    public string PluginDirectory { get; set; } = "./plugins";
-    public string UserPluginDirectory { get; set; } = "plugins";
     public bool LoggerActivated { get; set; } = false;
     public bool LoggerTimestampsActivated { get; set; } = true;
     public string LoggerTimestampFormat { get; set; } = "[hh:mm:ss]";

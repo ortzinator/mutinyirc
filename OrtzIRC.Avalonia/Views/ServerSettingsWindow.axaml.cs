@@ -7,9 +7,9 @@ using global::Avalonia.VisualTree;
 using System.Linq;
 using OrtzIRC.Avalonia.ViewModels;
 
-public partial class SettingsWindow : Window
+public partial class ServerSettingsWindow : Window
 {
-    public SettingsWindow()
+    public ServerSettingsWindow()
     {
         InitializeComponent();
         DataContext = new SettingsViewModel();

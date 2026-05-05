@@ -30,7 +30,8 @@
                            Text="{Binding Time, StringFormat='HH:mm'}"
                            Foreground="{DynamicResource ChatTimestampForeground}"
                            FontSize="11" Width="40" TextAlignment="Right"
-                           VerticalAlignment="Top" Margin="0,2,10,0"/>
+                           VerticalAlignment="Top" Margin="0,2,10,0"
+                           IsVisible="{Binding ShowTimestamps}"/>
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Top" Margin="0,2"
                            FontStyle="Italic">
                     <Run Text="* "
@@ -51,7 +52,8 @@
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource ChatTimestampForeground}"
-                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
+                               IsVisible="{Binding ShowTimestamps}"/>
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding User.NamesLiteral}"
                                FontWeight="SemiBold"
@@ -70,7 +72,8 @@
                            Text="{Binding Time, StringFormat='HH:mm'}"
                            Foreground="{DynamicResource ChatTimestampForeground}"
                            FontSize="11" Width="40" TextAlignment="Right"
-                           VerticalAlignment="Top" Margin="0,2,10,0"/>
+                           VerticalAlignment="Top" Margin="0,2,10,0"
+                           IsVisible="{Binding ShowTimestamps}"/>
                 <TextBlock DockPanel.Dock="Left"
                            Text="{Binding User.NamesLiteral}"
                            FontWeight="SemiBold"
@@ -88,7 +91,8 @@
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource ChatTimestampForeground}"
-                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
+                               IsVisible="{Binding ShowTimestamps}"/>
                     <TextBlock Foreground="{DynamicResource ErrorForeground}" TextWrapping="Wrap">
                         <TextBlock.Text>
                             <MultiBinding StringFormat="Error {0}: {1}">
@@ -108,7 +112,8 @@
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource ChatTimestampForeground}"
-                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
+                               IsVisible="{Binding ShowTimestamps}"/>
                     <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
                                Foreground="{DynamicResource ErrorForeground}"/>
                 </DockPanel>
@@ -121,7 +126,8 @@
                            Text="{Binding Time, StringFormat='HH:mm'}"
                            Foreground="{DynamicResource ChatTimestampForeground}"
                            FontSize="11" Width="40" TextAlignment="Right"
-                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                           VerticalAlignment="Center" Margin="0,0,10,0"
+                           IsVisible="{Binding ShowTimestamps}"/>
                 <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
                            Foreground="{DynamicResource SystemMessageForeground}"
                            FontStyle="Italic" VerticalAlignment="Center"/>

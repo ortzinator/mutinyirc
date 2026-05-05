@@ -1,8 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:OrtzIRC.Avalonia.ViewModels"
-        x:Class="OrtzIRC.Avalonia.Views.SettingsWindow"
-        Title="Settings"
+        x:Class="OrtzIRC.Avalonia.Views.ServerSettingsWindow"
+        Title="Servers"
         Width="660" Height="520"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
@@ -17,7 +17,7 @@
                 BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="16,0">
-            <TextBlock Text="Settings"
+            <TextBlock Text="Servers"
                        FontWeight="SemiBold" FontSize="15"
                        VerticalAlignment="Center"/>
         </Border>

@@ -368,7 +368,9 @@ namespace OrtzIRC.Common
         {
             OnNames?.Invoke(this, new NamesEventArgs(e.Channel, e.Nicks, e.Last));
 
-            Channel chan = _channels[e.Channel];
+            if (!_channels.TryGetValue(e.Channel, out Channel chan))
+                return;
+
             if (!_recievingNames)
             {
                 _recievingNames = true;

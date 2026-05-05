@@ -73,8 +73,13 @@
                     <Button Theme="{StaticResource SidebarNavTheme}"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             Padding="6" CornerRadius="20"
-                            Click="SettingsButton_Click"
                             ToolTip.Tip="Settings">
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="Settings..." Click="AppSettingsMenuItem_Click"/>
+                                <MenuItem Header="Servers..." Click="ServersMenuItem_Click"/>
+                            </MenuFlyout>
+                        </Button.Flyout>
                         <TextBlock Text="⚙" FontSize="14"/>
                     </Button>
                 </Grid>

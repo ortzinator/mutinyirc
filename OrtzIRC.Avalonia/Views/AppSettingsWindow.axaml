@@ -1,0 +1,132 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:OrtzIRC.Avalonia.ViewModels"
+        x:Class="OrtzIRC.Avalonia.Views.AppSettingsWindow"
+        Title="Settings"
+        Width="420" Height="400"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackground}">
+
+    <DockPanel>
+
+        <!-- ── Header ── -->
+        <Border DockPanel.Dock="Top"
+                Height="48"
+                Background="{DynamicResource ChannelHeaderBackground}"
+                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,0">
+            <TextBlock Text="Settings"
+                       FontWeight="SemiBold" FontSize="15"
+                       VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- ── Footer: OK / Cancel ── -->
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource ChatInputAreaBackground}"
+                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="12,8">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="6">
+                <Button Content="OK" Width="80" Click="OkButton_Click" />
+                <Button Content="Cancel" Width="80" Click="CancelButton_Click" />
+            </StackPanel>
+        </Border>
+
+        <!-- ── Content ── -->
+        <ScrollViewer Margin="16,12">
+            <StackPanel Spacing="20">
+
+                <!-- Identity -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="IDENTITY"
+                               FontSize="11" FontWeight="SemiBold"
+                               Foreground="{DynamicResource SidebarMutedForeground}"/>
+                    <Grid RowDefinitions="Auto,Auto,Auto"
+                          ColumnDefinitions="110,*"
+                          RowSpacing="6" ColumnSpacing="8">
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Primary nick"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                        <Border Grid.Row="0" Grid.Column="1"
+                                Background="{DynamicResource ChannelHeaderBackground}"
+                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                BorderThickness="1" CornerRadius="4" Padding="4,0">
+                            <TextBox Text="{Binding FirstNick}"
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Secondary nick"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                        <Border Grid.Row="1" Grid.Column="1"
+                                Background="{DynamicResource ChannelHeaderBackground}"
+                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                BorderThickness="1" CornerRadius="4" Padding="4,0">
+                            <TextBox Text="{Binding SecondNick}"
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Tertiary nick"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                        <Border Grid.Row="2" Grid.Column="1"
+                                Background="{DynamicResource ChannelHeaderBackground}"
+                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                BorderThickness="1" CornerRadius="4" Padding="4,0">
+                            <TextBox Text="{Binding ThirdNick}"
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Display -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="DISPLAY"
+                               FontSize="11" FontWeight="SemiBold"
+                               Foreground="{DynamicResource SidebarMutedForeground}"/>
+                    <CheckBox Content="Show timestamps"
+                              IsChecked="{Binding ShowTimestamps}"
+                              FontSize="13"/>
+                </StackPanel>
+
+                <!-- Logging -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="LOGGING"
+                               FontSize="11" FontWeight="SemiBold"
+                               Foreground="{DynamicResource SidebarMutedForeground}"/>
+                    <CheckBox Content="Enable logging"
+                              IsChecked="{Binding LoggerActivated}"
+                              FontSize="13"/>
+                    <CheckBox Content="Include timestamps in logs"
+                              IsChecked="{Binding LoggerTimestampsActivated}"
+                              IsEnabled="{Binding LoggerActivated}"
+                              FontSize="13"/>
+                    <Grid ColumnDefinitions="110,*" ColumnSpacing="8">
+                        <TextBlock Grid.Column="0" Text="Timestamp format"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                        <Border Grid.Column="1"
+                                Background="{DynamicResource ChannelHeaderBackground}"
+                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                BorderThickness="1" CornerRadius="4" Padding="4,0">
+                            <TextBox Text="{Binding LoggerTimestampFormat}"
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </DockPanel>
+
+</Window>

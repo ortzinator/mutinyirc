@@ -10,9 +10,15 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
-    private async void SettingsButton_Click(object? sender, RoutedEventArgs e)
+    private async void AppSettingsMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        var dialog = new SettingsWindow();
+        var dialog = new AppSettingsWindow();
+        await dialog.ShowDialog(this);
+    }
+
+    private async void ServersMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        var dialog = new ServerSettingsWindow();
         await dialog.ShowDialog(this);
     }
 }
