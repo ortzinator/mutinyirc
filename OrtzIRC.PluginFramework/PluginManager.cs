@@ -41,7 +41,10 @@ namespace OrtzIRC.PluginFramework
             Trace.WriteLine(string.Format("Loading Plug-ins ({0})", path), TraceCategories.PluginSystem);
 
             if (!Directory.Exists(path))
-                return; //TODO - Errorz?
+            {
+                Trace.WriteLine(string.Format("Plugin directory not found: {0}", path), TraceCategories.PluginSystem);
+                return;
+            }
 
             string[] files = Directory.GetFileSystemEntries(path, "*.dll");
 
@@ -114,9 +117,19 @@ namespace OrtzIRC.PluginFramework
 
         private IPlugin CreateInstance(PluginInfo pluginInfo)
         {
-            Assembly asm = Assembly.LoadFile(pluginInfo.AssemblyPath);
-
-            return (IPlugin)asm.CreateInstance(pluginInfo.FullName);
+            try
+            {
+                Assembly asm = Assembly.LoadFile(pluginInfo.AssemblyPath);
+                var instance = asm.CreateInstance(pluginInfo.FullName);
+                if (instance == null)
+                    Trace.WriteLine(string.Format("CreateInstance returned null for {0} in {1}", pluginInfo.FullName, pluginInfo.AssemblyPath), TraceCategories.PluginSystem);
+                return (IPlugin)instance;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(string.Format("Failed to instantiate {0}: {1}", pluginInfo.FullName, ex), TraceCategories.PluginSystem);
+                return null;
+            }
         }
 
         public CommandResultInfo ExecuteCommand(CommandExecutionInfo commandInput)
@@ -162,7 +175,15 @@ namespace OrtzIRC.PluginFramework
                                 break;
 
                             commandInput.ParameterList.Insert(0, commandInput.Context);
-                            return (CommandResultInfo)methodInfo.Invoke(commandInstance, commandInput.ParameterList.ToArray());
+                            try
+                            {
+                                return (CommandResultInfo)methodInfo.Invoke(commandInstance, commandInput.ParameterList.ToArray());
+                            }
+                            catch (Exception ex)
+                            {
+                                Trace.WriteLine(string.Format("Command '{0}' threw an exception: {1}", commandInput.Name, ex), TraceCategories.PluginSystem);
+                                return CommandResultInfo.Fail(string.Format("{0} failed with an error", commandInput.Name.ToUpper()));
+                            }
                         }
                         continue;
                     }
@@ -210,10 +231,19 @@ namespace OrtzIRC.PluginFramework
                         }
                     }
                     commandInput.ParameterList.Insert(0, commandInput.Context);
-                    return (CommandResultInfo)methodInfo.Invoke(commandInstance, commandInput.ParameterList.ToArray());
-                    //TODO: Should maybe log or something before returning
+                    try
+                    {
+                        return (CommandResultInfo)methodInfo.Invoke(commandInstance, commandInput.ParameterList.ToArray());
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine(string.Format("Command '{0}' threw an exception: {1}", commandInput.Name, ex), TraceCategories.PluginSystem);
+                        return CommandResultInfo.Fail(string.Format("{0} failed with an error", commandInput.Name.ToUpper()));
+                    }
                 }
             }
+            Trace.WriteLine(string.Format("No matching Execute() overload for command '{0}' with context {1} and {2} parameter(s)",
+                commandInput.Name, commandInput.Context.GetType().Name, commandInput.ParameterList.Count), TraceCategories.PluginSystem);
             return null;
         }
 
