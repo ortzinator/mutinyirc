@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text;
 using global::Avalonia.Controls;
 
 namespace OrtzIRC.Avalonia.ViewModels;
@@ -35,6 +36,7 @@ public class ServerViewModel : IrcViewModel
         server.ConnectCancelled += Server_ConnectCancelled;
         server.NickError += Server_NickError;
         server.PartSelf += Server_PartSelf;
+        server.WhoisReceived += Server_WhoisReceived;
     }
 
     public ServerViewModel()
@@ -217,6 +219,41 @@ public class ServerViewModel : IrcViewModel
         }
     }
 
+    private void Server_WhoisReceived(object? sender, OrtzIRC.Common.DataEventArgs<WhoisInfo> e)
+    {
+        WhoisInfo info = e.Data;
+        string nick = info.User?.Nick ?? "?";
+
+        AddMessage($"{nick} is {info.User?.Nick}!{info.User?.UserName}@{info.User?.HostMask} * {info.RealName}");
+
+        if (!string.IsNullOrEmpty(info.Server))
+            AddMessage($"{nick} server: {info.Server} [{info.ServerDescription}]");
+
+        if (info.IdleTime > 0)
+            AddMessage($"{nick} idle: {FormatIdleTime(info.IdleTime)}");
+
+        if (info.Operator)
+            AddMessage($"{nick} is an IRC operator");
+
+        string[]? channels = info.GetChannels();
+        if (channels != null && channels.Length > 0)
+            AddMessage($"{nick} channels: {string.Join(" ", channels)}");
+
+        AddMessage($"End of WHOIS for {nick}");
+    }
+
+    private static string FormatIdleTime(long seconds)
+    {
+        var sb = new StringBuilder();
+        long h = seconds / 3600;
+        long m = (seconds % 3600) / 60;
+        long s = seconds % 60;
+        if (h > 0) sb.Append($"{h}h ");
+        if (m > 0) sb.Append($"{m}m ");
+        sb.Append($"{s}s");
+        return sb.ToString().TrimEnd();
+    }
+
     public override void Close()
     {
         base.Close();
@@ -225,6 +262,7 @@ public class ServerViewModel : IrcViewModel
 
     public override void Dispose()
     {
-        //TODO
+        if (server != null)
+            server.WhoisReceived -= Server_WhoisReceived;
     }
 }

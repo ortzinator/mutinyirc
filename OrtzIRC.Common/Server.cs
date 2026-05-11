@@ -116,6 +116,7 @@ namespace OrtzIRC.Common
             Connection.Listener.OnPing += Listener_OnPing;
             Connection.Listener.OnNickError += Listener_OnNickError;
             Connection.Listener.OnQuit += Listener_OnQuit;
+            Connection.Listener.OnWhois += Listener_OnWhois;
 
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
         }
@@ -131,6 +132,11 @@ namespace OrtzIRC.Common
         private void Listener_OnNickError(object sender, NickErrorEventArgs e)
         {
             NickError.Fire(this, e);
+        }
+
+        private void Listener_OnWhois(WhoisInfo whoisInfo)
+        {
+            WhoisReceived.Fire(this, new DataEventArgs<WhoisInfo>(whoisInfo));
         }
 
         private void Listener_OnPing(string message)
@@ -188,6 +194,7 @@ namespace OrtzIRC.Common
             Connection.Listener.OnKick -= Listener_OnKick;
             Connection.Listener.OnPrivate -= Listener_OnPrivate;
             Connection.Listener.OnPing -= Listener_OnPing;
+            Connection.Listener.OnWhois -= Listener_OnWhois;
 
             Connection.RawMessageReceived -= Connection_OnRawMessageReceived;
         }
@@ -248,6 +255,8 @@ namespace OrtzIRC.Common
         public event EventHandler<DataEventArgs<string>> PingReceived;
 
         public event EventHandler<NickErrorEventArgs> NickError;
+
+        public event EventHandler<DataEventArgs<WhoisInfo>> WhoisReceived;
 
         // hack - should call dispose
         ~Server()
