@@ -65,3 +65,4 @@ packages/
 *.testsettings
 CLAUDE.md
 .claude/
+screenshot.png
