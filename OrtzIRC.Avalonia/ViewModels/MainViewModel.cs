@@ -6,6 +6,7 @@ namespace OrtzIRC.Avalonia.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Input;
 using FlamingIRC;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -44,6 +45,7 @@ public class MainViewModel : ViewModelBase
         Servers = new MTObservableCollection<ServerViewModel>();
 
         ServerManager.Instance.ServerAdded += Instance_ServerCreated;
+        Server.ChannelRemoved += Server_ChannelRemoved;
 
         LoadSettings();
 
@@ -125,6 +127,14 @@ public class MainViewModel : ViewModelBase
             SelectedPanel = vm;
             vm.IsSelected = true;
         }
+    }
+
+    private void Server_ChannelRemoved(object? sender, ChannelEventArgs e)
+    {
+        var chanVm = Panels.OfType<ChannelViewModel>()
+            .FirstOrDefault(c => c.Channel == e.Channel);
+        if (chanVm != null)
+            Chan_RequestClose(chanVm, EventArgs.Empty);
     }
 
     public override void Close()

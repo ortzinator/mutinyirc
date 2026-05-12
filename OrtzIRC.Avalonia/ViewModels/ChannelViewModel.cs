@@ -12,6 +12,7 @@ using OrtzIRC.Avalonia.Resources;
 public class ChannelViewModel : IrcViewModel
 {
     private Channel _channel;
+    public Channel Channel => _channel;
     private List<UserViewModel>? userList;
     private PluginManager _pluginManager;
 
