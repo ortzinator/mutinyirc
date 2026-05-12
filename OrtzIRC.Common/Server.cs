@@ -424,6 +424,8 @@ namespace OrtzIRC.Common
 
             if (IsMe(user))
             {
+                _channels.Remove(chan.Name);
+                ChannelRemoved.Fire(this, new ChannelEventArgs(chan));
                 PartSelf.Fire(this, new PartEventArgs(user, chan, String.Empty));
                 return;
             }
