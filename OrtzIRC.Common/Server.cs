@@ -431,9 +431,6 @@ namespace OrtzIRC.Common
             Part.Fire(this, new PartEventArgs(user, chan, reason));
             chan.UserPart(user, reason);
 
-            _channels.Remove(chan.Name);
-            ChannelRemoved.Fire(this, new ChannelEventArgs(chan));
-
             Connection.Sender.Names(channel);
         }
 
