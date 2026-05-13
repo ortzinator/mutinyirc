@@ -29,14 +29,14 @@ namespace OrtzIRC.Common
 
         public static bool AddTimestamp
         {
-            get { return TextLogger.addTimestamp; }
-            set { TextLogger.addTimestamp = value; }
+            get { return TextLogger.AddTimestamp; }
+            set { TextLogger.AddTimestamp = value; }
         }
 
         public static string TimeFormat
         {
-            get { return TextLogger.timeFormat; }
-            set { TextLogger.timeFormat = value; }
+            get { return TextLogger.TimeFormat; }
+            set { TextLogger.TimeFormat = value; }
         }
 
         public static void TextEntry(Server network, string text)
