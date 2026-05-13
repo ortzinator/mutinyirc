@@ -6,7 +6,7 @@
 
     public class UserList : IList<User>, INotifyUpdate
     {
-        private List<User> List;
+        private List<User> list;
         private EventHandler onUpdate;
 
         /// <summary>
@@ -18,13 +18,13 @@
 
         public UserList()
         {
-            List = new List<User>();
+            list = new List<User>();
             NotifyUpdate = true;
         }
 
         public UserList(List<User> userList)
         {
-            List = userList;
+            list = userList;
             NotifyUpdate = true;
         }
 
@@ -32,18 +32,18 @@
 
         public int IndexOf(User item)
         {
-            return List.IndexOf(item);
+            return list.IndexOf(item);
         }
 
         public void Insert(int index, User item)
         {
-            List.Insert(index, item);
+            list.Insert(index, item);
             OnUpdate();
         }
 
         public void RemoveAt(int index)
         {
-            List.RemoveAt(index);
+            list.RemoveAt(index);
             OnUpdate();
         }
 
@@ -51,11 +51,11 @@
         {
             get
             {
-                return List[index];
+                return list[index];
             }
             set
             {
-                List[index] = value;
+                list[index] = value;
                 OnUpdate();
             }
         }
@@ -66,29 +66,29 @@
 
         public void Add(User item)
         {
-            List.Add(item);
+            list.Add(item);
             OnUpdate();
         }
 
         public void Clear()
         {
-            List.Clear();
+            list.Clear();
             OnUpdate();
         }
 
         public bool Contains(User item)
         {
-            return List.Contains(item);
+            return list.Contains(item);
         }
 
         public void CopyTo(User[] array, int arrayIndex)
         {
-            List.CopyTo(array, arrayIndex);
+            list.CopyTo(array, arrayIndex);
         }
 
         public int Count
         {
-            get { return List.Count; }
+            get { return list.Count; }
         }
 
         public bool IsReadOnly
@@ -98,7 +98,7 @@
 
         public bool Remove(User item)
         {
-            var a = List.Remove(item);
+            var a = list.Remove(item);
             OnUpdate();
             return a;
         }
@@ -109,7 +109,7 @@
 
         public IEnumerator<User> GetEnumerator()
         {
-            return List.GetEnumerator();
+            return list.GetEnumerator();
         }
 
         #endregion
@@ -118,8 +118,7 @@
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return List.GetEnumerator();
-            //TODO: Correct?
+            return list.GetEnumerator();
         }
 
         #endregion
@@ -136,13 +135,13 @@
 
         private void OnUpdate()
         {
-            if (onUpdate != null && NotifyUpdate == true)
+            if (onUpdate != null && NotifyUpdate)
                 onUpdate(this, new EventArgs());
         }
 
         public User GetUser(string nick)
         {
-            foreach (var user in List)
+            foreach (var user in list)
                 if (user.Nick.ToUpper() == nick.ToUpper())
                     return user;
 
@@ -164,7 +163,7 @@
 
         public void Sort(Comparison<User> comparison)
         {
-            List.Sort(comparison);
+            list.Sort(comparison);
         }
     }
 
