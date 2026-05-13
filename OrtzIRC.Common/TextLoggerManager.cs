@@ -1,32 +1,29 @@
-﻿namespace OrtzIRC.Common
-{
-    using System;
-    using FlamingIRC;
+﻿using FlamingIRC;
 
+namespace OrtzIRC.Common
+{
     /// <summary>
-    /// Purpose: Handle the environnement around the manager such as subscribing
-    ///          to program events and managing whether the logger is on or off.
-    ///          it also listens to the various events in the program in order
-    ///          to detect any text input and tell the logger what to do.
+    ///     Manages the lifecycle of <see cref="TextLogger" />: subscribes to server and channel
+    ///     events when logging is enabled, and unsubscribes when disabled.
     /// </summary>
     public static class TextLoggerManager
     {
-        private static bool loggerActive;
+        private static bool _loggerActive;
 
         public static bool LoggerActive
         {
-            get { return loggerActive; }
+            get { return _loggerActive; }
 
             set
             {
-                if (value == loggerActive) return;
+                if (value == _loggerActive) return;
 
                 if (value)
                     TurnOn();
                 else
                     TurnOff();
 
-                loggerActive = value;
+                _loggerActive = value;
             }
         }
 
@@ -42,22 +39,19 @@
             set { TextLogger.timeFormat = value; }
         }
 
-        public static void TextEntry(Server network, String text)
+        public static void TextEntry(Server network, string text)
         {
-            if (LoggerActive)
-                TextLogger.TextEntry(network, text);
+            if (LoggerActive) TextLogger.TextEntry(network, text);
         }
 
-        public static void TextEntry(Server network, User person, String text)
+        public static void TextEntry(Server network, User person, string text)
         {
-            if (LoggerActive)
-                TextLogger.TextEntry(network, person, text);
+            if (LoggerActive) TextLogger.TextEntry(network, person, text);
         }
 
-        public static void TextEntry(Channel chan, String text)
+        public static void TextEntry(Channel chan, string text)
         {
-            if (LoggerActive)
-                TextLogger.TextEntry(chan, text);
+            if (LoggerActive) TextLogger.TextEntry(chan, text);
         }
 
         public static void TurnOn()
