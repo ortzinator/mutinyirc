@@ -52,7 +52,7 @@ namespace OrtzIRC.WPF.ViewModels
                 newServer.Connect();
             }
 
-            _pluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
+            _pluginManager.LoadPlugins(Path.Combine(AppContext.BaseDirectory, "plugins"));
             //PluginManager.LoadPlugins(Settings.Default.UserPluginDirectory);
             RandomMessages.Load();
         }

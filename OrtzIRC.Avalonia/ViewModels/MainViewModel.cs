@@ -61,7 +61,7 @@ public class MainViewModel : ViewModelBase
             newServer.Connect();
         }
 
-        _pluginManager.LoadPlugins(Path.Combine(Environment.CurrentDirectory, "plugins"));
+        _pluginManager.LoadPlugins(Path.Combine(AppContext.BaseDirectory, "plugins"));
         RandomMessages.Load();
     }
 
