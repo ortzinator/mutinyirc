@@ -137,6 +137,8 @@ namespace OrtzIRC.PluginFramework
             //TODO: This should handle errors
             //TODO: Pretty complex, maybe could use some commenting
 
+            Trace.WriteLine(string.Format("Command: /{0} [{1}]", commandInput.Name, string.Join(", ", commandInput.ParameterList)), TraceCategories.PluginSystem);
+
             ICommand commandInstance = GetCommandInstance(commandInput.Name);
             if (commandInstance == null)
                 return CommandResultInfo.Fail(String.Format("{0} is an invalid command", commandInput.Name.ToUpper()));

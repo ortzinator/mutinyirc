@@ -70,13 +70,7 @@
         public void Execute(Server context, ChannelInfo channel, string message)
         {
             if (context.InChannel(channel.Name))
-            {
                 context.Channels[channel.Name].Part(message);
-            }
-            else
-            {
-                //TODO: Error?
-            }
         }
 
         /// <summary>
