@@ -48,7 +48,6 @@ namespace FlamingIRC
         private CtcpListener _ctcpListener;
         private CtcpResponder _ctcpResponder;
         private DateTime _lastTraffic;
-        private ServerProperties _properties;
         private DateTime _timeLastSent;
 
         /// <summary>
@@ -123,10 +122,7 @@ namespace FlamingIRC
         /// A user friendly name of this Connection in the form 'nick@host'
         /// </summary>
         /// <value>Read only string</value>
-        public string Name
-        {
-            get { return _connectionArgs.Nick + "@" + _connectionArgs.Hostname; }
-        }
+        public string Name => _connectionArgs.Nick + "@" + _connectionArgs.Hostname;
 
         /// <summary>
         /// Whether Ctcp commands should be processed and if Ctcp events will be raised.
@@ -137,7 +133,7 @@ namespace FlamingIRC
         /// </value>
         public bool EnableCtcp
         {
-            get { return _ctcpEnabled; }
+            get => _ctcpEnabled;
             set
             {
                 if (value && !_ctcpEnabled)
@@ -168,7 +164,7 @@ namespace FlamingIRC
         /// <value>Once this is set it can be removed by setting it to null.</value>
         public CtcpResponder CtcpResponder
         {
-            get { return _ctcpResponder; }
+            get => _ctcpResponder;
             set
             {
                 if (value == null && _ctcpResponder != null)
@@ -181,10 +177,7 @@ namespace FlamingIRC
         /// The amount of time that has passed since the socket sent a command to the IRC server.
         /// </summary>
         /// <value>Read only TimeSpan</value>
-        public TimeSpan IdleTime
-        {
-            get { return DateTime.Now - _timeLastSent; }
-        }
+        public TimeSpan IdleTime => DateTime.Now - _timeLastSent;
 
         /// <summary>
         /// The object used to send commands to the IRC server.
@@ -209,19 +202,13 @@ namespace FlamingIRC
         /// The object that parses CTCP messages and notifies the appropriate delegate.
         /// </summary>
         /// <value>Read only CtcpListener. Null if CtcpEnabled is false.</value>
-        public CtcpListener CtcpListener
-        {
-            get { return _ctcpEnabled ? _ctcpListener : null; }
-        }
+        public CtcpListener CtcpListener => _ctcpEnabled ? _ctcpListener : null;
 
         /// <summary>
         /// The collection of data used to establish this connection.
         /// </summary>
         /// <value>Read only ConnectionArgs.</value>
-        public ConnectionArgs ConnectionData
-        {
-            get { return _connectionArgs; }
-        }
+        public ConnectionArgs ConnectionData => _connectionArgs;
 
         /// <summary>
         /// A read-only collection of string key/value pairs representing IRC server proprties.
@@ -229,27 +216,18 @@ namespace FlamingIRC
         /// <value>
         /// This connection's ServerProperties object is null if it has not been created.
         /// </value>
-        public ServerProperties ServerProperties
-        {
-            get { return _properties; }
-        }
+        public ServerProperties ServerProperties { get; private set; }
 
         public string Nick
         {
-            get { return _connectionArgs.Nick; }
+            get => _connectionArgs.Nick;
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException();
-
-                _connectionArgs.Nick = value;
+                _connectionArgs.Nick = value ?? throw new ArgumentNullException();
             }
         }
 
-        internal ConnectionArgs ConnectionArgs
-        {
-            get { return _connectionArgs; }
-        }
+        internal ConnectionArgs ConnectionArgs => _connectionArgs;
 
         /// <summary>
         /// Receive all the messages, unparsed, sent by the IRC server. This is typically only
@@ -369,7 +347,7 @@ namespace FlamingIRC
             if (matches.Count > 0)
             {
                 foreach (Match match in matches)
-                    _properties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
+                    ServerProperties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
             }
             //Extract ones we are interested in
             ExtractProperties();
@@ -412,7 +390,7 @@ namespace FlamingIRC
             {
                 if (Connected)
                     throw new Exception("Connection with IRC server already opened.");
-                _properties = new ServerProperties();
+                ServerProperties = new ServerProperties();
                 _activityTimer.Start();
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
                                   string.Format("[{0}] Connection::Connect()", Thread.CurrentThread.Name));

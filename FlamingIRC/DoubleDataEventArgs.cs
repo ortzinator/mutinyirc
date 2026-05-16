@@ -10,8 +10,8 @@
 
         public FlamingDoubleDataEventArgs(TFirst first, TSecond second)
         {
-            this.First = first;
-            this.Second = second;
+            First = first;
+            Second = second;
         }
     }
 }

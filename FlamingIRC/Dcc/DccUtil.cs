@@ -20,14 +20,13 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Net;
-using System.Diagnostics;
-using System.Globalization;
-
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Net;
+    using System.Diagnostics;
+    using System.Globalization;
+
     /// <summary>
     /// Utility methods needed to handle DCC requests.
     /// </summary>
@@ -78,7 +77,7 @@ namespace FlamingIRC
         public static long IPAddressToLong(IPAddress ipAddress)
         {
             long num = 0;
-            if (ipAddress.ToString() == String.Empty)
+            if (ipAddress.ToString() == string.Empty)
             {
                 return 0;
             }
@@ -87,7 +86,7 @@ namespace FlamingIRC
                 string[] octets = ipAddress.ToString().Split('.');
                 for (int i = octets.Length - 1; i >= 0; --i)
                 {
-                    num += (long)((int.Parse(octets[i]) % 256) * Math.Pow(256, (3 - i)));
+                    num += (long)((int.Parse(octets[i]) % 256) * Math.Pow(256, 3 - i));
                 }
                 return num;
             }

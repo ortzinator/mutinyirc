@@ -42,7 +42,6 @@ namespace FlamingIRC
         //Regex to create a User from a string
         private static readonly Regex nameSplitterRegex;
         private const string ChannelPrefix = "#!+&";
-        private const string ActionModes = "+-";
         private const string UserModes = "awiorOs";
         private const string ChannelModes = "OohvaimnqpsrtklbeI";
         private const string Space = " ";
@@ -138,7 +137,7 @@ namespace FlamingIRC
                 return false;
             }
 
-            if (Rfc2812Util.ContainsSpace(channel))
+            if (ContainsSpace(channel))
             {
                 return false;
             }
@@ -163,7 +162,7 @@ namespace FlamingIRC
             {
                 return false;
             }
-            if (Rfc2812Util.ContainsSpace(nick))
+            if (ContainsSpace(nick))
             {
                 return false;
             }

@@ -36,7 +36,7 @@ namespace FlamingIRC
     /// <para>Due to the asynchronous nature of IRC, none of these commands 
     /// have a return value. To get that value (or possibly an error) the client must
     /// handle the corresponding event. For example, to check if a user is online
-    /// the client would send <see cref="Sender.Ison"/> then check the value of the 
+    /// the client would send <see cref="Ison"/> then check the value of the 
     /// <see cref="Listener.OnIson"/> event to receive the answer.</para>
     /// <para>When a command can return an error, the possible error replies
     /// are listed. An error message will be sent via the <see cref="Listener.OnError"/> event
@@ -237,7 +237,7 @@ namespace FlamingIRC
         /// <seealso cref="Listener.OnJoin"/>
         public void Join(string channel)
         {
-            Join(channel, String.Empty);
+            Join(channel, string.Empty);
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace FlamingIRC
                     Buffer.Append(SPACE);
                     Buffer.Append(channel);
 
-                    if (password != String.Empty)
+                    if (password != string.Empty)
                     {
                         Buffer.Append(SPACE);
                         //8 is the JOIN + 2 spaces + CR + LF
@@ -348,7 +348,7 @@ namespace FlamingIRC
                 {
                     Buffer.Append("NAMES");
                     Buffer.Append(SPACE);
-                    Buffer.Append(String.Join(",", channels));
+                    Buffer.Append(string.Join(",", channels));
                     if (TooLong(Buffer))
                     {
                         ClearBuffer();
@@ -407,7 +407,7 @@ namespace FlamingIRC
                 {
                     Buffer.Append("LIST");
                     Buffer.Append(SPACE);
-                    Buffer.Append(String.Join(",", channels));
+                    Buffer.Append(string.Join(",", channels));
                     if (TooLong(Buffer))
                     {
                         ClearBuffer();
@@ -587,7 +587,7 @@ namespace FlamingIRC
                 {
                     Buffer.Append("PART");
                     Buffer.Append(SPACE);
-                    string channelList = String.Join(",", channels);
+                    string channelList = string.Join(",", channels);
                     Buffer.Append(channelList);
                     Buffer.Append(SPACE_COLON);
                     // 9 is PART + 2 x Spaces + : + CR + LF
@@ -629,7 +629,7 @@ namespace FlamingIRC
 
         public void Ping()
         {
-            lock(this)
+            lock (this)
             {
                 Buffer.Append("PING");
                 Buffer.Append(SPACE);
@@ -645,7 +645,7 @@ namespace FlamingIRC
         /// applies to servers too - they must not send any error reply back to the 
         /// client on receipt of a notice. The object of this rule is to avoid loops
         /// between clients automatically sending something in response to
-        /// something it received. See <see cref="Sender.PublicMessage"/> for possible errors.</para>
+        /// something it received. See <see cref="PublicMessage"/> for possible errors.</para>
         /// </remarks>
         /// <param name="channel">The target channel.</param>
         /// <param name="message">Text message. If the text is too large to be sent in one
@@ -693,7 +693,7 @@ namespace FlamingIRC
         /// applies to servers too - they must not send any error reply back to the 
         /// client on receipt of a notice. The object of this rule is to avoid loops
         /// between clients automatically sending something in response to
-        /// something it received. See <see cref="Sender.PrivateMessage"/> for possible errors.</para>
+        /// something it received. See <see cref="PrivateMessage"/> for possible errors.</para>
         /// </remarks>
         /// <param name="nick">The target nickname.</param>
         /// <param name="message">Text message. If the text is too large to be sent in one
@@ -929,7 +929,7 @@ namespace FlamingIRC
                     ClearBuffer();
                     throw new ArgumentException("The reason for kicking cannot be null.");
                 }
-                string nickList = String.Join(",", nicks);
+                string nickList = string.Join(",", nicks);
                 // 10 is KICK + 3 x Spaces + : + CR + LF
                 reason = Truncate(reason, 10 + channel.Length + nickList.Length);
                 Buffer.Append("KICK");
@@ -1186,8 +1186,8 @@ namespace FlamingIRC
         /// <summary>Changes this client's mode. To change another nick's mode
         /// use <see cref="ChangeChannelMode"/>.</summary>
         /// <remarks>
-        /// Away cannot be set here but should be set using <see cref="Sender.Away"/> 
-        /// or removed using <see cref="Sender.UnAway"/>.
+        /// Away cannot be set here but should be set using <see cref="Away"/> 
+        /// or removed using <see cref="UnAway"/>.
         /// </remarks>
         /// <param name="action">Add or remove a mode.</param>
         /// <param name="mode">The mode to be changed.</param>
@@ -1295,10 +1295,10 @@ namespace FlamingIRC
                     ClearBuffer();
                     throw new ArgumentException(channel + " is not a valid channel.");
                 }
-                if (mode != ChannelMode.Ban &&
-                    mode != ChannelMode.Exception &&
-                    mode != ChannelMode.Invitation &&
-                    mode != ChannelMode.ChannelCreator)
+                if (mode is not ChannelMode.Ban and
+                    not ChannelMode.Exception and
+                    not ChannelMode.Invitation and
+                    not ChannelMode.ChannelCreator)
                 {
                     ClearBuffer();
                     throw new ArgumentException(Enum.GetName(typeof(ChannelMode), mode) + " is not a valid channel mode for this request.");

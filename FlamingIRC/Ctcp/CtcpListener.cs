@@ -22,13 +22,13 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Text.RegularExpressions;
-using System.Diagnostics;
-using System.Globalization;
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Text.RegularExpressions;
+    using System.Diagnostics;
+    using System.Globalization;
+
     /// <summary>
     /// This class is used to send CTCP specific events. Once registered with this object 
     /// the client can receive notification of all CTCP requests, pings, and replies. Instances 
@@ -123,20 +123,14 @@ namespace FlamingIRC
                     if (connection.CtcpSender.IsMyRequest(ctcpTokens[Text]))
                     {
                         connection.CtcpSender.ReplyReceived(ctcpTokens[Text]);
-                        if (OnCtcpPingReply != null)
-                        {
-                            OnCtcpPingReply(Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]);
-                        }
+                        OnCtcpPingReply?.Invoke(Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]);
                     }
                     else
                     {
                         //Ignore PING's with now parameters
                         if (ctcpTokens[Text] != null && ctcpTokens[Text].TrimEnd().Length != 0)
                         {
-                            if (OnCtcpPingRequest != null)
-                            {
-                                OnCtcpPingRequest(Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]);
-                            }
+                            OnCtcpPingRequest?.Invoke(Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]);
                         }
                     }
                 }
@@ -144,17 +138,11 @@ namespace FlamingIRC
                 {
                     if (IsReply(ctcpTokens))
                     {
-                        if (OnCtcpReply != null)
-                        {
-                            OnCtcpReply(ctcpTokens[Command].ToUpper(CultureInfo.CurrentCulture), Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]);
-                        }
+                        OnCtcpReply?.Invoke(ctcpTokens[Command].ToUpper(CultureInfo.CurrentCulture), Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]);
                     }
                     else
                     {
-                        if (OnCtcpRequest != null)
-                        {
-                            OnCtcpRequest(ctcpTokens[Command].ToUpper(CultureInfo.CurrentCulture), Rfc2812Util.UserFromString(ctcpTokens[Name]));
-                        }
+                        OnCtcpRequest?.Invoke(ctcpTokens[Command].ToUpper(CultureInfo.CurrentCulture), Rfc2812Util.UserFromString(ctcpTokens[Name]));
                     }
                 }
             }

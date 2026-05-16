@@ -421,27 +421,11 @@ namespace FlamingIRC
                 Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message));
         }
 
-
-
-        private void ProcessNickCommand(string[] tokens)
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                string.Format("[{0}] Listener::ProcessNickCommand()", Thread.CurrentThread.Name));
-            OnNick.Fire(this, new NickChangeEventArgs(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2])));
-        }
-
         public void ProcessNickCommand(IrcMessage message)
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
                 string.Format("[{0}] Listener::ProcessNickCommand()", Thread.CurrentThread.Name));
             OnNick.Fire(this, new NickChangeEventArgs(Rfc2812Util.UserFromString(message.From), message.Message));
-        }
-
-        private void ProcessJoinCommand(string[] tokens)
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                string.Format("[{0}] Listener::ProcessJoinCommand()", Thread.CurrentThread.Name));
-            OnJoin?.Invoke(Rfc2812Util.UserFromString(tokens[0]), RemoveLeadingColon(tokens[2]));
         }
 
         public void ProcessJoinCommand(IrcMessage ircMessage)
@@ -635,7 +619,7 @@ namespace FlamingIRC
                     WhoisInfo whoisChannelInfo = LookupInfo(tokens[3]);
                     tokens[4] = RemoveLeadingColon(tokens[4]);
                     int numberOfChannels = tokens.Length - 4;
-                    string[] channels = new String[numberOfChannels];
+                    string[] channels = new string[numberOfChannels];
                     Array.Copy(tokens, 4, channels, 0, numberOfChannels);
                     whoisChannelInfo.SetChannels(channels);
                     break;
@@ -740,7 +724,7 @@ namespace FlamingIRC
                         CondenseStrings(tokens, 6), false);
                     break;
                 case ReplyCode.RPL_ENDOFLINKS:
-                    OnLinks?.Invoke(String.Empty, String.Empty, -1, String.Empty, true);
+                    OnLinks?.Invoke(string.Empty, string.Empty, -1, string.Empty, true);
                     break;
                 case ReplyCode.RPL_STATSLINKINFO:
                 case ReplyCode.RPL_STATSCOMMANDS:
@@ -790,7 +774,7 @@ namespace FlamingIRC
         /// <param name="tokens"></param>
         private void HandleDefaultReply(ReplyCode code, string[] tokens)
         {
-            if (code >= ReplyCode.ERR_NOSUCHNICK && code <= ReplyCode.ERR_USERSDONTMATCH)
+            if (code is >= ReplyCode.ERR_NOSUCHNICK and <= ReplyCode.ERR_USERSDONTMATCH)
             {
                 OnError.Fire(this, new ErrorMessageEventArgs(code, CondenseStrings(tokens, 3)));
             }
@@ -806,10 +790,7 @@ namespace FlamingIRC
         /// <returns></returns>
         private WhoisInfo LookupInfo(string nick)
         {
-            if (whoisInfos == null)
-            {
-                whoisInfos = new Hashtable();
-            }
+            whoisInfos ??= new Hashtable();
 
             WhoisInfo info = (WhoisInfo)whoisInfos[nick];
 
@@ -834,7 +815,7 @@ namespace FlamingIRC
             }
             else
             {
-                return String.Join(" ", strings, start, (strings.Length - start));
+                return string.Join(" ", strings, start, strings.Length - start);
             }
         }
         public string RemoveLeadingColon(string text)
@@ -857,20 +838,15 @@ namespace FlamingIRC
 
         private StatsQuery GetQueryType(ReplyCode code)
         {
-            switch (code)
+            return code switch
             {
-                case ReplyCode.RPL_STATSLINKINFO:
-                    return StatsQuery.Connections;
-                case ReplyCode.RPL_STATSCOMMANDS:
-                    return StatsQuery.CommandUsage;
-                case ReplyCode.RPL_STATSUPTIME:
-                    return StatsQuery.Uptime;
-                case ReplyCode.RPL_STATSOLINE:
-                    return StatsQuery.Operators;
+                ReplyCode.RPL_STATSLINKINFO => StatsQuery.Connections,
+                ReplyCode.RPL_STATSCOMMANDS => StatsQuery.CommandUsage,
+                ReplyCode.RPL_STATSUPTIME => StatsQuery.Uptime,
+                ReplyCode.RPL_STATSOLINE => StatsQuery.Operators,
                 //Should never get here
-                default:
-                    return StatsQuery.CommandUsage;
-            }
+                _ => StatsQuery.CommandUsage,
+            };
         }
 
         public IrcMessage ParseIrcMessage(string message)

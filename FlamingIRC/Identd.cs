@@ -58,7 +58,7 @@ namespace FlamingIRC
         /// <summary>
         /// The Identd server will start listening for queries
         /// in its own thread. It can be stopped by calling
-        /// <see cref="Identd.Stop"/>.
+        /// <see cref="Stop"/>.
         /// </summary>
         /// <param name="userName">Should be the same username as the one used
         /// in the ConnectionArgs object when establishing a connection.</param>
@@ -67,13 +67,13 @@ namespace FlamingIRC
         {
             lock (lockObject)
             {
-                if (running == true)
+                if (running)
                 {
                     throw new Exception("Identd already started.");
                 }
                 running = true;
                 username = userName;
-                Thread socketThread = new Thread(Identd.Run) { Name = "Identd", IsBackground = true };
+                Thread socketThread = new Thread(Run) { Name = "Identd", IsBackground = true };
                 socketThread.Start();
             }
         }

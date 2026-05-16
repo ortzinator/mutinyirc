@@ -22,16 +22,16 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Threading;
-using System.Text;
-using System.IO;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Threading;
+    using System.Text;
+    using System.IO;
+    using System.Diagnostics;
+    using System.Net;
+    using System.Net.Sockets;
+
     /// <summary>
     /// Establish a DCC Chat connection with a remote user. 
     /// </summary>
@@ -59,7 +59,6 @@ namespace FlamingIRC
 
         //Default timeout is 30 seconds
         private const int DefaultTimeout = 30000;
-        private readonly DccUser dccUser;
         private TcpClient client;
         private TcpListener server;
         private Thread thread;
@@ -69,7 +68,7 @@ namespace FlamingIRC
 
         internal DccChatSession(DccUser dccUser)
         {
-            this.dccUser = dccUser;
+            ClientInfo = dccUser;
             listening = false;
             receiving = false;
         }
@@ -79,24 +78,12 @@ namespace FlamingIRC
         /// is currently connected to another user.
         /// </summary>
         /// <value>True if the client is connected.</value>
-        public bool Connected
-        {
-            get
-            {
-                return client != null;
-            }
-        }
+        public bool Connected => client != null;
         /// <summary>
         /// Iinformation about the remote user.
         /// </summary>
         /// <value>A read-only instance of DccUser.</value>
-        public DccUser ClientInfo
-        {
-            get
-            {
-                return dccUser;
-            }
-        }
+        public DccUser ClientInfo { get; }
 
         private void CloseClientConnection()
         {
@@ -109,10 +96,7 @@ namespace FlamingIRC
         private void SendClosedEvent()
         {
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::SendClosedEvent()");
-            if (OnChatSessionClosed != null)
-            {
-                OnChatSessionClosed(this);
-            }
+            OnChatSessionClosed?.Invoke(this);
         }
         /// <summary>
         /// Create the correctly formatted DCC CHAT message and send it.
@@ -121,13 +105,13 @@ namespace FlamingIRC
         {
             //512 is the max IRC message size
             StringBuilder builder = new StringBuilder("PRIVMSG ", 512);
-            builder.Append(dccUser.Nick);
+            builder.Append(ClientInfo.Nick);
             builder.Append(" :\x0001DCC CHAT CHAT ");
             builder.Append(DccUtil.IPAddressToLong(IPAddress.Parse(listenIPAddress)).ToString());
             builder.Append(" ");
             builder.Append(listenPort);
             builder.Append("\x0001\n");
-            dccUser.Connection.Sender.Raw(builder.ToString());
+            ClientInfo.Connection.Sender.Raw(builder.ToString());
         }
         /// <summary>
         /// Called when timeout thread is done.
@@ -140,11 +124,8 @@ namespace FlamingIRC
         {
             if (listening)
             {
-                Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::TimerExpired() Chat session " + this.ToString() + " timed out.");
-                if (OnChatRequestTimeout != null)
-                {
-                    OnChatRequestTimeout(this);
-                }
+                Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::TimerExpired() Chat session " + ToString() + " timed out.");
+                OnChatRequestTimeout?.Invoke(this);
                 Close();
             }
         }
@@ -163,10 +144,7 @@ namespace FlamingIRC
                 server.Stop();
                 listening = false;
                 Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Listen() Remote user connected.");
-                if (OnChatSessionOpened != null)
-                {
-                    OnChatSessionOpened(this);
-                }
+                OnChatSessionOpened?.Invoke(this);
                 //Start listening for messages
                 ReceiveMessages();
             }
@@ -186,11 +164,8 @@ namespace FlamingIRC
             try
             {
                 client = new TcpClient();
-                client.Connect(dccUser.RemoteEndPoint);
-                if (OnChatSessionOpened != null)
-                {
-                    OnChatSessionOpened(this);
-                }
+                client.Connect(ClientInfo.RemoteEndPoint);
+                OnChatSessionOpened?.Invoke(this);
                 ReceiveMessages();
             }
             catch (Exception se)
@@ -198,11 +173,11 @@ namespace FlamingIRC
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccChatSession::Connect() exception=" + se);
                 if (se.Message.IndexOf("refused") > 0)
                 {
-                    dccUser.Connection.Listener.Error(ReplyCode.DccConnectionRefused, "Connection refused by remote user.");
+                    ClientInfo.Connection.Listener.Error(ReplyCode.DccConnectionRefused, "Connection refused by remote user.");
                 }
                 else
                 {
-                    dccUser.Connection.Listener.Error(ReplyCode.ConnectionFailed, "Unknown socket error:" + se.Message);
+                    ClientInfo.Connection.Listener.Error(ReplyCode.ConnectionFailed, "Unknown socket error:" + se.Message);
                 }
                 CloseClientConnection();
             }
@@ -218,7 +193,7 @@ namespace FlamingIRC
             {
                 receiving = true;
                 string message = "";
-                StreamReader reader = new StreamReader(client.GetStream(), dccUser.Connection.TextEncoding);
+                StreamReader reader = new StreamReader(client.GetStream(), ClientInfo.Connection.TextEncoding);
                 while ((message = reader.ReadLine()) != null)
                 {
                     if (OnChatMessageReceived != null)
@@ -231,7 +206,7 @@ namespace FlamingIRC
                 }
                 receiving = false;
                 //Read loop broken. Remote user must have closed the socket
-                dccUser.Connection.Listener.Error(ReplyCode.ConnectionFailed, "Chat connection closed by remote user.");
+                ClientInfo.Connection.Listener.Error(ReplyCode.ConnectionFailed, "Chat connection closed by remote user.");
             }
             catch (ThreadAbortException)
             {
@@ -264,7 +239,7 @@ namespace FlamingIRC
                     //Some IRC client are looking for a newline (ie mIRC) so add one
                     //before sending. Also strip off any existing new lines so
                     //we don't accidentally send two.
-                    byte[] messageBytes = dccUser.Connection.TextEncoding.GetBytes(text.TrimEnd() + "\n");
+                    byte[] messageBytes = ClientInfo.Connection.TextEncoding.GetBytes(text.TrimEnd() + "\n");
                     client.GetStream().Write(messageBytes, 0, messageBytes.Length);
                     Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccChatSession::SendMessage() Sent : " + text + " Size: " + messageBytes.Length);
                 }
@@ -299,7 +274,7 @@ namespace FlamingIRC
         /// <returns>Simple information about this session in human readable format.</returns>
         public override string ToString()
         {
-            return "DccChatSession::" + dccUser.ToString();
+            return "DccChatSession::" + ClientInfo.ToString();
         }
 
         /// <summary>
@@ -319,8 +294,10 @@ namespace FlamingIRC
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Accept()");
             DccChatSession session = new DccChatSession(dccUser);
             //Start session Thread
-            session.thread = new Thread(new ThreadStart(session.Connect));
-            session.thread.Name = session.ToString();
+            session.thread = new Thread(new ThreadStart(session.Connect))
+            {
+                Name = session.ToString()
+            };
             session.thread.Start();
             return session;
         }
@@ -375,11 +352,15 @@ namespace FlamingIRC
         {
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Request()");
             //Create session object
-            DccChatSession session = new DccChatSession(dccUser);
-            session.listenPort = listenPort;
+            DccChatSession session = new DccChatSession(dccUser)
+            {
+                listenPort = listenPort
+            };
             //Start session Thread
-            session.thread = new Thread(new ThreadStart(session.Listen));
-            session.thread.Name = session.ToString();
+            session.thread = new Thread(new ThreadStart(session.Listen))
+            {
+                Name = session.ToString()
+            };
             session.thread.Start();
             //Send Chat request to remote user
             session.SendChatRequest(listenIPAddress, listenPort);

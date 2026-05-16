@@ -31,15 +31,7 @@ namespace FlamingIRC
     /// </summary>
     public class User : IComparable<User>
     {
-        private string _hostMask = String.Empty;
-
-        private string _nick = String.Empty;
-
         private char _prefix;
-
-        private string _realName = String.Empty;
-
-        private string _userName = String.Empty;
 
         public User() { }
 
@@ -58,35 +50,21 @@ namespace FlamingIRC
             Prefix = '\0';
         }
 
-        public static User Empty
-        {
-            get { return new User(); }
-        }
+        public static User Empty => new User();
 
         /// <summary>The user's fully qualified host name</summary>
-        public string HostMask
-        {
-            get { return _hostMask; }
-            set { _hostMask = value; }
-        }
+        public string HostMask { get; set; } = string.Empty;
 
         /// <summary> Nickname plus mode symbol prefix </summary>
-        public string NamesLiteral { get { return Prefix != '\0' ? Prefix + Nick : Nick; } }
+        public string NamesLiteral => Prefix != '\0' ? Prefix + Nick : Nick;
 
         /// <summary>The user's nickname.</summary>
-        public string Nick
-        {
-            get { return _nick; }
-            set { _nick = value; }
-        }
+        public string Nick { get; set; } = string.Empty;
 
         /// <summary> The channel mode symbol prefix from NAMES</summary>
         public char Prefix
         {
-            get
-            {
-                return _prefix;
-            }
+            get => _prefix;
             set
             {
                 if (value != '\0' && !UserModeValidator.IsValid(value))
@@ -98,23 +76,15 @@ namespace FlamingIRC
         }
 
         /// <summary>The user's "real name", immediately before the @</summary>
-        public string RealName
-        {
-            get { return _realName; }
-            set { _realName = value; }
-        }
+        public string RealName { get; set; } = string.Empty;
         /// <summary>The user's username on the local machine</summary>
-        public string UserName
-        {
-            get { return _userName; }
-            set { _userName = value; }
-        }
+        public string UserName { get; set; } = string.Empty;
         /// <summary>
         ///   Takes a nick string from a NAMES and parses it as a User object
         /// </summary>
         public static User FromNames(string nick)
         {
-            if (nick == String.Empty)
+            if (nick == string.Empty)
                 return null;
 
             char mode = nick[0];
@@ -140,14 +110,14 @@ namespace FlamingIRC
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             return obj.GetType() == typeof(User) && Equals((User)obj);
         }
 
         public bool Equals(User other)
         {
-            if (ReferenceEquals(null, other)) return false;
+            if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
             return Equals(other.Nick, Nick);
@@ -155,7 +125,7 @@ namespace FlamingIRC
 
         public override int GetHashCode()
         {
-            return (Nick != null ? Nick.GetHashCode() : 0);
+            return Nick != null ? Nick.GetHashCode() : 0;
         }
         public override string ToString()
         {

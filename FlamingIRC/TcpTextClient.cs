@@ -80,9 +80,9 @@ namespace FlamingIRC
         /// Create a new connection to the server. Will call OnConnected or OnDisconnected depending
         /// on connection attempt outcome.
         /// </summary>
-        /// <param name="server">A <see cref="System.String" /></param>
-        /// <param name="port">A <see cref="System.Int32" /></param>
-        /// <param name="ssl">A <see cref="System.Boolean" /></param>
+        /// <param name="server">A <see cref="string" /></param>
+        /// <param name="port">A <see cref="int" /></param>
+        /// <param name="ssl">A <see cref="bool" /></param>
         protected void Connect(string server, int port, bool ssl)
         {
             _usesSsl = ssl;
@@ -111,10 +111,10 @@ namespace FlamingIRC
         /// <summary>
         /// Sends a string message to the server.
         /// </summary>
-        /// <param name="message">A <see cref="System.String" /></param>
+        /// <param name="message">A <see cref="string" /></param>
         public void Send(string message)
         {
-            message = message + "\r\n";
+            message += "\r\n";
             byte[] buffer = TextEncoding.GetBytes(message);
             _stream.BeginWrite(buffer, 0, buffer.Length, OnSend, null);
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,

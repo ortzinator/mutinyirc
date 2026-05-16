@@ -24,7 +24,6 @@
 
 namespace FlamingIRC
 {
-    using System;
     using System.Collections;
 
     /// <summary>
@@ -33,55 +32,22 @@ namespace FlamingIRC
     /// </summary>
     public sealed class ChannelModeInfo
     {
-        private ModeAction action;
-        private ChannelMode mode;
-        private string parameter;
 
         /// <summary>
         /// Whether the mode is being added or removed. In the case of a Channel mode
         /// request this will always be 'added'.
         /// </summary>
-        public ModeAction Action
-        {
-            get
-            {
-                return action;
-            }
-            set
-            {
-                action = value;
-            }
-        }
+        public ModeAction Action { get; set; }
 
         /// <summary>
         /// What mode is being added or removed.
         /// </summary>
-        public ChannelMode Mode
-        {
-            get
-            {
-                return mode;
-            }
-            set
-            {
-                mode = value;
-            }
-        }
+        public ChannelMode Mode { get; set; }
         /// <summary>
         /// Any additional parameters that belong to the mode. For example
         /// user masks or a maximum numbers of user allowed in a channel.
         /// </summary>
-        public string Parameter
-        {
-            get
-            {
-                return parameter;
-            }
-            set
-            {
-                parameter = value;
-            }
-        }
+        public string Parameter { get; set; }
 
 
         public override string ToString()
@@ -135,14 +101,7 @@ namespace FlamingIRC
                                 break;
                             case 'l':
                                 modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
-                                if (modeInfo.Action == ModeAction.Add)
-                                {
-                                    modeInfo.Parameter = tokens[parmIndex++];
-                                }
-                                else
-                                {
-                                    modeInfo.Parameter = "";
-                                }
+                                modeInfo.Parameter = modeInfo.Action == ModeAction.Add ? tokens[parmIndex++] : "";
                                 break;
                             default:
                                 modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);

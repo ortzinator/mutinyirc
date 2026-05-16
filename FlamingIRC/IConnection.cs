@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace FlamingIRC
+﻿namespace FlamingIRC
 {
+    using System;
+
     public interface IConnection
     {
         ISender Sender { get; }

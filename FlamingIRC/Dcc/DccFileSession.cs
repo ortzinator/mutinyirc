@@ -22,17 +22,15 @@
  * the archive of this library for complete text of license.
 */
 
-using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Collections;
-using System.Text;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-
 namespace FlamingIRC
 {
+    using System;
+    using System.Diagnostics;
+    using System.Threading;
+    using System.Text;
+    using System.Net;
+    using System.Net.Sockets;
+
     /// <summary>
     /// Allows the user to send and receive files
     /// from other IRC users.
@@ -63,16 +61,14 @@ namespace FlamingIRC
 
         //Does this session use send-ahead mode
         private bool turboMode;
+
         //The last time any data was received or sent successfully
         //used to test for a timeout.
-        private DateTime lastActivity;
         //Signals whether the session is waiting for an Accept message 
         //in reponse to a Resume request.
         private bool waitingOnAccept;
-        private DccUser dccUser;
         private byte[] buffer;
         private int listenPort;
-        private string sessionID;
         private string listenIPAddress;
         private Socket socket;
         private Socket serverSocket;
@@ -86,22 +82,16 @@ namespace FlamingIRC
         /// </summary>
         internal DccFileSession(DccUser dccUser, DccFileInfo dccFileInfo, int bufferSize, int listenPort, string sessionID)
         {
-            this.dccUser = dccUser;
+            User = dccUser;
             this.dccFileInfo = dccFileInfo;
             buffer = new byte[bufferSize];
             this.listenPort = listenPort;
-            this.sessionID = sessionID;
-            lastActivity = DateTime.Now;
+            ID = sessionID;
+            LastActivity = DateTime.Now;
             waitingOnAccept = false;
         }
 
-        internal DateTime LastActivity
-        {
-            get
-            {
-                return lastActivity;
-            }
-        }
+        internal DateTime LastActivity { get; private set; }
 
         /// <summary>
         /// A unique identifier for this session.
@@ -109,49 +99,25 @@ namespace FlamingIRC
         /// <value>Uses the TCP/IP port prefixed by an 'S' if this
         /// session is serving the file or a 'C' if this session is receiving the
         /// file.</value>
-        public string ID
-        {
-            get
-            {
-                return sessionID;
-            }
-        }
+        public string ID { get; }
         /// <summary>
         /// The DccUser object associated with this DccFileSession.
         /// </summary>
-        public DccUser User
-        {
-            get
-            {
-                return dccUser;
-            }
-        }
+        public DccUser User { get; }
         /// <summary>
         /// The DccFileInfo object associated with this DccFileSession.
         /// </summary>
-        public DccFileInfo File
-        {
-            get
-            {
-                return dccFileInfo;
-            }
-        }
+        public DccFileInfo File => dccFileInfo;
         /// <summary>
         /// The information about the remote user.
         /// </summary>
         /// <value>A read only instance of DccUser.</value>
-        public DccUser ClientInfo
-        {
-            get
-            {
-                return dccUser;
-            }
-        }
+        public DccUser ClientInfo => User;
 
         private void SendAccept()
         {
             StringBuilder builder = new StringBuilder("PRIVMSG ", 512);
-            builder.Append(dccUser.Nick);
+            builder.Append(User.Nick);
             builder.Append(" :\x0001DCC ACCEPT ");
             builder.Append(dccFileInfo.DccFileName);
             builder.Append(" ");
@@ -159,12 +125,12 @@ namespace FlamingIRC
             builder.Append(" ");
             builder.Append(dccFileInfo.FileStartingPosition);
             builder.Append("\x0001\n");
-            dccUser.Connection.Sender.Raw(builder.ToString());
+            User.Connection.Sender.Raw(builder.ToString());
         }
         private void DccSend(IPAddress sendAddress)
         {
             StringBuilder builder = new StringBuilder("PRIVMSG ", 512);
-            builder.Append(dccUser.Nick);
+            builder.Append(User.Nick);
             builder.Append(" :\x0001DCC SEND ");
             builder.Append(dccFileInfo.DccFileName);
             builder.Append(" ");
@@ -175,12 +141,12 @@ namespace FlamingIRC
             builder.Append(dccFileInfo.CompleteFileSize);
             builder.Append(turboMode ? " T" : "");
             builder.Append("\x0001\n");
-            dccUser.Connection.Sender.Raw(builder.ToString());
+            User.Connection.Sender.Raw(builder.ToString());
         }
         private void SendResume()
         {
             StringBuilder builder = new StringBuilder("PRIVMSG ", 512);
-            builder.Append(dccUser.Nick);
+            builder.Append(User.Nick);
             builder.Append(" :\x0001DCC RESUME ");
             builder.Append(dccFileInfo.DccFileName);
             builder.Append(" ");
@@ -188,7 +154,7 @@ namespace FlamingIRC
             builder.Append(" ");
             builder.Append(dccFileInfo.FileStartingPosition);
             builder.Append("\x0001\n");
-            dccUser.Connection.Sender.Raw(builder.ToString());
+            User.Connection.Sender.Raw(builder.ToString());
         }
         /// <summary>
         /// Attempt to shut the session down correctly.
@@ -197,10 +163,7 @@ namespace FlamingIRC
         {
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Cleanup()");
             DccFileSessionManager.DefaultInstance.RemoveSession(this);
-            if (serverSocket != null)
-            {
-                serverSocket.Close();
-            }
+            serverSocket?.Close();
             if (socket != null)
             {
                 try
@@ -216,15 +179,12 @@ namespace FlamingIRC
         }
         private void ResetActivityTimer()
         {
-            lastActivity = DateTime.Now;
+            LastActivity = DateTime.Now;
         }
         private void SignalTransferStart()
         {
             ResetActivityTimer();
-            if (OnFileTransferStarted != null)
-            {
-                OnFileTransferStarted(this);
-            }
+            OnFileTransferStarted?.Invoke(this);
         }
         private void Listen()
         {
@@ -317,7 +277,7 @@ namespace FlamingIRC
             try
             {
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(dccUser.RemoteEndPoint);
+                socket.Connect(User.RemoteEndPoint);
                 int bytesRead = 0;
                 while (!dccFileInfo.AllBytesTransfered())
                 {
@@ -345,11 +305,11 @@ namespace FlamingIRC
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccFileSession::Download() exception=" + ex);
                 if (ex.Message.IndexOf("refused") > 0)
                 {
-                    dccUser.Connection.Listener.Error(ReplyCode.DccConnectionRefused, "Connection refused by remote user.");
+                    User.Connection.Listener.Error(ReplyCode.DccConnectionRefused, "Connection refused by remote user.");
                 }
                 else
                 {
-                    dccUser.Connection.Listener.Error(ReplyCode.ConnectionFailed, "Unknown socket error:" + ex.Message);
+                    User.Connection.Listener.Error(ReplyCode.ConnectionFailed, "Unknown socket error:" + ex.Message);
                 }
                 Interrupted();
             }
@@ -358,10 +318,7 @@ namespace FlamingIRC
         internal void AddBytesProcessed(int bytesRead)
         {
             dccFileInfo.AddBytesTransfered(bytesRead);
-            if (OnFileTransferProgress != null)
-            {
-                OnFileTransferProgress(this, bytesRead);
-            }
+            OnFileTransferProgress?.Invoke(this, bytesRead);
         }
         /// <summary>
         /// Called by DccListener when it receives a DCC Accept message.
@@ -381,15 +338,17 @@ namespace FlamingIRC
                 waitingOnAccept = false;
                 if (!dccFileInfo.AcceptPositionMatches(position))
                 {
-                    dccUser.Connection.Listener.Error(ReplyCode.BadDccAcceptValue, "Asked to start at " + dccFileInfo.FileStartingPosition + " but was sent " + position);
+                    User.Connection.Listener.Error(ReplyCode.BadDccAcceptValue, "Asked to start at " + dccFileInfo.FileStartingPosition + " but was sent " + position);
                     Interrupted();
                     return;
                 }
                 ResetActivityTimer();
                 dccFileInfo.SetResumeToFileSize();
                 dccFileInfo.GotoWritePosition();
-                thread = new Thread(new ThreadStart(Download));
-                thread.Name = ToString();
+                thread = new Thread(new ThreadStart(Download))
+                {
+                    Name = ToString()
+                };
                 thread.Start();
             }
         }
@@ -418,7 +377,7 @@ namespace FlamingIRC
                     }
                     else
                     {
-                        dccUser.Connection.Listener.Error(ReplyCode.BadResumePosition, ToString() + " sent an invalid resume position.");
+                        User.Connection.Listener.Error(ReplyCode.BadResumePosition, ToString() + " sent an invalid resume position.");
                         //Close the socket and stop listening
                         Cleanup();
                     }
@@ -436,16 +395,15 @@ namespace FlamingIRC
             {
                 waitingOnAccept = false;
                 //Start a new thread to download the whole file
-                thread = new Thread(new ThreadStart(Download));
-                thread.Name = ToString();
+                thread = new Thread(new ThreadStart(Download))
+                {
+                    Name = ToString()
+                };
                 thread.Start();
             }
             else
             {
-                if (OnFileTransferTimeout != null)
-                {
-                    OnFileTransferTimeout(this);
-                }
+                OnFileTransferTimeout?.Invoke(this);
                 Cleanup();
             }
         }
@@ -457,10 +415,7 @@ namespace FlamingIRC
         {
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Interrupted()");
             Cleanup();
-            if (OnFileTransferInterrupted != null)
-            {
-                OnFileTransferInterrupted(this);
-            }
+            OnFileTransferInterrupted?.Invoke(this);
         }
         /// <summary>
         /// The file transfer is done. So close everything
@@ -470,10 +425,7 @@ namespace FlamingIRC
         {
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Finished()");
             Cleanup();
-            if (OnFileTransferCompleted != null)
-            {
-                OnFileTransferCompleted(this);
-            }
+            OnFileTransferCompleted?.Invoke(this);
         }
 
         /// <summary>
@@ -485,10 +437,7 @@ namespace FlamingIRC
             lock (this)
             {
                 Cleanup();
-                if (OnFileTransferInterrupted != null)
-                {
-                    OnFileTransferInterrupted(this);
-                }
+                OnFileTransferInterrupted?.Invoke(this);
             }
         }
         /// <summary>
@@ -497,7 +446,7 @@ namespace FlamingIRC
         /// <returns>Simple information about this session in human readable format.</returns>
         public override string ToString()
         {
-            return "DccFileSession:: ID=" + sessionID + " User=" + dccUser.ToString() + " File=" + dccFileInfo.DccFileName;
+            return "DccFileSession:: ID=" + ID + " User=" + User.ToString() + " File=" + dccFileInfo.DccFileName;
         }
 
         /// <summary>
@@ -562,18 +511,22 @@ namespace FlamingIRC
             }
             try
             {
-                session = new DccFileSession(dccUser, dccFileInfo, bufferSize, listenPort, "S" + listenPort);
-                //set turbo mode
-                session.turboMode = turbo;
-                //Set server IP address
-                session.listenIPAddress = listenIPAddress;
+                session = new DccFileSession(dccUser, dccFileInfo, bufferSize, listenPort, "S" + listenPort)
+                {
+                    //set turbo mode
+                    turboMode = turbo,
+                    //Set server IP address
+                    listenIPAddress = listenIPAddress
+                };
                 //Add session to active sessions hashtable
                 DccFileSessionManager.DefaultInstance.AddSession(session);
                 //Create stream to file
                 dccFileInfo.OpenForRead();
                 //Start session Thread
-                session.thread = new Thread(new ThreadStart(session.Listen));
-                session.thread.Name = session.ToString();
+                session.thread = new Thread(new ThreadStart(session.Listen))
+                {
+                    Name = session.ToString()
+                };
                 session.thread.Start();
                 //Send DCC Send request to remote user
                 session.DccSend(IPAddress.Parse(listenIPAddress));
@@ -585,7 +538,7 @@ namespace FlamingIRC
                 {
                     DccFileSessionManager.DefaultInstance.RemoveSession(session);
                 }
-                throw ex;
+                throw;
             }
         }
         /// <summary>
@@ -617,10 +570,12 @@ namespace FlamingIRC
             DccFileSession session = null;
             try
             {
-                session = new DccFileSession(dccUser, dccFileInfo, (64 * 1024),
-                    dccUser.remoteEndPoint.Port, "C" + dccUser.remoteEndPoint.Port);
-                //Has the initiator specified the turbo protocol? 
-                session.turboMode = turbo;
+                session = new DccFileSession(dccUser, dccFileInfo, 64 * 1024,
+                    dccUser.remoteEndPoint.Port, "C" + dccUser.remoteEndPoint.Port)
+                {
+                    //Has the initiator specified the turbo protocol? 
+                    turboMode = turbo
+                };
                 //Open file for writing
                 dccFileInfo.OpenForWrite();
                 DccFileSessionManager.DefaultInstance.AddSession(session);
@@ -633,8 +588,10 @@ namespace FlamingIRC
                 }
                 else
                 {
-                    session.thread = new Thread(new ThreadStart(session.Download));
-                    session.thread.Name = session.ToString();
+                    session.thread = new Thread(new ThreadStart(session.Download))
+                    {
+                        Name = session.ToString()
+                    };
                     session.thread.Start();
                 }
                 return session;
@@ -645,7 +602,7 @@ namespace FlamingIRC
                 {
                     DccFileSessionManager.DefaultInstance.RemoveSession(session);
                 }
-                throw ex;
+                throw;
             }
         }
 

@@ -49,10 +49,7 @@
 
         public User this[int index]
         {
-            get
-            {
-                return list[index];
-            }
+            get => list[index];
             set
             {
                 list[index] = value;
@@ -86,15 +83,9 @@
             list.CopyTo(array, arrayIndex);
         }
 
-        public int Count
-        {
-            get { return list.Count; }
-        }
+        public int Count => list.Count;
 
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
+        public bool IsReadOnly => false;
 
         public bool Remove(User item)
         {
@@ -126,9 +117,7 @@
         #region INotifyUpdate Members
 
         public event EventHandler Updated
-        {
-            add { onUpdate += value; }
-            remove { onUpdate -= value; }
+        { add => onUpdate += value; remove => onUpdate -= value;
         }
 
         #endregion
