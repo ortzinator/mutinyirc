@@ -22,7 +22,7 @@
         /// </summary>
         public Type Type
         {
-            get { return _type; }
+            get => _type;
             protected set
             {
                 var pluginType = typeof(IPlugin);

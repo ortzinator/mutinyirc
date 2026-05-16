@@ -1,13 +1,13 @@
-﻿using OrtzIRC.Common;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-
-namespace OrtzIRC.PluginFramework
+﻿namespace OrtzIRC.PluginFramework
 {
+    using OrtzIRC.Common;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+
     /// <summary>
     /// Manages plugins and commands.
     /// </summary>
@@ -111,7 +111,7 @@ namespace OrtzIRC.PluginFramework
                 if (item.Value.CommandName.Equals(name, StringComparison.CurrentCultureIgnoreCase))
                     return (ICommand)CreateInstance(item.Value);
             }
-            Trace.WriteLine(String.Format("No command called {0} found", name.ToUpper()), TraceCategories.PluginSystem);
+            Trace.WriteLine(string.Format("No command called {0} found", name.ToUpper()), TraceCategories.PluginSystem);
             return null;
         }
 
@@ -141,7 +141,7 @@ namespace OrtzIRC.PluginFramework
 
             ICommand commandInstance = GetCommandInstance(commandInput.Name);
             if (commandInstance == null)
-                return CommandResultInfo.Fail(String.Format("{0} is an invalid command", commandInput.Name.ToUpper()));
+                return CommandResultInfo.Fail(string.Format("{0} is an invalid command", commandInput.Name.ToUpper()));
 
             MethodInfo[] commandMethods = commandInstance.GetType().GetMethods()
                 .Where(o => o.Name == "Execute")
@@ -194,7 +194,7 @@ namespace OrtzIRC.PluginFramework
                     if (FlamingIRC.Rfc2812Util.IsValidChannelName(commandInput.ParameterList[p - 1] as string))
                         commandInput.ParameterList[p - 1] = new ChannelInfo(commandInput.ParameterList[p - 1] as string);
 
-                    var sp = (commandInput.ParameterList[p - 1] as string);
+                    var sp = commandInput.ParameterList[p - 1] as string;
                     if (sp != null && sp.StartsWith("-")) // Check for switches
                     {
                         sp = sp.Remove(0, 1);
@@ -255,7 +255,7 @@ namespace OrtzIRC.PluginFramework
 
             if (line.StartsWith("/"))
             {
-                string[] exploded = line.Split(new Char[] { ' ' });
+                string[] exploded = line.Split(new char[] { ' ' });
                 string name = exploded[0].TrimStart('/');
                 string[] parameters = new string[exploded.Length - 1];
                 Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
@@ -269,7 +269,7 @@ namespace OrtzIRC.PluginFramework
             }
             else
             {
-                string[] parameters = line.Split(new Char[] { ' ' });
+                string[] parameters = line.Split(new char[] { ' ' });
                 return new CommandExecutionInfo
                 {
                     Context = context,

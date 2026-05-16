@@ -21,7 +21,7 @@
             //TODO: clean this up
             IEnumerable<string> summaries = from member in xdoc.Descendants("member")
                                             where member.Attribute("name") != null
-                                            && member.Attribute("name").Value == XmlDocsParser.MemberNameString(type, info)
+                                            && member.Attribute("name").Value == MemberNameString(type, info)
                                             select member.Element("summary").Value.Trim();
 
             List<string> l = new List<string>(summaries);
@@ -77,7 +77,7 @@
             if (member.MemberType == MemberTypes.Constructor)
                 sb.Append(".#ctor");
 
-            if (member.MemberType == MemberTypes.Constructor || member.MemberType == MemberTypes.Method)
+            if (member.MemberType is MemberTypes.Constructor or MemberTypes.Method)
             {
                 sb.Append("(");
 
