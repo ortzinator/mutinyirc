@@ -1,4 +1,4 @@
-namespace FlamingIRC
+﻿namespace FlamingIRC
 {
     using System;
     using System.Collections;

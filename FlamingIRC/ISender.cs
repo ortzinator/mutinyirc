@@ -1,4 +1,4 @@
-namespace FlamingIRC
+﻿namespace FlamingIRC
 {
     public interface ISender
     {

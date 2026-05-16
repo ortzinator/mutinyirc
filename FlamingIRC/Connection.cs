@@ -1,4 +1,4 @@
-/*
+﻿/*
  * FlamingIRC IRC library
  * Copyright (C) 2008 Brian Ortiz & Max Schmeling <https://github.com/ortzinator/mutinyirc>
  *

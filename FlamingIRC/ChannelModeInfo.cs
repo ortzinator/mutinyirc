@@ -1,4 +1,4 @@
-/*
+﻿/*
  * FlamingIRC IRC library
  * Copyright (C) 2008 Brian Ortiz & Max Schmeling <https://github.com/ortzinator/mutinyirc>
  * 
@@ -91,7 +91,7 @@ namespace FlamingIRC
 
         internal static ChannelModeInfo[] ParseModes(string[] tokens, int start)
         {
-            //This nice piece of code was contributed by Klemen �avs.
+            //This nice piece of code was contributed by Klemen Šavs.
             //25 October 2003
             ArrayList modeInfoArray = new ArrayList();
             int i = start;
