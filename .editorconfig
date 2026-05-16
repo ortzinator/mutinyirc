@@ -17,7 +17,8 @@ dotnet_diagnostic.IDE0057.severity = silent # Use range operator
 dotnet_diagnostic.IDE0058.severity = silent # Expression value is never used
 dotnet_diagnostic.IDE0290.severity = silent # Use primary constructor
 dotnet_diagnostic.IDE0010.severity = silent # Add missing cases to switch
-dotnet_diagnostic.IDE0046.severity = silent # Use conditional expression for return0
+dotnet_diagnostic.IDE0046.severity = silent # Use conditional expression for return
+dotnet_diagnostic.IDE0130.severity = silent # Namespace does not match folder structure
 
 # Microsoft .NET properties
 csharp_new_line_before_members_in_object_initializers = false
