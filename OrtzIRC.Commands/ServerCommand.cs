@@ -1,4 +1,4 @@
-using FlamingIRC;
+﻿using FlamingIRC;
 
 namespace OrtzIRC.Commands
 {

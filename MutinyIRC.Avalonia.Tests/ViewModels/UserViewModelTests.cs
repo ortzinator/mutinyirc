@@ -1,4 +1,4 @@
-using FlamingIRC;
+﻿using FlamingIRC;
 using NUnit.Framework;
 using OrtzIRC.Avalonia.ViewModels;
 

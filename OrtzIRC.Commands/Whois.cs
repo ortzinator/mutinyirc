@@ -1,4 +1,4 @@
-namespace OrtzIRC.Commands
+﻿namespace OrtzIRC.Commands
 {
     using OrtzIRC.Common;
     using OrtzIRC.PluginFramework;

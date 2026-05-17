@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Avalonia.Headless.NUnit;
 using NUnit.Framework;
 using OrtzIRC.Avalonia.ViewModels;

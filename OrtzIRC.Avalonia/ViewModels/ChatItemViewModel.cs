@@ -1,4 +1,4 @@
-namespace OrtzIRC.Avalonia.ViewModels;
+﻿namespace OrtzIRC.Avalonia.ViewModels;
 
 using System;
 using FlamingIRC;

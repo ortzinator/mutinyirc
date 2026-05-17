@@ -1,4 +1,4 @@
-namespace OrtzIRC.Avalonia.Views;
+﻿namespace OrtzIRC.Avalonia.Views;
 
 using System.Collections.Specialized;
 using global::Avalonia;

@@ -1,4 +1,4 @@
-using Ninject.Modules;
+﻿using Ninject.Modules;
 using OrtzIRC.Avalonia.ViewModels;
 using OrtzIRC.PluginFramework;
 

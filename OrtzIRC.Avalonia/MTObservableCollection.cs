@@ -1,4 +1,4 @@
-namespace OrtzIRC.Avalonia;
+﻿namespace OrtzIRC.Avalonia;
 
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;

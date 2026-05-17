@@ -1,4 +1,4 @@
-namespace OrtzIRC.Avalonia.ViewModels.Design;
+﻿namespace OrtzIRC.Avalonia.ViewModels.Design;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 

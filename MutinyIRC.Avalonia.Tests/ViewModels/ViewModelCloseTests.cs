@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
 using NUnit.Framework;

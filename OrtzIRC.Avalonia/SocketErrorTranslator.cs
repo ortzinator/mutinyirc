@@ -1,4 +1,4 @@
-using OrtzIRC.Avalonia.Resources;
+﻿using OrtzIRC.Avalonia.Resources;
 
 namespace OrtzIRC.Avalonia;
 

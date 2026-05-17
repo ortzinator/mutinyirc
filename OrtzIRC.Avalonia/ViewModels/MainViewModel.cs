@@ -1,4 +1,4 @@
-using Ninject;
+﻿using Ninject;
 using Ninject.Parameters;
 
 namespace OrtzIRC.Avalonia.ViewModels;

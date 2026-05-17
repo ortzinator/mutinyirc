@@ -1,4 +1,4 @@
-namespace OrtzIRC.Avalonia.ViewModels.Design;
+﻿namespace OrtzIRC.Avalonia.ViewModels.Design;
 
 using System;
 using System.Collections.Generic;

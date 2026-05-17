@@ -1,4 +1,4 @@
-namespace OrtzIRC.Avalonia;
+﻿namespace OrtzIRC.Avalonia;
 
 using global::Avalonia;
 using global::Avalonia.Controls.ApplicationLifetimes;

@@ -1,4 +1,4 @@
-namespace OrtzIRC.Avalonia.Controls;
+﻿namespace OrtzIRC.Avalonia.Controls;
 
 using System;
 

@@ -1,4 +1,4 @@
-namespace OrtzIRC.Avalonia.Resources
+﻿namespace OrtzIRC.Avalonia.Resources
 {
     using System;
 

@@ -1,4 +1,4 @@
-namespace OrtzIRC.Avalonia.Converters;
+﻿namespace OrtzIRC.Avalonia.Converters;
 
 using System;
 using System.Globalization;
