@@ -22,7 +22,7 @@ public partial class IrcOutputBox : UserControl
     }
 
     private bool _isPinned = true;
-    private INotifyCollectionChanged _subscribedCollection;
+    private INotifyCollectionChanged? _subscribedCollection;
 
     public IrcOutputBox()
     {
@@ -62,7 +62,7 @@ public partial class IrcOutputBox : UserControl
         Dispatcher.UIThread.Post(() => scrollViewer.ScrollToEnd(), DispatcherPriority.Loaded);
     }
 
-    private void OnItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.Action == NotifyCollectionChangedAction.Add && _isPinned)
         {

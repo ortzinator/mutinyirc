@@ -13,7 +13,7 @@ public class ChannelViewModel : IrcViewModel
 {
     private Channel _channel;
     public Channel Channel => _channel;
-    private List<UserViewModel>? userList;
+    private List<UserViewModel> userList = new();
     private PluginManager _pluginManager;
 
     public PluginManager PluginManager => _pluginManager;
@@ -131,8 +131,11 @@ public class ChannelViewModel : IrcViewModel
         OnPropertyChanged("Name");
     }
 
-    protected override void OnExecute(string commandLine)
+    protected override void OnExecute(string? commandLine)
     {
+        if (string.IsNullOrEmpty(commandLine))
+            return;
+
         CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(_channel, commandLine));
         if (result != null && result.Result == Result.Fail)
         {

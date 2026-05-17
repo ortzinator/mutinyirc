@@ -164,11 +164,11 @@ public class ServerViewModel : IrcViewModel
     private void DoRegister()
     {
         string network = server.Connection.ServerProperties["Network"];
-        NetworkSettings networkSettings = IrcSettingsManager.Instance.GetNetwork(server);
+        NetworkSettings? networkSettings = IrcSettingsManager.Instance.GetNetwork(server);
 
         if (networkSettings == null)
         {
-            NetworkSettings tempNet;
+            NetworkSettings? tempNet;
             if (network == string.Empty)
             {
                 tempNet = IrcSettingsManager.Instance.AddNetwork(server.Url);
@@ -179,7 +179,7 @@ public class ServerViewModel : IrcViewModel
                 tempNet = IrcSettingsManager.Instance.AddNetwork(network);
             }
 
-            tempNet.AddServer(new ServerSettings(server.Url, "Random", server.Port.ToString(),
+            tempNet?.AddServer(new ServerSettings(server.Url, "Random", server.Port.ToString(),
                     server.Connection.ConnectionData.Ssl)
             { AutoConnect = true });
         }
@@ -190,7 +190,7 @@ public class ServerViewModel : IrcViewModel
             else
                 networkSettings.Name = network;
 
-            ServerSettings nServer = networkSettings.GetServer(server.Url);
+            ServerSettings? nServer = networkSettings.GetServer(server.Url);
             if (nServer == null)
             {
                 networkSettings.AddServer(new ServerSettings(server.Url, "Random", server.Port.ToString(),

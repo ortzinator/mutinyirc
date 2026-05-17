@@ -41,7 +41,7 @@ public class NetworkSettings : IEquatable<NetworkSettings>
         return server;
     }
 
-    public bool Equals(NetworkSettings other)
+    public bool Equals(NetworkSettings? other)
     {
         return other != null && other.Name == Name;
     }
@@ -50,7 +50,7 @@ public class NetworkSettings : IEquatable<NetworkSettings>
 
     public bool RemoveServer(ServerSettings serverSettings) => Servers.Remove(serverSettings);
 
-    public ServerSettings GetServer(string url)
+    public ServerSettings? GetServer(string url)
     {
         foreach (ServerSettings server in Servers)
             if (server.Url.Equals(url, StringComparison.CurrentCultureIgnoreCase))
@@ -74,7 +74,7 @@ public class NetworkSettings : IEquatable<NetworkSettings>
         Channels.Add(channel);
     }
 
-    public ChannelSettings GetChannel(string name)
+    public ChannelSettings? GetChannel(string name)
     {
         foreach (ChannelSettings channel in Channels)
             if (channel.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))

@@ -23,22 +23,23 @@ public class CommandTextBox : TextBox
 
     public void Submit()
     {
-        if (Text?.Trim() != string.Empty)
+        var text = Text;
+        if (!string.IsNullOrWhiteSpace(text))
         {
             if (historyIndex != cmdHistory.Count)
                 cmdHistory.RemoveAt(historyIndex);
-            cmdHistory.Add(Text);
+            cmdHistory.Add(text);
 
             var vm = DataContext as IrcViewModel;
-            vm?.ExecuteCommand.Execute(Text);
+            vm?.ExecuteCommand.Execute(text);
 
-            CommandEntered?.Invoke(this, new CommandEventArgs(Text));
+            CommandEntered?.Invoke(this, new CommandEventArgs(text));
             Clear();
             historyIndex = cmdHistory.Count;
         }
     }
 
-    private void HandleKeyDown(object sender, KeyEventArgs e)
+    private void HandleKeyDown(object? sender, KeyEventArgs e)
     {
         switch (e.Key)
         {
@@ -53,9 +54,10 @@ public class CommandTextBox : TextBox
                 break;
 
             case Key.Down:
-                if (historyIndex == cmdHistory.Count && Text?.Trim() != string.Empty)
+                var text = Text;
+                if (historyIndex == cmdHistory.Count && !string.IsNullOrWhiteSpace(text))
                 {
-                    cmdHistory.Add(Text);
+                    cmdHistory.Add(text);
                     historyIndex = cmdHistory.Count;
                     Clear();
                     e.Handled = true;

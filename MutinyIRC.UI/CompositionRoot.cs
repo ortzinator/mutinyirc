@@ -6,7 +6,7 @@ namespace MutinyIRC.UI;
 
 public class CompositionRoot
 {
-    private static IKernel _ninjectKernel;
+    private static IKernel _ninjectKernel = null!;
 
     public static void Wire(INinjectModule module)
     {

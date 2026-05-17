@@ -26,8 +26,11 @@ public abstract class IrcViewModel : ViewModelBase, IDisposable
         get { return executeCommand ?? (executeCommand = new RelayCommand<string>(OnExecute)); }
     }
 
-    protected virtual void OnExecute(string commandLine)
+    protected virtual void OnExecute(string? commandLine)
     {
+        if (string.IsNullOrEmpty(commandLine))
+            return;
+
         ChatLines.Add(new ChatItemViewModel(DateTime.Now, commandLine));
     }
 
