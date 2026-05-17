@@ -1,0 +1,7 @@
+# Revisions to exclude from `git blame` (mechanical, no semantic change).
+# Enable locally with:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+# GitHub/GitLab/Gitea honor this file automatically.
+
+# [MutinyIRC] Add .gitattributes and renormalize line endings to LF
+b68ed5c2abf757458e261c9d7a1cdba776c77ce0
