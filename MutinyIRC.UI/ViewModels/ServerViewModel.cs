@@ -83,12 +83,7 @@ public class ServerViewModel : IrcViewModel
         if (nickRetryAttempt == 2 || nickRetryFailed)
         {
             nickRetryFailed = true;
-            var generator = new NameGenerator();
-            string nick;
-            do
-            {
-                nick = generator.MakeName();
-            } while (!Rfc2812Util.IsValidNick(nick) || nick.Length == 1);
+            string nick = "MutinyIRC" + Random.Shared.Next(1000, 10000);
             server.Connection.Sender.Register(nick);
         }
     }

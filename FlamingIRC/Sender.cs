@@ -1413,7 +1413,6 @@ namespace FlamingIRC
         /// by calling <see cref="Connection.ConnectionData.Nick"/>.
         /// </remarks>
         /// <param name="newNick">The changed nick name.</param>
-        /// <seealso cref="NameGenerator"/>
         public void Register(string newNick)
         {
             Connection.Nick = newNick;

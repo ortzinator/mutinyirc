@@ -323,12 +323,7 @@ namespace FlamingIRC
             //If this is our initial connection attempt
             if (!Registered && HandleNickTaken)
             {
-                var generator = new NameGenerator();
-                string nick;
-                do
-                {
-                    nick = generator.MakeName();
-                } while (!Rfc2812Util.IsValidNick(nick) || nick.Length == 1);
+                string nick = "MutinyIRC" + Random.Shared.Next(1000, 10000);
                 //Try to reconnect
                 Sender.Register(nick);
             }
