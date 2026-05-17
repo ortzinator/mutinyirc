@@ -7,7 +7,7 @@
             "command": "dotnet",
             "args": [
                 "build",
-                "${workspaceFolder}/OrtzIRC.sln",
+                "${workspaceFolder}/MutinyIRC.sln",
                 "--configuration",
                 "Debug",
                 "--verbosity",

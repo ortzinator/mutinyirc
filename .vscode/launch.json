@@ -2,20 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "OrtzIRC (WPF)",
+            "name": "MutinyIRC",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/OrtzIRC.WPF/bin/Debug/net8.0-windows/OrtzIRC.WPF.exe",
-            "cwd": "${workspaceFolder}/OrtzIRC.WPF/bin/Debug/net8.0-windows"
-        },
-        {
-            "name": "OrtzIRC (Avalonia)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/OrtzIRC.Avalonia/bin/Debug/net8.0/OrtzIRC.Avalonia.exe",
-            "cwd": "${workspaceFolder}/OrtzIRC.Avalonia/bin/Debug/net8.0"
+            "program": "${workspaceFolder}/MutinyIRC.UI/bin/Debug/net8.0/MutinyIRC.UI.exe",
+            "cwd": "${workspaceFolder}/MutinyIRC.UI/bin/Debug/net8.0"
         }
     ]
 }

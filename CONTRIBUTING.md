@@ -16,6 +16,6 @@ This only affects local CLI `git blame`. GitHub, GitLab, and Gitea read
 ## Building
 
 ```sh
-dotnet build OrtzIRC.sln
-dotnet test OrtzIRC.sln
+dotnet build MutinyIRC.sln
+dotnet test MutinyIRC.sln
 ```
