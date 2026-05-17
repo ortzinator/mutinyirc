@@ -1,0 +1,32 @@
+# Normalize line endings across platforms.
+# Stored as LF in the repo; checked out per the rules below.
+* text=auto
+
+# Source and text files: LF everywhere (Linux-friendly, Roslyn-agnostic)
+*.cs       text eol=lf
+*.axaml    text eol=lf
+*.xaml     text eol=lf
+*.resx     text eol=lf
+*.json     text eol=lf
+*.config   text eol=lf
+*.settings text eol=lf
+*.ps1      text eol=lf
+*.md       text eol=lf
+.editorconfig text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.git-blame-ignore-revs text eol=lf
+.mailmap   text eol=lf
+
+# Visual Studio project/solution files: CRLF (VS convention)
+*.sln          text eol=crlf
+*.csproj       text eol=crlf
+*.vstemplate   text eol=crlf
+
+# Binary files: never touch line endings or attempt diffs
+*.bin   binary
+*.db    binary
+*.vsidx binary
+*.v2    binary
+*.png   binary
+*.ico   binary
