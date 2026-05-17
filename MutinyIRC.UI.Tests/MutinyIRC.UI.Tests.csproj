@@ -1,23 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>MutinyIRC.Tests</RootNamespace>
-    <AssemblyName>MutinyIRC.Tests</AssemblyName>
+    <RootNamespace>MutinyIRC.UI.Tests</RootNamespace>
+    <AssemblyName>MutinyIRC.UI.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Avalonia.Headless.NUnit" Version="12.0.0" />
     <PackageReference Include="FakeItEasy" Version="9.0.1" />
-    <PackageReference Include="NUnit" Version="4.3.2" />
+    <PackageReference Include="NUnit" Version="4.5.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj" />
-    <ProjectReference Include="..\MutinyIRC.Common\MutinyIRC.Common.csproj" />
+    <ProjectReference Include="..\MutinyIRC.UI\MutinyIRC.UI.csproj" />
   </ItemGroup>
-
 </Project>

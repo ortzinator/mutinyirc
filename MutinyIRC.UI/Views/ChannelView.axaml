@@ -1,0 +1,165 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MutinyIRC.UI.Controls"
+             xmlns:conv="clr-namespace:MutinyIRC.UI.Converters"
+             xmlns:views="clr-namespace:MutinyIRC.UI.Views"
+             xmlns:design="clr-namespace:MutinyIRC.UI.ViewModels.Design"
+             mc:Ignorable="d"
+             x:Class="MutinyIRC.UI.Views.ChannelView"
+             x:Name="channelPanel"
+             Background="{DynamicResource AppBackground}">
+
+    <Design.DataContext>
+        <design:DesignChannelViewModel />
+    </Design.DataContext>
+
+    <UserControl.Resources>
+        <conv:ModeToBrushConverter x:Key="ModeToBrushConverter" />
+    </UserControl.Resources>
+
+    <DockPanel>
+
+        <!-- ── Channel header ── -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource ChannelHeaderBackground}"
+                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,0,12,0" Height="48">
+            <DockPanel VerticalAlignment="Center">
+                <!-- User count badge (right side) -->
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal" Spacing="4"
+                            VerticalAlignment="Center" Margin="8,0,0,0">
+                    <TextBlock Text="🧑" FontSize="13" VerticalAlignment="Center" Opacity="0.6"/>
+                    <TextBlock Text="{Binding UserList.Count}"
+                               FontSize="13" VerticalAlignment="Center"
+                               Foreground="{DynamicResource SidebarMutedForeground}"/>
+                </StackPanel>
+                <!-- Channel name -->
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <TextBlock Text="#" FontSize="18" Opacity="0.4" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding ChannelName}"
+                               FontWeight="SemiBold" FontSize="15"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- ── Topic strip (hidden when empty) ── -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource ChannelHeaderBackground}"
+                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,5,16,5"
+                IsVisible="{Binding Topic, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding Topic}"
+                       FontSize="12"
+                       Foreground="{DynamicResource SidebarMutedForeground}"
+                       TextTrimming="CharacterEllipsis"/>
+        </Border>
+
+        <!-- ── Message input bar ── -->
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource ChatInputAreaBackground}"
+                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="12,8">
+            <Grid ColumnDefinitions="*,Auto">
+                <Border Grid.Column="0"
+                        Background="{DynamicResource AppBackground}"
+                        CornerRadius="6"
+                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                        BorderThickness="1"
+                        Padding="4,0">
+                    <local:CommandTextBox x:Name="commandBox"
+                                          BorderThickness="0"
+                                          Background="Transparent"
+                                          PlaceholderText="Message..."
+                                          FontSize="14"
+                                          VerticalAlignment="Center"/>
+                </Border>
+                <Button x:Name="sendButton"
+                        Grid.Column="1"
+                        Content="Send"
+                        Margin="8,0,0,0"
+                        Padding="16,6"
+                        VerticalAlignment="Center"
+                        FontSize="13"/>
+            </Grid>
+        </Border>
+
+        <!-- ── Body: chat area + user list ── -->
+        <Grid ColumnDefinitions="*,Auto">
+
+            <!-- Chat output -->
+            <views:IrcOutputBox x:Name="outputBox" Grid.Column="0"/>
+
+            <!-- Divider -->
+            <Border Grid.Column="1" Width="1"
+                    Background="{DynamicResource ChatBorderBrush}"
+                    HorizontalAlignment="Left"/>
+
+            <!-- User list panel -->
+            <DockPanel Grid.Column="1" Width="190"
+                       Background="{DynamicResource AppBackground}">
+
+                <!-- User list header -->
+                <Border DockPanel.Dock="Top"
+                        Padding="12,8,12,6"
+                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                        BorderThickness="0,0,0,1">
+                    <TextBlock FontSize="11" FontWeight="SemiBold"
+                               Foreground="{DynamicResource SidebarMutedForeground}">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="MEMBERS — {0}">
+                                <Binding Path="UserList.Count"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </Border>
+
+                <!-- User entries -->
+                <ListBox x:Name="userBox"
+                         ItemsSource="{Binding UserList}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="4,4,4,4">
+                    <ListBox.ItemContainerTheme>
+                        <ControlTheme TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="8,3"/>
+                            <Setter Property="CornerRadius" Value="3"/>
+                            <Setter Property="Foreground" Value="{Binding Mode, Converter={StaticResource ModeToBrushConverter}}"/>
+                            <Setter Property="Template">
+                                <ControlTemplate>
+                                    <Border Background="{TemplateBinding Background}"
+                                            CornerRadius="{TemplateBinding CornerRadius}"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter Content="{TemplateBinding Content}"
+                                                          Foreground="{TemplateBinding Foreground}"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter>
+                            <Style Selector="^:pointerover /template/ Border">
+                                <Setter Property="Background" Value="{DynamicResource SidebarItemHoverBackground}"/>
+                            </Style>
+                            <Style Selector="^:selected /template/ Border">
+                                <Setter Property="Background" Value="{DynamicResource SidebarItemSelectedBackground}"/>
+                            </Style>
+                        </ControlTheme>
+                    </ListBox.ItemContainerTheme>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FullNick}"
+                                       FontSize="13"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+        </Grid>
+    </DockPanel>
+
+</UserControl>

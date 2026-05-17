@@ -1,0 +1,154 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MutinyIRC.UI.ViewModels"
+        xmlns:views="clr-namespace:MutinyIRC.UI.Views"
+        xmlns:design="clr-namespace:MutinyIRC.UI.ViewModels.Design"
+        mc:Ignorable="d"
+        x:Class="MutinyIRC.UI.Views.MainWindow"
+        Title="MutinyIRC" Height="700" Width="1100" MinWidth="600" MinHeight="400"
+        Background="{DynamicResource SidebarBackground}">
+
+    <Design.DataContext>
+        <design:DesignMainViewModel />
+    </Design.DataContext>
+
+    <Window.Resources>
+        <ControlTheme x:Key="SidebarNavTheme" TargetType="Button">
+            <Setter Property="Background"                Value="Transparent"/>
+            <Setter Property="Foreground"                Value="{DynamicResource SidebarMutedForeground}"/>
+            <Setter Property="BorderThickness"           Value="0"/>
+            <Setter Property="HorizontalAlignment"       Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment"  Value="Center"/>
+            <Setter Property="CornerRadius"              Value="4"/>
+            <Setter Property="Padding"                   Value="8,5"/>
+            <Setter Property="Cursor"                    Value="Hand"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="PART_Border"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+            <Style Selector="^:pointerover /template/ Border#PART_Border">
+                <Setter Property="Background" Value="{DynamicResource SidebarItemHoverBackground}"/>
+            </Style>
+            <Style Selector="^:pressed /template/ Border#PART_Border">
+                <Setter Property="Background" Value="{DynamicResource SidebarItemSelectedBackground}"/>
+            </Style>
+            <Style Selector="^.active /template/ Border#PART_Border">
+                <Setter Property="Background" Value="{DynamicResource SidebarItemSelectedBackground}"/>
+            </Style>
+            <Style Selector="^:pointerover">
+                <Setter Property="Foreground" Value="{DynamicResource SidebarForeground}"/>
+            </Style>
+            <Style Selector="^.active">
+                <Setter Property="Foreground" Value="{DynamicResource SidebarHeaderForeground}"/>
+            </Style>
+        </ControlTheme>
+    </Window.Resources>
+
+    <Grid ColumnDefinitions="220,*">
+
+        <!-- ═══ Sidebar ═══ -->
+        <DockPanel Grid.Column="0" Background="{DynamicResource SidebarBackground}">
+
+            <!-- App header row -->
+            <Border DockPanel.Dock="Top" Height="48"
+                    Background="{DynamicResource SidebarBackground}"
+                    BorderBrush="{DynamicResource SidebarBorderBrush}"
+                    BorderThickness="0,0,0,1">
+                <Grid Margin="14,0,8,0">
+                    <TextBlock Text="MutinyIRC"
+                               FontWeight="SemiBold" FontSize="14"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource SidebarHeaderForeground}"/>
+                    <Button Theme="{StaticResource SidebarNavTheme}"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Padding="6" CornerRadius="20"
+                            ToolTip.Tip="Settings">
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="Settings..." Click="AppSettingsMenuItem_Click"/>
+                                <MenuItem Header="Servers..." Click="ServersMenuItem_Click"/>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                        <TextBlock Text="⚙" FontSize="14"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Server / channel tree -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Servers}" Margin="6,6,6,6">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:ServerViewModel}">
+                            <StackPanel>
+                                <!-- Server entry -->
+                                <Button Theme="{StaticResource SidebarNavTheme}"
+                                        Classes.active="{Binding IsSelected}"
+                                        Command="{Binding $parent[Window].DataContext.SelectPanelCommand}"
+                                        CommandParameter="{Binding}"
+                                        Padding="8,6" Margin="0,1,0,0">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="▸" FontSize="10"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontWeight="SemiBold" FontSize="12"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Channels under this server -->
+                                <ItemsControl ItemsSource="{Binding Channels}" Margin="0,0,0,4">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
+                                            <Button Theme="{StaticResource SidebarNavTheme}"
+                                                    Classes.active="{Binding IsSelected}"
+                                                    Command="{Binding $parent[Window].DataContext.SelectPanelCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Padding="20,4,8,4" Margin="0,1,0,0">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <TextBlock Text="#" FontSize="13" Opacity="0.5"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding ChannelName}"
+                                                               FontSize="13"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+
+        <!-- ═══ Content area ═══ -->
+        <ContentControl Grid.Column="1" Content="{Binding SelectedPanel}"
+                        Background="{DynamicResource AppBackground}">
+            <ContentControl.DataTemplates>
+                <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
+                    <views:ChannelView />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:ServerViewModel}">
+                    <views:ServerView />
+                </DataTemplate>
+            </ContentControl.DataTemplates>
+        </ContentControl>
+
+    </Grid>
+
+</Window>

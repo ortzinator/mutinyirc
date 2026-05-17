@@ -5,19 +5,19 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlamingIRC", "FlamingIRC\FlamingIRC.csproj", "{A38D6BD6-5262-4323-98A0-74BBBBD1EDA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Common", "OrtzIRC.Common\OrtzIRC.Common.csproj", "{1594A34C-9BB8-4334-880B-26671436D95E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.Common", "MutinyIRC.Common\MutinyIRC.Common.csproj", "{1594A34C-9BB8-4334-880B-26671436D95E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Commands", "OrtzIRC.Commands\OrtzIRC.Commands.csproj", "{30204C2A-1273-41CD-A0CB-39BBEF14B55C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.Commands", "MutinyIRC.Commands\MutinyIRC.Commands.csproj", "{30204C2A-1273-41CD-A0CB-39BBEF14B55C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.PluginFramework", "OrtzIRC.PluginFramework\OrtzIRC.PluginFramework.csproj", "{D8266C38-E44E-4708-89AE-3E6CA72D5987}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.PluginFramework", "MutinyIRC.PluginFramework\MutinyIRC.PluginFramework.csproj", "{D8266C38-E44E-4708-89AE-3E6CA72D5987}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.Tests", "MutinyIRC.Tests\MutinyIRC.Tests.csproj", "{F929430B-C58C-41AD-A1F0-BDC38E49447C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlamingIRC.Tests", "FlamingIRC.Tests\FlamingIRC.Tests.csproj", "{A5862F56-5FE5-48CA-B406-6B881E2EC6FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrtzIRC.Avalonia", "OrtzIRC.Avalonia\OrtzIRC.Avalonia.csproj", "{D653051D-4B44-466E-B135-6927AD6E63DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.UI", "MutinyIRC.UI\MutinyIRC.UI.csproj", "{D653051D-4B44-466E-B135-6927AD6E63DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.Avalonia.Tests", "MutinyIRC.Avalonia.Tests\MutinyIRC.Avalonia.Tests.csproj", "{9796E305-AE36-412D-904C-5DD6A18BF666}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutinyIRC.UI.Tests", "MutinyIRC.UI.Tests\MutinyIRC.UI.Tests.csproj", "{9796E305-AE36-412D-904C-5DD6A18BF666}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

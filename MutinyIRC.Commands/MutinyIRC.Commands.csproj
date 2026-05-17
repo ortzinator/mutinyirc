@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>MutinyIRC.Commands</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj" />
+    <ProjectReference Include="..\MutinyIRC.Common\MutinyIRC.Common.csproj" />
+    <ProjectReference Include="..\MutinyIRC.PluginFramework\MutinyIRC.PluginFramework.csproj" />
+  </ItemGroup>
+
+  <Target Name="CopyPluginToUI" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)..\MutinyIRC.UI\bin\$(Configuration)\net8.0\plugins\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).xml" DestinationFolder="$(MSBuildThisFileDirectory)..\MutinyIRC.UI\bin\$(Configuration)\net8.0\plugins\" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).xml')" />
+  </Target>
+
+</Project>

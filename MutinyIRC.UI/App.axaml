@@ -1,0 +1,139 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MutinyIRC.UI.ViewModels"
+             xmlns:conv="clr-namespace:MutinyIRC.UI.Converters"
+             x:Class="MutinyIRC.UI.App">
+
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Themes/DefaultTheme.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:NickColorConverter x:Key="NickColorConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.DataTemplates>
+
+        <!-- Most-derived types must come before their base types.
+             Avalonia searches top-to-bottom and uses IsInstanceOfType,
+             so a base-class template listed first would match all subclasses. -->
+
+        <DataTemplate DataType="{x:Type vm:ChannelActionViewModel}">
+            <DockPanel Margin="16,2,16,2">
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding Time, StringFormat='HH:mm'}"
+                           Foreground="{DynamicResource ChatTimestampForeground}"
+                           FontSize="11" Width="40" TextAlignment="Right"
+                           VerticalAlignment="Top" Margin="0,2,10,0"
+                           IsVisible="{Binding ShowTimestamps}"/>
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Top" Margin="0,2"
+                           FontStyle="Italic">
+                    <Run Text="* "
+                         Foreground="{Binding User.Nick, Converter={StaticResource NickColorConverter}}"/>
+                    <Run Text="{Binding User.Nick}"
+                         Foreground="{Binding User.Nick, Converter={StaticResource NickColorConverter}}"
+                         FontWeight="SemiBold"/>
+                    <Run Text=" "/>
+                    <Run Text="{Binding Message}"/>
+                </TextBlock>
+            </DockPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:PrivateNoticeViewModel}">
+            <Border Margin="12,3,12,3" Background="{DynamicResource ChatNoticeBackground}"
+                    CornerRadius="4" Padding="10,6">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding Time, StringFormat='HH:mm'}"
+                               Foreground="{DynamicResource ChatTimestampForeground}"
+                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
+                               IsVisible="{Binding ShowTimestamps}"/>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding User.NamesLiteral}"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource NoticeForeground}"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource NoticeForeground}"
+                               VerticalAlignment="Center"/>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:ChannelMessageViewModel}">
+            <DockPanel Margin="16,2,16,2">
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding Time, StringFormat='HH:mm'}"
+                           Foreground="{DynamicResource ChatTimestampForeground}"
+                           FontSize="11" Width="40" TextAlignment="Right"
+                           VerticalAlignment="Top" Margin="0,2,10,0"
+                           IsVisible="{Binding ShowTimestamps}"/>
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding User.NamesLiteral}"
+                           FontWeight="SemiBold"
+                           Foreground="{Binding User.Nick, Converter={StaticResource NickColorConverter}}"
+                           VerticalAlignment="Top" Margin="0,2,8,0"/>
+                <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                           VerticalAlignment="Top" Margin="0,2"/>
+            </DockPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:IrcErrorViewModel}">
+            <Border Margin="12,3,12,3" Background="{DynamicResource ChatErrorBackground}"
+                    CornerRadius="4" Padding="10,6">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding Time, StringFormat='HH:mm'}"
+                               Foreground="{DynamicResource ChatTimestampForeground}"
+                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
+                               IsVisible="{Binding ShowTimestamps}"/>
+                    <TextBlock Foreground="{DynamicResource ErrorForeground}" TextWrapping="Wrap">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="Error {0}: {1}">
+                                <Binding Path="Code" />
+                                <Binding Path="Message" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:ErrorMessageViewModel}">
+            <Border Margin="12,3,12,3" Background="{DynamicResource ChatErrorBackground}"
+                    CornerRadius="4" Padding="10,6">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding Time, StringFormat='HH:mm'}"
+                               Foreground="{DynamicResource ChatTimestampForeground}"
+                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
+                               IsVisible="{Binding ShowTimestamps}"/>
+                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource ErrorForeground}"/>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:ChatItemViewModel}">
+            <DockPanel Margin="16,1,16,1">
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding Time, StringFormat='HH:mm'}"
+                           Foreground="{DynamicResource ChatTimestampForeground}"
+                           FontSize="11" Width="40" TextAlignment="Right"
+                           VerticalAlignment="Center" Margin="0,0,10,0"
+                           IsVisible="{Binding ShowTimestamps}"/>
+                <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                           Foreground="{DynamicResource SystemMessageForeground}"
+                           FontStyle="Italic" VerticalAlignment="Center"/>
+            </DockPanel>
+        </DataTemplate>
+
+    </Application.DataTemplates>
+
+</Application>

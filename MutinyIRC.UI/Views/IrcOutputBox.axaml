@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="MutinyIRC.UI.Views.IrcOutputBox"
+             x:Name="root">
+
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom"
+                IsVisible="{Binding ElementName=root, Path=Scrolled}"
+                Background="{DynamicResource ScrollIndicatorBackground}"
+                Cursor="Hand"
+                PointerPressed="ScrollIndicator_PointerPressed">
+            <TextBlock HorizontalAlignment="Center"
+                       Foreground="{DynamicResource ScrollIndicatorForeground}"
+                       FontSize="8">▼ ▼</TextBlock>
+        </Border>
+        <ScrollViewer x:Name="scrollViewer" Background="{DynamicResource AppBackground}">
+            <ItemsControl x:Name="outputItems" ItemsSource="{Binding ChatLines}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+
+</UserControl>

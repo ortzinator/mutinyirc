@@ -1,0 +1,268 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:MutinyIRC.UI.ViewModels"
+        x:Class="MutinyIRC.UI.Views.ServerSettingsWindow"
+        Title="Servers"
+        Width="660" Height="520"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackground}">
+
+    <DockPanel>
+
+        <!-- ── Header ── -->
+        <Border DockPanel.Dock="Top"
+                Height="48"
+                Background="{DynamicResource ChannelHeaderBackground}"
+                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,0">
+            <TextBlock Text="Servers"
+                       FontWeight="SemiBold" FontSize="15"
+                       VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- ── Footer: OK / Cancel ── -->
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource ChatInputAreaBackground}"
+                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="12,8">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="6">
+                <Button Content="OK" Width="80" Click="OkButton_Click" />
+                <Button Content="Cancel" Width="80" Click="CancelButton_Click" />
+            </StackPanel>
+        </Border>
+
+        <!-- ── Main content ── -->
+        <Grid ColumnDefinitions="200,*" Margin="12" ColumnSpacing="12">
+
+            <!-- Networks column -->
+            <DockPanel Grid.Column="0">
+
+                <TextBlock DockPanel.Dock="Top"
+                           Text="NETWORKS"
+                           FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource SidebarMutedForeground}"
+                           Margin="0,0,0,6"/>
+
+                <StackPanel DockPanel.Dock="Bottom"
+                            Orientation="Horizontal"
+                            Spacing="4"
+                            Margin="0,6,0,0">
+                    <Button Content="+ Add"
+                            Command="{Binding AddNetworkCommand}"
+                            Padding="10,5" FontSize="12"/>
+                    <Button Content="Edit"
+                            IsEnabled="{Binding SelectedNetwork, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            Click="EditNetworkButton_Click"
+                            Padding="10,5" FontSize="12"/>
+                    <Button Content="Remove"
+                            Command="{Binding RemoveNetworkCommand}"
+                            Padding="10,5" FontSize="12"/>
+                </StackPanel>
+
+                <Border Background="{DynamicResource ChannelHeaderBackground}"
+                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                    <ListBox x:Name="networksListBox"
+                             ItemsSource="{Binding Networks}"
+                             SelectedItem="{Binding SelectedNetwork}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="4">
+                        <ListBox.ItemContainerTheme>
+                            <ControlTheme TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="8,5"/>
+                                <Setter Property="CornerRadius" Value="4"/>
+                                <Setter Property="Template">
+                                    <ControlTemplate>
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="{TemplateBinding CornerRadius}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter Content="{TemplateBinding Content}"
+                                                              ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter>
+                                <Style Selector="^:pointerover /template/ Border">
+                                    <Setter Property="Background" Value="{DynamicResource SidebarItemHoverBackground}"/>
+                                </Style>
+                                <Style Selector="^:selected /template/ Border">
+                                    <Setter Property="Background" Value="{DynamicResource SidebarItemSelectedBackground}"/>
+                                </Style>
+                            </ControlTheme>
+                        </ListBox.ItemContainerTheme>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:NetworkSettingsViewModel}">
+                                <Grid>
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="13" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center"
+                                               IsVisible="{Binding !IsEditing}"/>
+                                    <TextBox Text="{Binding EditName}"
+                                             FontSize="13"
+                                             BorderThickness="0" Background="Transparent" Padding="1,0"
+                                             VerticalAlignment="Center"
+                                             VerticalContentAlignment="Center"
+                                             IsVisible="{Binding IsEditing}">
+                                        <TextBox.KeyBindings>
+                                            <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}"/>
+                                            <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}"/>
+                                        </TextBox.KeyBindings>
+                                    </TextBox>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </DockPanel>
+
+            <!-- Servers + detail column -->
+            <DockPanel Grid.Column="1"
+                       IsEnabled="{Binding SelectedNetwork, Converter={x:Static ObjectConverters.IsNotNull}}">
+
+                <TextBlock DockPanel.Dock="Top"
+                           FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource SidebarMutedForeground}"
+                           Margin="0,0,0,6">
+                    <Run Text="SERVERS"/>
+                    <Run Text=" — "/>
+                    <Run Text="{Binding SelectedNetwork.Name}"/>
+                </TextBlock>
+
+                <!-- Server detail form -->
+                <Border DockPanel.Dock="Bottom"
+                        Background="{DynamicResource ChannelHeaderBackground}"
+                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Padding="12"
+                        Margin="0,6,0,0"
+                        IsVisible="{Binding SelectedNetwork.SelectedServer, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                          ColumnDefinitions="80,*"
+                          RowSpacing="6"
+                          ColumnSpacing="8">
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="URL"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                        <Border Grid.Row="0" Grid.Column="1"
+                                Background="{DynamicResource AppBackground}"
+                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                BorderThickness="1" CornerRadius="4" Padding="4,0">
+                            <TextBox Text="{Binding SelectedNetwork.SelectedServer.Url}"
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Description"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                        <Border Grid.Row="1" Grid.Column="1"
+                                Background="{DynamicResource AppBackground}"
+                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                BorderThickness="1" CornerRadius="4" Padding="4,0">
+                            <TextBox Text="{Binding SelectedNetwork.SelectedServer.Description}"
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Ports"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                        <Border Grid.Row="2" Grid.Column="1"
+                                Background="{DynamicResource AppBackground}"
+                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                BorderThickness="1" CornerRadius="4" Padding="4,0">
+                            <TextBox Text="{Binding SelectedNetwork.SelectedServer.Ports}"
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Nick"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                        <Border Grid.Row="3" Grid.Column="1"
+                                Background="{DynamicResource AppBackground}"
+                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                BorderThickness="1" CornerRadius="4" Padding="4,0">
+                            <TextBox Text="{Binding SelectedNetwork.SelectedServer.Nick}"
+                                     BorderThickness="0" Background="Transparent" FontSize="13"
+                                     VerticalContentAlignment="Center"/>
+                        </Border>
+
+                        <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                  Content="Use SSL"
+                                  IsChecked="{Binding SelectedNetwork.SelectedServer.Ssl}"
+                                  FontSize="13"/>
+
+                        <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                                  Content="Auto-connect"
+                                  IsChecked="{Binding SelectedNetwork.SelectedServer.AutoConnect}"
+                                  FontSize="13"/>
+                    </Grid>
+                </Border>
+
+                <!-- Add / Remove Server buttons -->
+                <StackPanel DockPanel.Dock="Bottom"
+                            Orientation="Horizontal"
+                            Spacing="4"
+                            Margin="0,6,0,0">
+                    <Button Content="+ Add Server"
+                            Command="{Binding SelectedNetwork.AddServerCommand}"
+                            Padding="10,5" FontSize="12"/>
+                    <Button Content="Remove Server"
+                            Command="{Binding SelectedNetwork.RemoveServerCommand}"
+                            Padding="10,5" FontSize="12"/>
+                </StackPanel>
+
+                <!-- Servers list -->
+                <Border Background="{DynamicResource ChannelHeaderBackground}"
+                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                    <ListBox ItemsSource="{Binding SelectedNetwork.Servers}"
+                             SelectedItem="{Binding SelectedNetwork.SelectedServer}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="4">
+                        <ListBox.ItemContainerTheme>
+                            <ControlTheme TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="8,5"/>
+                                <Setter Property="CornerRadius" Value="4"/>
+                                <Setter Property="Template">
+                                    <ControlTemplate>
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="{TemplateBinding CornerRadius}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter Content="{TemplateBinding Content}"
+                                                              ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter>
+                                <Style Selector="^:pointerover /template/ Border">
+                                    <Setter Property="Background" Value="{DynamicResource SidebarItemHoverBackground}"/>
+                                </Style>
+                                <Style Selector="^:selected /template/ Border">
+                                    <Setter Property="Background" Value="{DynamicResource SidebarItemSelectedBackground}"/>
+                                </Style>
+                            </ControlTheme>
+                        </ListBox.ItemContainerTheme>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:ServerSettingsViewModel}">
+                                <TextBlock Text="{Binding Url}" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </DockPanel>
+
+        </Grid>
+    </DockPanel>
+
+</Window>

@@ -3,7 +3,7 @@ using FakeItEasy;
 using FlamingIRC;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Legacy.ClassicAssert;
-using OrtzIRC.Common;
+using MutinyIRC.Common;
 
 namespace MutinyIRC.Tests
 {

@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using Assert = NUnit.Framework.Legacy.ClassicAssert;
-using OrtzIRC.Common;
+using MutinyIRC.Common;
 using FakeItEasy;
 using FlamingIRC;
 
@@ -32,7 +32,7 @@ namespace MutinyIRC.Tests
             const string expected = "Topic here and stuff";
 
             string topic = string.Empty;
-            _channel.TopicReceived += delegate (object sender, OrtzIRC.Common.DataEventArgs<string> e)
+            _channel.TopicReceived += delegate (object sender, Common.DataEventArgs<string> e)
             {
                 eventWasRaised = true;
                 topic = e.Data;

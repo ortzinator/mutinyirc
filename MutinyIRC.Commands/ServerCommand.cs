@@ -1,0 +1,72 @@
+﻿using FlamingIRC;
+
+namespace MutinyIRC.Commands
+{
+    using System;
+    using MutinyIRC.Common;
+    using System.Configuration;
+    using PluginFramework;
+
+    /// <summary>
+    /// Creates new connections to IRC servers
+    /// </summary>
+    [Plugin("Server")]
+    public class ServerCommand : ICommand
+    {
+        /// <summary>
+        /// Summary of command with these specific parameters
+        /// </summary>
+        public void Execute(Server context, char[] switches, string server)
+        {
+            Execute(context, switches, server, "6667");
+        }
+
+        public void Execute(Server context, char[] switches, string server, string port)
+        {
+            foreach (char c in switches)
+            {
+                switch (c)
+                {
+                    case 'n': //New window and connect
+                        var args = new ConnectionArgs(ConfigurationManager.AppSettings["FirstNick"] ?? "MutinyIRC", server, false);
+                        try
+                        {
+                            args.Port = int.Parse(port);
+                        }
+                        catch (Exception)
+                        {
+                            args.Port = 6667;
+                        }
+                        var svr = ServerManager.Instance.Create(args);
+                        svr.Connect();
+                        return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Connect to a server in the same window
+        /// </summary>
+        public void Execute(Server context, string server)
+        {
+            context.ChangeServer(ConfigurationManager.AppSettings["FirstNick"] ?? "MutinyIRC", server, false);
+            context.Connect();
+        }
+
+        public void Execute(Server context, string server, string port)
+        {
+            var args = new ConnectionArgs(ConfigurationManager.AppSettings["FirstNick"] ?? "MutinyIRC", server, false);
+            try
+            {
+                args.Port = int.Parse(port);
+            }
+            catch (Exception)
+            {
+                args.Port = 6667;
+            }
+
+            context.ChangeServer(args);
+            context.Connect();
+        }
+    }
+}

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <PackageId>MutinyIRC.PluginFramework</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj" />
+    <ProjectReference Include="..\MutinyIRC.Common\MutinyIRC.Common.csproj" />
+  </ItemGroup>
+
+</Project>
