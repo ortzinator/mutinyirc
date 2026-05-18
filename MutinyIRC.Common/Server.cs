@@ -317,16 +317,11 @@ namespace MutinyIRC.Common
             var chan = _channels[channel];
             Kick.Fire(this, new KickEventArgs(user, chan, kickee, reason));
             chan.UserKick(user, kickee, reason);
-
-            Connection.Sender.Names(channel);
         }
 
         private void Listener_OnUserModeChange(object sender, UserModeChangeEventArgs e)
         {
             UserModeChanged?.Invoke(this, e);
-
-            foreach (KeyValuePair<string, Channel> item in _channels)
-                Connection.Sender.Names(item.Key);
         }
 
         private void Listener_OnNick(object sender, NickChangeEventArgs e)
@@ -406,12 +401,12 @@ namespace MutinyIRC.Common
             if (user.Nick == UserNick)
             {
                 JoinSelf.Fire(this, new DataEventArgs<Channel>(chan));
+                Connection.Sender.Names(channel);
             }
             else
             {
                 JoinOther.Fire(this, new DoubleDataEventArgs<User, Channel>(user, chan));
                 chan.UserJoin(user);
-                Connection.Sender.Names(channel);
             }
         }
 
@@ -432,8 +427,6 @@ namespace MutinyIRC.Common
 
             Part.Fire(this, new PartEventArgs(user, chan, reason));
             chan.UserPart(user, reason);
-
-            Connection.Sender.Names(channel);
         }
 
         private void Listener_OnRegistered(object sender, EventArgs e)
@@ -443,9 +436,10 @@ namespace MutinyIRC.Common
 
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
         {
-            ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, _channels[channel], modes, raw));
+            var chan = _channels[channel];
+            ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, chan, modes, raw));
 
-            Connection.Sender.Names(channel);
+            chan.ApplyModeChanges(modes);
         }
 
         private void Listener_OnError(object sender, ErrorMessageEventArgs a)

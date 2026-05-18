@@ -46,8 +46,8 @@ namespace MutinyIRC.Common
         ///   A UserList of the users in the channel
         /// </summary>
         /// <remarks>
-        ///   At the moment, this is kept up to date by requesting a NAMES list for the channel 
-        ///   whenever someone joins, parts, quits, or their mode is changed (and thus their prefix symbol).
+        ///   Populated from the NAMES reply on channel join, then maintained incrementally
+        ///   as users join, part, quit, are kicked, or have their op/voice mode changed.
         /// </remarks>
         public UserList Users { get; set; }
 
@@ -167,7 +167,51 @@ namespace MutinyIRC.Common
 
         public void UserJoin(User nick)
         {
+            if (!Users.Contains(nick))
+                Users.Add(nick);
             OnJoin.Fire(this, new UserEventArgs(nick));
+        }
+
+        /// <summary>
+        ///   Removes the user with the given nick from the channel's user list, if present.
+        /// </summary>
+        public void RemoveUser(string nick)
+        {
+            User u = Users.GetUser(nick);
+            if (u != null)
+                Users.Remove(u);
+        }
+
+        /// <summary>
+        ///   Applies channel op/halfop/voice mode changes to the affected users' prefixes
+        ///   without re-fetching the whole NAMES list.
+        /// </summary>
+        public void ApplyModeChanges(ChannelModeInfo[] modes)
+        {
+            foreach (ChannelModeInfo mode in modes)
+            {
+                char symbol = mode.Mode switch
+                {
+                    ChannelMode.ChannelOperator => '@',
+                    ChannelMode.HalfChannelOperator => '%',
+                    ChannelMode.Voice => '+',
+                    _ => '\0'
+                };
+
+                if (symbol == '\0' || string.IsNullOrEmpty(mode.Parameter))
+                    continue;
+
+                User u = Users.GetUser(mode.Parameter);
+                if (u == null)
+                    continue;
+
+                if (mode.Action == ModeAction.Add)
+                    u.Prefix = symbol;
+                else if (u.Prefix == symbol)
+                    u.Prefix = '\0';
+            }
+
+            Users.Refresh();
         }
 
         public void Part(string message)
@@ -184,7 +228,10 @@ namespace MutinyIRC.Common
         public void UserPart(User user, string message)
         {
             if (user.Nick != Server.UserNick)
+            {
+                RemoveUser(user.Nick);
                 OtherUserParted.Fire(this, new UserMessageEventArgs(user, message));
+            }
             else
                 UserParted.Fire(this, new EventArgs());
         }
@@ -192,11 +239,11 @@ namespace MutinyIRC.Common
         public void UserQuit(User user, string message)
         {
             //Make sure the user is in the channel
-            foreach (User u in Users)
-            {
-                if (user.Nick != u.Nick) continue;
-                UserQuitted.Fire(this, new UserMessageEventArgs(u, message));
-            }
+            User found = Users.GetUser(user.Nick);
+            if (found == null) return;
+
+            Users.Remove(found);
+            UserQuitted.Fire(this, new UserMessageEventArgs(found, message));
         }
 
         /// <summary>
@@ -211,7 +258,7 @@ namespace MutinyIRC.Common
 
         public void UserKick(User nick, string kickee, string reason)
         {
-            Server.Connection.Sender.Names(Name);
+            RemoveUser(kickee);
 
             OnKick?.Invoke(nick, kickee, reason);
         }
