@@ -54,5 +54,63 @@ namespace FlamingIRC.Tests
                 user.Prefix = 'X';
             });
         }
+
+        [Test]
+        public void Prefix_OpAndVoice_ReturnsHighestRankedSymbol()
+        {
+            User user = new User();
+            user.AddStatus('+');
+            user.AddStatus('@');
+
+            Assert.AreEqual('@', user.Prefix);
+            Assert.IsTrue(user.HasStatus('+'));
+            Assert.IsTrue(user.HasStatus('@'));
+        }
+
+        [Test]
+        public void RemoveStatus_HighestSymbol_PrefixFallsBackToNextHighest()
+        {
+            User user = new User();
+            user.AddStatus('@');
+            user.AddStatus('+');
+
+            user.RemoveStatus('@');
+
+            Assert.AreEqual('+', user.Prefix);
+            Assert.IsFalse(user.HasStatus('@'));
+        }
+
+        [Test]
+        public void PrefixSetter_ValidSymbol_ReplacesAllStatuses()
+        {
+            User user = new User();
+            user.AddStatus('@');
+            user.AddStatus('+');
+
+            user.Prefix = '%';
+
+            Assert.AreEqual('%', user.Prefix);
+            Assert.IsFalse(user.HasStatus('@'), "Setting Prefix must replace, not merge, statuses");
+            Assert.IsFalse(user.HasStatus('+'));
+        }
+
+        [Test]
+        public void AddStatus_InvalidSymbol_ArgumentOutOfRangeException()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(delegate () {
+                new User().AddStatus('X');
+            });
+        }
+
+        [Test]
+        public void FromNames_MultiplePrefixSymbols_AllStatusesTracked()
+        {
+            User u = User.FromNames("@+Ortzinator");
+
+            Assert.AreEqual("Ortzinator", u.Nick);
+            Assert.AreEqual('@', u.Prefix);
+            Assert.IsTrue(u.HasStatus('@'));
+            Assert.IsTrue(u.HasStatus('+'));
+        }
     }
 }

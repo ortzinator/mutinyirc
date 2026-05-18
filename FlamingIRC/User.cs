@@ -25,13 +25,18 @@
 namespace FlamingIRC
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Represents a user in a single channel
     /// </summary>
     public class User : IComparable<User>
     {
-        private char _prefix;
+        // Active channel status symbols held by this user (e.g. '@' and '+' simultaneously).
+        private readonly List<char> _statuses = new List<char>();
+
+        // Status symbols from highest rank to lowest. Used to pick the symbol shown in nick lists.
+        private static readonly char[] StatusRank = { '~', '&', '@', '%', '+' };
 
         public User() { }
 
@@ -61,18 +66,53 @@ namespace FlamingIRC
         /// <summary>The user's nickname.</summary>
         public string Nick { get; set; } = string.Empty;
 
-        /// <summary> The channel mode symbol prefix from NAMES</summary>
+        /// <summary>
+        /// The highest-ranked channel status symbol the user currently holds (e.g. '@' for a user
+        /// who is both op and voiced), or '\0' if the user holds no status.
+        /// </summary>
+        /// <remarks>
+        /// Setting replaces all statuses with the single given symbol ('\0' clears all). To track
+        /// op and voice independently use <see cref="AddStatus"/> / <see cref="RemoveStatus"/>.
+        /// </remarks>
         public char Prefix
         {
-            get => _prefix;
+            get
+            {
+                foreach (char symbol in StatusRank)
+                    if (_statuses.Contains(symbol))
+                        return symbol;
+                return '\0';
+            }
             set
             {
                 if (value != '\0' && !UserModeValidator.IsValid(value))
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
-                _prefix = value;
+                _statuses.Clear();
+                if (value != '\0')
+                    _statuses.Add(value);
             }
+        }
+
+        /// <summary>Returns true if the user currently holds the given status symbol.</summary>
+        public bool HasStatus(char symbol) => _statuses.Contains(symbol);
+
+        /// <summary>Grants the user a channel status symbol (e.g. '@' for op) if not already held.</summary>
+        public void AddStatus(char symbol)
+        {
+            if (!UserModeValidator.IsValid(symbol))
+            {
+                throw new ArgumentOutOfRangeException("symbol");
+            }
+            if (!_statuses.Contains(symbol))
+                _statuses.Add(symbol);
+        }
+
+        /// <summary>Revokes a channel status symbol from the user, if held.</summary>
+        public void RemoveStatus(char symbol)
+        {
+            _statuses.Remove(symbol);
         }
 
         /// <summary>The user's "real name", immediately before the @</summary>
@@ -87,18 +127,15 @@ namespace FlamingIRC
             if (nick == string.Empty)
                 return null;
 
-            char mode = nick[0];
             var user = new User();
 
-            if (UserModeValidator.IsValid(mode))
+            int i = 0;
+            while (i < nick.Length && UserModeValidator.IsValid(nick[i]))
             {
-                user.Nick = nick.Substring(1);
-                user.Prefix = mode;
+                user.AddStatus(nick[i]);
+                i++;
             }
-            else
-            {
-                user.Nick = nick;
-            }
+            user.Nick = nick.Substring(i);
 
             return user;
         }

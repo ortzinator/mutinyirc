@@ -206,9 +206,9 @@ namespace MutinyIRC.Common
                     continue;
 
                 if (mode.Action == ModeAction.Add)
-                    u.Prefix = symbol;
-                else if (u.Prefix == symbol)
-                    u.Prefix = '\0';
+                    u.AddStatus(symbol);
+                else
+                    u.RemoveStatus(symbol);
             }
 
             Users.Refresh();

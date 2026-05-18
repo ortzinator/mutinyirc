@@ -280,6 +280,56 @@ namespace MutinyIRC.Tests
         }
 
         [Test]
+        public void ApplyModeChanges_VoiceOnExistingOperator_StillShowsOperator()
+        {
+            var channel = CreateChannelWithConnection();
+            User bob = MakeUser("Bob");
+            bob.Prefix = '@';
+            channel.UserJoin(bob);
+
+            channel.ApplyModeChanges(new[]
+            {
+                new ChannelModeInfo
+                {
+                    Action = ModeAction.Add,
+                    Mode = ChannelMode.Voice,
+                    Parameter = "Bob"
+                }
+            });
+
+            User result = channel.Users.GetUser("Bob");
+            Assert.AreEqual('@', result.Prefix,
+                "An op who is also voiced must still display as op, not collapse to voice");
+            Assert.IsTrue(result.HasStatus('+'), "Voice status must still be tracked alongside op");
+        }
+
+        [Test]
+        public void ApplyModeChanges_RemoveOpFromOpAndVoiced_FallsBackToVoice()
+        {
+            var channel = CreateChannelWithConnection();
+            User bob = MakeUser("Bob");
+            bob.Prefix = '@';
+            channel.UserJoin(bob);
+            channel.ApplyModeChanges(new[]
+            {
+                new ChannelModeInfo { Action = ModeAction.Add, Mode = ChannelMode.Voice, Parameter = "Bob" }
+            });
+
+            channel.ApplyModeChanges(new[]
+            {
+                new ChannelModeInfo
+                {
+                    Action = ModeAction.Remove,
+                    Mode = ChannelMode.ChannelOperator,
+                    Parameter = "Bob"
+                }
+            });
+
+            Assert.AreEqual('+', channel.Users.GetUser("Bob").Prefix,
+                "Removing op from an op+voiced user must fall back to the voice prefix");
+        }
+
+        [Test]
         public void ApplyModeChanges_NonStatusMode_LeavesPrefixUnchanged()
         {
             var channel = CreateChannelWithConnection();
