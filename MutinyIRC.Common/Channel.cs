@@ -275,6 +275,32 @@ namespace MutinyIRC.Common
             OnAction.Fire(this, new UserMessageEventArgs(Users.GetUser(Server.UserNick), message));
         }
 
+        // NAMES replies for this channel arrive as one or more chunks terminated by RPL_ENDOFNAMES.
+        // Buffer them here, per channel, so interleaved replies for other channels cannot contaminate it.
+        private readonly List<User> _pendingNames = new List<User>();
+
+        /// <summary>
+        ///   Buffers a chunk of NAMES nicks for this channel until the full list has been received.
+        /// </summary>
+        public void AddPendingNames(string[] nicks)
+        {
+            foreach (string nick in nicks)
+            {
+                User u = User.FromNames(nick);
+                if (u != null)
+                    _pendingNames.Add(u);
+            }
+        }
+
+        /// <summary>
+        ///   Replaces the channel's user list with the buffered NAMES list and clears the buffer.
+        /// </summary>
+        public void CommitPendingNames()
+        {
+            LoadNewNames(new List<User>(_pendingNames));
+            _pendingNames.Clear();
+        }
+
         /// <summary>
         ///   Loads a new list of user that replaces the old list
         /// </summary>

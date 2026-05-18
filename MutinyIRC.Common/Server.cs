@@ -11,9 +11,7 @@ namespace MutinyIRC.Common
     {
         private Dictionary<string, Channel> _channels = new Dictionary<string, Channel>(StringComparer.OrdinalIgnoreCase);
         private List<PrivateMessageSession> _pmSessions = new List<PrivateMessageSession>();
-        private bool _recievingNames;
         private DateTime _serverChangeTime;
-        private List<User> _tempNames = new List<User>();
         private IConnection _connection;
 
         public Server() { }
@@ -375,24 +373,12 @@ namespace MutinyIRC.Common
             if (!_channels.TryGetValue(e.Channel, out Channel chan))
                 return;
 
-            if (!_recievingNames)
-            {
-                _recievingNames = true;
-            }
-
-            foreach (string nick in e.Nicks)
-            {
-                _tempNames.Add(User.FromNames(nick));
-            }
+            chan.AddPendingNames(e.Nicks);
 
             Trace.WriteLine("Added chunk of " + e.Nicks.Length + " names", "Names");
 
             if (e.Last)
-            {
-                chan.LoadNewNames(_tempNames);
-                _recievingNames = false;
-                _tempNames.Clear();
-            }
+                chan.CommitPendingNames();
         }
 
         private void Listener_OnJoin(User user, string channel)

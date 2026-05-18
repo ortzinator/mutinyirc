@@ -348,5 +348,60 @@ namespace MutinyIRC.Tests
             Assert.AreEqual('\0', channel.Users.GetUser("Bob").Prefix,
                 "A ban mode must not alter any member's op/voice prefix");
         }
+
+        [Test]
+        public void PendingNames_InterleavedWithAnotherChannel_EachChannelGetsOnlyItsOwnMembers()
+        {
+            var chanA = CreateChannelWithConnection();
+            var chanB = CreateChannelWithConnection();
+
+            // Simulate the server pipelining NAMES runs for two channels:
+            //   353 #a alice bob / 353 #b carol dave / 366 #a / 366 #b
+            chanA.AddPendingNames(new[] { "alice", "bob" });
+            chanB.AddPendingNames(new[] { "carol", "dave" });
+            chanA.CommitPendingNames();
+            chanB.CommitPendingNames();
+
+            Assert.AreEqual(2, chanA.Users.Count);
+            Assert.IsNotNull(chanA.Users.GetUser("alice"));
+            Assert.IsNotNull(chanA.Users.GetUser("bob"));
+            Assert.IsNull(chanA.Users.GetUser("carol"), "channel A must not be contaminated by channel B's NAMES");
+            Assert.IsNull(chanA.Users.GetUser("dave"));
+
+            Assert.AreEqual(2, chanB.Users.Count);
+            Assert.IsNotNull(chanB.Users.GetUser("carol"));
+            Assert.IsNotNull(chanB.Users.GetUser("dave"),
+                "channel B must still be seeded even though channel A committed first");
+        }
+
+        [Test]
+        public void CommitPendingNames_ClearsBuffer_SoNextSeedIsIndependent()
+        {
+            var channel = CreateChannelWithConnection();
+
+            channel.AddPendingNames(new[] { "alice" });
+            channel.CommitPendingNames();
+
+            channel.AddPendingNames(new[] { "bob" });
+            channel.CommitPendingNames();
+
+            Assert.AreEqual(1, channel.Users.Count,
+                "A committed NAMES buffer must be cleared so a later NAMES does not accumulate stale users");
+            Assert.IsNotNull(channel.Users.GetUser("bob"));
+            Assert.IsNull(channel.Users.GetUser("alice"));
+        }
+
+        [Test]
+        public void AddPendingNames_StripsStatusPrefixesIntoUserStatus()
+        {
+            var channel = CreateChannelWithConnection();
+
+            channel.AddPendingNames(new[] { "@alice", "+bob", "charlie" });
+            channel.CommitPendingNames();
+
+            Assert.AreEqual('@', channel.Users.GetUser("alice").Prefix);
+            Assert.AreEqual('+', channel.Users.GetUser("bob").Prefix);
+            Assert.AreEqual('\0', channel.Users.GetUser("charlie").Prefix);
+        }
     }
 }
