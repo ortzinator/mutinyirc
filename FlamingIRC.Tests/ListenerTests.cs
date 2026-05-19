@@ -1,7 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Legacy.ClassicAssert;
-using FakeItEasy;
 
 namespace FlamingIRC.Tests
 {
@@ -9,22 +8,28 @@ namespace FlamingIRC.Tests
     public class ListenerTests
     {
         private Listener _listener;
-        private static readonly string _pong = ":hitchcock.freenode.net PONG hitchcock.freenode.net :ping";
-        private static readonly string _names = ":hitchcock.freenode.net 353 OrtzIRC = #ortzirc :Ortzinator OrtzIRC @ChanServ";
-        private static readonly string _namesEnd = ":hitchcock.freenode.net 366 OrtzIRC #ortzirc :End of /NAMES list.";
-        private static readonly string _quit = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT :Quit: Leaving";
-        private static readonly string _join = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com JOIN #ortzirc";
-        private static readonly string _noticePrivate = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NOTICE OrtzIRC :foobar";
-        private static readonly string _privmsg = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :foobar";
+        private static readonly string _pong =
+            ":hitchcock.freenode.net PONG hitchcock.freenode.net :ping";
+        private static readonly string _names =
+            ":hitchcock.freenode.net 353 OrtzIRC = #ortzirc :Ortzinator OrtzIRC @ChanServ";
+        private static readonly string _join =
+            ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com JOIN #ortzirc";
+        private static readonly string _noticePrivate =
+            ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NOTICE OrtzIRC :foobar";
+        private static readonly string _privmsg =
+            ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :foobar";
         private static readonly string _privmsgAction =
             ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :\u0001ACTION foobars\u0001";
-        private static readonly string _nick = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NICK :Ortz";
-        private static readonly string _kick = ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com KICK #ortzirc OrtzIRC :OrtzIRC";
+        private static readonly string _nick =
+            ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NICK :Ortz";
+        private static readonly string _kick =
+            ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com KICK #ortzirc OrtzIRC :OrtzIRC";
 
-        private static readonly string _topic = ":hitchcock.freenode.net 332 Ortzinator #lancer :foobar";
+        private static readonly string _topic =
+            ":hitchcock.freenode.net 332 Ortzinator #lancer :foobar";
 
-        private static readonly string _userString = "Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com";
-        private static readonly string _serverString = "hitchcock.freenode.net";
+        private static readonly string _userString =
+            "Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com";
         private static readonly User _testUser = Rfc2812Util.UserFromString(_userString);
 
         [OneTimeSetUp]
@@ -96,7 +101,7 @@ namespace FlamingIRC.Tests
 
             NamesEventArgs givenArgs = null;
 
-            _listener.OnNames += delegate (object sender, NamesEventArgs args) { givenArgs = args; };
+            _listener.OnNames += delegate(object sender, NamesEventArgs args) { givenArgs = args; };
             _listener.ProcessNamesReply(msg);
             Assert.AreEqual(new[] { "Ortzinator", "OrtzIRC", "@ChanServ" }, givenArgs.Nicks);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
@@ -134,7 +139,10 @@ namespace FlamingIRC.Tests
             };
             UserChannelMessageEventArgs givenArgs = null;
 
-            _listener.OnAction += delegate (object sender, UserChannelMessageEventArgs args) { givenArgs = args; };
+            _listener.OnAction += delegate(object sender, UserChannelMessageEventArgs args)
+            {
+                givenArgs = args;
+            };
             _listener.ProcessPrivmsgCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
@@ -154,7 +162,10 @@ namespace FlamingIRC.Tests
             };
             UserMessageEventArgs givenArgs = null;
 
-            _listener.OnPrivateAction += delegate (object sender, UserMessageEventArgs args) { givenArgs = args; };
+            _listener.OnPrivateAction += delegate(object sender, UserMessageEventArgs args)
+            {
+                givenArgs = args;
+            };
             _listener.ProcessPrivmsgCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("foobars", givenArgs.Message);
@@ -173,7 +184,10 @@ namespace FlamingIRC.Tests
             };
             UserChannelMessageEventArgs givenArgs = null;
 
-            _listener.OnPublic += delegate (object sender, UserChannelMessageEventArgs args) { givenArgs = args; };
+            _listener.OnPublic += delegate(object sender, UserChannelMessageEventArgs args)
+            {
+                givenArgs = args;
+            };
             _listener.ProcessPrivmsgCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
@@ -193,7 +207,10 @@ namespace FlamingIRC.Tests
             };
             UserMessageEventArgs givenArgs = null;
 
-            _listener.OnPrivate += delegate (object sender, UserMessageEventArgs args) { givenArgs = args; };
+            _listener.OnPrivate += delegate(object sender, UserMessageEventArgs args)
+            {
+                givenArgs = args;
+            };
             _listener.ProcessPrivmsgCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("foobar", givenArgs.Message);
@@ -244,7 +261,10 @@ namespace FlamingIRC.Tests
             };
             UserMessageEventArgs givenArgs = null;
 
-            _listener.OnPrivateNotice += delegate (object sender, UserMessageEventArgs args) { givenArgs = args; };
+            _listener.OnPrivateNotice += delegate(object sender, UserMessageEventArgs args)
+            {
+                givenArgs = args;
+            };
             _listener.ProcessNoticeCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("foobar", givenArgs.Message);
@@ -261,7 +281,10 @@ namespace FlamingIRC.Tests
                 Tokens = _nick.Split(new[] { ' ' })
             };
             NickChangeEventArgs givenArgs = null;
-            _listener.OnNick += delegate (object sender, NickChangeEventArgs args) { givenArgs = args; };
+            _listener.OnNick += delegate(object sender, NickChangeEventArgs args)
+            {
+                givenArgs = args;
+            };
             _listener.ProcessNickCommand(msg);
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("Ortz", givenArgs.NewNick);
@@ -277,7 +300,10 @@ namespace FlamingIRC.Tests
                 Message = "#ortzirc"
             };
             InviteEventArgs givenArgs = null;
-            _listener.OnInvite += delegate (object sender, InviteEventArgs args) { givenArgs = args; };
+            _listener.OnInvite += delegate(object sender, InviteEventArgs args)
+            {
+                givenArgs = args;
+            };
             _listener.ProcessInviteCommand(msg);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
             Assert.AreEqual("Ortzinator", givenArgs.Nick);
@@ -294,7 +320,7 @@ namespace FlamingIRC.Tests
             };
             User expectedUser = null;
             string expectedChannel = null;
-            _listener.OnJoin += delegate (User user, string channel)
+            _listener.OnJoin += delegate(User user, string channel)
             {
                 expectedUser = user;
                 expectedChannel = channel;
@@ -337,13 +363,13 @@ namespace FlamingIRC.Tests
             string givenChannel = null;
             string givenKickee = null;
             string givenReason = null;
-            _listener.OnKick += delegate (User user, string channel, string kickee, string reason)
-                                {
-                                    givenUser = user;
-                                    givenChannel = channel;
-                                    givenKickee = kickee;
-                                    givenReason = reason;
-                                };
+            _listener.OnKick += delegate(User user, string channel, string kickee, string reason)
+            {
+                givenUser = user;
+                givenChannel = channel;
+                givenKickee = kickee;
+                givenReason = reason;
+            };
             _listener.ProcessKickCommand(msg);
             Assert.AreEqual(_testUser, givenUser);
             Assert.AreEqual(givenChannel, "#ortzirc");
@@ -355,7 +381,7 @@ namespace FlamingIRC.Tests
         public void Parse_Ping_OnPingFires()
         {
             string givenMsg = String.Empty;
-            _listener.OnPing += delegate (string message)
+            _listener.OnPing += delegate(string message)
             {
                 givenMsg = message;
             };
@@ -367,7 +393,7 @@ namespace FlamingIRC.Tests
         public void Parse_Notice_OnPrivateNoticeFires()
         {
             string givenMsg = String.Empty;
-            _listener.OnPrivateNotice += delegate (object sender, UserMessageEventArgs args)
+            _listener.OnPrivateNotice += delegate(object sender, UserMessageEventArgs args)
             {
                 givenMsg = args.Message;
             };
@@ -379,7 +405,7 @@ namespace FlamingIRC.Tests
         public void Parse_Error_OnErrorFires()
         {
             string givenMsg = String.Empty;
-            _listener.OnError += delegate (object sender, ErrorMessageEventArgs args)
+            _listener.OnError += delegate(object sender, ErrorMessageEventArgs args)
             {
                 givenMsg = args.Message;
             };
@@ -428,7 +454,8 @@ namespace FlamingIRC.Tests
         {
             UserModeChangeEventArgs givenArgs = null;
             _listener.OnUserModeChange += (sender, args) => givenArgs = args;
-            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com MODE Ortzinator +i");
+            _listener.Parse(
+                ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com MODE Ortzinator +i");
             Assert.IsNotNull(givenArgs);
             Assert.AreEqual(ModeAction.Add, givenArgs.Action);
             Assert.AreEqual(UserMode.Invisible, givenArgs.Mode);
@@ -439,8 +466,13 @@ namespace FlamingIRC.Tests
         {
             User givenUser = null;
             string givenReason = null;
-            _listener.OnQuit += (user, reason) => { givenUser = user; givenReason = reason; };
-            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT :Quit: Leaving");
+            _listener.OnQuit += (user, reason) =>
+            {
+                givenUser = user;
+                givenReason = reason;
+            };
+            _listener.Parse(
+                ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT :Quit: Leaving");
             Assert.AreEqual(_testUser, givenUser);
             Assert.AreEqual("Quit: Leaving", givenReason);
         }
@@ -450,7 +482,11 @@ namespace FlamingIRC.Tests
         {
             User givenUser = null;
             string givenReason = null;
-            _listener.OnQuit += (user, reason) => { givenUser = user; givenReason = reason; };
+            _listener.OnQuit += (user, reason) =>
+            {
+                givenUser = user;
+                givenReason = reason;
+            };
             _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT");
             Assert.AreEqual(_testUser, givenUser);
             Assert.AreEqual("", givenReason);
@@ -462,8 +498,14 @@ namespace FlamingIRC.Tests
             User givenUser = null;
             string givenChannel = null;
             string givenReason = null;
-            _listener.OnPart += (user, channel, reason) => { givenUser = user; givenChannel = channel; givenReason = reason; };
-            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PART #ortzirc :Goodbye");
+            _listener.OnPart += (user, channel, reason) =>
+            {
+                givenUser = user;
+                givenChannel = channel;
+                givenReason = reason;
+            };
+            _listener.Parse(
+                ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PART #ortzirc :Goodbye");
             Assert.AreEqual(_testUser, givenUser);
             Assert.AreEqual("#ortzirc", givenChannel);
             Assert.AreEqual("Goodbye", givenReason);
@@ -475,7 +517,12 @@ namespace FlamingIRC.Tests
             User givenUser = null;
             string givenChannel = null;
             string givenReason = null;
-            _listener.OnPart += (user, channel, reason) => { givenUser = user; givenChannel = channel; givenReason = reason; };
+            _listener.OnPart += (user, channel, reason) =>
+            {
+                givenUser = user;
+                givenChannel = channel;
+                givenReason = reason;
+            };
             _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PART #ortzirc");
             Assert.AreEqual(_testUser, givenUser);
             Assert.AreEqual("#ortzirc", givenChannel);
@@ -487,7 +534,8 @@ namespace FlamingIRC.Tests
         {
             UserChannelMessageEventArgs givenArgs = null;
             _listener.OnTopicChanged += (sender, args) => givenArgs = args;
-            _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com TOPIC #ortzirc :New topic here");
+            _listener.Parse(
+                ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com TOPIC #ortzirc :New topic here");
             Assert.AreEqual(_testUser, givenArgs.User);
             Assert.AreEqual("#ortzirc", givenArgs.Channel);
             Assert.AreEqual("New topic here", givenArgs.Message);
@@ -499,7 +547,12 @@ namespace FlamingIRC.Tests
             User givenUser = null;
             string givenNick = null;
             string givenReason = null;
-            _listener.OnKill += (user, nick, reason) => { givenUser = user; givenNick = nick; givenReason = reason; };
+            _listener.OnKill += (user, nick, reason) =>
+            {
+                givenUser = user;
+                givenNick = nick;
+                givenReason = reason;
+            };
             _listener.Parse(":irc.server.net KILL Ortzinator :Killed by operator");
             Assert.AreEqual("irc.server.net", givenUser.Nick);
             Assert.AreEqual("Ortzinator", givenNick);
@@ -512,7 +565,12 @@ namespace FlamingIRC.Tests
             User givenUser = null;
             string givenNick = null;
             string givenReason = null;
-            _listener.OnKill += (user, nick, reason) => { givenUser = user; givenNick = nick; givenReason = reason; };
+            _listener.OnKill += (user, nick, reason) =>
+            {
+                givenUser = user;
+                givenNick = nick;
+                givenReason = reason;
+            };
             _listener.Parse(":irc.server.net KILL Ortzinator");
             Assert.AreEqual("Ortzinator", givenNick);
             Assert.AreEqual("", givenReason);
