@@ -1,7 +1,7 @@
-﻿namespace MutinyIRC.Common
-{
-    using FlamingIRC;
+﻿using FlamingIRC;
 
+namespace MutinyIRC.Common
+{
     public class UserInfo
     {
         /// <summary>The user's nickname.</summary>

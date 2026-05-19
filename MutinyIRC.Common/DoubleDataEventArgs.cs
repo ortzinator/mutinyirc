@@ -1,7 +1,7 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
+﻿using System;
 
+namespace MutinyIRC.Common
+{
     public class DoubleDataEventArgs<TFirst, TSecond> : EventArgs
     {
         public DoubleDataEventArgs(TFirst first, TSecond second)

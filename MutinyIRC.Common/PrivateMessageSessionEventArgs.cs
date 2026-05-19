@@ -1,7 +1,7 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
+﻿using System;
 
+namespace MutinyIRC.Common
+{
     public class PrivateMessageSessionEventArgs : EventArgs
     {
         public PrivateMessageSessionEventArgs(PrivateMessageSession pmsession)

@@ -1,7 +1,7 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
+﻿using System;
 
+namespace MutinyIRC.Common
+{
     public class DataEventArgs<T> : EventArgs
     {
         public DataEventArgs(T data)

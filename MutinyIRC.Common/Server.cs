@@ -9,8 +9,6 @@ namespace MutinyIRC.Common
 {
     public class Server : MessageContext
     {
-        private Dictionary<string, Channel> _channels = new Dictionary<string, Channel>(StringComparer.OrdinalIgnoreCase);
-        private List<PrivateMessageSession> _pmSessions = new List<PrivateMessageSession>();
         private DateTime _serverChangeTime;
         private IConnection _connection;
 
@@ -28,53 +26,31 @@ namespace MutinyIRC.Common
             HookEvents();
         }
 
-        public string Url
-        {
-            get { return Connection.ConnectionData.Hostname; }
-        }
+        public string Url => Connection.ConnectionData.Hostname;
 
-        public int Port
-        {
-            get { return Connection.ConnectionData.Port; }
-        }
+        public int Port => Connection.ConnectionData.Port;
 
         public virtual IConnection Connection
         {
-            get { return _connection; }
+            get => _connection;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-
                 Channels.Clear();
-                _connection = value;
+                _connection = value ?? throw new ArgumentNullException("value");
             }
         }
 
-        public List<PrivateMessageSession> PMSessions
-        {
-            get { return _pmSessions; }
-        }
+        public List<PrivateMessageSession> PMSessions { get; } = new List<PrivateMessageSession>();
 
-        public bool IsConnected
-        {
-            get { return Connection.Connected; }
-        }
+        public bool IsConnected => Connection.Connected;
 
         /// <summary>
         ///   The nick of the connected user
         /// </summary>
-        public virtual string UserNick
-        {
-            get { return Connection.ConnectionData.Nick; }
-        }
+        public virtual string UserNick => Connection.ConnectionData.Nick;
 
-        public Dictionary<string, Channel> Channels
-        {
-            get { return _channels; }
-        }
+        public Dictionary<string, Channel> Channels { get; } =
+            new Dictionary<string, Channel>(StringComparer.OrdinalIgnoreCase);
 
         public static event EventHandler<ChannelEventArgs> ChannelCreated;
 
@@ -121,7 +97,7 @@ namespace MutinyIRC.Common
 
         private void Listener_OnQuit(User user, string reason)
         {
-            foreach (KeyValuePair<string, Channel> pair in _channels)
+            foreach (KeyValuePair<string, Channel> pair in Channels)
             {
                 pair.Value.UserQuit(user, reason);
             }
@@ -287,10 +263,10 @@ namespace MutinyIRC.Common
             if (DateTime.Now - _serverChangeTime < TimeSpan.FromSeconds(1))
             {
                 var th = new Thread(() =>
-                                    {
-                                        Thread.Sleep(TimeSpan.FromSeconds(1));
-                                        Connection.Connect();
-                                    });
+                {
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
+                    Connection.Connect();
+                });
                 th.Start();
             }
             else
@@ -312,7 +288,7 @@ namespace MutinyIRC.Common
 
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
         {
-            var chan = _channels[channel];
+            var chan = Channels[channel];
             Kick.Fire(this, new KickEventArgs(user, chan, kickee, reason));
             chan.UserKick(user, kickee, reason);
         }
@@ -345,7 +321,8 @@ namespace MutinyIRC.Common
             chan.OnNewAction(ea.User, ea.Message);
         }
 
-        private void Connection_OnRawMessageReceived(object sender, FlamingIRC.DataEventArgs<string> e)
+        private void Connection_OnRawMessageReceived(object sender,
+                                                     FlamingIRC.DataEventArgs<string> e)
         {
             RawMessageReceived.Fire(this, new DataEventArgs<string>(e.Data));
         }
@@ -362,15 +339,16 @@ namespace MutinyIRC.Common
 
         private void Listener_OnPublic(object sender, UserChannelMessageEventArgs ea)
         {
-            ChannelMessaged.Fire(this, new ChannelMessageEventArgs(ea.User, _channels[ea.Channel], ea.Message));
-            _channels[ea.Channel].OnNewMessage(ea.User, ea.Message);
+            ChannelMessaged.Fire(this,
+                new ChannelMessageEventArgs(ea.User, Channels[ea.Channel], ea.Message));
+            Channels[ea.Channel].OnNewMessage(ea.User, ea.Message);
         }
 
         private void Listener_OnNames(object sender, NamesEventArgs e)
         {
             OnNames?.Invoke(this, new NamesEventArgs(e.Channel, e.Nicks, e.Last));
 
-            if (!_channels.TryGetValue(e.Channel, out Channel chan))
+            if (!Channels.TryGetValue(e.Channel, out Channel chan))
                 return;
 
             chan.AddPendingNames(e.Nicks);
@@ -398,16 +376,16 @@ namespace MutinyIRC.Common
 
         private void Listener_OnPart(User user, string channel, string reason)
         {
-            var chan = _channels[channel];
+            var chan = Channels[channel];
 
             if (chan == null)
                 return;
 
             if (IsMe(user))
             {
-                _channels.Remove(chan.Name);
+                Channels.Remove(chan.Name);
                 ChannelRemoved.Fire(this, new ChannelEventArgs(chan));
-                PartSelf.Fire(this, new PartEventArgs(user, chan, String.Empty));
+                PartSelf.Fire(this, new PartEventArgs(user, chan, string.Empty));
                 return;
             }
 
@@ -420,9 +398,10 @@ namespace MutinyIRC.Common
             Registered?.Invoke(this, e);
         }
 
-        private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes, string raw)
+        private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes,
+                                                  string raw)
         {
-            var chan = _channels[channel];
+            var chan = Channels[channel];
             ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, chan, modes, raw));
 
             chan.ApplyModeChanges(modes);
@@ -435,7 +414,7 @@ namespace MutinyIRC.Common
 
         public Channel JoinChannel(string channelToJoin)
         {
-            return JoinChannel(channelToJoin, String.Empty);
+            return JoinChannel(channelToJoin, string.Empty);
         }
 
         public Channel JoinChannel(string channelToJoin, string key)
@@ -455,7 +434,7 @@ namespace MutinyIRC.Common
 
         public override string ToString()
         {
-            return String.Format("{0}:{1}", Url, Port);
+            return string.Format("{0}:{1}", Url, Port);
         }
 
         public void ChangeNick(string nick)
@@ -470,10 +449,7 @@ namespace MutinyIRC.Common
                 Disconnect();
             }
 
-            if (args.Nick == null)
-            {
-                args.Nick = Connection.ConnectionData.Nick;
-            }
+            args.Nick ??= Connection.ConnectionData.Nick;
 
             UnhookEvents();
             SetupConnection(args);
@@ -494,16 +470,16 @@ namespace MutinyIRC.Common
 
         public Channel CreateChannel(string channelName)
         {
-            if (_channels.ContainsKey(channelName))
+            if (Channels.ContainsKey(channelName))
             {
-                return _channels[channelName];
+                return Channels[channelName];
             }
 
             if (!Rfc2812Util.IsValidChannelName(channelName))
                 return null;
 
             var newChan = new Channel(this, channelName);
-            _channels.Add(channelName, newChan);
+            Channels.Add(channelName, newChan);
             ChannelCreated.Fire(this, new ChannelEventArgs(newChan));
 
             return newChan;
@@ -511,15 +487,15 @@ namespace MutinyIRC.Common
 
         public bool InChannel(string channelName)
         {
-            if (_channels.ContainsKey(channelName))
+            if (Channels.ContainsKey(channelName))
             {
-                if (_channels[channelName].Joined)
+                if (Channels[channelName].Joined)
                 {
                     return true;
                 }
 
-                ChannelRemoved.Fire(this, new ChannelEventArgs(_channels[channelName]));
-                if (!_channels.Remove(channelName))
+                ChannelRemoved.Fire(this, new ChannelEventArgs(Channels[channelName]));
+                if (!Channels.Remove(channelName))
                     Debug.WriteLine("Failed to remove channel");
                 //TODO: Is this all that needs to be done?
             }

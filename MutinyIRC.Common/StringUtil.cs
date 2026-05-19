@@ -1,7 +1,7 @@
-﻿namespace MutinyIRC.Common
-{
-    using System.Text;
+﻿using System.Text;
 
+namespace MutinyIRC.Common
+{
     public static class StringUtil
     {
         /// <summary>

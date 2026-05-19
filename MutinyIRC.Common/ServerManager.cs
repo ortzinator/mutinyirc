@@ -1,11 +1,10 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
+using System;
+using FlamingIRC;
 
 namespace MutinyIRC.Common
 {
-    using System.Collections.Generic;
-    using System;
-    using FlamingIRC;
-
     public class ServerManager
     {
         public event EventHandler<ServerEventArgs> ServerAdded;
@@ -19,8 +18,7 @@ namespace MutinyIRC.Common
         {
             get
             {
-                if (instance == null)
-                    instance = new ServerManager { ServerList = new List<Server>() };
+                instance ??= new ServerManager { ServerList = new List<Server>() };
 
                 return instance;
             }

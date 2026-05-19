@@ -12,7 +12,7 @@ namespace MutinyIRC.Common
 
         public static bool LoggerActive
         {
-            get { return _loggerActive; }
+            get => _loggerActive;
 
             set
             {
@@ -28,15 +28,11 @@ namespace MutinyIRC.Common
         }
 
         public static bool AddTimestamp
-        {
-            get { return TextLogger.AddTimestamp; }
-            set { TextLogger.AddTimestamp = value; }
+        { get => TextLogger.AddTimestamp; set => TextLogger.AddTimestamp = value;
         }
 
         public static string TimeFormat
-        {
-            get { return TextLogger.TimeFormat; }
-            set { TextLogger.TimeFormat = value; }
+        { get => TextLogger.TimeFormat; set => TextLogger.TimeFormat = value;
         }
 
         public static void TextEntry(Server network, string text)

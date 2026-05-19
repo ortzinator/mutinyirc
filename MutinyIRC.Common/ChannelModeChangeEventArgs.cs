@@ -1,9 +1,9 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
-    using System.Collections.Generic;
-    using FlamingIRC;
+﻿using System;
+using System.Collections.Generic;
+using FlamingIRC;
 
+namespace MutinyIRC.Common
+{
     public class ChannelModeChangeEventArgs : EventArgs
     {
         public ChannelModeChangeEventArgs(User user, Channel channel, IEnumerable<ChannelModeInfo> modes, string raw)

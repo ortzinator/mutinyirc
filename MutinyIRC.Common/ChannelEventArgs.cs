@@ -1,7 +1,7 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
+﻿using System;
 
+namespace MutinyIRC.Common
+{
     public class ChannelEventArgs : EventArgs
     {
         public ChannelEventArgs(Channel channel)

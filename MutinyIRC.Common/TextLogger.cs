@@ -50,8 +50,7 @@ namespace MutinyIRC.Common
 
         private static void Error(string err)
         {
-            if (WriteFailed != null)
-                WriteFailed(null, new DataEventArgs<string>(err));
+            WriteFailed?.Invoke(null, new DataEventArgs<string>(err));
         }
 
         /// <summary>Registers a server connection for logging, creating its log file.</summary>

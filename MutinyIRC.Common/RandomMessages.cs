@@ -1,10 +1,10 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Xml.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 
+namespace MutinyIRC.Common
+{
     /// <summary>
     /// Generator for random messages of any type (quit, part).
     /// </summary>
@@ -93,13 +93,12 @@
             {
                 XmlSerializer s = new XmlSerializer(typeof(SerializableDictionary<string, List<string>>));
                 TextReader r = new StreamReader(Environment.CurrentDirectory + "\\list.xml");
-
                 try
                 {
                     _messagesStore = (SerializableDictionary<string, List<string>>)s.Deserialize(r);
                     r.Close();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // TODO: Let's tell the user about it or something
                     throw;
@@ -118,13 +117,12 @@
         {
             XmlSerializer s = new XmlSerializer(typeof(SerializableDictionary<string, List<string>>));
             TextWriter w = new StreamWriter(Environment.CurrentDirectory + "\\list.xml");
-
             try
             {
                 s.Serialize(w, _messagesStore);
                 w.Close();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // TODO: Let's tell the user about it or something
                 throw;

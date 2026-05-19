@@ -54,10 +54,7 @@ namespace MutinyIRC.Common
         /// <summary>
         ///   Returns true if the user is in the channel
         /// </summary>
-        public bool Joined
-        {
-            get { return Users.Count > 0; }
-        }
+        public bool Joined => Users.Count > 0;
 
         //TODO: Update these to EventHandlers
 
@@ -266,7 +263,8 @@ namespace MutinyIRC.Common
         public void Say(string message)
         {
             Server.Connection.Sender.PublicMessage(Name, message);
-            MessagedChannel.Fire(this, new UserMessageEventArgs(Users.GetUser(Server.UserNick), message));
+            MessagedChannel.Fire(this,
+                new UserMessageEventArgs(Users.GetUser(Server.UserNick), message));
         }
 
         public void Act(string message)

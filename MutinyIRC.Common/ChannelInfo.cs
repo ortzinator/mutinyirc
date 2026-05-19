@@ -1,8 +1,8 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
-    using FlamingIRC;
+﻿using System;
+using FlamingIRC;
 
+namespace MutinyIRC.Common
+{
     public class ChannelInfo
     {
         public ChannelInfo(string name)
@@ -32,7 +32,7 @@
 
         public override string ToString()
         {
-            return String.Format("{0} - {1}", Name, Topic);
+            return string.Format("{0} - {1}", Name, Topic);
         }
     }
 }

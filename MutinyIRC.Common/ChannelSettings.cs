@@ -1,10 +1,10 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
-    using System.Xml.Serialization;
-    using System.Xml.Schema;
-    using System.Xml;
+﻿using System;
+using System.Xml.Serialization;
+using System.Xml.Schema;
+using System.Xml;
 
+namespace MutinyIRC.Common
+{
     public class ChannelSettings : IXmlSerializable, IEquatable<ChannelSettings>
     {
         public ChannelSettings(string name, bool autojoin, string description, string key)
@@ -34,7 +34,7 @@
 
         public void ReadXml(XmlReader reader)
         {
-            Description = reader.GetAttribute("Description") ?? String.Empty;
+            Description = reader.GetAttribute("Description") ?? string.Empty;
             Name = reader.GetAttribute("Name");
             Key = reader.GetAttribute("Key");
             AutoJoin = reader.GetAttribute("AutoJoin") == "True";

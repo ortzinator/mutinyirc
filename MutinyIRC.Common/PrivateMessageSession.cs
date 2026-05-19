@@ -1,8 +1,8 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
-    using FlamingIRC;
+﻿using System;
+using FlamingIRC;
 
+namespace MutinyIRC.Common
+{
     public sealed class PrivateMessageSession : MessageContext
     {
         public PrivateMessageSession(Server parentServer, User user)

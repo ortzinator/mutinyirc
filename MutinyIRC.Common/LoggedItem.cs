@@ -1,9 +1,8 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
-    using System.IO;
-    using System.Text;
+﻿using System;
+using System.IO;
 
+namespace MutinyIRC.Common
+{
     /// <summary>
     /// This class holds a single log file as well as corresponding name and path.
     /// The goal of this class is to abstract away the IO verification/handling made

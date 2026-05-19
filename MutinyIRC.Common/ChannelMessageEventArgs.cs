@@ -1,8 +1,8 @@
-﻿namespace MutinyIRC.Common
-{
-    using System;
-    using FlamingIRC;
+﻿using System;
+using FlamingIRC;
 
+namespace MutinyIRC.Common
+{
     public class ChannelMessageEventArgs : EventArgs
     {
         public ChannelMessageEventArgs(User user, Channel channel, string message)

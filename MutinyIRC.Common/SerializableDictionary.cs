@@ -1,9 +1,9 @@
-﻿namespace MutinyIRC.Common
-{
-    using System.Collections.Generic;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
+﻿using System.Collections.Generic;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
+namespace MutinyIRC.Common
+{
     /// <summary>
     /// Dictionary that can be serialized to XML
     /// </summary>
