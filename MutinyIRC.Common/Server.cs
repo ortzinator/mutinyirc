@@ -35,8 +35,10 @@ namespace MutinyIRC.Common
             get => _connection;
             set
             {
+                ArgumentNullException.ThrowIfNull(value);
+
                 Channels.Clear();
-                _connection = value ?? throw new ArgumentNullException("value");
+                _connection = value;
             }
         }
 
