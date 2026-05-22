@@ -291,6 +291,8 @@ namespace MutinyIRC.Common
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
         {
             var chan = Channels[channel];
+            if (kickee == UserNick)
+                chan.Membership = ChannelMembership.NotJoined;
             Kick.Fire(this, new KickEventArgs(user, chan, kickee, reason));
             chan.UserKick(user, kickee, reason);
         }
@@ -366,6 +368,7 @@ namespace MutinyIRC.Common
             var chan = CreateChannel(channel);
             if (user.Nick == UserNick)
             {
+                chan.Membership = ChannelMembership.Joined;
                 JoinSelf.Fire(this, new DataEventArgs<Channel>(chan));
                 Connection.Sender.Names(channel);
             }
@@ -385,6 +388,7 @@ namespace MutinyIRC.Common
 
             if (IsMe(user))
             {
+                chan.Membership = ChannelMembership.NotJoined;
                 Channels.Remove(chan.Name);
                 ChannelRemoved.Fire(this, new ChannelEventArgs(chan));
                 PartSelf.Fire(this, new PartEventArgs(user, chan, string.Empty));
@@ -422,6 +426,7 @@ namespace MutinyIRC.Common
         public Channel JoinChannel(string channelToJoin, string key)
         {
             Channel newChan = CreateChannel(channelToJoin);
+            newChan.Membership = ChannelMembership.Joining;
 
             Connection.Sender.Join(channelToJoin, key);
             // TODO: Figure out what happens when you join with a wrong key, and fix up channel manager integrity afterwards.
@@ -489,19 +494,7 @@ namespace MutinyIRC.Common
 
         public bool InChannel(string channelName)
         {
-            if (Channels.ContainsKey(channelName))
-            {
-                if (Channels[channelName].Joined)
-                {
-                    return true;
-                }
-
-                ChannelRemoved.Fire(this, new ChannelEventArgs(Channels[channelName]));
-                if (!Channels.Remove(channelName))
-                    Debug.WriteLine("Failed to remove channel");
-                //TODO: Is this all that needs to be done?
-            }
-            return false;
+            return Channels.TryGetValue(channelName, out Channel chan) && chan.Joined;
         }
     }
 }

@@ -7,6 +7,21 @@ namespace MutinyIRC.Common
     public delegate void ChannelKickEventHandler(User nick, string kickee, string reason);
 
     /// <summary>
+    ///   Our membership state for a channel, independent of whether the user list is populated.
+    /// </summary>
+    public enum ChannelMembership
+    {
+        /// <summary>We are not a member of the channel.</summary>
+        NotJoined,
+
+        /// <summary>A JOIN has been sent but the server has not yet echoed it back.</summary>
+        Joining,
+
+        /// <summary>The server has confirmed we are a member of the channel.</summary>
+        Joined
+    }
+
+    /// <summary>
     ///   Represents a specific channel on a network
     /// </summary>
     public sealed class Channel : MessageContext
@@ -52,9 +67,15 @@ namespace MutinyIRC.Common
         public UserList Users { get; set; }
 
         /// <summary>
-        ///   Returns true if the user is in the channel
+        ///   Our membership state for this channel. Set from the connection lifecycle
+        ///   (join sent, join echoed, part, kick), not derived from the user list.
         /// </summary>
-        public bool Joined => Users.Count > 0;
+        public ChannelMembership Membership { get; internal set; } = ChannelMembership.NotJoined;
+
+        /// <summary>
+        ///   Returns true if the server has confirmed we are a member of the channel.
+        /// </summary>
+        public bool Joined => Membership == ChannelMembership.Joined;
 
         //TODO: Update these to EventHandlers
 

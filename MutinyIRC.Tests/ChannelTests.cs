@@ -25,7 +25,7 @@ namespace MutinyIRC.Tests
         }
 
         [Test]
-        public void ShowTopic_TopicRecievedRegistered_EventFires()
+        public void ShowTopic_TopicReceivedRegistered_EventFires()
         {
 
             bool eventWasRaised = false;
@@ -38,7 +38,7 @@ namespace MutinyIRC.Tests
                 topic = e.Data;
             };
             _channel.ShowTopic(expected);
-            Assert.IsTrue(eventWasRaised, "TopicRecieved event was not fired");
+            Assert.IsTrue(eventWasRaised, "TopicReceived event was not fired");
             Assert.AreEqual(expected, topic);
         }
 
@@ -389,6 +389,47 @@ namespace MutinyIRC.Tests
                 "A committed NAMES buffer must be cleared so a later NAMES does not accumulate stale users");
             Assert.IsNotNull(channel.Users.GetUser("bob"));
             Assert.IsNull(channel.Users.GetUser("alice"));
+        }
+
+        [Test]
+        public void Membership_NewChannel_DefaultsToNotJoined()
+        {
+            var channel = CreateChannelWithConnection();
+
+            Assert.AreEqual(ChannelMembership.NotJoined, channel.Membership);
+            Assert.IsFalse(channel.Joined, "A freshly created channel must not report as joined");
+        }
+
+        [Test]
+        public void Joined_MembershipJoinedButNoUsers_ReturnsTrue()
+        {
+            var channel = CreateChannelWithConnection();
+            channel.Membership = ChannelMembership.Joined;
+
+            // Regression: between the JOIN echo and the NAMES reply the user list is
+            // empty, but we are still a member. Joined must not depend on Users.Count.
+            Assert.IsTrue(channel.Joined,
+                "Joined must reflect membership state, not whether the user list is populated");
+        }
+
+        [Test]
+        public void Joined_MembershipNotJoinedButHasUsers_ReturnsFalse()
+        {
+            var channel = CreateChannelWithConnection();
+            channel.UserJoin(MakeUser("Bob"));
+
+            Assert.IsFalse(channel.Joined,
+                "A populated user list must not make a non-member channel report as joined");
+        }
+
+        [Test]
+        public void Joined_MembershipJoining_ReturnsFalse()
+        {
+            var channel = CreateChannelWithConnection();
+            channel.Membership = ChannelMembership.Joining;
+
+            Assert.IsFalse(channel.Joined,
+                "A channel awaiting its JOIN echo is not yet joined");
         }
 
         [Test]

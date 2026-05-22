@@ -41,5 +41,53 @@ namespace MutinyIRC.Tests
                 _server.Connection = null;
             });
         }
+
+        [Test]
+        public void InChannel_JoinedChannel_ReturnsTrue()
+        {
+            var chan = new Channel(_server, "#test") { Membership = ChannelMembership.Joined };
+            _server.Channels.Add("#test", chan);
+
+            Assert.IsTrue(_server.InChannel("#test"));
+        }
+
+        [Test]
+        public void InChannel_UnknownChannel_ReturnsFalse()
+        {
+            Assert.IsFalse(_server.InChannel("#nope"));
+        }
+
+        [Test]
+        public void InChannel_NotJoinedChannel_ReturnsFalse()
+        {
+            var chan = new Channel(_server, "#test") { Membership = ChannelMembership.Joining };
+            _server.Channels.Add("#test", chan);
+
+            Assert.IsFalse(_server.InChannel("#test"),
+                "A channel awaiting its JOIN echo must not report as joined");
+        }
+
+        [Test]
+        public void InChannel_NotJoinedChannel_DoesNotRemoveChannelOrFireChannelRemoved()
+        {
+            var chan = new Channel(_server, "#test") { Membership = ChannelMembership.Joining };
+            _server.Channels.Add("#test", chan);
+
+            bool removedFired = false;
+            EventHandler<ChannelEventArgs> handler = (_, _) => removedFired = true;
+            Server.ChannelRemoved += handler;
+            try
+            {
+                _server.InChannel("#test");
+            }
+            finally
+            {
+                Server.ChannelRemoved -= handler;
+            }
+
+            Assert.IsTrue(_server.Channels.ContainsKey("#test"),
+                "InChannel must be a pure query and not prune the channel");
+            Assert.IsFalse(removedFired, "InChannel must not fire ChannelRemoved");
+        }
     }
 }

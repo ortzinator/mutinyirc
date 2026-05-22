@@ -9,4 +9,8 @@
     <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="MutinyIRC.Tests" />
+  </ItemGroup>
+
 </Project>
