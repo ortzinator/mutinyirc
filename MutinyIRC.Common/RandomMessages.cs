@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml.Serialization;
+using System.Text.Json;
 
 namespace MutinyIRC.Common
 {
@@ -10,8 +10,17 @@ namespace MutinyIRC.Common
     /// </summary>
     public static class RandomMessages
     {
-        private static SerializableDictionary<string, List<string>> _messagesStore;
-        private static Random _rand;
+        private static readonly string FilePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+            "MutinyIRC", "random-messages.json");
+
+        private static readonly JsonSerializerOptions SerializerOptions = new()
+        {
+            WriteIndented = true
+        };
+
+        private static Dictionary<string, List<string>> _messagesStore = new();
+        private static readonly Random Rand = new();
 
         /// <summary>
         /// Adds a message type to the list
@@ -31,7 +40,6 @@ namespace MutinyIRC.Common
         /// Removes a message type from the list. This also removes any messages of that type.
         /// </summary>
         /// <param name="messageType">Type of message (quit, part, etc.)</param>
-        /// <returns></returns>
         public static bool UnregisterMessageType(string messageType)
         {
             return _messagesStore.Remove(messageType);
@@ -44,9 +52,9 @@ namespace MutinyIRC.Common
         /// <param name="message">The message</param>
         public static void AddMessage(string messageType, string message)
         {
-            if (_messagesStore.ContainsKey(messageType) && !_messagesStore[messageType].Contains(message))
+            if (_messagesStore.TryGetValue(messageType, out var list) && !list.Contains(message))
             {
-                _messagesStore[messageType].Add(message);
+                list.Add(message);
             }
         }
 
@@ -57,75 +65,62 @@ namespace MutinyIRC.Common
         /// <param name="message">The message to remove</param>
         public static void RemoveMessage(string messageType, string message)
         {
-            if (_messagesStore.ContainsKey(messageType))
+            if (_messagesStore.TryGetValue(messageType, out var list))
             {
-                _messagesStore[messageType].Remove(message);
+                list.Remove(message);
             }
         }
 
         /// <summary>
-        /// Retreives a random message from a certain type
+        /// Retrieves a random message from a certain type
         /// </summary>
         /// <param name="messageType">Type of message (quit, part, etc.)</param>
         /// <returns>The message, or null if no messages of that type have been entered yet.</returns>
         public static string GetMessage(string messageType)
         {
-            if (_messagesStore.ContainsKey(messageType))
+            if (_messagesStore.TryGetValue(messageType, out var list) && list.Count != 0)
             {
-                List<string> listRef = _messagesStore[messageType];
-
-                if (listRef.Count != 0)
-                    return listRef[_rand.Next(0, listRef.Count)];
+                return list[Rand.Next(0, list.Count)];
             }
 
             return null;
         }
 
         /// <summary>
-        /// Loads the settings from XML
+        /// Loads the messages from disk. No-op if the file does not exist yet.
         /// </summary>
         public static void Load()
         {
-            _rand = new Random();
+            try
+            {
+                if (!File.Exists(FilePath))
+                    return;
 
-            // TODO: Real path
-            if (File.Exists(Environment.CurrentDirectory + "\\list.xml"))
-            {
-                XmlSerializer s = new XmlSerializer(typeof(SerializableDictionary<string, List<string>>));
-                TextReader r = new StreamReader(Environment.CurrentDirectory + "\\list.xml");
-                try
-                {
-                    _messagesStore = (SerializableDictionary<string, List<string>>)s.Deserialize(r);
-                    r.Close();
-                }
-                catch (Exception)
-                {
-                    // TODO: Let's tell the user about it or something
-                    throw;
-                }
+                using FileStream stream = File.OpenRead(FilePath);
+                _messagesStore =
+                    JsonSerializer.Deserialize<Dictionary<string, List<string>>>(stream)
+                    ?? new Dictionary<string, List<string>>();
             }
-            else
+            catch (Exception ex)
             {
-                _messagesStore = new SerializableDictionary<string, List<string>>();
+                Console.Error.WriteLine($"Could not load random messages: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Saves the settings to XML
+        /// Saves the messages to disk.
         /// </summary>
         public static void Save()
         {
-            XmlSerializer s = new XmlSerializer(typeof(SerializableDictionary<string, List<string>>));
-            TextWriter w = new StreamWriter(Environment.CurrentDirectory + "\\list.xml");
             try
             {
-                s.Serialize(w, _messagesStore);
-                w.Close();
+                Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+                using FileStream stream = File.Create(FilePath);
+                JsonSerializer.Serialize(stream, _messagesStore, SerializerOptions);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // TODO: Let's tell the user about it or something
-                throw;
+                Console.Error.WriteLine($"Could not save random messages: {ex.Message}");
             }
         }
     }
