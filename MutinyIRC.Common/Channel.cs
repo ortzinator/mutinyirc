@@ -137,7 +137,10 @@ namespace MutinyIRC.Common
         public void Server_OnNick(object sender, NickChangeEventArgs e)
         {
             User user = Users.GetUser(e.User);
-            if (user != null) { user.Nick = e.NewNick; }
+            if (user == null) return;
+
+            user.Nick = e.NewNick;
+            NickChanged.Fire(this, e);
         }
 
         /// <summary>

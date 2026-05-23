@@ -91,6 +91,37 @@ namespace MutinyIRC.Tests
             Assert.AreEqual(gotUser.Nick, "BillNye");
         }
 
+        [Test]
+        public void Server_OnNick_UserInChannel_FiresNickChanged()
+        {
+            _channel.Users = A.Fake<UserList>();
+            User cached = new User("Ortzinator", "Ortzinator", "");
+            A.CallTo(() => _channel.Users.GetUser(A<User>.Ignored)).Returns(cached);
+
+            NickChangeEventArgs received = null;
+            _channel.NickChanged += (_, e) => received = e;
+
+            var args = new NickChangeEventArgs(new User("Ortzinator", "Ortzinator", ""), "BillNye");
+            _channel.Server_OnNick(null, args);
+
+            Assert.IsNotNull(received, "NickChanged must fire when the renamed user is in the channel");
+            Assert.AreEqual("BillNye", received.NewNick);
+        }
+
+        [Test]
+        public void Server_OnNick_UserNotInChannel_DoesNotFireNickChanged()
+        {
+            _channel.Users = A.Fake<UserList>();
+            A.CallTo(() => _channel.Users.GetUser(A<User>.Ignored)).Returns(null);
+
+            bool fired = false;
+            _channel.NickChanged += (_, _) => fired = true;
+
+            _channel.Server_OnNick(null, new NickChangeEventArgs(new User("Stranger", "Stranger", ""), "BillNye"));
+
+            Assert.IsFalse(fired, "NickChanged must not fire for a user that is not in this channel");
+        }
+
         private static User MakeUser(string nick) => new User(nick, nick, "");
 
         [Test]
