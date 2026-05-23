@@ -252,7 +252,7 @@ public class ServerViewModel : IrcViewModel
     public override void Close()
     {
         base.Close();
-        server?.Disconnect();
+        server?.Disconnect(RandomMessages.GetMessage("quit") ?? "MutinyIRC");
     }
 
     public override void Dispose()

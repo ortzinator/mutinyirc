@@ -3,6 +3,7 @@
 using global::Avalonia;
 using global::Avalonia.Controls.ApplicationLifetimes;
 using global::Avalonia.Markup.Xaml;
+using Common;
 using ViewModels;
 using Views;
 
@@ -28,6 +29,7 @@ public partial class App : Application
                 closing = true;
                 viewModel.Close();
                 IrcSettingsManager.Instance.Save();
+                RandomMessages.Save();
             };
             desktop.MainWindow = window;
         }

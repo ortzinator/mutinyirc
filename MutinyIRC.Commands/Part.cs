@@ -9,7 +9,9 @@
     [Plugin]
     public class Part : ICommand
     {
-        private const string defaultMessage = "Goodbye!";
+        private const string fallbackMessage = "Goodbye!";
+
+        private static string DefaultMessage() => RandomMessages.GetMessage("part") ?? fallbackMessage;
 
         /// <summary>
         /// Parts the current channel with a message
@@ -27,7 +29,7 @@
         /// <param name="context"></param>
         public void Execute(Channel context)
         {
-            Execute(context, defaultMessage);
+            Execute(context, DefaultMessage());
         }
 
         /// <summary>
@@ -37,7 +39,7 @@
         /// <param name="channel"></param>
         public void Execute(Channel context, ChannelInfo channel)
         {
-            Execute(context.Server, channel, defaultMessage);
+            Execute(context.Server, channel, DefaultMessage());
         }
 
         /// <summary>
@@ -58,7 +60,7 @@
         /// <param name="channel"></param>
         public void Execute(Server context, ChannelInfo channel)
         {
-            Execute(context, channel, defaultMessage);
+            Execute(context, channel, DefaultMessage());
         }
 
         /// <summary>
@@ -80,7 +82,7 @@
         /// <param name="channel"></param>
         public void Execute(PrivateMessageSession context, ChannelInfo channel)
         {
-            Execute(context.Server, channel, defaultMessage);
+            Execute(context.Server, channel, DefaultMessage());
         }
 
         /// <summary>
