@@ -126,7 +126,7 @@ namespace FlamingIRC
             StringBuilder builder = new StringBuilder();
             builder.Append(time.ToLongDateString() + " ");
             builder.Append(time.ToLongTimeString() + " ");
-            builder.Append("(" + TimeZone.CurrentTimeZone.StandardName + ")");
+            builder.Append("(" + TimeZoneInfo.Local.StandardName + ")");
             return builder.ToString();
         }
         /// <summary>

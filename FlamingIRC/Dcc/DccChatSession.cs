@@ -87,8 +87,14 @@ namespace FlamingIRC
 
         private void CloseClientConnection()
         {
-            client.GetStream().Close();
-            client.Close();
+            try
+            {
+                client?.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLineIf(DccUtil.DccTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccChatSession::CloseClientConnection() " + ex);
+            }
         }
         /// <summary>
         /// Send the session closed event
@@ -208,12 +214,6 @@ namespace FlamingIRC
                 //Read loop broken. Remote user must have closed the socket
                 ClientInfo.Connection.Listener.Error(ReplyCode.ConnectionFailed, "Chat connection closed by remote user.");
             }
-            catch (ThreadAbortException)
-            {
-                Debug.WriteLineIf(DccUtil.DccTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccChatSession::ReceiveMessages() Thread manually stopped. ");
-                //Prevent the exception from being re-thrown in the Listen() method.
-                Thread.ResetAbort();
-            }
             catch (Exception ex)
             {
                 Debug.WriteLineIf(DccUtil.DccTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccChatSession::ReceiveMessages() exception= " + ex);
@@ -264,7 +264,9 @@ namespace FlamingIRC
                 }
                 else if (receiving)
                 {
-                    thread.Abort();
+                    //Closing the client breaks the blocking ReadLine in ReceiveMessages,
+                    //which then exits via the general exception/finally path.
+                    CloseClientConnection();
                 }
             }
         }
