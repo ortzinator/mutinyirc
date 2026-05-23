@@ -29,7 +29,7 @@ public partial class App : Application
                 closing = true;
                 viewModel.Close();
                 IrcSettingsManager.Instance.Save();
-                RandomMessages.Save();
+                RandomMessages.Instance.Save();
             };
             desktop.MainWindow = window;
         }

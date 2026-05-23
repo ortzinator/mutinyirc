@@ -8,9 +8,9 @@ namespace MutinyIRC.Common
     /// <summary>
     /// Generator for random messages of any type (quit, part).
     /// </summary>
-    public static class RandomMessages
+    public class RandomMessages
     {
-        private static readonly string FilePath = Path.Combine(
+        private static readonly string DefaultFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Personal),
             "MutinyIRC", "random-messages.json");
 
@@ -19,15 +19,43 @@ namespace MutinyIRC.Common
             WriteIndented = true
         };
 
-        private static Dictionary<string, List<string>> _messagesStore = new();
-        private static readonly Random Rand = new();
+        private static RandomMessages _instance;
+
+        /// <summary>
+        /// Process-wide instance backed by the default file path. Lazily loads on first access.
+        /// </summary>
+        public static RandomMessages Instance
+        {
+            get
+            {
+                if (_instance != null) return _instance;
+                _instance = new RandomMessages(DefaultFilePath);
+                _instance.Load();
+                return _instance;
+            }
+        }
+
+        private readonly string _filePath;
+        private readonly Random _rand;
+        private Dictionary<string, List<string>> _messagesStore = new();
+
+        /// <summary>
+        /// Creates a new instance. Tests should use this directly; app code should use <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="filePath">Path to the JSON file used by Load/Save.</param>
+        /// <param name="rand">Random source. Pass a seeded Random for deterministic tests.</param>
+        public RandomMessages(string filePath, Random rand = null)
+        {
+            _filePath = filePath;
+            _rand = rand ?? new Random();
+        }
 
         /// <summary>
         /// Adds a message type to the list
         /// </summary>
         /// <param name="messageType">Type of message (quit, part, etc.) used later to fetch individual random messages</param>
         /// <returns>True if the type registered correctly, false if it was already registered before</returns>
-        public static bool RegisterMessageType(string messageType)
+        public bool RegisterMessageType(string messageType)
         {
             if (_messagesStore.ContainsKey(messageType))
                 return false;
@@ -40,7 +68,7 @@ namespace MutinyIRC.Common
         /// Removes a message type from the list. This also removes any messages of that type.
         /// </summary>
         /// <param name="messageType">Type of message (quit, part, etc.)</param>
-        public static bool UnregisterMessageType(string messageType)
+        public bool UnregisterMessageType(string messageType)
         {
             return _messagesStore.Remove(messageType);
         }
@@ -50,7 +78,7 @@ namespace MutinyIRC.Common
         /// </summary>
         /// <param name="messageType">Type of message (quit, part, etc.)</param>
         /// <param name="message">The message</param>
-        public static void AddMessage(string messageType, string message)
+        public void AddMessage(string messageType, string message)
         {
             if (_messagesStore.TryGetValue(messageType, out var list) && !list.Contains(message))
             {
@@ -63,7 +91,7 @@ namespace MutinyIRC.Common
         /// </summary>
         /// <param name="messageType">Type of message (quit, part, etc.)</param>
         /// <param name="message">The message to remove</param>
-        public static void RemoveMessage(string messageType, string message)
+        public void RemoveMessage(string messageType, string message)
         {
             if (_messagesStore.TryGetValue(messageType, out var list))
             {
@@ -76,11 +104,11 @@ namespace MutinyIRC.Common
         /// </summary>
         /// <param name="messageType">Type of message (quit, part, etc.)</param>
         /// <returns>The message, or null if no messages of that type have been entered yet.</returns>
-        public static string GetMessage(string messageType)
+        public string GetMessage(string messageType)
         {
             if (_messagesStore.TryGetValue(messageType, out var list) && list.Count != 0)
             {
-                return list[Rand.Next(0, list.Count)];
+                return list[_rand.Next(0, list.Count)];
             }
 
             return null;
@@ -89,16 +117,15 @@ namespace MutinyIRC.Common
         /// <summary>
         /// Loads the messages from disk. No-op if the file does not exist yet.
         /// </summary>
-        public static void Load()
+        public void Load()
         {
             try
             {
-                if (!File.Exists(FilePath))
+                if (!File.Exists(_filePath))
                     return;
 
-                using FileStream stream = File.OpenRead(FilePath);
-                _messagesStore =
-                    JsonSerializer.Deserialize<Dictionary<string, List<string>>>(stream)
+                using FileStream stream = File.OpenRead(_filePath);
+                _messagesStore = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(stream)
                     ?? new Dictionary<string, List<string>>();
             }
             catch (Exception ex)
@@ -110,12 +137,12 @@ namespace MutinyIRC.Common
         /// <summary>
         /// Saves the messages to disk.
         /// </summary>
-        public static void Save()
+        public void Save()
         {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-                using FileStream stream = File.Create(FilePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(_filePath)!);
+                using FileStream stream = File.Create(_filePath);
                 JsonSerializer.Serialize(stream, _messagesStore, SerializerOptions);
             }
             catch (Exception ex)

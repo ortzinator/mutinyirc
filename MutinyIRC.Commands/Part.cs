@@ -11,7 +11,7 @@
     {
         private const string fallbackMessage = "Goodbye!";
 
-        private static string DefaultMessage() => RandomMessages.GetMessage("part") ?? fallbackMessage;
+        private static string DefaultMessage() => RandomMessages.Instance.GetMessage("part") ?? fallbackMessage;
 
         /// <summary>
         /// Parts the current channel with a message

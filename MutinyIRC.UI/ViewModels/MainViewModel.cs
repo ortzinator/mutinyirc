@@ -62,7 +62,7 @@ public class MainViewModel : ViewModelBase
         }
 
         _pluginManager.LoadPlugins(Path.Combine(AppContext.BaseDirectory, "plugins"));
-        RandomMessages.Load();
+        _ = RandomMessages.Instance;
     }
 
     private void Server_JoinSelf(object? sender, Common.DataEventArgs<Channel> e)
