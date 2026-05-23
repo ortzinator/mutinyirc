@@ -139,15 +139,22 @@ namespace MutinyIRC.Common
         /// </summary>
         public void Save()
         {
+            string tempPath = _filePath + ".tmp";
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(_filePath)!);
-                using FileStream stream = File.Create(_filePath);
-                JsonSerializer.Serialize(stream, _messagesStore, SerializerOptions);
+
+                using (FileStream stream = File.Create(tempPath))
+                {
+                    JsonSerializer.Serialize(stream, _messagesStore, SerializerOptions);
+                }
+
+                File.Move(tempPath, _filePath, overwrite: true);
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"Could not save random messages: {ex.Message}");
+                try { if (File.Exists(tempPath)) File.Delete(tempPath); } catch (IOException) { }
             }
         }
     }
