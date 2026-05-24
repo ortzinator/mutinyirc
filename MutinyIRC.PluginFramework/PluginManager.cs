@@ -118,7 +118,8 @@
         {
             try
             {
-                Assembly asm = Assembly.LoadFile(pluginInfo.AssemblyPath);
+                Assembly asm = FindLoadedAssembly(pluginInfo.AssemblyPath)
+                    ?? Assembly.LoadFile(pluginInfo.AssemblyPath);
                 var instance = asm.CreateInstance(pluginInfo.FullName);
                 if (instance == null)
                     Trace.WriteLine($"CreateInstance returned null for {pluginInfo.FullName} in {pluginInfo.AssemblyPath}", TraceCategories.PluginSystem);
@@ -129,6 +130,17 @@
                 Trace.WriteLine($"Failed to instantiate {pluginInfo.FullName}: {ex}", TraceCategories.PluginSystem);
                 return null;
             }
+        }
+
+        private static Assembly FindLoadedAssembly(string path)
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                if (asm.IsDynamic) continue;
+                if (string.Equals(asm.Location, path, StringComparison.OrdinalIgnoreCase))
+                    return asm;
+            }
+            return null;
         }
 
         public CommandResultInfo ExecuteCommand(CommandExecutionInfo commandInput)
