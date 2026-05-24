@@ -2,16 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <PackageId>MutinyIRC.PluginFramework</PackageId>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj" />
     <ProjectReference Include="..\MutinyIRC.Common\MutinyIRC.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="MutinyIRC.PluginFramework.Tests" />
+    <ProjectReference Include="..\MutinyIRC.PluginFramework\MutinyIRC.PluginFramework.csproj" />
   </ItemGroup>
 
 </Project>

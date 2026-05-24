@@ -13,7 +13,7 @@
     /// </summary>
     public sealed class PluginManager
     {
-        private Dictionary<string, CommandInfo> _commands;
+        internal Dictionary<string, CommandInfo> _commands;
         private List<PluginInfo> _plugins;
 
         public PluginManager()
