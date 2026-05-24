@@ -20,8 +20,9 @@
         {
             //TODO: clean this up
             IEnumerable<string> summaries = from member in xdoc.Descendants("member")
-                                            where member.Attribute("name") != null
-                                            && member.Attribute("name").Value == MemberNameString(type, info)
+                                            where member.Attribute("name") != null &&
+                                                member.Attribute("name").Value ==
+                                                MemberNameString(type, info)
                                             select member.Element("summary").Value.Trim();
 
             List<string> l = new List<string>(summaries);
@@ -33,6 +34,21 @@
                 return null;
 
             return l[0];
+        }
+
+        /// <summary>
+        /// Gets the &lt;summary&gt; text from the XML docs for the given type.
+        /// </summary>
+        /// <returns>The trimmed summary, or null if none is present.</returns>
+        public string GetTypeSummary(Type type)
+        {
+            string name = "T:" + type.FullName;
+            var summary = xdoc.Descendants("member")
+                .Where(m => m.Attribute("name") != null && m.Attribute("name").Value == name)
+                .Select(m => m.Element("summary"))
+                .FirstOrDefault();
+
+            return summary == null ? null : summary.Value.Trim();
         }
 
         /// <summary>
