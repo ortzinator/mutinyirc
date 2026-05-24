@@ -38,11 +38,11 @@
         /// </summary>
         private void FindPlugins(string path)
         {
-            Trace.WriteLine(string.Format("Loading Plug-ins ({0})", path), TraceCategories.PluginSystem);
+            Trace.WriteLine($"Loading Plug-ins ({path})", TraceCategories.PluginSystem);
 
             if (!Directory.Exists(path))
             {
-                Trace.WriteLine(string.Format("Plugin directory not found: {0}", path), TraceCategories.PluginSystem);
+                Trace.WriteLine($"Plugin directory not found: {path}", TraceCategories.PluginSystem);
                 return;
             }
 
@@ -61,30 +61,29 @@
                             if (!_commands.ContainsKey(info.FullName))
                             {
                                 tempCommands.Add(info.FullName, info as CommandInfo);
-                                Trace.WriteLine(string.Format("Added command plugin {0} at {1}", info.FullName, info.AssemblyPath), TraceCategories.PluginSystem);
+                                Trace.WriteLine($"Added command plugin {info.FullName} at {info.AssemblyPath}", TraceCategories.PluginSystem);
                             }
                             else
                             {
-                                Trace.WriteLine(string.Format("Could not load command {0}. A command by that name already exists.", info.FullName),
+                                Trace.WriteLine($"Could not load command {info.FullName} at {info.AssemblyPath}. A command by that name already exists at {_commands[info.FullName].AssemblyPath}.",
                                     TraceCategories.PluginSystem);
-                                //TODO: Log
                             }
                         }
                         else
                         {
                             _plugins.Add(info);
-                            Trace.WriteLine(string.Format("Added plugin {0} at {1}", info.FullName, info.AssemblyPath), TraceCategories.PluginSystem);
+                            Trace.WriteLine($"Added plugin {info.FullName} at {info.AssemblyPath}", TraceCategories.PluginSystem);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(string.Format("Could not load: {0} ({1})", file, ex), TraceCategories.PluginSystem);
+                    Trace.WriteLine($"Could not load: {file} ({ex})", TraceCategories.PluginSystem);
                 }
             }
 
             if (tempCommands.Count == 0)
-                Trace.WriteLine(string.Format("No plugins found in directory: {0}", path), TraceCategories.PluginSystem);
+                Trace.WriteLine($"No plugins found in directory: {path}", TraceCategories.PluginSystem);
 
             foreach (var pair in tempCommands)
             {
@@ -111,7 +110,7 @@
                 if (item.Value.CommandName.Equals(name, StringComparison.CurrentCultureIgnoreCase))
                     return (ICommand)CreateInstance(item.Value);
             }
-            Trace.WriteLine(string.Format("No command called {0} found", name.ToUpper()), TraceCategories.PluginSystem);
+            Trace.WriteLine($"No command called {name.ToUpper()} found", TraceCategories.PluginSystem);
             return null;
         }
 
@@ -122,12 +121,12 @@
                 Assembly asm = Assembly.LoadFile(pluginInfo.AssemblyPath);
                 var instance = asm.CreateInstance(pluginInfo.FullName);
                 if (instance == null)
-                    Trace.WriteLine(string.Format("CreateInstance returned null for {0} in {1}", pluginInfo.FullName, pluginInfo.AssemblyPath), TraceCategories.PluginSystem);
+                    Trace.WriteLine($"CreateInstance returned null for {pluginInfo.FullName} in {pluginInfo.AssemblyPath}", TraceCategories.PluginSystem);
                 return (IPlugin)instance;
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(string.Format("Failed to instantiate {0}: {1}", pluginInfo.FullName, ex), TraceCategories.PluginSystem);
+                Trace.WriteLine($"Failed to instantiate {pluginInfo.FullName}: {ex}", TraceCategories.PluginSystem);
                 return null;
             }
         }
@@ -137,11 +136,11 @@
             //TODO: This should handle errors
             //TODO: Pretty complex, maybe could use some commenting
 
-            Trace.WriteLine(string.Format("Command: /{0} [{1}]", commandInput.Name, string.Join(", ", commandInput.ParameterList)), TraceCategories.PluginSystem);
+            Trace.WriteLine($"Command: /{commandInput.Name} [{string.Join(", ", commandInput.ParameterList)}]", TraceCategories.PluginSystem);
 
             ICommand commandInstance = GetCommandInstance(commandInput.Name);
             if (commandInstance == null)
-                return CommandResultInfo.Fail(string.Format("{0} is an invalid command", commandInput.Name.ToUpper()));
+                return CommandResultInfo.Fail($"{commandInput.Name.ToUpper()} is an invalid command");
 
             MethodInfo[] commandMethods = commandInstance.GetType().GetMethods()
                 .Where(o => o.Name == "Execute")
@@ -183,8 +182,8 @@
                             }
                             catch (Exception ex)
                             {
-                                Trace.WriteLine(string.Format("Command '{0}' threw an exception: {1}", commandInput.Name, ex), TraceCategories.PluginSystem);
-                                return CommandResultInfo.Fail(string.Format("{0} failed with an error", commandInput.Name.ToUpper()));
+                                Trace.WriteLine($"Command '{commandInput.Name}' threw an exception: {ex}", TraceCategories.PluginSystem);
+                                return CommandResultInfo.Fail($"{commandInput.Name.ToUpper()} failed with an error");
                             }
                         }
                         continue;
@@ -239,13 +238,13 @@
                     }
                     catch (Exception ex)
                     {
-                        Trace.WriteLine(string.Format("Command '{0}' threw an exception: {1}", commandInput.Name, ex), TraceCategories.PluginSystem);
-                        return CommandResultInfo.Fail(string.Format("{0} failed with an error", commandInput.Name.ToUpper()));
+                        Trace.WriteLine($"Command '{commandInput.Name}' threw an exception: {ex}", TraceCategories.PluginSystem);
+                        return CommandResultInfo.Fail($"{commandInput.Name.ToUpper()} failed with an error");
                     }
                 }
             }
-            Trace.WriteLine(string.Format("No matching Execute() overload for command '{0}' with context {1} and {2} parameter(s)",
-                commandInput.Name, commandInput.Context.GetType().Name, commandInput.ParameterList.Count), TraceCategories.PluginSystem);
+            Trace.WriteLine($"No matching Execute() overload for command '{commandInput.Name}' with context {commandInput.Context.GetType().Name} and {commandInput.ParameterList.Count} parameter(s)",
+                TraceCategories.PluginSystem);
             return null;
         }
 
