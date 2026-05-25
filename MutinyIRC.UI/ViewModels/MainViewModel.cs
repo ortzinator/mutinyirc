@@ -86,6 +86,54 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    private void Server_PrivateMessageSessionAdded(object? sender, PrivateMessageSessionEventArgs e)
+    {
+        try
+        {
+            var pm = CompositionRoot.Resolve<PrivateMessageViewModel>(
+                new ConstructorArgument("session", e.PrivateMessageSession));
+            pm.RequestClose += Pm_RequestClose;
+            Panels.Add(pm);
+
+            if (_serverMap.TryGetValue(e.PrivateMessageSession.Server, out var serverVm))
+                serverVm.PrivateMessages.Add(pm);
+
+            // Intentionally do NOT focus: incoming PMs must not steal focus.
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"!!!!Server_PrivateMessageSessionAdded threw: {ex}");
+        }
+    }
+
+    private void Server_PrivateMessageSessionRemoved(object? sender, PrivateMessageSessionEventArgs e)
+    {
+        var pm = Panels.OfType<PrivateMessageViewModel>()
+            .FirstOrDefault(p => p.Session == e.PrivateMessageSession);
+        if (pm != null)
+            Pm_RequestClose(pm, EventArgs.Empty);
+    }
+
+    private void Pm_RequestClose(object? sender, EventArgs e)
+    {
+        var pm = (PrivateMessageViewModel)sender!;
+        pm.RequestClose -= Pm_RequestClose;
+        Panels.Remove(pm);
+
+        foreach (var sv in Servers)
+            sv.PrivateMessages.Remove(pm);
+
+        if (SelectedPanel == pm)
+        {
+            pm.IsSelected = false;
+            var next = Panels.Count > 0 ? Panels[0] : null;
+            SelectedPanel = next;
+            if (next != null) next.IsSelected = true;
+        }
+
+        pm.Dispose();
+    }
+
     private void Chan_RequestClose(object? sender, EventArgs e)
     {
         var chan = (ChannelViewModel)sender!;
@@ -122,6 +170,10 @@ public class MainViewModel : ViewModelBase
         _serverMap[server] = vm;
         Panels.Add(vm);
         Servers.Add(vm);
+
+        server.PrivateMessageSessionAdded += Server_PrivateMessageSessionAdded;
+        server.PrivateMessageSessionRemoved += Server_PrivateMessageSessionRemoved;
+
         if (SelectedPanel == null)
         {
             SelectedPanel = vm;

@@ -12,6 +12,14 @@ namespace MutinyIRC.Common
         private DateTime _serverChangeTime;
         private IConnection _connection;
 
+        /// <summary>
+        ///   Nicknames whose PRIVMSGs bypass the PM tab UI and surface in the server
+        ///   window instead (NickServ, ChanServ, etc). Hosts populate this once at
+        ///   startup; tests can mutate it directly. Empty by default so pure-protocol
+        ///   consumers see all PRIVMSGs as conversations. Lookups are case-insensitive.
+        /// </summary>
+        public static HashSet<string> ServiceNicks { get; } = new(StringComparer.OrdinalIgnoreCase);
+
         public Server() { }
 
         public Server(ConnectionArgs settings)
@@ -84,6 +92,7 @@ namespace MutinyIRC.Common
             Connection.Listener.OnUserModeChange += Listener_OnUserModeChange;
             Connection.Listener.OnError += Listener_OnError;
             Connection.Listener.OnAction += Listener_OnAction;
+            Connection.Listener.OnPrivateAction += Listener_OnPrivateAction;
             Connection.Listener.OnPrivateNotice += Listener_OnPrivateNotice;
             Connection.Listener.OnRecieveTopic += ListenerOnRecieveTopic;
             Connection.Listener.OnNick += Listener_OnNick;
@@ -134,11 +143,42 @@ namespace MutinyIRC.Common
 
         private void Listener_OnPrivate(object sender, UserMessageEventArgs e)
         {
-            GetPM(e.User).OnMessageReceived(new DataEventArgs<string>(e.Message));
+            if (IsServiceNick(e.User.Nick))
+            {
+                ServiceMessageReceived.Fire(this, new UserMessageEventArgs(e.User, e.Message));
+                return;
+            }
+
+            GetOrCreatePM(e.User).OnMessageReceived(new DataEventArgs<string>(e.Message));
         }
 
-        private PrivateMessageSession GetPM(User user)
+        private void Listener_OnPrivateAction(object sender, UserMessageEventArgs e)
         {
+            if (IsServiceNick(e.User.Nick))
+            {
+                ServiceActionReceived.Fire(this, new UserMessageEventArgs(e.User, e.Message));
+                return;
+            }
+
+            GetOrCreatePM(e.User).OnActionReceived(new DataEventArgs<string>(e.Message));
+        }
+
+        private static bool IsServiceNick(string nick)
+            => !string.IsNullOrEmpty(nick) && ServiceNicks.Contains(nick);
+
+        /// <summary>
+        ///   Returns the existing <see cref="PrivateMessageSession"/> for the given user
+        ///   or creates a new one. Returns null if the nickname identifies a server-side
+        ///   service (per <see cref="ServiceNickPolicy"/>) since services do not warrant
+        ///   a dedicated PM tab.
+        /// </summary>
+        public PrivateMessageSession GetOrCreatePM(User user)
+        {
+            ArgumentNullException.ThrowIfNull(user);
+
+            if (IsServiceNick(user.Nick))
+                return null;
+
             foreach (var session in PMSessions)
             {
                 if (session.User.Equals(user))
@@ -153,6 +193,31 @@ namespace MutinyIRC.Common
             return tmpsession;
         }
 
+        /// <summary>
+        ///   Convenience overload that resolves a <see cref="PrivateMessageSession"/> by
+        ///   nickname. Returns null for service nicks.
+        /// </summary>
+        public PrivateMessageSession GetOrCreatePM(string nick)
+        {
+            if (string.IsNullOrEmpty(nick))
+                throw new ArgumentException("Nick cannot be null or empty.", nameof(nick));
+
+            return GetOrCreatePM(new User { Nick = nick });
+        }
+
+        /// <summary>
+        ///   Removes a private message session from this server. Fires
+        ///   <see cref="PrivateMessageSessionRemoved"/> so any UI listening can tear
+        ///   down its tab. Safe to call with a session that is not currently tracked.
+        /// </summary>
+        public void RemovePM(PrivateMessageSession session)
+        {
+            if (session == null) return;
+
+            if (PMSessions.Remove(session))
+                PrivateMessageSessionRemoved.Fire(this, new PrivateMessageSessionEventArgs(session));
+        }
+
         public void UnhookEvents()
         {
             Connection.Listener.OnJoin -= Listener_OnJoin;
@@ -164,6 +229,7 @@ namespace MutinyIRC.Common
             Connection.Listener.OnUserModeChange -= Listener_OnUserModeChange;
             Connection.Listener.OnError -= Listener_OnError;
             Connection.Listener.OnAction -= Listener_OnAction;
+            Connection.Listener.OnPrivateAction -= Listener_OnPrivateAction;
             Connection.Listener.OnPrivateNotice -= Listener_OnPrivateNotice;
             Connection.Listener.OnRecieveTopic -= ListenerOnRecieveTopic;
             Connection.Listener.OnNick -= Listener_OnNick;
@@ -223,6 +289,21 @@ namespace MutinyIRC.Common
         public event EventHandler<KickEventArgs> Kick;
 
         public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
+
+        public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionRemoved;
+
+        /// <summary>
+        ///   Fired when a PRIVMSG arrives from a nickname that <see cref="ServiceNickPolicy"/>
+        ///   identifies as a server-side service. No PM session is created; the host
+        ///   should surface the message in the server window.
+        /// </summary>
+        public event EventHandler<UserMessageEventArgs> ServiceMessageReceived;
+
+        /// <summary>
+        ///   Same as <see cref="ServiceMessageReceived"/> but for an incoming CTCP ACTION
+        ///   (e.g. <c>/me</c>) from a service nick.
+        /// </summary>
+        public event EventHandler<UserMessageEventArgs> ServiceActionReceived;
 
         public event EventHandler<DisconnectEventArgs> ConnectionLost;
 

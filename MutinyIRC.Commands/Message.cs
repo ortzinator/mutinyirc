@@ -1,4 +1,4 @@
-﻿namespace MutinyIRC.Commands
+namespace MutinyIRC.Commands
 {
     using MutinyIRC.Common;
     using PluginFramework;
@@ -9,16 +9,29 @@
     [Plugin("Msg")]
     public class Message : ICommand
     {
-        /// <summary>
-        /// Sends a private message to the specified user.
-        /// </summary>
-        /// <param name="channel">The context where the command is executed from.</param>
-        /// <param name="user">The user to send the message to.</param>
-        /// <param name="message">The message to send.</param>
         public CommandResultInfo Execute(Channel channel, string user, string message)
+            => SendPrivate(channel.Server, user, message);
+
+        public CommandResultInfo Execute(Server server, string user, string message)
+            => SendPrivate(server, user, message);
+
+        public CommandResultInfo Execute(PrivateMessageSession pm, string user, string message)
+            => SendPrivate(pm.Server, user, message);
+
+        /// <summary>
+        ///   Routes the outgoing message through a <see cref="PrivateMessageSession"/> so
+        ///   the sender gets a tab + echoed line. Falls back to the raw wire send when the
+        ///   target is a service nickname (no session is created in that case).
+        /// </summary>
+        private static CommandResultInfo SendPrivate(Server server, string user, string message)
         {
-            channel.Server.MessageUser(user, message);
-            return new CommandResultInfo { Message = "", Result = Result.Success };
+            PrivateMessageSession session = server.GetOrCreatePM(user);
+            if (session != null)
+                session.Send(message);
+            else
+                server.Connection.Sender.PrivateMessage(user, message);
+
+            return CommandResultInfo.Success(string.Empty);
         }
     }
 }

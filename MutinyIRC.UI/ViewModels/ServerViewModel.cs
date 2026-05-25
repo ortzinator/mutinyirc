@@ -19,6 +19,7 @@ public class ServerViewModel : IrcViewModel
     private readonly PluginManager _pluginManager = null!;
 
     public MTObservableCollection<ChannelViewModel> Channels { get; } = new MTObservableCollection<ChannelViewModel>();
+    public MTObservableCollection<PrivateMessageViewModel> PrivateMessages { get; } = new MTObservableCollection<PrivateMessageViewModel>();
     internal Server? ServerInstance => server;
 
     public ServerViewModel(Server newServer, PluginManager pluginManager)
@@ -40,6 +41,18 @@ public class ServerViewModel : IrcViewModel
         server.NickError += Server_NickError;
         server.PartSelf += Server_PartSelf;
         server.WhoisReceived += Server_WhoisReceived;
+        server.ServiceMessageReceived += Server_ServiceMessageReceived;
+        server.ServiceActionReceived += Server_ServiceActionReceived;
+    }
+
+    private void Server_ServiceMessageReceived(object? sender, UserMessageEventArgs e)
+    {
+        ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Message, e.User));
+    }
+
+    private void Server_ServiceActionReceived(object? sender, UserMessageEventArgs e)
+    {
+        ChatLines.Add(new ChannelActionViewModel(DateTime.Now, e.Message, e.User));
     }
 
     public ServerViewModel()

@@ -1,22 +1,22 @@
-﻿namespace MutinyIRC.Commands
+namespace MutinyIRC.Commands
 {
     using MutinyIRC.Common;
     using PluginFramework;
 
     /// <summary>
-    /// Parts a channel
+    /// Sends a CTCP ACTION (the /me command) to a channel or private-message session.
     /// </summary>
     [Plugin("Me")]
     public class Action : ICommand
     {
-        /// <summary>
-        /// Sends a message to the current channel as an action
-        /// </summary>
-        /// <param name="channel"></param>
-        /// <param name="message"></param>
         public void Execute(Channel channel, string message)
         {
             channel.Act(message);
+        }
+
+        public void Execute(PrivateMessageSession pm, string message)
+        {
+            pm.SendAction(message);
         }
     }
 }

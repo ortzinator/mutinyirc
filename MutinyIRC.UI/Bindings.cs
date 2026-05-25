@@ -12,6 +12,7 @@ internal class Bindings : NinjectModule
     {
         Bind<MainViewModel>().ToSelf();
         Bind<ChannelViewModel>().ToSelf();
+        Bind<PrivateMessageViewModel>().ToSelf();
         Bind<PluginManager>().ToSelf().InSingletonScope();
     }
 }
