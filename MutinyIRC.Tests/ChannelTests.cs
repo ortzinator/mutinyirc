@@ -227,7 +227,7 @@ namespace MutinyIRC.Tests
             var channel = CreateChannelWithConnection();
             channel.UserJoin(MakeUser("Victim"));
             bool kickFired = false;
-            channel.OnKick += (_, _, _) => kickFired = true;
+            channel.OnKick += (_, _) => kickFired = true;
 
             channel.UserKick(MakeUser("Op"), "Victim", "rules");
 

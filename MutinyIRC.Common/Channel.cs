@@ -4,8 +4,6 @@ using FlamingIRC;
 
 namespace MutinyIRC.Common
 {
-    public delegate void ChannelKickEventHandler(User nick, string kickee, string reason);
-
     /// <summary>
     ///   Our membership state for a channel, independent of whether the user list is populated.
     /// </summary>
@@ -77,8 +75,6 @@ namespace MutinyIRC.Common
         /// </summary>
         public bool Joined => Membership == ChannelMembership.Joined;
 
-        //TODO: Update these to EventHandlers
-
         /// <summary>
         ///   A user messaged the channel
         /// </summary>
@@ -127,7 +123,7 @@ namespace MutinyIRC.Common
         /// <summary>
         ///   A user was kicked from the channel
         /// </summary>
-        public event ChannelKickEventHandler OnKick;
+        public event EventHandler<KickEventArgs> OnKick;
 
         /// <summary>
         ///   The client messaged the channel
@@ -281,7 +277,7 @@ namespace MutinyIRC.Common
         {
             RemoveUser(kickee);
 
-            OnKick?.Invoke(nick, kickee, reason);
+            OnKick.Fire(this, new KickEventArgs(nick, this, kickee, reason));
         }
 
         public void Say(string message)
