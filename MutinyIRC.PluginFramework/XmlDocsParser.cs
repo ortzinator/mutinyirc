@@ -1,7 +1,6 @@
 ﻿namespace MutinyIRC.PluginFramework
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Xml.Linq;
     using System.Text;
@@ -16,24 +15,19 @@
             xdoc = XDocument.Load(path);
         }
 
+        /// <summary>
+        /// Gets the &lt;summary&gt; text from the XML docs for the given method.
+        /// </summary>
+        /// <returns>The trimmed summary, or null if none is present.</returns>
         public string GetMethodSummary(Type type, MethodInfo info)
         {
-            //TODO: clean this up
-            IEnumerable<string> summaries = from member in xdoc.Descendants("member")
-                                            where member.Attribute("name") != null &&
-                                                member.Attribute("name").Value ==
-                                                MemberNameString(type, info)
-                                            select member.Element("summary").Value.Trim();
+            string name = MemberNameString(type, info);
+            var summary = xdoc.Descendants("member")
+                .Where(m => m.Attribute("name") != null && m.Attribute("name").Value == name)
+                .Select(m => m.Element("summary"))
+                .FirstOrDefault();
 
-            List<string> l = new List<string>(summaries);
-
-            if (l.Count > 1)
-                throw new Exception(); //this should never happen
-
-            if (l.Count == 0)
-                return null;
-
-            return l[0];
+            return summary == null ? null : summary.Value.Trim();
         }
 
         /// <summary>
