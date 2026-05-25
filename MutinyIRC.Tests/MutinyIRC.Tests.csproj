@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlamingIRC\FlamingIRC.csproj" />
+    <ProjectReference Include="..\MutinyIRC.Commands\MutinyIRC.Commands.csproj" />
     <ProjectReference Include="..\MutinyIRC.Common\MutinyIRC.Common.csproj" />
   </ItemGroup>
 
