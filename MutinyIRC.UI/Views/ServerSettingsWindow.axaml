@@ -54,8 +54,8 @@
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Spacing="6">
-                <Button Content="OK" Width="80" Click="OkButton_Click" />
-                <Button Content="Cancel" Width="80" Click="CancelButton_Click" />
+                <Button Content="Save" Width="80" Classes="accent" IsDefault="True" Click="OkButton_Click" />
+                <Button Content="Cancel" Width="80" IsCancel="True" Click="CancelButton_Click" />
             </StackPanel>
         </Border>
 
