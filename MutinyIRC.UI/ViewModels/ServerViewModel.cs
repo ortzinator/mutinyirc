@@ -225,7 +225,7 @@ public class ServerViewModel : IrcViewModel
         foreach (ChannelSettings channel in networkSettings.Channels)
         {
             if (channel.AutoJoin)
-                server.JoinChannel(channel.Name);
+                server.JoinChannel(channel.Name, channel.Key ?? string.Empty);
         }
     }
 
