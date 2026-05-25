@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -16,8 +16,9 @@ namespace MutinyIRC.PluginFramework
         /// <summary>
         /// Examines the given assembly for MutinyIRC plugins, yielding a <see cref="CommandInfo"/>
         /// for each <see cref="ICommand"/> implementation and a <see cref="PluginInfo"/> for any
-        /// other <see cref="IPlugin"/>. Sibling XML doc files are loaded once per assembly and
-        /// used to populate <see cref="CommandInfo.Description"/>.
+        /// other <see cref="IPlugin"/>. Command descriptions come from
+        /// <see cref="PluginAttribute.Description"/>, falling back to the sibling XML doc file
+        /// loaded once per assembly.
         /// </summary>
         /// <param name="asm">The assembly to examine.</param>
         /// <returns>A lazily-enumerated collection of plugin metadata.</returns>
@@ -35,13 +36,13 @@ namespace MutinyIRC.PluginFramework
             {
                 if (type.GetInterface(typeof(ICommand).FullName) != null)
                 {
-                    string name =
-                        ((PluginAttribute[])type.GetCustomAttributes(typeof(PluginAttribute),
-                            false))[0].Name;
-                    string description = docs == null ? null : SafeGetTypeSummary(docs, type, asm);
+                    var attr = ((PluginAttribute[])type.GetCustomAttributes(
+                        typeof(PluginAttribute), false))[0];
+                    string description = attr.Description
+                        ?? (docs == null ? null : SafeGetTypeSummary(docs, type, asm));
 
-                    yield return new CommandInfo(asm.Location, type.FullName, name ?? type.Name,
-                        typeof(ICommand), description);
+                    yield return new CommandInfo(asm.Location, type.FullName,
+                        attr.Name ?? type.Name, typeof(ICommand), description);
                 }
                 else
                 {
