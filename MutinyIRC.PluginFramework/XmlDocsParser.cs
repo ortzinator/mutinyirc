@@ -27,7 +27,7 @@
                 .Select(m => m.Element("summary"))
                 .FirstOrDefault();
 
-            return summary == null ? null : summary.Value.Trim();
+            return summary?.Value.Trim();
         }
 
         /// <summary>
@@ -42,7 +42,7 @@
                 .Select(m => m.Element("summary"))
                 .FirstOrDefault();
 
-            return summary == null ? null : summary.Value.Trim();
+            return summary?.Value.Trim();
         }
 
         /// <summary>
