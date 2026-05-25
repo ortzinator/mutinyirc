@@ -415,7 +415,51 @@ namespace MutinyIRC.Common
 
         private void Listener_OnError(object sender, ErrorMessageEventArgs a)
         {
+            CleanupFailedJoin(a);
             ErrorMessageRecieved?.Invoke(sender, new ErrorMessageEventArgs(a.Code, a.Message));
+        }
+
+        /// <summary>
+        ///   Removes a channel from <see cref="Channels"/> when the server rejects our JOIN.
+        /// </summary>
+        /// <remarks>
+        ///   <see cref="JoinChannel(string, string)"/> speculatively adds the channel before
+        ///   the server confirms, so a rejection (wrong key, banned, invite-only, etc.) would
+        ///   otherwise leave a phantom entry stuck in the <see cref="ChannelMembership.Joining"/>
+        ///   state. Only channels still in that state are pruned, so a stray error for a channel
+        ///   we've already joined cannot evict it.
+        /// </remarks>
+        private void CleanupFailedJoin(ErrorMessageEventArgs a)
+        {
+            if (!IsJoinFailureCode(a.Code) || string.IsNullOrEmpty(a.Message))
+                return;
+
+            int space = a.Message.IndexOf(' ');
+            string channelName = space < 0 ? a.Message : a.Message.Substring(0, space);
+
+            if (!Channels.TryGetValue(channelName, out Channel chan) ||
+                chan.Membership != ChannelMembership.Joining)
+                return;
+
+            chan.Membership = ChannelMembership.NotJoined;
+            Channels.Remove(chan.Name);
+            ChannelRemoved.Fire(this, new ChannelEventArgs(chan));
+        }
+
+        private static bool IsJoinFailureCode(ReplyCode code)
+        {
+            return code switch
+            {
+                ReplyCode.ERR_NOSUCHCHANNEL => true,
+                ReplyCode.ERR_TOOMANYCHANNELS => true,
+                ReplyCode.ERR_CHANNELISFULL => true,
+                ReplyCode.ERR_INVITEONLYCHAN => true,
+                ReplyCode.ERR_BANNEDFROMCHAN => true,
+                ReplyCode.ERR_BADCHANNELKEY => true,
+                ReplyCode.ERR_BADCHANMASK => true,
+                ReplyCode.ERR_NOCHANMODES => true,
+                _ => false
+            };
         }
 
         public Channel JoinChannel(string channelToJoin)
@@ -429,7 +473,6 @@ namespace MutinyIRC.Common
             newChan.Membership = ChannelMembership.Joining;
 
             Connection.Sender.Join(channelToJoin, key);
-            // TODO: Figure out what happens when you join with a wrong key, and fix up channel manager integrity afterwards.
 
             return newChan;
         }

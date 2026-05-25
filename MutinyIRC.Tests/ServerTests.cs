@@ -89,5 +89,69 @@ namespace MutinyIRC.Tests
                 "InChannel must be a pure query and not prune the channel");
             Assert.IsFalse(removedFired, "InChannel must not fire ChannelRemoved");
         }
+
+        [Test]
+        public void BadChannelKeyError_ForJoiningChannel_RemovesChannelAndFiresChannelRemoved()
+        {
+            var chan = _server.CreateChannel("#secret");
+            chan.Membership = ChannelMembership.Joining;
+
+            Channel removed = null;
+            EventHandler<ChannelEventArgs> handler = (_, e) => removed = e.Channel;
+            Server.ChannelRemoved += handler;
+            try
+            {
+                _server.Connection.Listener.Parse(":server.name 475 test #secret :Cannot join channel (+k)");
+            }
+            finally
+            {
+                Server.ChannelRemoved -= handler;
+            }
+
+            Assert.IsFalse(_server.Channels.ContainsKey("#secret"),
+                "A rejected JOIN must not leave the channel in the manager");
+            Assert.IsNotNull(removed, "ChannelRemoved must fire for the pruned channel");
+            Assert.AreEqual("#secret", removed.Name);
+            Assert.AreEqual(ChannelMembership.NotJoined, chan.Membership);
+        }
+
+        [Test]
+        public void BadChannelKeyError_ForJoinedChannel_DoesNotRemoveChannel()
+        {
+            var chan = _server.CreateChannel("#secret");
+            chan.Membership = ChannelMembership.Joined;
+
+            bool removedFired = false;
+            EventHandler<ChannelEventArgs> handler = (_, _) => removedFired = true;
+            Server.ChannelRemoved += handler;
+            try
+            {
+                _server.Connection.Listener.Parse(":server.name 475 test #secret :Cannot join channel (+k)");
+            }
+            finally
+            {
+                Server.ChannelRemoved -= handler;
+            }
+
+            Assert.IsTrue(_server.Channels.ContainsKey("#secret"),
+                "A stray rejection must not evict an already-joined channel");
+            Assert.IsFalse(removedFired);
+            Assert.AreEqual(ChannelMembership.Joined, chan.Membership);
+        }
+
+        [Test]
+        public void BadChannelKeyError_AlsoPropagatesViaErrorMessageReceived()
+        {
+            var chan = _server.CreateChannel("#secret");
+            chan.Membership = ChannelMembership.Joining;
+
+            ErrorMessageEventArgs received = null;
+            _server.ErrorMessageRecieved += (_, e) => received = e;
+
+            _server.Connection.Listener.Parse(":server.name 475 test #secret :Cannot join channel (+k)");
+
+            Assert.IsNotNull(received, "The error must still surface to ErrorMessageRecieved subscribers");
+            Assert.AreEqual(ReplyCode.ERR_BADCHANNELKEY, received.Code);
+        }
     }
 }
