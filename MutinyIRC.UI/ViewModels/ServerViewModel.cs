@@ -8,6 +8,7 @@ namespace MutinyIRC.UI.ViewModels;
 using System;
 using FlamingIRC;
 using Common;
+using PluginFramework;
 using Resources;
 
 public class ServerViewModel : IrcViewModel
@@ -15,15 +16,17 @@ public class ServerViewModel : IrcViewModel
     private int nickRetryAttempt;
     private bool nickRetryFailed;
     private readonly Server server = null!;
+    private readonly PluginManager _pluginManager = null!;
 
     public MTObservableCollection<ChannelViewModel> Channels { get; } = new MTObservableCollection<ChannelViewModel>();
     internal Server? ServerInstance => server;
 
-    public ServerViewModel(Server newServer)
+    public ServerViewModel(Server newServer, PluginManager pluginManager)
     {
         if (global::Avalonia.Controls.Design.IsDesignMode)
             return;
 
+        _pluginManager = pluginManager;
         server = newServer;
         Name = server.Url;
         server.Registered += Server_Registered;
@@ -149,6 +152,18 @@ public class ServerViewModel : IrcViewModel
     private void Server_Registered(object? sender, EventArgs e)
     {
         DoRegister();
+    }
+
+    protected override void OnExecute(string? commandLine)
+    {
+        if (string.IsNullOrEmpty(commandLine))
+            return;
+
+        CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(server, commandLine));
+        if (result != null && result.Result == Result.Fail)
+        {
+            ChatLines.Add(new ErrorMessageViewModel(DateTime.Now, result.Message));
+        }
     }
 
     private void AddMessage(string message)

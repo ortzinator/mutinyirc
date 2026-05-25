@@ -118,7 +118,7 @@ public class MainViewModel : ViewModelBase
 
     private void CreateServerPanel(Server server)
     {
-        var vm = new ServerViewModel(server);
+        var vm = new ServerViewModel(server, _pluginManager);
         _serverMap[server] = vm;
         Panels.Add(vm);
         Servers.Add(vm);
