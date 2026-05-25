@@ -8,7 +8,7 @@ namespace MutinyIRC.Common
         public ChannelInfo(string name)
         {
             if (!Rfc2812Util.IsValidChannelName(name))
-                throw new ArgumentException("Invaid channel name", "name");
+                throw new ArgumentException("Invalid channel name", nameof(name));
 
             Name = name;
         }
