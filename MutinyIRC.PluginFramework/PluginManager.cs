@@ -43,7 +43,8 @@
 
             if (!Directory.Exists(path))
             {
-                Trace.WriteLine($"Plugin directory not found: {path}", TraceCategories.PluginSystem);
+                Trace.WriteLine($"Plugin directory not found: {path}",
+                    TraceCategories.PluginSystem);
                 return;
             }
 
@@ -55,25 +56,30 @@
             {
                 try
                 {
-                    foreach (PluginInfo info in AssemblyExaminer.ExamineAssembly(Assembly.LoadFrom(file)))
+                    foreach (PluginInfo info in AssemblyExaminer.ExamineAssembly(
+                                 Assembly.LoadFrom(file)))
                     {
                         if (info is CommandInfo)
                         {
                             if (!_commands.ContainsKey(info.FullName))
                             {
                                 tempCommands.Add(info.FullName, info as CommandInfo);
-                                Trace.WriteLine($"Added command plugin {info.FullName} at {info.AssemblyPath}", TraceCategories.PluginSystem);
+                                Trace.WriteLine(
+                                    $"Added command plugin {info.FullName} at {info.AssemblyPath}",
+                                    TraceCategories.PluginSystem);
                             }
                             else
                             {
-                                Trace.WriteLine($"Could not load command {info.FullName} at {info.AssemblyPath}. A command by that name already exists at {_commands[info.FullName].AssemblyPath}.",
+                                Trace.WriteLine(
+                                    $"Could not load command {info.FullName} at {info.AssemblyPath}. A command by that name already exists at {_commands[info.FullName].AssemblyPath}.",
                                     TraceCategories.PluginSystem);
                             }
                         }
                         else
                         {
                             _plugins.Add(info);
-                            Trace.WriteLine($"Added plugin {info.FullName} at {info.AssemblyPath}", TraceCategories.PluginSystem);
+                            Trace.WriteLine($"Added plugin {info.FullName} at {info.AssemblyPath}",
+                                TraceCategories.PluginSystem);
                         }
                     }
                 }
@@ -84,7 +90,8 @@
             }
 
             if (tempCommands.Count == 0)
-                Trace.WriteLine($"No plugins found in directory: {path}", TraceCategories.PluginSystem);
+                Trace.WriteLine($"No plugins found in directory: {path}",
+                    TraceCategories.PluginSystem);
 
             foreach (var pair in tempCommands)
             {
@@ -111,7 +118,8 @@
                 if (item.Value.CommandName.Equals(name, StringComparison.CurrentCultureIgnoreCase))
                     return (ICommand)CreateInstance(item.Value);
             }
-            Trace.WriteLine($"No command called {name.ToUpper()} found", TraceCategories.PluginSystem);
+            Trace.WriteLine($"No command called {name.ToUpper()} found",
+                TraceCategories.PluginSystem);
             return null;
         }
 
@@ -123,12 +131,15 @@
                     ?? Assembly.LoadFile(pluginInfo.AssemblyPath);
                 var instance = asm.CreateInstance(pluginInfo.FullName);
                 if (instance == null)
-                    Trace.WriteLine($"CreateInstance returned null for {pluginInfo.FullName} in {pluginInfo.AssemblyPath}", TraceCategories.PluginSystem);
+                    Trace.WriteLine(
+                        $"CreateInstance returned null for {pluginInfo.FullName} in {pluginInfo.AssemblyPath}",
+                        TraceCategories.PluginSystem);
                 return (IPlugin)instance;
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"Failed to instantiate {pluginInfo.FullName}: {ex}", TraceCategories.PluginSystem);
+                Trace.WriteLine($"Failed to instantiate {pluginInfo.FullName}: {ex}",
+                    TraceCategories.PluginSystem);
                 return null;
             }
         }
@@ -144,21 +155,46 @@
             return null;
         }
 
+        /// <summary>
+        /// Resolves the command named in <paramref name="commandInput"/> and dispatches to the best-matching
+        /// <c>Execute</c> overload on the command instance.
+        /// </summary>
+        /// <param name="commandInput">
+        /// The parsed command: its name, the user-supplied argument list, and the originating
+        /// <see cref="MessageContext"/>. The argument list is not mutated.
+        /// </param>
+        /// <returns>
+        /// The result returned by the dispatched <c>Execute</c> overload;
+        /// <see cref="CommandResultInfo.Fail(string)"/> if the command name is unknown or the dispatched
+        /// overload threw; or <c>null</c> if the command exists but no overload matches the supplied
+        /// context type and argument shape.
+        /// </returns>
+        /// <remarks>
+        /// Overloads are tried most-specific first (highest parameter count). Each candidate gets a fresh
+        /// copy of <see cref="CommandExecutionInfo.ParameterList"/>, so coercions applied while trying one
+        /// overload (e.g. promoting a string to <see cref="ChannelInfo"/> or <see cref="char"/>[]) never
+        /// leak into the next attempt.
+        /// </remarks>
         public CommandResultInfo ExecuteCommand(CommandExecutionInfo commandInput)
         {
-            Trace.WriteLine($"Command: /{commandInput.Name} [{string.Join(", ", commandInput.ParameterList)}]", TraceCategories.PluginSystem);
+            Trace.WriteLine(
+                $"Command: /{commandInput.Name} [{string.Join(", ", commandInput.ParameterList)}]",
+                TraceCategories.PluginSystem);
 
             ICommand commandInstance = GetCommandInstance(commandInput.Name);
             if (commandInstance == null)
-                return CommandResultInfo.Fail($"{commandInput.Name.ToUpper()} is an invalid command");
+                return CommandResultInfo.Fail(
+                    $"{commandInput.Name.ToUpper()} is an invalid command");
 
             foreach (MethodInfo overload in GetExecuteOverloads(commandInstance))
             {
-                CommandResultInfo result = TryInvokeOverload(overload, commandInstance, commandInput);
+                CommandResultInfo result =
+                    TryInvokeOverload(overload, commandInstance, commandInput);
                 if (result != null) return result;
             }
 
-            Trace.WriteLine($"No matching Execute() overload for command '{commandInput.Name}' with context {commandInput.Context.GetType().Name} and {commandInput.ParameterList.Count} parameter(s)",
+            Trace.WriteLine(
+                $"No matching Execute() overload for command '{commandInput.Name}' with context {commandInput.Context.GetType().Name} and {commandInput.ParameterList.Count} parameter(s)",
                 TraceCategories.PluginSystem);
             return null;
         }
@@ -186,7 +222,8 @@
         /// The invocation result, or <c>null</c> if <paramref name="method"/> does not match the input
         /// (wrong arity, context type mismatch, or post-coercion argument type mismatch).
         /// </returns>
-        private static CommandResultInfo TryInvokeOverload(MethodInfo method, ICommand instance, CommandExecutionInfo input)
+        private static CommandResultInfo TryInvokeOverload(MethodInfo method, ICommand instance,
+                                                           CommandExecutionInfo input)
         {
             ParameterInfo[] methodParams = method.GetParameters();
             int userParamCount = methodParams.Length - 1;
@@ -262,7 +299,8 @@
             list.Add(joined.ToString());
         }
 
-        private static CommandResultInfo InvokeSafely(MethodInfo method, ICommand instance, object[] args, string commandName)
+        private static CommandResultInfo InvokeSafely(MethodInfo method, ICommand instance,
+                                                      object[] args, string commandName)
         {
             try
             {
@@ -270,7 +308,8 @@
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"Command '{commandName}' threw an exception: {ex}", TraceCategories.PluginSystem);
+                Trace.WriteLine($"Command '{commandName}' threw an exception: {ex}",
+                    TraceCategories.PluginSystem);
                 return CommandResultInfo.Fail($"{commandName.ToUpper()} failed with an error");
             }
         }
@@ -284,7 +323,8 @@
                 string[] exploded = line.Split(new char[] { ' ' });
                 string name = exploded[0].TrimStart('/');
                 string[] parameters = new string[exploded.Length - 1];
-                Array.Copy(exploded, 1, parameters, 0, exploded.Length - 1); //Removing the first element
+                Array.Copy(exploded, 1, parameters, 0,
+                    exploded.Length - 1); //Removing the first element
 
                 return new CommandExecutionInfo
                 {
