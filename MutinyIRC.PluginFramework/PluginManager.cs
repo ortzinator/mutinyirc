@@ -7,6 +7,7 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Text;
 
     /// <summary>
     /// Manages plugins and commands.
@@ -145,119 +146,133 @@
 
         public CommandResultInfo ExecuteCommand(CommandExecutionInfo commandInput)
         {
-            //TODO: This should handle errors
-            //TODO: Pretty complex, maybe could use some commenting
-
             Trace.WriteLine($"Command: /{commandInput.Name} [{string.Join(", ", commandInput.ParameterList)}]", TraceCategories.PluginSystem);
 
             ICommand commandInstance = GetCommandInstance(commandInput.Name);
             if (commandInstance == null)
                 return CommandResultInfo.Fail($"{commandInput.Name.ToUpper()} is an invalid command");
 
-            MethodInfo[] commandMethods = commandInstance.GetType().GetMethods()
-                .Where(o => o.Name == "Execute")
-                .Where(o => o.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext)).ToArray();
-
-            //Sort descending by number of parameters so the more "specific" methods are given priority
-            Array.Sort(commandMethods,
-                       (m1, m2) => -m1.GetParameters().Length.CompareTo(m2.GetParameters().Length));
-
-            foreach (MethodInfo methodInfo in commandMethods)
+            foreach (MethodInfo overload in GetExecuteOverloads(commandInstance))
             {
-                ParameterInfo[] methodParameters = methodInfo.GetParameters();
-                int parameterCount = methodParameters.Length - 1;
-
-                //Loop throught the method's parameters
-                for (int p = 0; p < methodParameters.Length; p++)
-                {
-                    ParameterInfo methodParameter = methodParameters[p];
-
-                    if (commandInput.ParameterList.Count < parameterCount)
-                        break;
-
-                    if (p == 0)
-                    {
-                        //First parameter must match the current context type
-                        if (methodParameter.ParameterType != commandInput.Context.GetType())
-                            break;
-
-                        //Handle parameterless command
-                        if (commandInput.ParameterList.Count == 0)
-                        {
-                            if (parameterCount != 0)
-                                break;
-
-                            commandInput.ParameterList.Insert(0, commandInput.Context);
-                            try
-                            {
-                                return (CommandResultInfo)methodInfo.Invoke(commandInstance, commandInput.ParameterList.ToArray());
-                            }
-                            catch (Exception ex)
-                            {
-                                Trace.WriteLine($"Command '{commandInput.Name}' threw an exception: {ex}", TraceCategories.PluginSystem);
-                                return CommandResultInfo.Fail($"{commandInput.Name.ToUpper()} failed with an error");
-                            }
-                        }
-                        continue;
-                    }
-
-                    // If it's a channel, convert the string into a ChannelInfo object
-                    if (FlamingIRC.Rfc2812Util.IsValidChannelName(commandInput.ParameterList[p - 1] as string))
-                        commandInput.ParameterList[p - 1] = new ChannelInfo(commandInput.ParameterList[p - 1] as string);
-
-                    var sp = commandInput.ParameterList[p - 1] as string;
-                    if (sp != null && sp.StartsWith("-")) // Check for switches
-                    {
-                        sp = sp.Remove(0, 1);
-                        commandInput.ParameterList[p - 1] = sp.ToCharArray();
-                    }
-
-                    if (methodParameter.ParameterType != commandInput.ParameterList[p - 1].GetType())
-                        break; //Parameter mismatch. Break parameter loop and go the the next method
-
-                    if (p != parameterCount) continue; //If this isn't the last parameter then keep looping
-
-                    //Checks for an "open-ended" string parameter.
-                    if (methodParameter.ParameterType == typeof(string))
-                    {
-                        bool allStrings = true;
-                        var openString = new System.Text.StringBuilder();
-
-                        int numberOpenEnded = 0;
-                        for (int k = p - 1; k < commandInput.ParameterList.Count; k++)
-                        {
-                            if (commandInput.ParameterList[k].GetType() != typeof(string))
-                            {
-                                allStrings = false;
-                                break;
-                            }
-
-                            openString.Append(commandInput.ParameterList[k] + " ");
-                            numberOpenEnded++;
-                        }
-
-                        if (allStrings && p != commandInput.ParameterList.Count)
-                        {
-                            openString.Remove(openString.Length - 1, 1);
-                            commandInput.ParameterList.RemoveRange(p - 1, numberOpenEnded);
-                            commandInput.ParameterList.Add(openString.ToString());
-                        }
-                    }
-                    commandInput.ParameterList.Insert(0, commandInput.Context);
-                    try
-                    {
-                        return (CommandResultInfo)methodInfo.Invoke(commandInstance, commandInput.ParameterList.ToArray());
-                    }
-                    catch (Exception ex)
-                    {
-                        Trace.WriteLine($"Command '{commandInput.Name}' threw an exception: {ex}", TraceCategories.PluginSystem);
-                        return CommandResultInfo.Fail($"{commandInput.Name.ToUpper()} failed with an error");
-                    }
-                }
+                CommandResultInfo result = TryInvokeOverload(overload, commandInstance, commandInput);
+                if (result != null) return result;
             }
+
             Trace.WriteLine($"No matching Execute() overload for command '{commandInput.Name}' with context {commandInput.Context.GetType().Name} and {commandInput.ParameterList.Count} parameter(s)",
                 TraceCategories.PluginSystem);
             return null;
+        }
+
+        /// <summary>
+        /// Returns the command's <c>Execute</c> overloads whose first parameter derives from
+        /// <see cref="MessageContext"/>, sorted most-specific first (descending by parameter count).
+        /// </summary>
+        private static MethodInfo[] GetExecuteOverloads(ICommand command)
+        {
+            return command.GetType().GetMethods()
+                .Where(m => m.Name == "Execute")
+                .Where(m => m.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext))
+                .OrderByDescending(m => m.GetParameters().Length)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Attempts to match <paramref name="input"/> against a single <c>Execute</c> overload and invoke it.
+        /// </summary>
+        /// <param name="method">The candidate <c>Execute</c> overload.</param>
+        /// <param name="instance">The command instance to invoke against.</param>
+        /// <param name="input">The parsed command input. Not mutated.</param>
+        /// <returns>
+        /// The invocation result, or <c>null</c> if <paramref name="method"/> does not match the input
+        /// (wrong arity, context type mismatch, or post-coercion argument type mismatch).
+        /// </returns>
+        private static CommandResultInfo TryInvokeOverload(MethodInfo method, ICommand instance, CommandExecutionInfo input)
+        {
+            ParameterInfo[] methodParams = method.GetParameters();
+            int userParamCount = methodParams.Length - 1;
+
+            if (input.ParameterList.Count < userParamCount) return null;
+            if (methodParams[0].ParameterType != input.Context.GetType()) return null;
+
+            // Work on a copy so coercions from a failed match don't leak into the next overload.
+            var args = new List<object>(input.ParameterList);
+
+            if (userParamCount == 0)
+            {
+                if (args.Count != 0) return null;
+                args.Insert(0, input.Context);
+                return InvokeSafely(method, instance, args.ToArray(), input.Name);
+            }
+
+            for (int i = 0; i < userParamCount; i++)
+            {
+                args[i] = CoerceArgument(args[i]);
+                if (methodParams[i + 1].ParameterType != args[i].GetType()) return null;
+            }
+
+            if (methodParams[userParamCount].ParameterType == typeof(string))
+                CollapseTrailingStrings(args, userParamCount - 1);
+
+            args.Insert(0, input.Context);
+            return InvokeSafely(method, instance, args.ToArray(), input.Name);
+        }
+
+        /// <summary>
+        /// Promotes a bare string argument to a richer type: <see cref="ChannelInfo"/> for channel-name
+        /// strings, or <see cref="char"/>[] for <c>-flag</c> switches. Non-string arguments are returned unchanged.
+        /// </summary>
+        private static object CoerceArgument(object arg)
+        {
+            if (arg is string s)
+            {
+                if (FlamingIRC.Rfc2812Util.IsValidChannelName(s))
+                    return new ChannelInfo(s);
+                if (s.StartsWith("-"))
+                    return s.Substring(1).ToCharArray();
+            }
+            return arg;
+        }
+
+        /// <summary>
+        /// Folds the trailing string arguments at and after <paramref name="startIndex"/> in
+        /// <paramref name="list"/> into a single space-joined string at <paramref name="startIndex"/>.
+        /// </summary>
+        /// <param name="list">The argument list to modify in place.</param>
+        /// <param name="startIndex">The index of the first argument to fold.</param>
+        /// <remarks>
+        /// The list is only modified when there are trailing extras
+        /// (<c>list.Count &gt; startIndex + 1</c>) and every argument from
+        /// <paramref name="startIndex"/> onward is a <see cref="string"/>; otherwise it is left unchanged.
+        /// </remarks>
+        private static void CollapseTrailingStrings(List<object> list, int startIndex)
+        {
+            if (startIndex + 1 >= list.Count) return;
+            for (int k = startIndex; k < list.Count; k++)
+            {
+                if (list[k].GetType() != typeof(string)) return;
+            }
+
+            int count = list.Count - startIndex;
+            var joined = new StringBuilder();
+            for (int k = startIndex; k < list.Count; k++)
+                joined.Append((string)list[k]).Append(' ');
+            joined.Length -= 1;
+
+            list.RemoveRange(startIndex, count);
+            list.Add(joined.ToString());
+        }
+
+        private static CommandResultInfo InvokeSafely(MethodInfo method, ICommand instance, object[] args, string commandName)
+        {
+            try
+            {
+                return (CommandResultInfo)method.Invoke(instance, args);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Command '{commandName}' threw an exception: {ex}", TraceCategories.PluginSystem);
+                return CommandResultInfo.Fail($"{commandName.ToUpper()} failed with an error");
+            }
         }
 
         public CommandExecutionInfo ParseCommand(MessageContext context, string line)

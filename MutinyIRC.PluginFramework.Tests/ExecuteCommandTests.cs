@@ -139,5 +139,38 @@ namespace MutinyIRC.PluginFramework.Tests
 
             Assert.That(result.Message, Is.EqualTo("noargs"));
         }
+
+        [Test]
+        public void ChannelCoercion_DoesNotMutateInputParameterList()
+        {
+            // Covers in-place channel coercion + context prepend.
+            var input = Build("test", new TestMessageContext(), "#room", "hi there");
+
+            _manager.ExecuteCommand(input);
+
+            Assert.That(input.ParameterList, Is.EqualTo(new object[] { "#room", "hi there" }));
+        }
+
+        [Test]
+        public void SwitchCoercion_DoesNotMutateInputParameterList()
+        {
+            // Covers in-place switch (string -> char[]) coercion + context prepend.
+            var input = Build("test", new TestMessageContext(), "-abc");
+
+            _manager.ExecuteCommand(input);
+
+            Assert.That(input.ParameterList, Is.EqualTo(new object[] { "-abc" }));
+        }
+
+        [Test]
+        public void OpenEndedCollapsing_DoesNotMutateInputParameterList()
+        {
+            // Covers RemoveRange/Add collapse + context prepend.
+            var input = Build("test", new TestMessageContext(), "a", "b", "c");
+
+            _manager.ExecuteCommand(input);
+
+            Assert.That(input.ParameterList, Is.EqualTo(new object[] { "a", "b", "c" }));
+        }
     }
 }
