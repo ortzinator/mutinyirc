@@ -40,6 +40,9 @@ Contributors
 - Max Schmeling (schmeling88)
 - gparent
 
+Also a special thanks to Adam Caudill for a lot of valuable advice and guidance provided in the early days of this
+project.
+
 License
 -------
 
