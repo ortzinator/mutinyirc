@@ -15,11 +15,9 @@
     public sealed class PluginManager
     {
         internal Dictionary<string, CommandInfo> _commands;
-        private List<PluginInfo> _plugins;
 
         public PluginManager()
         {
-            _plugins = new List<PluginInfo>();
             _commands = new Dictionary<string, CommandInfo>();
         }
 
@@ -56,29 +54,20 @@
             {
                 try
                 {
-                    foreach (PluginInfo info in AssemblyExaminer.ExamineAssembly(
+                    foreach (CommandInfo info in AssemblyExaminer.ExamineAssembly(
                                  Assembly.LoadFrom(file)))
                     {
-                        if (info is CommandInfo)
+                        if (!_commands.ContainsKey(info.FullName))
                         {
-                            if (!_commands.ContainsKey(info.FullName))
-                            {
-                                tempCommands.Add(info.FullName, info as CommandInfo);
-                                Trace.WriteLine(
-                                    $"Added command plugin {info.FullName} at {info.AssemblyPath}",
-                                    TraceCategories.PluginSystem);
-                            }
-                            else
-                            {
-                                Trace.WriteLine(
-                                    $"Could not load command {info.FullName} at {info.AssemblyPath}. A command by that name already exists at {_commands[info.FullName].AssemblyPath}.",
-                                    TraceCategories.PluginSystem);
-                            }
+                            tempCommands.Add(info.FullName, info);
+                            Trace.WriteLine(
+                                $"Added command plugin {info.FullName} at {info.AssemblyPath}",
+                                TraceCategories.PluginSystem);
                         }
                         else
                         {
-                            _plugins.Add(info);
-                            Trace.WriteLine($"Added plugin {info.FullName} at {info.AssemblyPath}",
+                            Trace.WriteLine(
+                                $"Could not load command {info.FullName} at {info.AssemblyPath}. A command by that name already exists at {_commands[info.FullName].AssemblyPath}.",
                                 TraceCategories.PluginSystem);
                         }
                     }

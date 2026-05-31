@@ -11,35 +11,28 @@ namespace MutinyIRC.PluginFramework
     public static class AssemblyExaminer
     {
         /// <summary>
-        /// Examines the given assembly for MutinyIRC plugins, yielding a <see cref="CommandInfo"/>
-        /// for each <see cref="ICommand"/> implementation and a <see cref="PluginInfo"/> for any
-        /// other <see cref="IPlugin"/>. Command descriptions come from
+        /// Examines the given assembly for MutinyIRC commands, yielding a <see cref="CommandInfo"/>
+        /// for each public, non-abstract, <see cref="PluginAttribute"/>-decorated
+        /// <see cref="ICommand"/> implementation. Command descriptions come from
         /// <see cref="PluginAttribute.Description"/>.
         /// </summary>
         /// <param name="asm">The assembly to examine.</param>
-        /// <returns>A lazily-enumerated collection of plugin metadata.</returns>
-        public static IEnumerable<PluginInfo> ExamineAssembly(Assembly asm)
+        /// <returns>A lazily-enumerated collection of command metadata.</returns>
+        public static IEnumerable<CommandInfo> ExamineAssembly(Assembly asm)
         {
             var query = asm.GetTypes().Where(o => o.IsPublic)
                 .Where(o => o.IsClass)
                 .Where(o => (o.Attributes & TypeAttributes.Abstract) != TypeAttributes.Abstract)
                 .Where(o => o.GetCustomAttributes(typeof(PluginAttribute), false).Length > 0)
-                .Where(o => o.GetInterfaces().Contains(typeof(IPlugin)));
+                .Where(o => o.GetInterfaces().Contains(typeof(ICommand)));
 
             foreach (Type type in query)
             {
-                if (type.GetInterface(typeof(ICommand).FullName) != null)
-                {
-                    var attr = ((PluginAttribute[])type.GetCustomAttributes(
-                        typeof(PluginAttribute), false))[0];
+                var attr = ((PluginAttribute[])type.GetCustomAttributes(
+                    typeof(PluginAttribute), false))[0];
 
-                    yield return new CommandInfo(asm.Location, type.FullName,
-                        attr.Name ?? type.Name, typeof(ICommand), attr.Description);
-                }
-                else
-                {
-                    yield return new PluginInfo(asm.Location, type.Name, typeof(IPlugin));
-                }
+                yield return new CommandInfo(asm.Location, type.FullName,
+                    attr.Name ?? type.Name, typeof(ICommand), attr.Description);
             }
         }
     }
