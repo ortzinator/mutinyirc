@@ -7,7 +7,6 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Text;
 
     /// <summary>
     /// Manages plugins and commands.
@@ -275,17 +274,12 @@
             if (startIndex + 1 >= list.Count) return;
             for (int k = startIndex; k < list.Count; k++)
             {
-                if (list[k].GetType() != typeof(string)) return;
+                if (list[k] is not string) return;
             }
 
-            int count = list.Count - startIndex;
-            var joined = new StringBuilder();
-            for (int k = startIndex; k < list.Count; k++)
-                joined.Append((string)list[k]).Append(' ');
-            joined.Length -= 1;
-
-            list.RemoveRange(startIndex, count);
-            list.Add(joined.ToString());
+            var joined = string.Join(" ", list.Skip(startIndex).Cast<string>());
+            list.RemoveRange(startIndex, list.Count - startIndex);
+            list.Add(joined);
         }
 
         private static CommandResultInfo InvokeSafely(MethodInfo method, ICommand instance,
