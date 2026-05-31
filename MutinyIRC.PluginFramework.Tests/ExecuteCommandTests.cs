@@ -141,6 +141,15 @@ namespace MutinyIRC.PluginFramework.Tests
         }
 
         [Test]
+        public void ParameterlessExecuteOverload_IsSkippedWithoutThrowing()
+        {
+            // TestCommand declares an Execute() with no parameters. Overload discovery filters
+            // on the first parameter's type, so it must guard against the empty parameter list
+            // rather than throw IndexOutOfRangeException.
+            Assert.DoesNotThrow(() => _manager.ExecuteCommand(Build("test", new TestMessageContext())));
+        }
+
+        [Test]
         public void ChannelCoercion_DoesNotMutateInputParameterList()
         {
             // Covers in-place channel coercion + context prepend.

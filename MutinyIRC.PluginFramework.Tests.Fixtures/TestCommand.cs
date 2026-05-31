@@ -6,6 +6,11 @@ namespace MutinyIRC.PluginFramework.Tests.Fixtures
     [Plugin("test")]
     public class TestCommand : ICommand
     {
+        // A parameterless Execute() that GetExecuteOverloads must skip without
+        // throwing (its first-parameter filter would otherwise index an empty array).
+        public CommandResultInfo Execute()
+            => CommandResultInfo.Success("no-context");
+
         public CommandResultInfo Execute(TestMessageContext ctx)
             => CommandResultInfo.Success("noargs");
 

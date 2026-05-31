@@ -195,7 +195,8 @@
         {
             return command.GetType().GetMethods()
                 .Where(m => m.Name == "Execute")
-                .Where(m => m.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext))
+                .Where(m => m.GetParameters().Length > 0
+                            && m.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext))
                 .OrderByDescending(m => m.GetParameters().Length)
                 .ToArray();
         }
