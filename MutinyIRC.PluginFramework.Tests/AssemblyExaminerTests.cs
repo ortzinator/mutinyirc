@@ -66,7 +66,7 @@ namespace MutinyIRC.PluginFramework.Tests
             Assert.That(FullNames, Does.Not.Contain(typeof(NonCommandPlugin).FullName));
         }
 
-        // #6 — an ICommand yields a CommandInfo with all metadata fields populated correctly.
+        // An ICommand yields a CommandInfo with all metadata fields populated correctly.
         [Test]
         public void Command_YieldsCommandInfoWithCorrectMetadata()
         {
@@ -78,7 +78,7 @@ namespace MutinyIRC.PluginFramework.Tests
             Assert.That(info.Type, Is.EqualTo(typeof(ICommand)));
         }
 
-        // #8 — [Plugin(name, description)] flows the description through to CommandInfo.Description.
+        // [Plugin(name, description)] flows the description through to CommandInfo.Description.
         [Test]
         public void DescribedCommand_PopulatesDescription()
         {
@@ -88,21 +88,21 @@ namespace MutinyIRC.PluginFramework.Tests
             Assert.That(info.Description, Is.EqualTo("Has a description"));
         }
 
-        // #9 — the [Plugin("name")] overload leaves Description null.
+        // The [Plugin("name")] overload leaves Description null.
         [Test]
         public void CommandWithoutDescription_HasNullDescription()
         {
             Assert.That(Command<TestCommand>().Description, Is.Null);
         }
 
-        // #10 — parameterless [Plugin()] leaves attr.Name null, so CommandName falls back to type.Name.
+        // Parameterless [Plugin()] leaves attr.Name null, so CommandName falls back to type.Name.
         [Test]
         public void NamelessCommand_FallsBackToTypeName()
         {
             Assert.That(Command<NamelessCommand>().CommandName, Is.EqualTo(nameof(NamelessCommand)));
         }
 
-        // #11 — every matching command type in the assembly is yielded, not just the first.
+        // Every matching command type in the assembly is yielded, not just the first.
         [Test]
         public void AllMatchingCommands_AreYielded()
         {
@@ -115,7 +115,7 @@ namespace MutinyIRC.PluginFramework.Tests
             }));
         }
 
-        // #12 — an assembly with no [Plugin] ICommand types yields an empty sequence. The
+        // An assembly with no [Plugin] ICommand types yields an empty sequence. The
         // PluginFramework assembly itself defines the interfaces/attributes but no commands.
         [Test]
         public void AssemblyWithNoCommands_YieldsEmpty()
