@@ -555,9 +555,23 @@ namespace MutinyIRC.Common
             return newChan;
         }
 
+        /// <summary>
+        ///   Sends a PRIVMSG to a user. The Server facade owns the Connection/Sender
+        ///   plumbing so callers (e.g. <see cref="PrivateMessageSession"/>) don't reach
+        ///   through it directly.
+        /// </summary>
         public void MessageUser(string nick, string msg)
         {
             Connection.Sender.PrivateMessage(nick, msg);
+        }
+
+        /// <summary>
+        ///   Sends a CTCP ACTION (a <c>/me</c>) to a user. Action counterpart to
+        ///   <see cref="MessageUser"/>.
+        /// </summary>
+        public void MessageUserAction(string nick, string action)
+        {
+            Connection.Sender.PrivateAction(nick, action);
         }
 
         public override string ToString()

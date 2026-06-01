@@ -20,13 +20,13 @@ namespace MutinyIRC.Common
 
         public void Send(string message)
         {
-            Server.Connection.Sender.PrivateMessage(User.Nick, message);
+            Server.MessageUser(User.Nick, message);
             MessageSent.Fire(this, new DataEventArgs<string>(message));
         }
 
         public void SendAction(string message)
         {
-            Server.Connection.Sender.PrivateAction(User.Nick, message);
+            Server.MessageUserAction(User.Nick, message);
             ActionSent.Fire(this, new DataEventArgs<string>(message));
         }
 

@@ -29,7 +29,7 @@ namespace MutinyIRC.Commands
             if (session != null)
                 session.Send(message);
             else
-                server.Connection.Sender.PrivateMessage(user, message);
+                server.MessageUser(user, message);
 
             return CommandResultInfo.Success(string.Empty);
         }
