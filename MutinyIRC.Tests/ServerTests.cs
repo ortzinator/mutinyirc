@@ -200,6 +200,31 @@ namespace MutinyIRC.Tests
             Assert.IsFalse(fired, "A part for a channel we don't track must be ignored");
         }
 
+        // --- Only the join lifecycle creates channels; content events for an untracked
+        //     (but otherwise valid) channel must not materialize a phantom channel ---
+
+        [Test]
+        public void Action_ForUntrackedChannel_DoesNotCreateChannelAndIsIgnored()
+        {
+            bool fired = false;
+            _server.UserAction += (_, _) => fired = true;
+
+            Assert.DoesNotThrow(() =>
+                _server.Connection.Listener.Parse(":bob!u@h PRIVMSG #notjoined :ACTION waves"));
+            Assert.IsFalse(fired, "An action for a channel we don't track must be ignored");
+            Assert.IsFalse(_server.Channels.ContainsKey("#notjoined"),
+                "An action must not create a channel we never joined");
+        }
+
+        [Test]
+        public void Topic_ForUntrackedChannel_DoesNotCreateChannel()
+        {
+            Assert.DoesNotThrow(() =>
+                _server.Connection.Listener.Parse(":server.name 332 test #notjoined :a topic"));
+            Assert.IsFalse(_server.Channels.ContainsKey("#notjoined"),
+                "A topic must not create a channel we never joined");
+        }
+
         // --- Regression: invalid channel names make CreateChannel return null; callers must not NRE (gap #5) ---
 
         [Test]

@@ -400,8 +400,7 @@ namespace MutinyIRC.Common
 
         private void ListenerOnRecieveTopic(string channel, string topic)
         {
-            var chan = CreateChannel(channel);
-            if (chan == null)
+            if (!Channels.TryGetValue(channel, out Channel chan))
                 return;
             chan.ShowTopic(topic);
         }
@@ -413,8 +412,7 @@ namespace MutinyIRC.Common
 
         private void Listener_OnAction(object sender, UserChannelMessageEventArgs ea)
         {
-            var chan = CreateChannel(ea.Channel);
-            if (chan == null)
+            if (!Channels.TryGetValue(ea.Channel, out Channel chan))
                 return;
             UserAction.Fire(this, new ChannelMessageEventArgs(ea.User, chan, ea.Message));
             chan.OnNewAction(ea.User, ea.Message);
@@ -643,6 +641,17 @@ namespace MutinyIRC.Common
             return user.Nick == Connection.ConnectionData.Nick;
         }
 
+        /// <summary>
+        ///   Returns the tracked <see cref="Channel"/> for the given name, creating and
+        ///   registering it if absent. Returns null if the name is not a valid channel name.
+        /// </summary>
+        /// <remarks>
+        ///   Channel creation belongs to the join lifecycle only (<see cref="JoinChannel(string, string)"/>
+        ///   and <see cref="Listener_OnJoin"/>). Content events for a channel we never joined
+        ///   (messages, actions, topics, modes, kicks, parts) must look the channel up via
+        ///   <see cref="Channels"/> rather than calling this, so a stray event can't conjure a
+        ///   phantom channel.
+        /// </remarks>
         public Channel CreateChannel(string channelName)
         {
             if (Channels.ContainsKey(channelName))
