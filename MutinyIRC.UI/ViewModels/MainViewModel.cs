@@ -115,13 +115,7 @@ public class MainViewModel : ViewModelBase
         foreach (var sv in Servers)
             sv.PrivateMessages.Remove(pm);
 
-        if (SelectedPanel == pm)
-        {
-            pm.IsSelected = false;
-            var next = Panels.Count > 0 ? Panels[0] : null;
-            SelectedPanel = next;
-            if (next != null) next.IsSelected = true;
-        }
+        SelectNextAfterClosing(pm);
 
         pm.Session.Server.RemovePM(pm.Session);
         pm.Dispose();
@@ -136,13 +130,25 @@ public class MainViewModel : ViewModelBase
         foreach (var sv in Servers)
             sv.Channels.Remove(chan);
 
-        if (SelectedPanel == chan)
-        {
-            chan.IsSelected = false;
-            var next = Panels.Count > 0 ? Panels[0] : null;
-            SelectedPanel = next;
-            if (next != null) next.IsSelected = true;
-        }
+        SelectNextAfterClosing(chan);
+
+        chan.Dispose();
+    }
+
+    /// <summary>
+    ///   When the panel being closed is the selected one, deselects it and selects the
+    ///   first remaining panel (if any). Call after the panel has been removed from
+    ///   <see cref="Panels"/> so the replacement is picked from what's left.
+    /// </summary>
+    private void SelectNextAfterClosing(IrcViewModel closed)
+    {
+        if (SelectedPanel != closed)
+            return;
+
+        closed.IsSelected = false;
+        var next = Panels.Count > 0 ? Panels[0] : null;
+        SelectedPanel = next;
+        if (next != null) next.IsSelected = true;
     }
 
     private void LoadSettings()
