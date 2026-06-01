@@ -148,6 +148,19 @@ namespace MutinyIRC.Tests
         }
 
         [Test]
+        public void MessageService_FiresServiceMessageSent()
+        {
+            UserMessageEventArgs sent = null;
+            _server.ServiceMessageSent += (_, e) => sent = e;
+
+            _server.MessageService("NickServ", "identify hunter2");
+
+            Assert.IsNotNull(sent, "MessageService must fire ServiceMessageSent so the host can echo it");
+            Assert.AreEqual("NickServ", sent.User.Nick);
+            Assert.AreEqual("identify hunter2", sent.Message);
+        }
+
+        [Test]
         public void ServiceNickMatching_IsCaseInsensitive()
         {
             _server.ServiceNicks.Add("ChanServ");

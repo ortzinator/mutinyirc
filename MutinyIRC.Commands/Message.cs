@@ -20,8 +20,9 @@ namespace MutinyIRC.Commands
 
         /// <summary>
         ///   Routes the outgoing message through a <see cref="PrivateMessageSession"/> so
-        ///   the sender gets a tab + echoed line. Falls back to the raw wire send when the
-        ///   target is a service nickname (no session is created in that case).
+        ///   the sender gets a tab + echoed line. When the target is a service nickname (no
+        ///   session is created) it goes through <see cref="Server.MessageService"/>, which
+        ///   echoes the line in the server window alongside the service's replies.
         /// </summary>
         private static CommandResultInfo SendPrivate(Server server, string user, string message)
         {
@@ -29,7 +30,7 @@ namespace MutinyIRC.Commands
             if (session != null)
                 session.Send(message);
             else
-                server.MessageUser(user, message);
+                server.MessageService(user, message);
 
             return CommandResultInfo.Success(string.Empty);
         }

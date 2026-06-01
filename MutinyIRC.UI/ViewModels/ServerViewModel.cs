@@ -43,11 +43,17 @@ public class ServerViewModel : IrcViewModel
         server.WhoisReceived += Server_WhoisReceived;
         server.ServiceMessageReceived += Server_ServiceMessageReceived;
         server.ServiceActionReceived += Server_ServiceActionReceived;
+        server.ServiceMessageSent += Server_ServiceMessageSent;
     }
 
     private void Server_ServiceMessageReceived(object? sender, UserMessageEventArgs e)
     {
         ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Message, e.User));
+    }
+
+    private void Server_ServiceMessageSent(object? sender, UserMessageEventArgs e)
+    {
+        ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Message, server.UserNick));
     }
 
     private void Server_ServiceActionReceived(object? sender, UserMessageEventArgs e)

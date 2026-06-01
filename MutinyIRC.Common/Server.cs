@@ -306,6 +306,14 @@ namespace MutinyIRC.Common
         /// </summary>
         public event EventHandler<UserMessageEventArgs> ServiceActionReceived;
 
+        /// <summary>
+        ///   Fired when we send a PRIVMSG to a service nick (no PM tab exists for one).
+        ///   The host echoes this in the server window so the outgoing line sits alongside
+        ///   the service's replies (<see cref="ServiceMessageReceived"/>). The event's
+        ///   <c>User</c> is the target service; the host renders the line under our own nick.
+        /// </summary>
+        public event EventHandler<UserMessageEventArgs> ServiceMessageSent;
+
         public event EventHandler<DisconnectEventArgs> ConnectionLost;
 
         public event EventHandler ConnectCancelled;
@@ -576,6 +584,17 @@ namespace MutinyIRC.Common
         public void MessageUserAction(string nick, string action)
         {
             Connection.Sender.PrivateAction(nick, action);
+        }
+
+        /// <summary>
+        ///   Sends a PRIVMSG to a service nick (one that has no PM tab) and fires
+        ///   <see cref="ServiceMessageSent"/> so the host can echo it in the server window.
+        ///   Use this instead of <see cref="MessageUser"/> when the target is a service.
+        /// </summary>
+        public void MessageService(string nick, string msg)
+        {
+            MessageUser(nick, msg);
+            ServiceMessageSent.Fire(this, new UserMessageEventArgs(new User { Nick = nick }, msg));
         }
 
         public override string ToString()
