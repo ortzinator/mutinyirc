@@ -380,7 +380,8 @@ namespace MutinyIRC.Common
 
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
         {
-            var chan = Channels[channel];
+            if (!Channels.TryGetValue(channel, out Channel chan))
+                return;
             if (kickee == UserNick)
                 chan.Membership = ChannelMembership.NotJoined;
             Kick.Fire(this, new KickEventArgs(user, chan, kickee, reason));
@@ -400,6 +401,8 @@ namespace MutinyIRC.Common
         private void ListenerOnRecieveTopic(string channel, string topic)
         {
             var chan = CreateChannel(channel);
+            if (chan == null)
+                return;
             chan.ShowTopic(topic);
         }
 
@@ -411,6 +414,8 @@ namespace MutinyIRC.Common
         private void Listener_OnAction(object sender, UserChannelMessageEventArgs ea)
         {
             var chan = CreateChannel(ea.Channel);
+            if (chan == null)
+                return;
             UserAction.Fire(this, new ChannelMessageEventArgs(ea.User, chan, ea.Message));
             chan.OnNewAction(ea.User, ea.Message);
         }
@@ -433,9 +438,11 @@ namespace MutinyIRC.Common
 
         private void Listener_OnPublic(object sender, UserChannelMessageEventArgs ea)
         {
+            if (!Channels.TryGetValue(ea.Channel, out Channel chan))
+                return;
             ChannelMessaged.Fire(this,
-                new ChannelMessageEventArgs(ea.User, Channels[ea.Channel], ea.Message));
-            Channels[ea.Channel].OnNewMessage(ea.User, ea.Message);
+                new ChannelMessageEventArgs(ea.User, chan, ea.Message));
+            chan.OnNewMessage(ea.User, ea.Message);
         }
 
         private void Listener_OnNames(object sender, NamesEventArgs e)
@@ -456,6 +463,8 @@ namespace MutinyIRC.Common
         private void Listener_OnJoin(User user, string channel)
         {
             var chan = CreateChannel(channel);
+            if (chan == null)
+                return;
             if (user.Nick == UserNick)
             {
                 chan.Membership = ChannelMembership.Joined;
@@ -471,9 +480,7 @@ namespace MutinyIRC.Common
 
         private void Listener_OnPart(User user, string channel, string reason)
         {
-            var chan = Channels[channel];
-
-            if (chan == null)
+            if (!Channels.TryGetValue(channel, out Channel chan))
                 return;
 
             if (IsMe(user))
@@ -497,7 +504,8 @@ namespace MutinyIRC.Common
         private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes,
                                                   string raw)
         {
-            var chan = Channels[channel];
+            if (!Channels.TryGetValue(channel, out Channel chan))
+                return;
             ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, chan, modes, raw));
 
             chan.ApplyModeChanges(modes);
@@ -560,6 +568,8 @@ namespace MutinyIRC.Common
         public Channel JoinChannel(string channelToJoin, string key)
         {
             Channel newChan = CreateChannel(channelToJoin);
+            if (newChan == null)
+                return null;
             newChan.Membership = ChannelMembership.Joining;
 
             Connection.Sender.Join(channelToJoin, key);

@@ -153,5 +153,81 @@ namespace MutinyIRC.Tests
             Assert.IsNotNull(received, "The error must still surface to ErrorMessageRecieved subscribers");
             Assert.AreEqual(ReplyCode.ERR_BADCHANNELKEY, received.Code);
         }
+
+        // --- Regression: events for untracked channels must not throw KeyNotFoundException (gap #2) ---
+
+        [Test]
+        public void PublicMessage_ForUntrackedChannel_DoesNotThrowAndIsIgnored()
+        {
+            bool fired = false;
+            _server.ChannelMessaged += (_, _) => fired = true;
+
+            Assert.DoesNotThrow(() =>
+                _server.Connection.Listener.Parse(":bob!u@h PRIVMSG #notjoined :hello"));
+            Assert.IsFalse(fired, "A message for a channel we don't track must be ignored");
+        }
+
+        [Test]
+        public void Kick_ForUntrackedChannel_DoesNotThrowAndIsIgnored()
+        {
+            bool fired = false;
+            _server.Kick += (_, _) => fired = true;
+
+            Assert.DoesNotThrow(() =>
+                _server.Connection.Listener.Parse(":bob!u@h KICK #notjoined victim :gone"));
+            Assert.IsFalse(fired, "A kick for a channel we don't track must be ignored");
+        }
+
+        [Test]
+        public void ChannelModeChange_ForUntrackedChannel_DoesNotThrowAndIsIgnored()
+        {
+            bool fired = false;
+            _server.ChannelModeChange += (_, _) => fired = true;
+
+            Assert.DoesNotThrow(() =>
+                _server.Connection.Listener.Parse(":bob!u@h MODE #notjoined +o someone"));
+            Assert.IsFalse(fired, "A mode change for a channel we don't track must be ignored");
+        }
+
+        [Test]
+        public void Part_ForUntrackedChannel_DoesNotThrowAndIsIgnored()
+        {
+            bool fired = false;
+            _server.Part += (_, _) => fired = true;
+
+            Assert.DoesNotThrow(() =>
+                _server.Connection.Listener.Parse(":bob!u@h PART #notjoined :bye"));
+            Assert.IsFalse(fired, "A part for a channel we don't track must be ignored");
+        }
+
+        // --- Regression: invalid channel names make CreateChannel return null; callers must not NRE (gap #5) ---
+
+        [Test]
+        public void Topic_ForInvalidChannelName_DoesNotThrowAndCreatesNoChannel()
+        {
+            Assert.DoesNotThrow(() =>
+                _server.Connection.Listener.Parse(":server.name 332 test badname :a topic"));
+            Assert.IsFalse(_server.Channels.ContainsKey("badname"),
+                "An invalid channel name must not be added to the channel list");
+        }
+
+        [Test]
+        public void Join_ForInvalidChannelName_DoesNotThrowAndCreatesNoChannel()
+        {
+            Assert.DoesNotThrow(() =>
+                _server.Connection.Listener.Parse(":bob!u@h JOIN badname"));
+            Assert.IsFalse(_server.Channels.ContainsKey("badname"),
+                "An invalid channel name must not be added to the channel list");
+        }
+
+        [Test]
+        public void JoinChannel_WithInvalidChannelName_ReturnsNullAndCreatesNoChannel()
+        {
+            Channel result = null;
+            Assert.DoesNotThrow(() => result = _server.JoinChannel("badname"));
+            Assert.IsNull(result, "Joining an invalid channel name must return null, not throw");
+            Assert.IsFalse(_server.Channels.ContainsKey("badname"),
+                "An invalid channel name must not be added to the channel list");
+        }
     }
 }
