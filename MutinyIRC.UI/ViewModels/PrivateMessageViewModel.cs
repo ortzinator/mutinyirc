@@ -131,12 +131,6 @@ public class PrivateMessageViewModel : IrcViewModel
         }
     }
 
-    public override void Close()
-    {
-        _session.Server.RemovePM(_session);
-        base.Close();
-    }
-
     public override void Dispose()
     {
         if (_session == null) return;

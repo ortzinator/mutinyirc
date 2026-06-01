@@ -107,14 +107,15 @@ public class PrivateMessageViewModelTests
     }
 
     [Test]
-    public void Close_RemovesSessionFromServer()
+    public void Close_FiresRequestClose()
     {
+        // Closure is UI-driven: the VM only signals RequestClose; the host
+        // (MainViewModel) is responsible for removing the session and disposing.
         bool requestedClose = false;
         _vm.RequestClose += (_, _) => requestedClose = true;
 
         _vm.Close();
 
-        Assert.That(_server.PMSessions, Does.Not.Contain(_session));
         Assert.That(requestedClose, Is.True);
     }
 }

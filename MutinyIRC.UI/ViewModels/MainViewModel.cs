@@ -106,14 +106,6 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private void Server_PrivateMessageSessionRemoved(object? sender, PrivateMessageSessionEventArgs e)
-    {
-        var pm = Panels.OfType<PrivateMessageViewModel>()
-            .FirstOrDefault(p => p.Session == e.PrivateMessageSession);
-        if (pm != null)
-            Pm_RequestClose(pm, EventArgs.Empty);
-    }
-
     private void Pm_RequestClose(object? sender, EventArgs e)
     {
         var pm = (PrivateMessageViewModel)sender!;
@@ -131,6 +123,7 @@ public class MainViewModel : ViewModelBase
             if (next != null) next.IsSelected = true;
         }
 
+        pm.Session.Server.RemovePM(pm.Session);
         pm.Dispose();
     }
 
@@ -172,7 +165,6 @@ public class MainViewModel : ViewModelBase
         Servers.Add(vm);
 
         server.PrivateMessageSessionAdded += Server_PrivateMessageSessionAdded;
-        server.PrivateMessageSessionRemoved += Server_PrivateMessageSessionRemoved;
 
         if (SelectedPanel == null)
         {

@@ -129,28 +129,25 @@ namespace MutinyIRC.Tests
         }
 
         [Test]
-        public void RemovePM_RemovesSessionAndFiresRemoved()
+        public void RemovePM_RemovesSession()
         {
             var session = _server.GetOrCreatePM(new User { Nick = "alice" });
-            PrivateMessageSession removed = null;
-            _server.PrivateMessageSessionRemoved += (_, e) => removed = e.PrivateMessageSession;
 
             _server.RemovePM(session);
 
-            Assert.AreSame(session, removed);
             Assert.AreEqual(0, _server.PMSessions.Count);
         }
 
         [Test]
-        public void RemovePM_UnknownSession_DoesNotFire()
+        public void RemovePM_UnknownSession_LeavesTrackedSessionsIntact()
         {
+            var tracked = _server.GetOrCreatePM(new User { Nick = "alice" });
             var stray = new PrivateMessageSession(_server, new User { Nick = "ghost" });
-            bool fired = false;
-            _server.PrivateMessageSessionRemoved += (_, _) => fired = true;
 
             _server.RemovePM(stray);
 
-            Assert.IsFalse(fired);
+            Assert.AreEqual(1, _server.PMSessions.Count);
+            Assert.Contains(tracked, _server.PMSessions);
         }
 
         [Test]

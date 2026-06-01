@@ -206,16 +206,15 @@ namespace MutinyIRC.Common
         }
 
         /// <summary>
-        ///   Removes a private message session from this server. Fires
-        ///   <see cref="PrivateMessageSessionRemoved"/> so any UI listening can tear
-        ///   down its tab. Safe to call with a session that is not currently tracked.
+        ///   Removes a private message session from this server. Closure is UI-driven:
+        ///   the host tears down its tab and then calls this to drop the session, so no
+        ///   event is fired here. Safe to call with a session that is not currently tracked.
         /// </summary>
         public void RemovePM(PrivateMessageSession session)
         {
             if (session == null) return;
 
-            if (PMSessions.Remove(session))
-                PrivateMessageSessionRemoved.Fire(this, new PrivateMessageSessionEventArgs(session));
+            PMSessions.Remove(session);
         }
 
         public void UnhookEvents()
@@ -289,8 +288,6 @@ namespace MutinyIRC.Common
         public event EventHandler<KickEventArgs> Kick;
 
         public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
-
-        public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionRemoved;
 
         /// <summary>
         ///   Fired when a PRIVMSG arrives from a nickname that <see cref="ServiceNickPolicy"/>
