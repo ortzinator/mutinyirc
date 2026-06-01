@@ -67,43 +67,29 @@ public class MainViewModel : ViewModelBase
 
     private void Server_JoinSelf(object? sender, Common.DataEventArgs<Channel> e)
     {
-        try
-        {
-            var chan = CompositionRoot.Resolve<ChannelViewModel>(new ConstructorArgument("channel", e.Data));
-            chan.RequestClose += Chan_RequestClose;
-            Panels.Add(chan);
+        var chan = CompositionRoot.Resolve<ChannelViewModel>(new ConstructorArgument("channel", e.Data));
+        chan.RequestClose += Chan_RequestClose;
+        Panels.Add(chan);
 
-            if (_serverMap.TryGetValue(e.Data.Server, out var serverVm))
-                serverVm.Channels.Add(chan);
+        if (_serverMap.TryGetValue(e.Data.Server, out var serverVm))
+            serverVm.Channels.Add(chan);
 
-            if (_selectedPanel != null) _selectedPanel.IsSelected = false;
-            SelectedPanel = chan;
-            chan.IsSelected = true;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"!!!!Server_JoinSelf threw: {ex}");
-        }
+        if (_selectedPanel != null) _selectedPanel.IsSelected = false;
+        SelectedPanel = chan;
+        chan.IsSelected = true;
     }
 
     private void Server_PrivateMessageSessionAdded(object? sender, PrivateMessageSessionEventArgs e)
     {
-        try
-        {
-            var pm = CompositionRoot.Resolve<PrivateMessageViewModel>(
-                new ConstructorArgument("session", e.PrivateMessageSession));
-            pm.RequestClose += Pm_RequestClose;
-            Panels.Add(pm);
+        var pm = CompositionRoot.Resolve<PrivateMessageViewModel>(
+            new ConstructorArgument("session", e.PrivateMessageSession));
+        pm.RequestClose += Pm_RequestClose;
+        Panels.Add(pm);
 
-            if (_serverMap.TryGetValue(e.PrivateMessageSession.Server, out var serverVm))
-                serverVm.PrivateMessages.Add(pm);
+        if (_serverMap.TryGetValue(e.PrivateMessageSession.Server, out var serverVm))
+            serverVm.PrivateMessages.Add(pm);
 
-            // Intentionally do NOT focus: incoming PMs must not steal focus.
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"!!!!Server_PrivateMessageSessionAdded threw: {ex}");
-        }
+        // Intentionally do NOT focus: incoming PMs must not steal focus.
     }
 
     private void Pm_RequestClose(object? sender, EventArgs e)
