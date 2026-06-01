@@ -14,11 +14,12 @@ namespace MutinyIRC.Common
 
         /// <summary>
         ///   Nicknames whose PRIVMSGs bypass the PM tab UI and surface in the server
-        ///   window instead (NickServ, ChanServ, etc). Hosts populate this once at
-        ///   startup; tests can mutate it directly. Empty by default so pure-protocol
-        ///   consumers see all PRIVMSGs as conversations. Lookups are case-insensitive.
+        ///   window instead (NickServ, ChanServ, etc). Hosts seed this per connection
+        ///   (so it can vary by IRC network); tests can mutate it directly. Empty by
+        ///   default so pure-protocol consumers see all PRIVMSGs as conversations.
+        ///   Lookups are case-insensitive.
         /// </summary>
-        public static HashSet<string> ServiceNicks { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> ServiceNicks { get; } = new(StringComparer.OrdinalIgnoreCase);
 
         public Server() { }
 
@@ -163,7 +164,7 @@ namespace MutinyIRC.Common
             GetOrCreatePM(e.User).OnActionReceived(new DataEventArgs<string>(e.Message));
         }
 
-        private static bool IsServiceNick(string nick)
+        private bool IsServiceNick(string nick)
             => !string.IsNullOrEmpty(nick) && ServiceNicks.Contains(nick);
 
         /// <summary>

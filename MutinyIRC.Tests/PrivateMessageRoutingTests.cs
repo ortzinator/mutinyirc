@@ -21,14 +21,11 @@ namespace MutinyIRC.Tests
             var args = new ConnectionArgs("test", "irc.fake.com", false);
             var connMock = A.Fake<Connection>(x => x.WithArgumentsForConstructor(new object[] { args, false, false }));
             _server = new Server(connMock);
-
-            Server.ServiceNicks.Clear();
         }
 
         [TearDown]
         public void Teardown()
         {
-            Server.ServiceNicks.Clear();
             _server = null;
         }
 
@@ -59,7 +56,7 @@ namespace MutinyIRC.Tests
         [Test]
         public void GetOrCreatePM_ServiceNick_ReturnsNullAndDoesNotCreate()
         {
-            Server.ServiceNicks.Add("NickServ");
+            _server.ServiceNicks.Add("NickServ");
 
             PrivateMessageSession session = _server.GetOrCreatePM("NickServ");
 
@@ -70,7 +67,7 @@ namespace MutinyIRC.Tests
         [Test]
         public void IncomingPM_FromServiceNick_FiresServiceMessageReceived_NoSession()
         {
-            Server.ServiceNicks.Add("NickServ");
+            _server.ServiceNicks.Add("NickServ");
 
             UserMessageEventArgs serviceArgs = null;
             _server.ServiceMessageReceived += (_, e) => serviceArgs = e;
@@ -114,7 +111,7 @@ namespace MutinyIRC.Tests
         [Test]
         public void IncomingPrivateAction_FromServiceNick_FiresServiceActionReceived_NoSession()
         {
-            Server.ServiceNicks.Add("ChanServ");
+            _server.ServiceNicks.Add("ChanServ");
 
             UserMessageEventArgs serviceArgs = null;
             _server.ServiceActionReceived += (_, e) => serviceArgs = e;
@@ -153,7 +150,7 @@ namespace MutinyIRC.Tests
         [Test]
         public void ServiceNickMatching_IsCaseInsensitive()
         {
-            Server.ServiceNicks.Add("ChanServ");
+            _server.ServiceNicks.Add("ChanServ");
 
             Assert.IsNull(_server.GetOrCreatePM("chanserv"));
             Assert.IsNull(_server.GetOrCreatePM("CHANSERV"));

@@ -23,7 +23,6 @@ public class PrivateMessageViewModelTests
         var conn = A.Fake<Connection>(x => x.WithArgumentsForConstructor(new object[] { args, false, false }));
         _server = new Server(conn);
 
-        Server.ServiceNicks.Clear();
         _plugins = new PluginManager();
         _session = _server.GetOrCreatePM(new User { Nick = "alice" });
         _vm = new PrivateMessageViewModel(_session, _plugins);

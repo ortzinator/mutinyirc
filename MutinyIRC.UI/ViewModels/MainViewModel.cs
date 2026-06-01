@@ -160,6 +160,10 @@ public class MainViewModel : ViewModelBase
 
     private void Instance_ServerCreated(object? sender, ServerEventArgs e)
     {
+        // Seed this connection's service-nick filter from user config.
+        foreach (string nick in AppSettings.Instance.ServiceNicks)
+            e.Server.ServiceNicks.Add(nick);
+
         CreateServerPanel(e.Server);
     }
 
