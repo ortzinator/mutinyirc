@@ -170,12 +170,15 @@ namespace MutinyIRC.Common
         /// <summary>
         ///   Returns the existing <see cref="PrivateMessageSession"/> for the given user
         ///   or creates a new one. Returns null if the nickname identifies a server-side
-        ///   service (per <see cref="ServiceNickPolicy"/>) since services do not warrant
+        ///   service (per <see cref="ServiceNicks"/>) since services do not warrant
         ///   a dedicated PM tab.
         /// </summary>
         public PrivateMessageSession GetOrCreatePM(User user)
         {
             ArgumentNullException.ThrowIfNull(user);
+
+            if (string.IsNullOrEmpty(user.Nick))
+                throw new ArgumentException("User nick cannot be null or empty.", nameof(user));
 
             if (IsServiceNick(user.Nick))
                 return null;
@@ -291,7 +294,7 @@ namespace MutinyIRC.Common
         public event EventHandler<PrivateMessageSessionEventArgs> PrivateMessageSessionAdded;
 
         /// <summary>
-        ///   Fired when a PRIVMSG arrives from a nickname that <see cref="ServiceNickPolicy"/>
+        ///   Fired when a PRIVMSG arrives from a nickname that <see cref="ServiceNicks"/>
         ///   identifies as a server-side service. No PM session is created; the host
         ///   should surface the message in the server window.
         /// </summary>
