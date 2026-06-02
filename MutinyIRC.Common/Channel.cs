@@ -182,6 +182,16 @@ namespace MutinyIRC.Common
             TopicReceived.Fire(this, new DataEventArgs<string>(topic));
         }
 
+        public void RequestTopic()
+        {
+            Server.Connection.Sender.RequestTopic(Name);
+        }
+
+        public void SetTopic(string topic)
+        {
+            Server.Connection.Sender.ChangeTopic(Name, topic);
+        }
+
         public void UserJoin(User nick)
         {
             if (!Users.Contains(nick))

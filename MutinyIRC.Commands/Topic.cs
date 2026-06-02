@@ -1,0 +1,28 @@
+namespace MutinyIRC.Commands
+{
+    using MutinyIRC.Common;
+    using PluginFramework;
+
+    /// <summary>
+    /// Requests or sets the topic of the current channel (the /topic command).
+    /// </summary>
+    [Plugin]
+    public class Topic : ICommand
+    {
+        /// <summary>
+        /// Requests the current topic for the channel.
+        /// </summary>
+        public void Execute(Channel channel)
+        {
+            channel.RequestTopic();
+        }
+
+        /// <summary>
+        /// Sets the channel topic.
+        /// </summary>
+        public void Execute(Channel channel, string topic)
+        {
+            channel.SetTopic(topic);
+        }
+    }
+}
