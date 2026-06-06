@@ -192,6 +192,14 @@ namespace MutinyIRC.Common
             Server.Connection.Sender.ChangeTopic(Name, topic);
         }
 
+        /// <summary>
+        ///   Kicks a user from the channel with the given reason.
+        /// </summary>
+        public void Kick(string nick, string reason)
+        {
+            Server.Connection.Sender.Kick(Name, reason, nick);
+        }
+
         public void UserJoin(User nick)
         {
             if (!Users.Contains(nick))
