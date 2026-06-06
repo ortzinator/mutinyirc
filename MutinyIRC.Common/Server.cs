@@ -605,6 +605,19 @@ namespace MutinyIRC.Common
             ServiceMessageSent.Fire(this, new UserMessageEventArgs(new User { Nick = nick }, msg));
         }
 
+        /// <summary>
+        ///   Sends a raw <c>MODE</c> command for <paramref name="target"/> (a channel or nick).
+        ///   When <paramref name="modeArgs"/> is empty the server's current modes are requested
+        ///   instead of changed.
+        /// </summary>
+        public void SendMode(string target, string modeArgs)
+        {
+            string command = string.IsNullOrWhiteSpace(modeArgs)
+                ? $"MODE {target}"
+                : $"MODE {target} {modeArgs}";
+            Connection.Sender.Raw(command);
+        }
+
         public override string ToString()
         {
             return string.Format("{0}:{1}", Url, Port);
