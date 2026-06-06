@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="MutinyIRC.PluginFramework.Tests" />
+    <InternalsVisibleTo Include="MutinyIRC.Tests" />
   </ItemGroup>
 
 </Project>

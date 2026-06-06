@@ -1,16 +1,19 @@
-using NUnit.Framework;
-using MutinyIRC.Commands;
-using MutinyIRC.Common;
-using FakeItEasy;
-using FlamingIRC;
-
 namespace MutinyIRC.Tests
 {
+    using System.Collections.Generic;
+    using FakeItEasy;
+    using FlamingIRC;
+    using MutinyIRC.Commands;
+    using MutinyIRC.Common;
+    using MutinyIRC.PluginFramework;
+    using NUnit.Framework;
+
     [TestFixture]
     public class ModeCommandTests
     {
         private ISender _fakeSender;
         private Channel _channel;
+        private PluginManager _manager;
 
         [SetUp]
         public void Setup()
@@ -21,132 +24,101 @@ namespace MutinyIRC.Tests
             var server = A.Fake<Server>();
             A.CallTo(() => server.Connection).Returns(fakeConn);
             _channel = new Channel(server, "#mutiny");
+
+            _manager = new PluginManager();
+            var type = typeof(Mode);
+            _manager._commands.Add(type.FullName,
+                new CommandInfo(type.Assembly.Location, type.FullName, "mode", typeof(ICommand)));
         }
 
-        // --- Current channel, no explicit target ---
+        // Dispatches /mode through the real PluginManager so the coercion path (or, here, the
+        // [RawArguments] opt-out) is exercised — not just the command body in isolation.
+        private void Dispatch(params string[] args)
+            => _manager.ExecuteCommand(new CommandExecutionInfo
+            {
+                Name = "mode",
+                Context = _channel,
+                ParameterList = new List<object>(args),
+            });
 
         [Test]
-        public void Execute_NoArgs_RequestsCurrentChannelModes()
+        public void BareMode_RequestsCurrentChannelModes()
         {
-            new Mode().Execute(_channel);
+            Dispatch();
 
             A.CallTo(() => _fakeSender.Raw("MODE #mutiny")).MustHaveHappened();
         }
 
         [Test]
-        public void Execute_PlusFlagOnly_SetsModeOnCurrentChannel()
+        public void PlusSpec_AppliesToCurrentChannel()
         {
-            new Mode().Execute(_channel, "+i");
+            Dispatch("+o", "nick");
+
+            A.CallTo(() => _fakeSender.Raw("MODE #mutiny +o nick")).MustHaveHappened();
+        }
+
+        [Test] // the case that previously forced char[] coercion + Removal reconstruction
+        public void MinusSpec_PassesThroughVerbatim()
+        {
+            Dispatch("-ooo", "a", "b", "c");
+
+            A.CallTo(() => _fakeSender.Raw("MODE #mutiny -ooo a b c")).MustHaveHappened();
+        }
+
+        [Test]
+        public void PlusFlagOnly_SetsModeOnCurrentChannel()
+        {
+            Dispatch("+i");
 
             A.CallTo(() => _fakeSender.Raw("MODE #mutiny +i")).MustHaveHappened();
         }
 
         [Test]
-        public void Execute_MinusFlagOnly_RemovesModeOnCurrentChannel()
+        public void MinusFlagOnly_RemovesModeOnCurrentChannel()
         {
-            new Mode().Execute(_channel, new[] { 'i' });
+            Dispatch("-i");
 
             A.CallTo(() => _fakeSender.Raw("MODE #mutiny -i")).MustHaveHappened();
         }
 
         [Test]
-        public void Execute_PlusFlagWithParam_SetsModeOnCurrentChannel()
+        public void ExplicitChannel_RequestsThatChannelsModes()
         {
-            new Mode().Execute(_channel, "+o", "nick");
-
-            A.CallTo(() => _fakeSender.Raw("MODE #mutiny +o nick")).MustHaveHappened();
-        }
-
-        [Test]
-        public void Execute_MultiPlusFlagWithParams_SetsModeOnCurrentChannel()
-        {
-            new Mode().Execute(_channel, "+ooo", "a b c");
-
-            A.CallTo(() => _fakeSender.Raw("MODE #mutiny +ooo a b c")).MustHaveHappened();
-        }
-
-        [Test]
-        public void Execute_MinusFlagWithParam_RemovesModeOnCurrentChannel()
-        {
-            new Mode().Execute(_channel, new[] { 'o' }, "nick");
-
-            A.CallTo(() => _fakeSender.Raw("MODE #mutiny -o nick")).MustHaveHappened();
-        }
-
-        [Test]
-        public void Execute_MultiMinusFlagWithParams_RemovesModeOnCurrentChannel()
-        {
-            new Mode().Execute(_channel, new[] { 'o', 'o', 'o' }, "a b c");
-
-            A.CallTo(() => _fakeSender.Raw("MODE #mutiny -ooo a b c")).MustHaveHappened();
-        }
-
-        // --- Explicit nick target ---
-
-        [Test]
-        public void Execute_BareTarget_RequestsThatTargetsModes()
-        {
-            new Mode().Execute(_channel, "someone");
-
-            A.CallTo(() => _fakeSender.Raw("MODE someone")).MustHaveHappened();
-        }
-
-        [Test]
-        public void Execute_NickWithPlusFlag_SetsUserMode()
-        {
-            new Mode().Execute(_channel, "someone", "+i");
-
-            A.CallTo(() => _fakeSender.Raw("MODE someone +i")).MustHaveHappened();
-        }
-
-        [Test]
-        public void Execute_NickWithMinusFlag_RemovesUserMode()
-        {
-            new Mode().Execute(_channel, "someone", new[] { 'i' });
-
-            A.CallTo(() => _fakeSender.Raw("MODE someone -i")).MustHaveHappened();
-        }
-
-        [Test]
-        public void Execute_NickWithMinusFlagAndParam_RemovesUserMode()
-        {
-            new Mode().Execute(_channel, "someone", new[] { 'o' }, "x");
-
-            A.CallTo(() => _fakeSender.Raw("MODE someone -o x")).MustHaveHappened();
-        }
-
-        // --- Explicit channel target ---
-
-        [Test]
-        public void Execute_ExplicitChannel_RequestsThatChannelsModes()
-        {
-            new Mode().Execute(_channel, new ChannelInfo("#other"));
+            Dispatch("#other");
 
             A.CallTo(() => _fakeSender.Raw("MODE #other")).MustHaveHappened();
         }
 
         [Test]
-        public void Execute_ExplicitChannelWithPlusSpec_SetsMode()
+        public void ExplicitChannel_WithPlusSpec()
         {
-            new Mode().Execute(_channel, new ChannelInfo("#other"), "+o nick");
+            Dispatch("#other", "+o", "nick");
 
             A.CallTo(() => _fakeSender.Raw("MODE #other +o nick")).MustHaveHappened();
         }
 
         [Test]
-        public void Execute_ExplicitChannelWithMinusFlag_RemovesMode()
+        public void ExplicitChannel_WithRemoval()
         {
-            new Mode().Execute(_channel, new ChannelInfo("#other"), new[] { 'i' });
+            Dispatch("#other", "-o", "nick");
 
-            A.CallTo(() => _fakeSender.Raw("MODE #other -i")).MustHaveHappened();
+            A.CallTo(() => _fakeSender.Raw("MODE #other -o nick")).MustHaveHappened();
         }
 
         [Test]
-        public void Execute_ExplicitChannelWithMinusFlagAndParam_RemovesMode()
+        public void NickTarget_RequestsThatNicksModes()
         {
-            new Mode().Execute(_channel, new ChannelInfo("#other"), new[] { 'o' }, "nick");
+            Dispatch("someone");
 
-            A.CallTo(() => _fakeSender.Raw("MODE #other -o nick")).MustHaveHappened();
+            A.CallTo(() => _fakeSender.Raw("MODE someone")).MustHaveHappened();
+        }
+
+        [Test]
+        public void NickTarget_WithUserMode()
+        {
+            Dispatch("someone", "+i");
+
+            A.CallTo(() => _fakeSender.Raw("MODE someone +i")).MustHaveHappened();
         }
     }
 }

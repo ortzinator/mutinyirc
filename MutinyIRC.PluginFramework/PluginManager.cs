@@ -220,6 +220,15 @@
             if (input.ParameterList.Count < userParamCount) return null;
             if (methodParams[0].ParameterType != input.Context.GetType()) return null;
 
+            // A [RawArguments] overload opts out of per-token coercion and takes the whole argument
+            // tail verbatim as one string — for passthrough commands (/mode, /quote) where a leading
+            // '-' or '#' token is data, not a switch or a channel to promote. The arity guard above
+            // (with one user parameter) guarantees at least one token here, so a bare command still
+            // falls through to a barer overload.
+            if (method.IsDefined(typeof(RawArgumentsAttribute), inherit: false))
+                return InvokeSafely(method, instance,
+                    new object[] { input.Context, string.Join(" ", input.ParameterList) }, input.Name);
+
             // Work on a copy so coercions from a failed match don't leak into the next overload.
             var args = new List<object>(input.ParameterList);
 
