@@ -618,6 +618,15 @@ namespace MutinyIRC.Common
             Connection.Sender.Raw(command);
         }
 
+        /// <summary>
+        ///   Sends a raw, unparsed line straight to the server (the /raw command). The caller is
+        ///   responsible for formatting a valid IRC command; nothing is added or escaped.
+        /// </summary>
+        public void SendRaw(string command)
+        {
+            Connection.Sender.Raw(command);
+        }
+
         public override string ToString()
         {
             return string.Format("{0}:{1}", Url, Port);
