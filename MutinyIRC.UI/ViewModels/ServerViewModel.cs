@@ -44,6 +44,12 @@ public class ServerViewModel : IrcViewModel
         server.ServiceMessageReceived += Server_ServiceMessageReceived;
         server.ServiceActionReceived += Server_ServiceActionReceived;
         server.ServiceMessageSent += Server_ServiceMessageSent;
+        server.NoticeSent += Server_NoticeSent;
+    }
+
+    private void Server_NoticeSent(object? sender, UserMessageEventArgs e)
+    {
+        ChatLines.Add(new OutgoingNoticeViewModel(DateTime.Now, e.Message, e.User.Nick));
     }
 
     private void Server_ServiceMessageReceived(object? sender, UserMessageEventArgs e)

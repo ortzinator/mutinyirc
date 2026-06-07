@@ -66,6 +66,29 @@
             </Border>
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type vm:OutgoingNoticeViewModel}">
+            <Border Margin="12,3,12,3" Background="{DynamicResource ChatNoticeBackground}"
+                    CornerRadius="4" Padding="10,6">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding Time, StringFormat='HH:mm'}"
+                               Foreground="{DynamicResource ChatTimestampForeground}"
+                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
+                               IsVisible="{Binding ShowTimestamps}"/>
+                    <TextBlock DockPanel.Dock="Left"
+                               Foreground="{DynamicResource NoticeForeground}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" Margin="0,0,8,0">
+                        <Run Text="&#x2192;"/>
+                        <Run Text="-"/><Run Text="{Binding User.Nick}"/><Run Text="-"/>
+                    </TextBlock>
+                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource NoticeForeground}"
+                               VerticalAlignment="Center"/>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type vm:ChannelMessageViewModel}">
             <DockPanel Margin="16,2,16,2">
                 <TextBlock DockPanel.Dock="Left"

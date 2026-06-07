@@ -606,6 +606,21 @@ namespace MutinyIRC.Common
         }
 
         /// <summary>
+        ///   Sends a NOTICE to a user or channel (the /notice command). Unlike
+        ///   <see cref="MessageUser"/>, no <see cref="PrivateMessageSession"/> (and therefore no
+        ///   PM tab) is created. The echo of the outgoing line is the caller's responsibility:
+        ///   the /notice command raises <see cref="MessageContext.NoticeSent"/> on the context it
+        ///   was issued from so the line appears in that window.
+        /// </summary>
+        public void SendNotice(string target, string message)
+        {
+            if (Rfc2812Util.IsValidChannelName(target))
+                Connection.Sender.PublicNotice(target, message);
+            else
+                Connection.Sender.PrivateNotice(target, message);
+        }
+
+        /// <summary>
         ///   Sends a raw <c>MODE</c> command for <paramref name="target"/> (a channel or nick).
         ///   When <paramref name="modeArgs"/> is empty the target's current modes are requested
         ///   instead of changed.

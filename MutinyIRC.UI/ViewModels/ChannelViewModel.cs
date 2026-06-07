@@ -57,8 +57,14 @@ public class ChannelViewModel : IrcViewModel
         _channel.NickChanged += Channel_OnNick;
         _channel.OnKick += Channel_OnKick;
         _channel.MessagedChannel += Channel_MessagedChannel;
+        _channel.NoticeSent += Channel_NoticeSent;
 
         _channel.Server.Disconnected += Server_Disconnected;
+    }
+
+    private void Channel_NoticeSent(object? sender, UserMessageEventArgs e)
+    {
+        ChatLines.Add(new OutgoingNoticeViewModel(DateTime.Now, e.Message, e.User.Nick));
     }
 
     private void Server_Disconnected(object? sender, EventArgs e)
@@ -162,6 +168,7 @@ public class ChannelViewModel : IrcViewModel
         _channel.NickChanged -= Channel_OnNick;
         _channel.OnKick -= Channel_OnKick;
         _channel.MessagedChannel -= Channel_MessagedChannel;
+        _channel.NoticeSent -= Channel_NoticeSent;
 
         _channel.Server.Disconnected -= Server_Disconnected;
     }

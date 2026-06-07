@@ -81,3 +81,13 @@ public class PrivateNoticeViewModel : ChannelMessageViewModel
     public PrivateNoticeViewModel(DateTime time, string message, string nick)
         : base(time, message, nick) { }
 }
+
+/// <summary>
+/// A notice we sent (the /notice command). The nick carried by <see cref="ChannelMessageViewModel.User"/>
+/// is the target the notice was sent to, not the sender.
+/// </summary>
+public class OutgoingNoticeViewModel : ChannelMessageViewModel
+{
+    public OutgoingNoticeViewModel(DateTime time, string message, string target)
+        : base(time, message, target) { }
+}

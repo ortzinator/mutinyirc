@@ -51,6 +51,7 @@ public class PrivateMessageViewModel : IrcViewModel
         _session.MessageSent += Session_MessageSent;
         _session.ActionReceived += Session_ActionReceived;
         _session.ActionSent += Session_ActionSent;
+        _session.NoticeSent += Session_NoticeSent;
 
         _session.Server.OnNick += Server_OnNick;
         _session.Server.Disconnected += Server_Disconnected;
@@ -89,6 +90,11 @@ public class PrivateMessageViewModel : IrcViewModel
     private void Session_ActionSent(object? sender, Common.DataEventArgs<string> e)
     {
         ChatLines.Add(new ChannelActionViewModel(DateTime.Now, e.Data, _session.Server.UserNick));
+    }
+
+    private void Session_NoticeSent(object? sender, UserMessageEventArgs e)
+    {
+        ChatLines.Add(new OutgoingNoticeViewModel(DateTime.Now, e.Message, e.User.Nick));
     }
 
     private void Server_OnNick(object? sender, NickChangeEventArgs e)
@@ -139,6 +145,7 @@ public class PrivateMessageViewModel : IrcViewModel
         _session.MessageSent -= Session_MessageSent;
         _session.ActionReceived -= Session_ActionReceived;
         _session.ActionSent -= Session_ActionSent;
+        _session.NoticeSent -= Session_NoticeSent;
 
         _session.Server.OnNick -= Server_OnNick;
         _session.Server.Disconnected -= Server_Disconnected;
