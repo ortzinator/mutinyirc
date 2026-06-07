@@ -3,10 +3,14 @@
 using System;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using Common;
 
 public abstract class IrcViewModel : ViewModelBase, IDisposable
 {
     public MTObservableCollection<ChatItemViewModel> ChatLines { get; protected set; }
+
+    /// <summary>The server connection this panel belongs to, or null if it has none.</summary>
+    public abstract Server? OwningServer { get; }
 
     private bool _isSelected;
     public virtual bool IsSelected

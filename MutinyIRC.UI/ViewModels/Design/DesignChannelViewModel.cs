@@ -3,12 +3,14 @@
 using System;
 using System.Collections.Generic;
 using FlamingIRC;
+using Common;
 
 public class DesignChannelViewModel : IrcViewModel
 {
     public string ChannelName => "#general";
     public new string Name => "#general (3)";
     public List<UserViewModel> UserList { get; }
+    public override Server? OwningServer => null;
 
     public DesignChannelViewModel()
     {

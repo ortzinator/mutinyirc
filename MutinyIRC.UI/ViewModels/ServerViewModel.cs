@@ -20,7 +20,7 @@ public class ServerViewModel : IrcViewModel
 
     public MTObservableCollection<ChannelViewModel> Channels { get; } = new MTObservableCollection<ChannelViewModel>();
     public MTObservableCollection<PrivateMessageViewModel> PrivateMessages { get; } = new MTObservableCollection<PrivateMessageViewModel>();
-    internal Server? ServerInstance => server;
+    public override Server? OwningServer => server;
 
     public ServerViewModel(Server newServer, PluginManager pluginManager)
     {

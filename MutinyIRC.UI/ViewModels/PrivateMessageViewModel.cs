@@ -12,6 +12,7 @@ public class PrivateMessageViewModel : IrcViewModel
     private readonly PluginManager _pluginManager = null!;
 
     public PrivateMessageSession Session => _session;
+    public override Server? OwningServer => _session.Server;
 
     private string _otherNick = string.Empty;
     public string OtherNick

@@ -157,6 +157,7 @@ public class ViewModelCloseTests
     // Minimal IrcViewModel stub — no real Channel/Server dependencies.
     private sealed class DesignChannelViewModelStub : IrcViewModel
     {
+        public override Common.Server? OwningServer => null;
         public override void Dispose() { }
     }
 }

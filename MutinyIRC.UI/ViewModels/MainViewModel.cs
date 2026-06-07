@@ -95,18 +95,9 @@ public class MainViewModel : ViewModelBase
         // A user notice surfaces in the active window when that panel belongs to the same
         // connection, so it appears where your attention is; otherwise it falls back to the
         // notice's own server window.
-        IrcViewModel? target = ServerOf(SelectedPanel) == server ? SelectedPanel : serverVm;
+        IrcViewModel? target = SelectedPanel?.OwningServer == server ? SelectedPanel : serverVm;
         target?.AddPrivateNotice(e.User.Nick, e.Message);
     }
-
-    /// <summary>Returns the server a chat panel belongs to, or null for panels with no connection.</summary>
-    private static Server? ServerOf(IrcViewModel? panel) => panel switch
-    {
-        ServerViewModel s => s.ServerInstance,
-        ChannelViewModel c => c.Channel.Server,
-        PrivateMessageViewModel p => p.Session.Server,
-        _ => null
-    };
 
     private void Server_PrivateMessageSessionAdded(object? sender, PrivateMessageSessionEventArgs e)
     {

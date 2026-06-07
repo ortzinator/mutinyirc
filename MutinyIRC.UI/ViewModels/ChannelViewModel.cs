@@ -13,6 +13,7 @@ public class ChannelViewModel : IrcViewModel
 {
     private Channel _channel;
     public Channel Channel => _channel;
+    public override Server? OwningServer => _channel.Server;
     private List<UserViewModel> userList = new();
     private PluginManager _pluginManager;
 
