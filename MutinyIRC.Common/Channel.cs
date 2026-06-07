@@ -130,6 +130,12 @@ namespace MutinyIRC.Common
         /// </summary>
         public event EventHandler<UserMessageEventArgs> MessagedChannel;
 
+        /// <summary>
+        ///   A NOTICE was sent to the channel. The sender need not be a member, so the
+        ///   carried <see cref="User"/> is taken from the message rather than the user list.
+        /// </summary>
+        public event EventHandler<UserMessageEventArgs> OnNotice;
+
         public void Server_OnNick(object sender, NickChangeEventArgs e)
         {
             User user = Users.GetUser(e.User);
@@ -163,6 +169,15 @@ namespace MutinyIRC.Common
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        ///   Raises <see cref="OnNotice"/> for an incoming channel NOTICE. Unlike
+        ///   <see cref="OnNewMessage"/>, the sender is not required to be in the user list.
+        /// </summary>
+        public void OnNewNotice(User nick, string message)
+        {
+            OnNotice.Fire(this, new UserMessageEventArgs(nick, message));
         }
 
         public void OnNewAction(User nick, string message)

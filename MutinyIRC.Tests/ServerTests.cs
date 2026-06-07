@@ -200,6 +200,31 @@ namespace MutinyIRC.Tests
             Assert.IsFalse(fired, "A part for a channel we don't track must be ignored");
         }
 
+        [Test]
+        public void PublicNotice_ForTrackedChannel_FiresChannelOnNotice()
+        {
+            var chan = _server.CreateChannel("#test");
+            chan.Membership = ChannelMembership.Joined;
+
+            UserMessageEventArgs captured = null;
+            chan.OnNotice += (_, e) => captured = e;
+
+            _server.Connection.Listener.Parse(":bob!u@h NOTICE #test :heads up");
+
+            Assert.IsNotNull(captured, "A channel notice must route to the channel's OnNotice");
+            Assert.AreEqual("bob", captured.User.Nick);
+            Assert.AreEqual("heads up", captured.Message);
+        }
+
+        [Test]
+        public void PublicNotice_ForUntrackedChannel_DoesNotThrowAndCreatesNoChannel()
+        {
+            Assert.DoesNotThrow(() =>
+                _server.Connection.Listener.Parse(":bob!u@h NOTICE #notjoined :heads up"));
+            Assert.IsFalse(_server.Channels.ContainsKey("#notjoined"),
+                "A notice must not create a channel we never joined");
+        }
+
         // --- Only the join lifecycle creates channels; content events for an untracked
         //     (but otherwise valid) channel must not materialize a phantom channel ---
 

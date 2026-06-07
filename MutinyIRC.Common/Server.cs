@@ -95,6 +95,7 @@ namespace MutinyIRC.Common
             Connection.Listener.OnAction += Listener_OnAction;
             Connection.Listener.OnPrivateAction += Listener_OnPrivateAction;
             Connection.Listener.OnPrivateNotice += Listener_OnPrivateNotice;
+            Connection.Listener.OnPublicNotice += Listener_OnPublicNotice;
             Connection.Listener.OnRecieveTopic += ListenerOnRecieveTopic;
             Connection.Listener.OnNick += Listener_OnNick;
             Connection.Listener.OnKick += Listener_OnKick;
@@ -234,6 +235,7 @@ namespace MutinyIRC.Common
             Connection.Listener.OnAction -= Listener_OnAction;
             Connection.Listener.OnPrivateAction -= Listener_OnPrivateAction;
             Connection.Listener.OnPrivateNotice -= Listener_OnPrivateNotice;
+            Connection.Listener.OnPublicNotice -= Listener_OnPublicNotice;
             Connection.Listener.OnRecieveTopic -= ListenerOnRecieveTopic;
             Connection.Listener.OnNick -= Listener_OnNick;
             Connection.Listener.OnKick -= Listener_OnKick;
@@ -408,6 +410,13 @@ namespace MutinyIRC.Common
         private void Listener_OnPrivateNotice(object sender, UserMessageEventArgs e)
         {
             PrivateNotice.Fire(this, new UserMessageEventArgs(e.User, e.Message));
+        }
+
+        private void Listener_OnPublicNotice(object sender, UserChannelMessageEventArgs ea)
+        {
+            if (!Channels.TryGetValue(ea.Channel, out Channel chan))
+                return;
+            chan.OnNewNotice(ea.User, ea.Message);
         }
 
         private void Listener_OnAction(object sender, UserChannelMessageEventArgs ea)
