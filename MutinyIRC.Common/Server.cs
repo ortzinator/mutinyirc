@@ -409,25 +409,10 @@ namespace MutinyIRC.Common
 
         private void Listener_OnPrivateNotice(object sender, UserMessageEventArgs e)
         {
-            // A notice from a user we share channels with is surfaced in those channels,
-            // where the conversation with them already lives, rather than the server window.
-            // Notices with no sender nick (pre-registration / server notices) and notices
-            // from users we share no channel with still fall back to the server window.
-            bool routed = false;
-            if (!string.IsNullOrEmpty(e.User.Nick))
-            {
-                foreach (Channel chan in Channels.Values)
-                {
-                    if (chan.HasUser(e.User.Nick))
-                    {
-                        chan.OnNewNotice(e.User, e.Message);
-                        routed = true;
-                    }
-                }
-            }
-
-            if (!routed)
-                PrivateNotice.Fire(this, new UserMessageEventArgs(e.User, e.Message));
+            // Where a private notice is displayed (active window vs. server window) is a UI
+            // concern that depends on which panel is focused, so it's decided in the UI layer.
+            // Here we just surface the event.
+            PrivateNotice.Fire(this, new UserMessageEventArgs(e.User, e.Message));
         }
 
         private void Listener_OnPublicNotice(object sender, UserChannelMessageEventArgs ea)

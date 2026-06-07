@@ -32,7 +32,6 @@ public class ServerViewModel : IrcViewModel
         Name = server.Url;
         server.Registered += Server_Registered;
         server.ConnectFailed += Server_ConnectFailed;
-        server.PrivateNotice += Server_PrivateNotice;
         server.ErrorMessageRecieved += Server_ErrorMessageRecieved;
         server.Connecting += Server_Connecting;
         server.Disconnected += Server_Disconnected;
@@ -158,15 +157,11 @@ public class ServerViewModel : IrcViewModel
         ChatLines.Add(new IrcErrorViewModel(DateTime.Now, e.Message, e.Code.ToString()));
     }
 
-    private void Server_PrivateNotice(object? sender, UserMessageEventArgs e)
-    {
-        // Pre-registration server NOTICEs come from User.Empty (no nick).
-        // Display them as plain informational messages, not as user-to-user notices.
-        if (string.IsNullOrEmpty(e.User.Nick))
-            ChatLines.Add(new ChatItemViewModel(DateTime.Now, e.Message));
-        else
-            ChatLines.Add(new PrivateNoticeViewModel(DateTime.Now, e.Message, e.User.Nick));
-    }
+    /// <summary>
+    ///   Appends a connection-level server NOTICE (one with no sender nick, such as a
+    ///   pre-registration notice) as a plain informational line in the server window.
+    /// </summary>
+    public void AddServerNotice(string message) => AddMessage(message);
 
     private void Server_ConnectFailed(object? sender, ConnectFailedEventArgs e)
     {

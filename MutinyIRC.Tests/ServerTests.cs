@@ -226,55 +226,23 @@ namespace MutinyIRC.Tests
         }
 
         [Test]
-        public void PrivateNotice_FromUserInCommonChannel_RoutesToChannelNotServerWindow()
+        public void PrivateNotice_FromUser_FiresPrivateNoticeEvent()
         {
+            // The server surfaces every private notice via PrivateNotice; the UI layer decides
+            // which window (active vs. server) it lands in, so the channel is never involved here.
             var chan = _server.CreateChannel("#test");
             chan.Membership = ChannelMembership.Joined;
             chan.AddNick(User.FromNames("bob"));
 
-            UserMessageEventArgs channelNotice = null;
-            chan.OnNotice += (_, e) => channelNotice = e;
-            bool serverWindowFired = false;
-            _server.PrivateNotice += (_, _) => serverWindowFired = true;
+            UserMessageEventArgs captured = null;
+            chan.OnNotice += (_, _) => Assert.Fail("A private notice must not route to a channel");
+            _server.PrivateNotice += (_, e) => captured = e;
 
             _server.Connection.Listener.Parse(":bob!u@h NOTICE test :psst");
 
-            Assert.IsNotNull(channelNotice, "A notice from a shared-channel user must route to that channel");
-            Assert.AreEqual("bob", channelNotice.User.Nick);
-            Assert.AreEqual("psst", channelNotice.Message);
-            Assert.IsFalse(serverWindowFired, "A routed notice must not also hit the server window");
-        }
-
-        [Test]
-        public void PrivateNotice_FromUserInMultipleCommonChannels_RoutesToEach()
-        {
-            int count = 0;
-            foreach (string name in new[] { "#one", "#two" })
-            {
-                var chan = _server.CreateChannel(name);
-                chan.Membership = ChannelMembership.Joined;
-                chan.AddNick(User.FromNames("bob"));
-                chan.OnNotice += (_, _) => count++;
-            }
-
-            _server.Connection.Listener.Parse(":bob!u@h NOTICE test :psst");
-
-            Assert.AreEqual(2, count, "A notice must appear in every channel shared with the sender");
-        }
-
-        [Test]
-        public void PrivateNotice_FromUserWithNoCommonChannel_FallsBackToServerWindow()
-        {
-            var chan = _server.CreateChannel("#test");
-            chan.Membership = ChannelMembership.Joined;
-
-            bool serverWindowFired = false;
-            _server.PrivateNotice += (_, _) => serverWindowFired = true;
-
-            _server.Connection.Listener.Parse(":stranger!u@h NOTICE test :psst");
-
-            Assert.IsTrue(serverWindowFired,
-                "A notice from a user we share no channel with must fall back to the server window");
+            Assert.IsNotNull(captured, "A private notice must fire PrivateNotice");
+            Assert.AreEqual("bob", captured.User.Nick);
+            Assert.AreEqual("psst", captured.Message);
         }
 
         // --- Only the join lifecycle creates channels; content events for an untracked

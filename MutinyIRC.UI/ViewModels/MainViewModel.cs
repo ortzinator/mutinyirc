@@ -79,6 +79,35 @@ public class MainViewModel : ViewModelBase
         chan.IsSelected = true;
     }
 
+    private void Server_PrivateNotice(object? sender, UserMessageEventArgs e)
+    {
+        var server = (Server)sender!;
+        _serverMap.TryGetValue(server, out ServerViewModel? serverVm);
+
+        // Pre-registration / server notices (no sender nick) are connection-level, so they
+        // belong in the server window rather than wherever the user happens to be looking.
+        if (string.IsNullOrEmpty(e.User.Nick))
+        {
+            serverVm?.AddServerNotice(e.Message);
+            return;
+        }
+
+        // A user notice surfaces in the active window when that panel belongs to the same
+        // connection, so it appears where your attention is; otherwise it falls back to the
+        // notice's own server window.
+        IrcViewModel? target = ServerOf(SelectedPanel) == server ? SelectedPanel : serverVm;
+        target?.AddPrivateNotice(e.User.Nick, e.Message);
+    }
+
+    /// <summary>Returns the server a chat panel belongs to, or null for panels with no connection.</summary>
+    private static Server? ServerOf(IrcViewModel? panel) => panel switch
+    {
+        ServerViewModel s => s.ServerInstance,
+        ChannelViewModel c => c.Channel.Server,
+        PrivateMessageViewModel p => p.Session.Server,
+        _ => null
+    };
+
     private void Server_PrivateMessageSessionAdded(object? sender, PrivateMessageSessionEventArgs e)
     {
         var pm = CompositionRoot.Resolve<PrivateMessageViewModel>(
@@ -161,6 +190,7 @@ public class MainViewModel : ViewModelBase
         Servers.Add(vm);
 
         server.PrivateMessageSessionAdded += Server_PrivateMessageSessionAdded;
+        server.PrivateNotice += Server_PrivateNotice;
 
         if (SelectedPanel == null)
         {

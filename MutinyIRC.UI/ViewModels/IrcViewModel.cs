@@ -20,6 +20,13 @@ public abstract class IrcViewModel : ViewModelBase, IDisposable
         ChatLines = new MTObservableCollection<ChatItemViewModel>();
     }
 
+    /// <summary>
+    ///   Appends an incoming private NOTICE from <paramref name="nick"/>. Lives on the base type
+    ///   because a private notice is routed to whichever panel is active, not only the server window.
+    /// </summary>
+    public void AddPrivateNotice(string nick, string message)
+        => ChatLines.Add(new PrivateNoticeViewModel(DateTime.Now, message, nick));
+
     private RelayCommand<string>? executeCommand;
     public ICommand ExecuteCommand
     {
