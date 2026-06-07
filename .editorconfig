@@ -1,6 +1,8 @@
 root = true
 [*.cs]
 
+insert_final_newline = true
+
 dotnet_analyzer_diagnostic.category-Style.severity = error
 
 # Here we ignore some rule violations that they are not really important for us
