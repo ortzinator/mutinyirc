@@ -338,11 +338,26 @@ public class ServerViewModel : IrcViewModel
 
     public override void Dispose()
     {
-        if (server != null)
-        {
-            server.WhoisReceived -= Server_WhoisReceived;
-            server.WentAway -= Server_WentAway;
-            server.CameBack -= Server_CameBack;
-        }
+        if (server == null)
+            return;
+
+        // Detach every handler wired in the constructor so the Server (which outlives this VM)
+        // doesn't keep it alive. Keep this list in sync with the constructor's subscriptions.
+        server.Registered -= Server_Registered;
+        server.ConnectFailed -= Server_ConnectFailed;
+        server.ErrorMessageRecieved -= Server_ErrorMessageRecieved;
+        server.Connecting -= Server_Connecting;
+        server.Disconnected -= Server_Disconnected;
+        server.ConnectionLost -= Server_ConnectionLost;
+        server.ConnectCancelled -= Server_ConnectCancelled;
+        server.NickError -= Server_NickError;
+        server.PartSelf -= Server_PartSelf;
+        server.WhoisReceived -= Server_WhoisReceived;
+        server.ServiceMessageReceived -= Server_ServiceMessageReceived;
+        server.ServiceActionReceived -= Server_ServiceActionReceived;
+        server.ServiceMessageSent -= Server_ServiceMessageSent;
+        server.NoticeSent -= Server_NoticeSent;
+        server.WentAway -= Server_WentAway;
+        server.CameBack -= Server_CameBack;
     }
 }
