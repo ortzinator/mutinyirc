@@ -105,6 +105,10 @@
                                                    FontWeight="SemiBold" FontSize="12"
                                                    TextTrimming="CharacterEllipsis"
                                                    VerticalAlignment="Center"/>
+                                        <TextBlock Text="(away)" FontSize="11"
+                                                   VerticalAlignment="Center"
+                                                   IsVisible="{Binding IsAway}"
+                                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
                                     </StackPanel>
                                 </Button>
 

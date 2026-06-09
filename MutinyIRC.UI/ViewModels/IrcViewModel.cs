@@ -31,6 +31,14 @@ public abstract class IrcViewModel : ViewModelBase, IDisposable
     public void AddPrivateNotice(string nick, string message)
         => ChatLines.Add(new PrivateNoticeViewModel(DateTime.Now, message, nick));
 
+    /// <summary>
+    ///   Appends an incoming away reply (RPL_AWAY) telling you that <paramref name="nick"/> is
+    ///   away. Lives on the base type because it is routed to whichever panel is active, like a
+    ///   private notice, rather than only the server window.
+    /// </summary>
+    public void AddAwayReply(string nick, string message)
+        => ChatLines.Add(new ChatItemViewModel(DateTime.Now, $"{nick} is away: {message}"));
+
     private RelayCommand<string>? executeCommand;
     public ICommand ExecuteCommand
     {

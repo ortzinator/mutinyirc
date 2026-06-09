@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using global::Avalonia.Controls;
@@ -22,6 +23,21 @@ public class ServerViewModel : IrcViewModel
     public MTObservableCollection<PrivateMessageViewModel> PrivateMessages { get; } = new MTObservableCollection<PrivateMessageViewModel>();
     public override Server? OwningServer => server;
 
+    private bool _isAway;
+    /// <summary>
+    ///   Whether the local user is marked away on this connection, mirroring
+    ///   <see cref="Server.IsAway"/>. Bound by the sidebar to show an "(away)" badge.
+    /// </summary>
+    public bool IsAway
+    {
+        get => _isAway;
+        private set => SetProperty(ref _isAway, value);
+    }
+
+    // The away message last shown for each nick, so messaging an away user repeatedly doesn't
+    // re-print their away text. A changed message shows again; cleared when the connection drops.
+    private readonly Dictionary<string, string> _shownAwayReplies = new(StringComparer.OrdinalIgnoreCase);
+
     public ServerViewModel(Server newServer, PluginManager pluginManager)
     {
         if (global::Avalonia.Controls.Design.IsDesignMode)
@@ -44,6 +60,26 @@ public class ServerViewModel : IrcViewModel
         server.ServiceActionReceived += Server_ServiceActionReceived;
         server.ServiceMessageSent += Server_ServiceMessageSent;
         server.NoticeSent += Server_NoticeSent;
+        server.WentAway += Server_WentAway;
+        server.CameBack += Server_CameBack;
+    }
+
+    private void Server_WentAway(object? sender, EventArgs e) => IsAway = true;
+
+    private void Server_CameBack(object? sender, EventArgs e) => IsAway = false;
+
+    /// <summary>
+    ///   Returns whether an incoming away reply (RPL_AWAY) for <paramref name="nick"/> should be
+    ///   shown, suppressing a consecutive duplicate of the same away message. Records the message
+    ///   as shown when it returns true.
+    /// </summary>
+    public bool ShouldShowAwayReply(string nick, string message)
+    {
+        if (_shownAwayReplies.TryGetValue(nick, out string? last) && last == message)
+            return false;
+
+        _shownAwayReplies[nick] = message;
+        return true;
     }
 
     private void Server_NoticeSent(object? sender, UserMessageEventArgs e)
@@ -127,6 +163,7 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_ConnectionLost(object? sender, DisconnectEventArgs e)
     {
+        ResetAwayState();
         AddMessage(ServerStrings.ConnectionLost.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
 
         if (e.Reason != DisconnectReason.UserInitiated)
@@ -138,7 +175,16 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_Disconnected(object? sender, EventArgs e)
     {
+        ResetAwayState();
         AddMessage(ServerStrings.Disconnected);
+    }
+
+    // Away status and the per-nick reply history are connection-scoped; a dropped connection
+    // clears both so a reconnect starts fresh.
+    private void ResetAwayState()
+    {
+        IsAway = false;
+        _shownAwayReplies.Clear();
     }
 
     private void Server_Connecting(object? sender, CancelEventArgs e)
@@ -293,6 +339,10 @@ public class ServerViewModel : IrcViewModel
     public override void Dispose()
     {
         if (server != null)
+        {
             server.WhoisReceived -= Server_WhoisReceived;
+            server.WentAway -= Server_WentAway;
+            server.CameBack -= Server_CameBack;
+        }
     }
 }

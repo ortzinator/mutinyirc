@@ -99,6 +99,23 @@ public class MainViewModel : ViewModelBase
         target?.AddPrivateNotice(e.User.Nick, e.Message);
     }
 
+    private void Server_AwayReplyReceived(object? sender, AwayEventArgs e)
+    {
+        var server = (Server)sender!;
+        if (!_serverMap.TryGetValue(server, out ServerViewModel? serverVm))
+            return;
+
+        // Suppress a repeat of the same away message for this nick so messaging an away user
+        // again doesn't re-print it.
+        if (!serverVm.ShouldShowAwayReply(e.Nick, e.AwayMessage))
+            return;
+
+        // Surface in the active window when it belongs to this connection, so it appears where
+        // your attention is; otherwise fall back to the connection's server window.
+        IrcViewModel? target = SelectedPanel?.OwningServer == server ? SelectedPanel : serverVm;
+        target?.AddAwayReply(e.Nick, e.AwayMessage);
+    }
+
     private void Server_PrivateMessageSessionAdded(object? sender, PrivateMessageSessionEventArgs e)
     {
         var pm = CompositionRoot.Resolve<PrivateMessageViewModel>(
@@ -182,6 +199,7 @@ public class MainViewModel : ViewModelBase
 
         server.PrivateMessageSessionAdded += Server_PrivateMessageSessionAdded;
         server.PrivateNotice += Server_PrivateNotice;
+        server.AwayReplyReceived += Server_AwayReplyReceived;
 
         if (SelectedPanel == null)
         {
