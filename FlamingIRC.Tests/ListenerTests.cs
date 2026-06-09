@@ -575,5 +575,34 @@ namespace FlamingIRC.Tests
             Assert.AreEqual("Ortzinator", givenNick);
             Assert.AreEqual("", givenReason);
         }
+
+        [Test]
+        public void Parse_Away_FiresOnAway()
+        {
+            AwayEventArgs givenArgs = null;
+            _listener.OnAway += (sender, args) => givenArgs = args;
+            _listener.Parse(":irc.server.net 301 OrtzIRC Buster :Gone fishing");
+            Assert.IsNotNull(givenArgs);
+            Assert.AreEqual("Buster", givenArgs.Nick);
+            Assert.AreEqual("Gone fishing", givenArgs.AwayMessage);
+        }
+
+        [Test]
+        public void Parse_NowAway_FiresOnNowAway()
+        {
+            bool fired = false;
+            _listener.OnNowAway += (sender, args) => fired = true;
+            _listener.Parse(":irc.server.net 306 OrtzIRC :You have been marked as being away");
+            Assert.IsTrue(fired);
+        }
+
+        [Test]
+        public void Parse_UnAway_FiresOnUnAway()
+        {
+            bool fired = false;
+            _listener.OnUnAway += (sender, args) => fired = true;
+            _listener.Parse(":irc.server.net 305 OrtzIRC :You are no longer marked as being away");
+            Assert.IsTrue(fired);
+        }
     }
 }

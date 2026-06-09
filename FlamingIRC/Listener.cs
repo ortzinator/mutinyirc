@@ -52,6 +52,14 @@ namespace FlamingIRC
         /// </summary>
         public event EventHandler<AwayEventArgs> OnAway;
         /// <summary>
+        /// The server confirmed that the local user is now marked away (in response to <see cref="Sender.Away"/>).
+        /// </summary>
+        public event EventHandler OnNowAway;
+        /// <summary>
+        /// The server confirmed that the local user is no longer away (in response to <see cref="Sender.UnAway"/>).
+        /// </summary>
+        public event EventHandler OnUnAway;
+        /// <summary>
         /// An <see cref="Sender.Invite"/> message was successfully sent to another user. 
         /// </summary>
         public event EventHandler<InviteEventArgs> OnInviteSent;
@@ -593,6 +601,12 @@ namespace FlamingIRC
                     break;
                 case ReplyCode.RPL_AWAY:
                     OnAway.Fire(this, new AwayEventArgs(tokens[3], RemoveLeadingColon(CondenseStrings(tokens, 4))));
+                    break;
+                case ReplyCode.RPL_NOWAWAY:
+                    OnNowAway.Fire(this, EventArgs.Empty);
+                    break;
+                case ReplyCode.RPL_UNAWAY:
+                    OnUnAway.Fire(this, EventArgs.Empty);
                     break;
                 case ReplyCode.RPL_WHOREPLY:
                     User user = new User(tokens[7], tokens[4], tokens[5]);
