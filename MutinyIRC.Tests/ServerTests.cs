@@ -299,5 +299,48 @@ namespace MutinyIRC.Tests
             Assert.IsFalse(_server.Channels.ContainsKey("badname"),
                 "An invalid channel name must not be added to the channel list");
         }
+
+        // --- Away status: server-confirmed via 301/305/306 ---
+
+        [Test]
+        public void AwayReply_FromServer_FiresAwayReplyReceivedWithNickAndMessage()
+        {
+            AwayEventArgs captured = null;
+            _server.AwayReplyReceived += (_, e) => captured = e;
+
+            _server.Connection.Listener.Parse(":server.name 301 test Buster :Gone fishing");
+
+            Assert.IsNotNull(captured, "An RPL_AWAY must surface via AwayReplyReceived");
+            Assert.AreEqual("Buster", captured.Nick);
+            Assert.AreEqual("Gone fishing", captured.AwayMessage);
+        }
+
+        [Test]
+        public void NowAway_FromServer_SetsIsAwayAndFiresWentAway()
+        {
+            bool fired = false;
+            _server.WentAway += (_, _) => fired = true;
+            Assert.IsFalse(_server.IsAway, "A fresh server starts not away");
+
+            _server.Connection.Listener.Parse(":server.name 306 test :You have been marked as being away");
+
+            Assert.IsTrue(_server.IsAway, "RPL_NOWAWAY must mark the server away");
+            Assert.IsTrue(fired, "RPL_NOWAWAY must fire WentAway");
+        }
+
+        [Test]
+        public void UnAway_FromServer_ClearsIsAwayAndFiresCameBack()
+        {
+            _server.Connection.Listener.Parse(":server.name 306 test :You have been marked as being away");
+            Assert.IsTrue(_server.IsAway, "Precondition: server is away");
+
+            bool fired = false;
+            _server.CameBack += (_, _) => fired = true;
+
+            _server.Connection.Listener.Parse(":server.name 305 test :You are no longer marked as being away");
+
+            Assert.IsFalse(_server.IsAway, "RPL_UNAWAY must clear the away status");
+            Assert.IsTrue(fired, "RPL_UNAWAY must fire CameBack");
+        }
     }
 }

@@ -56,6 +56,14 @@ namespace MutinyIRC.Common
         public bool IsConnected => Connection.Connected;
 
         /// <summary>
+        ///   Whether the local user is currently marked away. Set only in response to the
+        ///   server confirming the change (<see cref="Listener.OnNowAway"/> /
+        ///   <see cref="Listener.OnUnAway"/>), so it reflects the server's view rather than
+        ///   an optimistic local guess.
+        /// </summary>
+        public bool IsAway { get; private set; }
+
+        /// <summary>
         ///   The nick of the connected user
         /// </summary>
         public virtual string UserNick => Connection.ConnectionData.Nick;
@@ -104,6 +112,9 @@ namespace MutinyIRC.Common
             Connection.Listener.OnNickError += Listener_OnNickError;
             Connection.Listener.OnQuit += Listener_OnQuit;
             Connection.Listener.OnWhois += Listener_OnWhois;
+            Connection.Listener.OnAway += Listener_OnAway;
+            Connection.Listener.OnNowAway += Listener_OnNowAway;
+            Connection.Listener.OnUnAway += Listener_OnUnAway;
 
             Connection.RawMessageReceived += Connection_OnRawMessageReceived;
         }
@@ -129,6 +140,23 @@ namespace MutinyIRC.Common
         private void Listener_OnPing(string message)
         {
             PingReceived.Fire(this, new DataEventArgs<string>(message));
+        }
+
+        private void Listener_OnAway(object sender, AwayEventArgs e)
+        {
+            AwayReplyReceived.Fire(this, e);
+        }
+
+        private void Listener_OnNowAway(object sender, EventArgs e)
+        {
+            IsAway = true;
+            WentAway.Fire(this, EventArgs.Empty);
+        }
+
+        private void Listener_OnUnAway(object sender, EventArgs e)
+        {
+            IsAway = false;
+            CameBack.Fire(this, EventArgs.Empty);
         }
 
         private void Connection_ConnectionLost(object sender, DisconnectEventArgs e)
@@ -242,6 +270,9 @@ namespace MutinyIRC.Common
             Connection.Listener.OnPrivate -= Listener_OnPrivate;
             Connection.Listener.OnPing -= Listener_OnPing;
             Connection.Listener.OnWhois -= Listener_OnWhois;
+            Connection.Listener.OnAway -= Listener_OnAway;
+            Connection.Listener.OnNowAway -= Listener_OnNowAway;
+            Connection.Listener.OnUnAway -= Listener_OnUnAway;
 
             Connection.RawMessageReceived -= Connection_OnRawMessageReceived;
         }
@@ -325,6 +356,24 @@ namespace MutinyIRC.Common
         public event EventHandler<NickErrorEventArgs> NickError;
 
         public event EventHandler<DataEventArgs<WhoisInfo>> WhoisReceived;
+
+        /// <summary>
+        ///   The server replied (RPL_AWAY) that a user we messaged is away. The event args
+        ///   carry that user's nick and their away message.
+        /// </summary>
+        public event EventHandler<AwayEventArgs> AwayReplyReceived;
+
+        /// <summary>
+        ///   The server confirmed the local user is now marked away. <see cref="IsAway"/>
+        ///   is already updated when this fires.
+        /// </summary>
+        public event EventHandler WentAway;
+
+        /// <summary>
+        ///   The server confirmed the local user is no longer away. <see cref="IsAway"/>
+        ///   is already updated when this fires.
+        /// </summary>
+        public event EventHandler CameBack;
 
         // hack - should call dispose
         ~Server()
@@ -630,6 +679,24 @@ namespace MutinyIRC.Common
                 Connection.Sender.PublicNotice(target, message);
             else
                 Connection.Sender.PrivateNotice(target, message);
+        }
+
+        /// <summary>
+        ///   Marks the local user away with <paramref name="message"/> (the AWAY command). The
+        ///   server's confirmation flips <see cref="IsAway"/> and raises <see cref="WentAway"/>.
+        /// </summary>
+        public void SetAway(string message)
+        {
+            Connection.Sender.Away(message);
+        }
+
+        /// <summary>
+        ///   Clears the local user's away status. The server's confirmation flips
+        ///   <see cref="IsAway"/> and raises <see cref="CameBack"/>.
+        /// </summary>
+        public void ClearAway()
+        {
+            Connection.Sender.UnAway();
         }
 
         /// <summary>
