@@ -388,29 +388,20 @@ namespace MutinyIRC.Common
         ///   of <see cref="ServerManager"/> so the singleton's list no longer pins this instance
         ///   in memory. The owner (the UI on shutdown) is responsible for calling this. Safe to
         ///   call more than once.
+        ///
+        ///   No finalizer backstops this: a Server is pinned by the ServerManager singleton (and,
+        ///   while connected, by its own Connection event subscriptions) until Dispose removes it,
+        ///   so it is never GC-eligible before Dispose has already run. Server owns no unmanaged
+        ///   resource of its own — the socket lives in <see cref="Connection"/>.
         /// </summary>
         public void Dispose()
-        {
-            Cleanup();
-            GC.SuppressFinalize(this);
-        }
-
-        // Finalizer backstop for a Server that was never disposed. Routes through the same
-        // guarded cleanup. In practice the ServerManager singleton holds a strong reference to
-        // every Server until Dispose removes it, so this rarely runs — Dispose is the real path.
-        ~Server()
-        {
-            Cleanup();
-        }
-
-        private void Cleanup()
         {
             if (_disposed)
                 return;
             _disposed = true;
 
             // _connection is null for a Server built with the parameterless constructor that
-            // never had a Connection assigned; guard so the finalizer can't throw an NRE.
+            // never had a Connection assigned; guard against an NRE.
             if (_connection != null)
             {
                 if (_connection.Connected)
