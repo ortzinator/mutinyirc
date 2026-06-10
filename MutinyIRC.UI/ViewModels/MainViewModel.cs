@@ -221,6 +221,16 @@ public class MainViewModel : ViewModelBase
         for (int i = 0; i < Panels.Count; i++)
             Panels[i].Close();
 
+        // App shutdown: dispose each server panel (detaching its handlers) and tear down the
+        // underlying Server so it unhooks its FlamingIRC subscriptions and drops out of
+        // ServerManager. Without this the ServerManager singleton's strong reference would pin
+        // every Server for the process lifetime and the finalizer would never run.
+        foreach (ServerViewModel serverVm in Servers.ToList())
+        {
+            serverVm.Dispose();
+            serverVm.OwningServer?.Dispose();
+        }
+
         base.Close();
     }
 }

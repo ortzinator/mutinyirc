@@ -7,10 +7,11 @@ using System.Threading;
 
 namespace MutinyIRC.Common
 {
-    public class Server : MessageContext
+    public class Server : MessageContext, IDisposable
     {
         private DateTime _serverChangeTime;
         private IConnection _connection;
+        private bool _disposed;
 
         /// <summary>
         ///   Nicknames whose PRIVMSGs bypass the PM tab UI and surface in the server
@@ -252,6 +253,10 @@ namespace MutinyIRC.Common
 
         public void UnhookEvents()
         {
+            Connection.ConnectionEstablished -= Connection_OnConnectSuccess;
+            Connection.ConnectFailed -= Connection_ConnectFailed;
+            Connection.ConnectionLost -= Connection_ConnectionLost;
+
             Connection.Listener.OnJoin -= Listener_OnJoin;
             Connection.Listener.OnPart -= Listener_OnPart;
             Connection.Listener.OnPublic -= Listener_OnPublic;
@@ -269,6 +274,8 @@ namespace MutinyIRC.Common
             Connection.Listener.OnKick -= Listener_OnKick;
             Connection.Listener.OnPrivate -= Listener_OnPrivate;
             Connection.Listener.OnPing -= Listener_OnPing;
+            Connection.Listener.OnNickError -= Listener_OnNickError;
+            Connection.Listener.OnQuit -= Listener_OnQuit;
             Connection.Listener.OnWhois -= Listener_OnWhois;
             Connection.Listener.OnAway -= Listener_OnAway;
             Connection.Listener.OnNowAway -= Listener_OnNowAway;
@@ -375,16 +382,41 @@ namespace MutinyIRC.Common
         /// </summary>
         public event EventHandler CameBack;
 
-        // hack - should call dispose
+        /// <summary>
+        ///   Tears the server down deterministically: disconnects if still connected (which
+        ///   also unhooks the FlamingIRC handlers), otherwise just unhooks them, then drops out
+        ///   of <see cref="ServerManager"/> so the singleton's list no longer pins this instance
+        ///   in memory. The owner (the UI on shutdown) is responsible for calling this. Safe to
+        ///   call more than once.
+        /// </summary>
+        public void Dispose()
+        {
+            Cleanup();
+            GC.SuppressFinalize(this);
+        }
+
+        // Finalizer backstop for a Server that was never disposed. Routes through the same
+        // guarded cleanup. In practice the ServerManager singleton holds a strong reference to
+        // every Server until Dispose removes it, so this rarely runs — Dispose is the real path.
         ~Server()
         {
-            if (Connection.Connected)
+            Cleanup();
+        }
+
+        private void Cleanup()
+        {
+            if (_disposed)
+                return;
+            _disposed = true;
+
+            // _connection is null for a Server built with the parameterless constructor that
+            // never had a Connection assigned; guard so the finalizer can't throw an NRE.
+            if (_connection != null)
             {
-                Disconnect();
-            }
-            else
-            {
-                UnhookEvents();
+                if (_connection.Connected)
+                    Disconnect();
+                else
+                    UnhookEvents();
             }
 
             ServerManager.Instance.Remove(this);
