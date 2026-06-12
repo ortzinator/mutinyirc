@@ -5,6 +5,29 @@ Mutiny is a modern, cross-platform IRC client made with heavy IRC users in mind.
 
 Commands are loaded as plugins from a `plugins/` folder, so you can drop in your own without touching the core.
 
+## Commands
+
+Type these in any input box, prefixed with `/`. Arguments in `<angle brackets>` are required, `[square brackets]` are
+optional. Most commands work from a channel, server, or private-message window and route to that window's server.
+
+| Command | Syntax | What it does |
+| --- | --- | --- |
+| `/join` | `/join <#channel> [key]` | Join a channel, optionally with a key. |
+| `/part` | `/part [#channel] [message]` | Leave a channel. Bare `/part` leaves the current one with a random part message. |
+| `/say` | `/say <message>` | Send a message to the current channel or PM (the same as just typing). |
+| `/me` | `/me <action>` | Send a CTCP ACTION ("emote") to the channel or PM. |
+| `/msg` | `/msg <nick> <message>` | Send a private message, opening a PM tab. Messages to services echo in the server window. |
+| `/query` | `/query <nick>` | Open a PM tab for a nick without sending anything. |
+| `/notice` | `/notice <target> <message>` | Send a NOTICE to a nick or channel. No PM tab — it's echoed in the server window. |
+| `/topic` | `/topic [new topic]` | Show the channel topic, or set it when you supply text. |
+| `/kick` | `/kick <nick> [reason]` | Kick a user from the current channel. |
+| `/mode` | `/mode [target] <modes...>` | View or change channel/user modes. In a channel the target is implicit (`/mode +o nick`); bare `/mode` shows the current modes. |
+| `/nick` | `/nick <newnick>` | Change your nick. |
+| `/whois` | `/whois <nick>` | Look up information about a user. |
+| `/away` | `/away [message]` | Mark yourself away with a message; bare `/away` clears it. |
+| `/server` | `/server [-n] <host> [port]` | Connect to a server (port defaults to 6667). `-n` opens it in a new window instead of reconnecting in place. |
+| `/raw` | `/raw <command>` | Send a line straight to the server, unparsed (e.g. `/raw WHOIS someone`). |
+
 ## FlamingIRC
 
 FlamingIRC is a .NET IRC framework. It is forked and heavily modified
