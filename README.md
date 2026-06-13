@@ -17,7 +17,7 @@ optional. Most commands work from a channel, server, or private-message window a
 | `/say` | `/say <message>` | Send a message to the current channel or PM (the same as just typing). |
 | `/me` | `/me <action>` | Send a CTCP ACTION ("emote") to the channel or PM. |
 | `/msg` | `/msg <nick> <message>` | Send a private message, opening a PM tab. Messages to services echo in the server window. |
-| `/query` | `/query <nick>` | Open a PM tab for a nick without sending anything. |
+| `/query` | `/query <nick> [message]` | Open a PM tab for a nick, optionally sending an initial message. |
 | `/notice` | `/notice <target> <message>` | Send a NOTICE to a nick or channel. No PM tab — it's echoed in the server window. |
 | `/topic` | `/topic [new topic]` | Show the channel topic, or set it when you supply text. |
 | `/kick` | `/kick <nick> [reason]` | Kick a user from the current channel. |
