@@ -25,6 +25,7 @@ optional. Most commands work from a channel, server, or private-message window a
 | `/nick` | `/nick <newnick>` | Change your nick. |
 | `/whois` | `/whois <nick>` | Look up information about a user. |
 | `/away` | `/away [message]` | Mark yourself away with a message; bare `/away` clears it. |
+| `/quit` | `/quit [message]` | Disconnect from the current server. Bare `/quit` uses a random quit message. |
 | `/server` | `/server [-n] <host> [port]` | Connect to a server (port defaults to 6667). `-n` opens it in a new window instead of reconnecting in place. |
 | `/raw` | `/raw <command>` | Send a line straight to the server, unparsed (e.g. `/raw WHOIS someone`). |
 
