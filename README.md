@@ -13,6 +13,7 @@ optional. Most commands work from a channel, server, or private-message window a
 | Command | Syntax | What it does |
 | --- | --- | --- |
 | `/away` | `/away [message]` | Mark yourself away with a message; bare `/away` clears it. |
+| `/invite` | `/invite <nick> [#channel]` | Invite a user to a channel. Bare `/invite <nick>` from a channel invites them to it. |
 | `/join` | `/join <#channel> [key]` | Join a channel, optionally with a key. |
 | `/kick` | `/kick <nick> [reason]` | Kick a user from the current channel. |
 | `/me` | `/me <action>` | Send a CTCP ACTION ("emote") to the channel or PM. |
