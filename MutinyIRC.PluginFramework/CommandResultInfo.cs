@@ -1,7 +1,9 @@
 ﻿namespace MutinyIRC.PluginFramework
 {
     /// <summary>
-    /// Not implemented. Possibly to provide commands with a way to send messages back to the app.
+    /// The outcome of running a command. A <see cref="Result.Fail"/> result has its
+    /// <see cref="Message"/> rendered as an error line in the chat pane; a
+    /// <see cref="Result.Success"/> result (or a <c>null</c>/void return) produces no UI output.
     /// </summary>
     public class CommandResultInfo
     {
