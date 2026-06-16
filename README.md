@@ -12,22 +12,22 @@ optional. Most commands work from a channel, server, or private-message window a
 
 | Command | Syntax | What it does |
 | --- | --- | --- |
-| `/join` | `/join <#channel> [key]` | Join a channel, optionally with a key. |
-| `/part` | `/part [#channel] [message]` | Leave a channel. Bare `/part` leaves the current one with a random part message. |
-| `/say` | `/say <message>` | Send a message to the current channel or PM (the same as just typing). |
-| `/me` | `/me <action>` | Send a CTCP ACTION ("emote") to the channel or PM. |
-| `/msg` | `/msg <nick> <message>` | Send a private message, opening a PM tab. Messages to services echo in the server window. |
-| `/query` | `/query <nick> [message]` | Open a PM tab for a nick, optionally sending an initial message. |
-| `/notice` | `/notice <target> <message>` | Send a NOTICE to a nick or channel. No PM tab — it's echoed in the server window. |
-| `/topic` | `/topic [new topic]` | Show the channel topic, or set it when you supply text. |
-| `/kick` | `/kick <nick> [reason]` | Kick a user from the current channel. |
-| `/mode` | `/mode [target] <modes...>` | View or change channel/user modes. In a channel the target is implicit (`/mode +o nick`); bare `/mode` shows the current modes. |
-| `/nick` | `/nick <newnick>` | Change your nick. |
-| `/whois` | `/whois <nick>` | Look up information about a user. |
 | `/away` | `/away [message]` | Mark yourself away with a message; bare `/away` clears it. |
+| `/join` | `/join <#channel> [key]` | Join a channel, optionally with a key. |
+| `/kick` | `/kick <nick> [reason]` | Kick a user from the current channel. |
+| `/me` | `/me <action>` | Send a CTCP ACTION ("emote") to the channel or PM. |
+| `/mode` | `/mode [target] <modes...>` | View or change channel/user modes. In a channel the target is implicit (`/mode +o nick`); bare `/mode` shows the current modes. |
+| `/msg` | `/msg <nick> <message>` | Send a private message, opening a PM tab. Messages to services echo in the server window. |
+| `/nick` | `/nick <newnick>` | Change your nick. |
+| `/notice` | `/notice <target> <message>` | Send a NOTICE to a nick or channel. No PM tab — it's echoed in the server window. |
+| `/part` | `/part [#channel] [message]` | Leave a channel. Bare `/part` leaves the current one with a random part message. |
+| `/query` | `/query <nick> [message]` | Open a PM tab for a nick, optionally sending an initial message. |
 | `/quit` | `/quit [message]` | Disconnect from the current server. Bare `/quit` uses a random quit message. |
-| `/server` | `/server [-n] <host> [port]` | Connect to a server (port defaults to 6667). `-n` opens it in a new window instead of reconnecting in place. |
 | `/raw` | `/raw <command>` | Send a line straight to the server, unparsed (e.g. `/raw WHOIS someone`). |
+| `/say` | `/say <message>` | Send a message to the current channel or PM (the same as just typing). |
+| `/server` | `/server [-n] <host> [port]` | Connect to a server (port defaults to 6667). `-n` opens it in a new window instead of reconnecting in place. |
+| `/topic` | `/topic [new topic]` | Show the channel topic, or set it when you supply text. |
+| `/whois` | `/whois <nick>` | Look up information about a user. |
 
 ## FlamingIRC
 
