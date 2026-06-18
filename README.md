@@ -30,6 +30,55 @@ optional. Most commands work from a channel, server, or private-message window a
 | `/topic` | `/topic [new topic]` | Show the channel topic, or set it when you supply text. |
 | `/whois` | `/whois <nick>` | Look up information about a user. |
 
+## Writing your own commands
+
+A command is a class marked `[Plugin]` with one or more `Execute` methods. The first parameter is always the *context*
+the command was run from, and the rest are the arguments the user typed. The three contexts — `Channel`, `Server`, and
+`PrivateMessageSession` — all derive from `MessageContext`, and every one of them exposes an `OwningServer`, so most
+commands never need to know which window they were called from:
+
+```csharp
+[Plugin]
+public class Nick : ICommand
+{
+    // Works from any window — /nick just needs the connection.
+    public void Execute(MessageContext context, string nick)
+        => context.OwningServer.ChangeNick(nick);
+}
+```
+
+Type the context as `MessageContext` for the common case where a command behaves the same everywhere. Type it as a
+concrete context when a command only makes sense in one kind of window: declaring `Execute(Channel, …)` and nothing
+else means the command simply won't match from a server or PM window — no extra guard code required.
+
+When you supply several overloads, the dispatcher picks one in two steps:
+
+1. **More arguments win.** `/query nick hello` prefers `Execute(_, string, string)` over `Execute(_, string)`.
+2. **At equal argument counts, the more-specific context wins.** An `Execute(Channel, …)` is tried before an
+   `Execute(MessageContext, …)` of the same shape.
+
+That second rule is the **general default + specific override** pattern: offer a broad `MessageContext` overload for the
+usual behavior, then add a same-shaped overload for one window to specialize it. The specific one wins where it
+applies, and everything else falls through to the default:
+
+```csharp
+[Plugin("Hello")]
+public class Hello : ICommand
+{
+    // Default: greet from a server or PM window.
+    public CommandResultInfo Execute(MessageContext context, string name)
+        => CommandResultInfo.Success($"Hello, {name}!");
+
+    // Override: in a channel, welcome them to it by name.
+    public CommandResultInfo Execute(Channel channel, string name)
+        => CommandResultInfo.Success($"Hello {name}, welcome to {channel.Name}!");
+}
+```
+
+You're free to use the same trick across different argument counts — `/invite` pairs an `Execute(Channel, string)` (so
+`/invite nick` from a channel invites them to *that* channel) with a general `Execute(MessageContext, string,
+ChannelInfo)` for the explicit `/invite nick #channel` form.
+
 ## FlamingIRC
 
 FlamingIRC is a .NET IRC framework. It is forked and heavily modified
