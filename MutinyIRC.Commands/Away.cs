@@ -19,26 +19,13 @@ namespace MutinyIRC.Commands
     [Plugin]
     public class Away : ICommand
     {
-        /// <summary>Marks away with a message from the server window.</summary>
+        /// <summary>Marks away with a message from any window.</summary>
         [RawArguments]
-        public CommandResultInfo Execute(Server server, string message) => SetAway(server, message);
+        public CommandResultInfo Execute(MessageContext context, string message)
+            => SetAway(context.OwningServer, message);
 
-        /// <summary>Marks away with a message from a channel window.</summary>
-        [RawArguments]
-        public CommandResultInfo Execute(Channel channel, string message) => SetAway(channel.Server, message);
-
-        /// <summary>Marks away with a message from a private message window.</summary>
-        [RawArguments]
-        public CommandResultInfo Execute(PrivateMessageSession pm, string message) => SetAway(pm.Server, message);
-
-        /// <summary>Clears away (bare /away) from the server window.</summary>
-        public CommandResultInfo Execute(Server server) => ClearAway(server);
-
-        /// <summary>Clears away (bare /away) from a channel window.</summary>
-        public CommandResultInfo Execute(Channel channel) => ClearAway(channel.Server);
-
-        /// <summary>Clears away (bare /away) from a private message window.</summary>
-        public CommandResultInfo Execute(PrivateMessageSession pm) => ClearAway(pm.Server);
+        /// <summary>Clears away (bare /away) from any window.</summary>
+        public CommandResultInfo Execute(MessageContext context) => ClearAway(context.OwningServer);
 
         private static CommandResultInfo SetAway(Server server, string message)
         {

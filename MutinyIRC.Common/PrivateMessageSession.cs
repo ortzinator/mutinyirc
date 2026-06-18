@@ -11,7 +11,10 @@ namespace MutinyIRC.Common
             User = user;
         }
 
-        public Server Server { get; private set; }
+        public Server Server { get; }
+
+        /// <inheritdoc />
+        public override Server OwningServer => Server;
         public User User { get; private set; }
         public event EventHandler<DataEventArgs<string>> MessageReceived;
         public event EventHandler<DataEventArgs<string>> MessageSent;

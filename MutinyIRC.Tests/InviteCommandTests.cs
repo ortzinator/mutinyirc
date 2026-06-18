@@ -23,8 +23,6 @@ namespace MutinyIRC.Tests
             _fakeSender = A.Fake<ISender>();
             var fakeConn = A.Fake<IConnection>();
             A.CallTo(() => fakeConn.Sender).Returns(_fakeSender);
-            // A real Server (not a fake) so its runtime type matches the dispatcher's exact
-            // GetType() check for the Server-context overload.
             _server = new Server { Connection = fakeConn };
             _channel = new Channel(_server, "#mutiny");
             _pm = new PrivateMessageSession(_server, new User { Nick = "someone" });

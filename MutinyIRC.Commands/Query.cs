@@ -10,23 +10,11 @@ namespace MutinyIRC.Commands
     [Plugin("Query")]
     public class Query : ICommand
     {
-        public CommandResultInfo Execute(Channel channel, string nick)
-            => OpenQuery(channel.Server, nick, null);
+        public CommandResultInfo Execute(MessageContext context, string nick)
+            => OpenQuery(context.OwningServer, nick, null);
 
-        public CommandResultInfo Execute(Server server, string nick)
-            => OpenQuery(server, nick, null);
-
-        public CommandResultInfo Execute(PrivateMessageSession pm, string nick)
-            => OpenQuery(pm.Server, nick, null);
-
-        public CommandResultInfo Execute(Channel channel, string nick, string message)
-            => OpenQuery(channel.Server, nick, message);
-
-        public CommandResultInfo Execute(Server server, string nick, string message)
-            => OpenQuery(server, nick, message);
-
-        public CommandResultInfo Execute(PrivateMessageSession pm, string nick, string message)
-            => OpenQuery(pm.Server, nick, message);
+        public CommandResultInfo Execute(MessageContext context, string nick, string message)
+            => OpenQuery(context.OwningServer, nick, message);
 
         private static CommandResultInfo OpenQuery(Server server, string nick, string message)
         {

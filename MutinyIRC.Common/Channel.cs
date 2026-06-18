@@ -35,7 +35,10 @@ namespace MutinyIRC.Common
         /// <summary>
         ///   The Server object the channel is associated with
         /// </summary>
-        public Server Server { get; private set; }
+        public Server Server { get; }
+
+        /// <inheritdoc />
+        public override Server OwningServer => Server;
 
         /// <summary>
         ///   The key (password) to the channel

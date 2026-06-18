@@ -16,13 +16,8 @@ namespace MutinyIRC.Commands
     public class Raw : ICommand
     {
         [RawArguments]
-        public CommandResultInfo Execute(Server server, string command) => Send(server, command);
-
-        [RawArguments]
-        public CommandResultInfo Execute(Channel channel, string command) => Send(channel.Server, command);
-
-        [RawArguments]
-        public CommandResultInfo Execute(PrivateMessageSession pm, string command) => Send(pm.Server, command);
+        public CommandResultInfo Execute(MessageContext context, string command)
+            => Send(context.OwningServer, command);
 
         private static CommandResultInfo Send(Server server, string command)
         {

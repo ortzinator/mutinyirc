@@ -12,21 +12,11 @@
         /// <summary>
         /// Changes your nick
         /// </summary>
-        /// <param name="server"></param>
+        /// <param name="context"></param>
         /// <param name="nick"></param>
-        public void Execute(Server server, string nick)
+        public void Execute(MessageContext context, string nick)
         {
-            server.ChangeNick(nick);
-        }
-
-        /// <summary>
-        /// Changes your nick
-        /// </summary>
-        /// <param name="channel"></param>
-        /// <param name="nick"></param>
-        public void Execute(Channel channel, string nick)
-        {
-            Execute(channel.Server, nick);
+            context.OwningServer.ChangeNick(nick);
         }
     }
 }

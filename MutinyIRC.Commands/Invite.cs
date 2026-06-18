@@ -20,20 +20,8 @@ namespace MutinyIRC.Commands
         /// <summary>
         /// Invites a user to the named channel.
         /// </summary>
-        public CommandResultInfo Execute(Channel context, string nick, ChannelInfo channel)
-            => SendInvite(context.Server, nick, channel.Name);
-
-        /// <summary>
-        /// Invites a user to the named channel.
-        /// </summary>
-        public CommandResultInfo Execute(Server context, string nick, ChannelInfo channel)
-            => SendInvite(context, nick, channel.Name);
-
-        /// <summary>
-        /// Invites a user to the named channel.
-        /// </summary>
-        public CommandResultInfo Execute(PrivateMessageSession context, string nick, ChannelInfo channel)
-            => SendInvite(context.Server, nick, channel.Name);
+        public CommandResultInfo Execute(MessageContext context, string nick, ChannelInfo channel)
+            => SendInvite(context.OwningServer, nick, channel.Name);
 
         private static CommandResultInfo SendInvite(Server server, string nick, string channel)
         {

@@ -36,6 +36,9 @@ namespace MutinyIRC.Common
             HookEvents();
         }
 
+        /// <summary>A <see cref="Server"/> is its own context's server.</summary>
+        public override Server OwningServer => this;
+
         public string Url => Connection.ConnectionData.Hostname;
 
         public int Port => Connection.ConnectionData.Port;

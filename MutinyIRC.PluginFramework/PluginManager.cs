@@ -158,7 +158,9 @@
         /// context type and argument shape.
         /// </returns>
         /// <remarks>
-        /// Overloads are tried most-specific first (highest parameter count). Each candidate gets a fresh
+        /// Overloads are tried most-specific first: by parameter count, then by how derived the
+        /// context parameter is, so a <see cref="Channel"/>-specific overload wins over a general
+        /// <see cref="MessageContext"/> overload of the same arity. Each candidate gets a fresh
         /// copy of <see cref="CommandExecutionInfo.ParameterList"/>, so coercions applied while trying one
         /// overload (e.g. promoting a string to <see cref="ChannelInfo"/> or <see cref="char"/>[]) never
         /// leak into the next attempt.
@@ -188,17 +190,37 @@
         }
 
         /// <summary>
-        /// Returns the command's <c>Execute</c> overloads whose first parameter derives from
-        /// <see cref="MessageContext"/>, sorted most-specific first (descending by parameter count).
+        /// Returns the command's <c>Execute</c> overloads whose first parameter is
+        /// <see cref="MessageContext"/> or a subclass of it, sorted most-specific first: by
+        /// parameter count descending, then by how derived the context parameter is. The
+        /// specificity tiebreak means a <see cref="Channel"/> (or other concrete-context)
+        /// overload is tried before a general <see cref="MessageContext"/> overload of the same
+        /// arity, so a command can offer a single <c>Execute(MessageContext, …)</c> default while
+        /// still overriding behavior for a specific context.
         /// </summary>
         private static MethodInfo[] GetExecuteOverloads(ICommand command)
         {
             return command.GetType().GetMethods()
                 .Where(m => m.Name == "Execute")
                 .Where(m => m.GetParameters().Length > 0
-                            && m.GetParameters()[0].ParameterType.BaseType == typeof(MessageContext))
+                            && typeof(MessageContext).IsAssignableFrom(
+                                m.GetParameters()[0].ParameterType))
                 .OrderByDescending(m => m.GetParameters().Length)
+                .ThenByDescending(m => ContextDepth(m.GetParameters()[0].ParameterType))
                 .ToArray();
+        }
+
+        /// <summary>
+        /// Counts how far <paramref name="contextType"/> sits below <see cref="MessageContext"/>
+        /// in the inheritance chain (<see cref="MessageContext"/> itself is 0, a direct subclass
+        /// like <see cref="Channel"/> is 1). Used to order more-derived context overloads first.
+        /// </summary>
+        private static int ContextDepth(Type contextType)
+        {
+            int depth = 0;
+            for (Type t = contextType; t != null && t != typeof(MessageContext); t = t.BaseType)
+                depth++;
+            return depth;
         }
 
         /// <summary>
@@ -218,7 +240,11 @@
             int userParamCount = methodParams.Length - 1;
 
             if (input.ParameterList.Count < userParamCount) return null;
-            if (methodParams[0].ParameterType != input.Context.GetType()) return null;
+            // Assignable rather than exact: a Channel/Server/PM context matches an
+            // Execute(MessageContext, …) overload, while a concrete-context parameter (e.g.
+            // Server) still rejects an unrelated context. This also lets a faked Server (a proxy
+            // subclass) match a Server parameter.
+            if (!methodParams[0].ParameterType.IsAssignableFrom(input.Context.GetType())) return null;
 
             // A [RawArguments] overload opts out of per-token coercion and takes the whole argument
             // tail verbatim as one string — for passthrough commands (/mode, /quote) where a leading

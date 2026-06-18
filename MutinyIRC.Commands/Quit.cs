@@ -19,26 +19,13 @@ namespace MutinyIRC.Commands
 
         private static string DefaultMessage() => RandomMessages.Instance.GetMessage("quit") ?? fallbackMessage;
 
-        /// <summary>Quits with a message from the server window.</summary>
+        /// <summary>Quits with a message from any window.</summary>
         [RawArguments]
-        public void Execute(Server server, string message) => Disconnect(server, message);
+        public void Execute(MessageContext context, string message)
+            => Disconnect(context.OwningServer, message);
 
-        /// <summary>Quits with a message from a channel window.</summary>
-        [RawArguments]
-        public void Execute(Channel channel, string message) => Disconnect(channel.Server, message);
-
-        /// <summary>Quits with a message from a private message window.</summary>
-        [RawArguments]
-        public void Execute(PrivateMessageSession pm, string message) => Disconnect(pm.Server, message);
-
-        /// <summary>Quits with the default message from the server window.</summary>
-        public void Execute(Server server) => Disconnect(server, DefaultMessage());
-
-        /// <summary>Quits with the default message from a channel window.</summary>
-        public void Execute(Channel channel) => Disconnect(channel.Server, DefaultMessage());
-
-        /// <summary>Quits with the default message from a private message window.</summary>
-        public void Execute(PrivateMessageSession pm) => Disconnect(pm.Server, DefaultMessage());
+        /// <summary>Quits with the default message from any window.</summary>
+        public void Execute(MessageContext context) => Disconnect(context.OwningServer, DefaultMessage());
 
         private static void Disconnect(Server server, string message)
         {

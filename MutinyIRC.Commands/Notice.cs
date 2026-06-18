@@ -14,20 +14,10 @@ namespace MutinyIRC.Commands
     [Plugin]
     public class Notice : ICommand
     {
-        /// <summary>Sends a notice from a channel window.</summary>
+        /// <summary>Sends a notice from any window, echoing it in that window.</summary>
         [RawArguments]
-        public CommandResultInfo Execute(Channel channel, string rest)
-            => SendNotice(channel, channel.Server, rest);
-
-        /// <summary>Sends a notice from the server window.</summary>
-        [RawArguments]
-        public CommandResultInfo Execute(Server server, string rest)
-            => SendNotice(server, server, rest);
-
-        /// <summary>Sends a notice from a private message window.</summary>
-        [RawArguments]
-        public CommandResultInfo Execute(PrivateMessageSession pm, string rest)
-            => SendNotice(pm, pm.Server, rest);
+        public CommandResultInfo Execute(MessageContext context, string rest)
+            => SendNotice(context, context.OwningServer, rest);
 
         /// <summary>
         ///   Sends the notice over <paramref name="server"/> and echoes it in

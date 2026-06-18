@@ -9,14 +9,8 @@ namespace MutinyIRC.Commands
     [Plugin("Msg")]
     public class Message : ICommand
     {
-        public CommandResultInfo Execute(Channel channel, string user, string message)
-            => SendPrivate(channel.Server, user, message);
-
-        public CommandResultInfo Execute(Server server, string user, string message)
-            => SendPrivate(server, user, message);
-
-        public CommandResultInfo Execute(PrivateMessageSession pm, string user, string message)
-            => SendPrivate(pm.Server, user, message);
+        public CommandResultInfo Execute(MessageContext context, string user, string message)
+            => SendPrivate(context.OwningServer, user, message);
 
         /// <summary>
         ///   Routes the outgoing message through a <see cref="PrivateMessageSession"/> so
