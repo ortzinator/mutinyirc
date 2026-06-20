@@ -13,6 +13,7 @@ optional. Most commands work from a channel, server, or private-message window a
 | Command | Syntax | What it does |
 | --- | --- | --- |
 | `/away` | `/away [message]` | Mark yourself away with a message; bare `/away` clears it. |
+| `/ban` | `/ban [#channel] [-k] [-r] <nick\|mask> [reason]` | Ban a user or mask. Give a bare nick and it's resolved to `*!*@host` from the user list (falling back to `nick!*@*`); anything with `!`, `@`, or `*` is used as a literal mask. `-k` also kicks them; `-r` removes the ban instead of setting it. |
 | `/invite` | `/invite <nick> [#channel]` | Invite a user to a channel. Bare `/invite <nick>` from a channel invites them to it. |
 | `/join` | `/join <#channel> [key]` | Join a channel, optionally with a key. |
 | `/kick` | `/kick <nick> [reason]` | Kick a user from the current channel. |

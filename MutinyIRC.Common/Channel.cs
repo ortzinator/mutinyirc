@@ -218,6 +218,34 @@ namespace MutinyIRC.Common
             Server.Connection.Sender.Kick(Name, reason, nick);
         }
 
+        /// <summary>
+        ///   Bans a mask from the channel (sets channel mode <c>+b</c>).
+        /// </summary>
+        public void Ban(string mask)
+        {
+            Server.Connection.Sender.ChangeChannelMode(Name, ModeAction.Add, ChannelMode.Ban, mask);
+        }
+
+        /// <summary>
+        ///   Removes a ban from the channel (sets channel mode <c>-b</c>).
+        /// </summary>
+        public void Unban(string mask)
+        {
+            Server.Connection.Sender.ChangeChannelMode(Name, ModeAction.Remove, ChannelMode.Ban, mask);
+        }
+
+        /// <summary>
+        ///   Builds the ban mask for a nick currently in the channel: <c>*!*@host</c> when the
+        ///   host is known, otherwise <c>nick!*@*</c> (e.g. for a user seen only via NAMES).
+        /// </summary>
+        public string ResolveBanMask(string nick)
+        {
+            User u = Users.GetUser(nick);
+            return u != null && !string.IsNullOrEmpty(u.HostMask)
+                ? $"*!*@{u.HostMask}"
+                : $"{nick}!*@*";
+        }
+
         public void UserJoin(User nick)
         {
             if (!Users.Contains(nick))
