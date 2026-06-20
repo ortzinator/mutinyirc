@@ -6,7 +6,7 @@
     /// <summary>
     /// Joins a channel
     /// </summary>
-    [Plugin]
+    [Plugin("Join", "Joins a channel. Usage: /join <#channel> [key]")]
     public class Join : ICommand
     {
         /// <summary>

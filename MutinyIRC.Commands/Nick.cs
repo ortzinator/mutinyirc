@@ -6,7 +6,7 @@
     /// <summary>
     /// Parts a channel
     /// </summary>
-    [Plugin]
+    [Plugin("Nick", "Changes your nickname. Usage: /nick <newnick>")]
     public class Nick : ICommand
     {
         /// <summary>

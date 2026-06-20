@@ -12,9 +12,12 @@ namespace MutinyIRC.Commands
     ///   Works from any window; the command is always routed to that window's server. The tail
     ///   is taken raw so spaces, colons, and a leading <c>+</c>/<c>-</c> are preserved.
     /// </remarks>
-    [Plugin]
+    [Plugin("Raw", "Sends a line straight to the server, unparsed. Usage: /raw <command>")]
     public class Raw : ICommand
     {
+        /// <summary>
+        /// Forwards the raw command line to the current window's server.
+        /// </summary>
         [RawArguments]
         public CommandResultInfo Execute(MessageContext context, string command)
             => Send(context.OwningServer, command);

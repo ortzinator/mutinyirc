@@ -10,7 +10,7 @@ namespace MutinyIRC.Commands
     /// <summary>
     /// Creates new connections to IRC servers
     /// </summary>
-    [Plugin("Server")]
+    [Plugin("Server", "Connects to an IRC server. Usage: /server [-n] <server> [port]")]
     public class ServerCommand : ICommand
     {
         /// <summary>
@@ -21,6 +21,9 @@ namespace MutinyIRC.Commands
             Execute(context, switches, server, "6667");
         }
 
+        /// <summary>
+        /// Handles switch-prefixed connects (e.g. <c>-n</c> for a new window) on the given port.
+        /// </summary>
         public void Execute(Server context, char[] switches, string server, string port)
         {
             foreach (char c in switches)
@@ -53,6 +56,9 @@ namespace MutinyIRC.Commands
             context.Connect();
         }
 
+        /// <summary>
+        /// Connect to a server on the given port in the same window.
+        /// </summary>
         public void Execute(Server context, string server, string port)
         {
             var args = new ConnectionArgs(ConfigurationManager.AppSettings["FirstNick"] ?? "MutinyIRC", server, false);

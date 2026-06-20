@@ -6,7 +6,7 @@ namespace MutinyIRC.Commands
     /// <summary>
     /// Kicks a user from the current channel (the /kick command).
     /// </summary>
-    [Plugin]
+    [Plugin("Kick", "Kicks a user from the current channel. Usage: /kick <nick> [reason]")]
     public class Kick : ICommand
     {
         /// <summary>

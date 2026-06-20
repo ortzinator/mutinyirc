@@ -11,7 +11,7 @@ namespace MutinyIRC.Commands
     ///   Syntax is <c>/notice &lt;target&gt; &lt;message&gt;</c>. The first token is the target
     ///   (a nick or channel); everything after it is the message text, passed through verbatim.
     /// </remarks>
-    [Plugin]
+    [Plugin("Notice", "Sends a NOTICE to a user or channel. Usage: /notice <target> <message>")]
     public class Notice : ICommand
     {
         /// <summary>Sends a notice from any window, echoing it in that window.</summary>

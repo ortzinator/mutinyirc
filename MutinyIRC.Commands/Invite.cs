@@ -8,7 +8,7 @@ namespace MutinyIRC.Commands
     ///   <c>/invite nickname #channel</c>, or as <c>/invite nickname</c> from a channel to
     ///   invite the user to that channel.
     /// </summary>
-    [Plugin("Invite")]
+    [Plugin("Invite", "Invites a user to a channel. Usage: /invite <nick> [#channel]")]
     public class Invite : ICommand
     {
         /// <summary>

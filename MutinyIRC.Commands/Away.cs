@@ -16,7 +16,7 @@ namespace MutinyIRC.Commands
     ///   overload when at least one token is present, and the underlying AWAY command rejects an
     ///   empty message anyway.
     /// </remarks>
-    [Plugin]
+    [Plugin("Away", "Sets or clears your away status. Usage: /away [message]")]
     public class Away : ICommand
     {
         /// <summary>Marks away with a message from any window.</summary>

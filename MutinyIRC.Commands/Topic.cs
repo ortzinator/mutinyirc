@@ -6,7 +6,7 @@ namespace MutinyIRC.Commands
     /// <summary>
     /// Requests or sets the topic of the current channel (the /topic command).
     /// </summary>
-    [Plugin]
+    [Plugin("Topic", "Views or sets the current channel's topic. Usage: /topic [new topic]")]
     public class Topic : ICommand
     {
         /// <summary>

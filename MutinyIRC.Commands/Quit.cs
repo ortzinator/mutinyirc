@@ -12,7 +12,7 @@ namespace MutinyIRC.Commands
     ///   Works from any window; the command is always routed to that window's server. The tail
     ///   is taken raw so the quit message keeps its spacing.
     /// </remarks>
-    [Plugin]
+    [Plugin("Quit", "Disconnects from the current server. Usage: /quit [message]")]
     public class Quit : ICommand
     {
         private const string fallbackMessage = "MutinyIRC";

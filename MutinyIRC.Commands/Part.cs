@@ -6,7 +6,7 @@
     /// <summary>
     /// Parts a channel
     /// </summary>
-    [Plugin]
+    [Plugin("Part", "Leaves a channel. Usage: /part [#channel] [message]")]
     public class Part : ICommand
     {
         private const string fallbackMessage = "Goodbye!";

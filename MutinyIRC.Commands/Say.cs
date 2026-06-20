@@ -6,7 +6,7 @@
     /// <summary>
     /// 
     /// </summary>
-    [Plugin]
+    [Plugin("Say", "Sends a message to the current channel or query. Usage: /say <message>")]
     public class Say : ICommand
     {
         /// <summary>
@@ -19,6 +19,9 @@
             channel.Say(message);
         }
 
+        /// <summary>
+        /// Sends a message to the current private-message session.
+        /// </summary>
         public void Execute(PrivateMessageSession pm, string message)
         {
             pm.Send(message);

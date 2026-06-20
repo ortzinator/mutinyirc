@@ -12,7 +12,7 @@ namespace MutinyIRC.Commands
     ///   target also works (<c>/mode #other +o nick</c>, <c>/mode nick +i</c>). The tail is passed
     ///   through verbatim, so a leading <c>-</c> stays part of the mode string.
     /// </remarks>
-    [Plugin]
+    [Plugin("Mode", "Views or changes channel and user modes. Usage: /mode [target] [modes]")]
     public class Mode : ICommand
     {
         /// <summary>Requests the current channel's modes (bare <c>/mode</c>).</summary>

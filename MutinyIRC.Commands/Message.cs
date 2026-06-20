@@ -6,9 +6,12 @@ namespace MutinyIRC.Commands
     /// <summary>
     /// A command that sends private messages.
     /// </summary>
-    [Plugin("Msg")]
+    [Plugin("Msg", "Sends a private message to a user or channel. Usage: /msg <target> <message>")]
     public class Message : ICommand
     {
+        /// <summary>
+        /// Sends a private message to the given user or channel from any window.
+        /// </summary>
         public CommandResultInfo Execute(MessageContext context, string user, string message)
             => SendPrivate(context.OwningServer, user, message);
 
