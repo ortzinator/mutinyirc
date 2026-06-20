@@ -4,6 +4,7 @@ namespace MutinyIRC.UI.ViewModels;
 
 using System;
 using System.Collections.Generic;
+using CommunityToolkit.Mvvm.Input;
 using FlamingIRC;
 using Common;
 using PluginFramework;
@@ -154,6 +155,44 @@ public class ChannelViewModel : IrcViewModel
         {
             ChatLines.Add(new ErrorMessageViewModel(DateTime.Now, result.Message));
         }
+    }
+
+    // ── User-list context-menu actions ──
+    // Each routes through the same dispatcher as typed commands so behaviour stays identical.
+
+    private RelayCommand<UserViewModel>? _whoisUserCommand;
+    public System.Windows.Input.ICommand WhoisUserCommand => _whoisUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/whois", u));
+
+    private RelayCommand<UserViewModel>? _queryUserCommand;
+    public System.Windows.Input.ICommand QueryUserCommand => _queryUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/query", u));
+
+    private RelayCommand<UserViewModel>? _opUserCommand;
+    public System.Windows.Input.ICommand OpUserCommand => _opUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/mode +o", u));
+
+    private RelayCommand<UserViewModel>? _deopUserCommand;
+    public System.Windows.Input.ICommand DeopUserCommand => _deopUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/mode -o", u));
+
+    private RelayCommand<UserViewModel>? _voiceUserCommand;
+    public System.Windows.Input.ICommand VoiceUserCommand => _voiceUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/mode +v", u));
+
+    private RelayCommand<UserViewModel>? _devoiceUserCommand;
+    public System.Windows.Input.ICommand DevoiceUserCommand => _devoiceUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/mode -v", u));
+
+    private RelayCommand<UserViewModel>? _kickUserCommand;
+    public System.Windows.Input.ICommand KickUserCommand => _kickUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/kick", u));
+
+    private RelayCommand<UserViewModel>? _banUserCommand;
+    public System.Windows.Input.ICommand BanUserCommand => _banUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/ban", u));
+
+    private RelayCommand<UserViewModel>? _kickBanUserCommand;
+    public System.Windows.Input.ICommand KickBanUserCommand => _kickBanUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/ban -k", u));
+
+    private void RunUserCommand(string commandPrefix, UserViewModel? user)
+    {
+        if (user == null)
+            return;
+
+        OnExecute($"{commandPrefix} {user.Nick}");
     }
 
     private void AddMessage(string msg)

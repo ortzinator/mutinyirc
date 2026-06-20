@@ -126,6 +126,39 @@
                          Background="Transparent"
                          BorderThickness="0"
                          Padding="4,4,4,4">
+                    <ListBox.ContextMenu>
+                        <ContextMenu x:Name="userContextMenu">
+                            <MenuItem Header="Whois"
+                                      Command="{Binding WhoisUserCommand}"
+                                      CommandParameter="{Binding #userBox.SelectedItem}"/>
+                            <MenuItem Header="Private message"
+                                      Command="{Binding QueryUserCommand}"
+                                      CommandParameter="{Binding #userBox.SelectedItem}"/>
+                            <Separator/>
+                            <MenuItem Header="Op"
+                                      Command="{Binding OpUserCommand}"
+                                      CommandParameter="{Binding #userBox.SelectedItem}"/>
+                            <MenuItem Header="Deop"
+                                      Command="{Binding DeopUserCommand}"
+                                      CommandParameter="{Binding #userBox.SelectedItem}"/>
+                            <MenuItem Header="Voice"
+                                      Command="{Binding VoiceUserCommand}"
+                                      CommandParameter="{Binding #userBox.SelectedItem}"/>
+                            <MenuItem Header="Devoice"
+                                      Command="{Binding DevoiceUserCommand}"
+                                      CommandParameter="{Binding #userBox.SelectedItem}"/>
+                            <Separator/>
+                            <MenuItem Header="Kick"
+                                      Command="{Binding KickUserCommand}"
+                                      CommandParameter="{Binding #userBox.SelectedItem}"/>
+                            <MenuItem Header="Ban"
+                                      Command="{Binding BanUserCommand}"
+                                      CommandParameter="{Binding #userBox.SelectedItem}"/>
+                            <MenuItem Header="Kick + Ban"
+                                      Command="{Binding KickBanUserCommand}"
+                                      CommandParameter="{Binding #userBox.SelectedItem}"/>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
                     <ListBox.ItemContainerTheme>
                         <ControlTheme TargetType="ListBoxItem">
                             <Setter Property="Padding" Value="8,3"/>

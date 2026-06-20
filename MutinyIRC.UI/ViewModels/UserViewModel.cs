@@ -10,6 +10,9 @@ public class UserViewModel : ObservableObject, IComparable<UserViewModel>
 
     public string FullNick => user.NamesLiteral;
 
+    /// <summary>The bare nickname without any mode prefix (used for command targets).</summary>
+    public string Nick => user.Nick;
+
     private Mode mode;
     public Mode Mode => mode;
 
