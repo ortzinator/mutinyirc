@@ -158,41 +158,26 @@ public class ChannelViewModel : IrcViewModel
     }
 
     // ── User-list context-menu actions ──
-    // Each routes through the same dispatcher as typed commands so behaviour stays identical.
+    // The menu always operates on the selected user (right-click selects the row under the cursor
+    // first). Each menu item binds to this one command and passes its IRC verb as the parameter,
+    // routing through the same dispatcher as typed commands so behaviour stays identical.
 
-    private RelayCommand<UserViewModel>? _whoisUserCommand;
-    public System.Windows.Input.ICommand WhoisUserCommand => _whoisUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/whois", u));
-
-    private RelayCommand<UserViewModel>? _queryUserCommand;
-    public System.Windows.Input.ICommand QueryUserCommand => _queryUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/query", u));
-
-    private RelayCommand<UserViewModel>? _opUserCommand;
-    public System.Windows.Input.ICommand OpUserCommand => _opUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/mode +o", u));
-
-    private RelayCommand<UserViewModel>? _deopUserCommand;
-    public System.Windows.Input.ICommand DeopUserCommand => _deopUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/mode -o", u));
-
-    private RelayCommand<UserViewModel>? _voiceUserCommand;
-    public System.Windows.Input.ICommand VoiceUserCommand => _voiceUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/mode +v", u));
-
-    private RelayCommand<UserViewModel>? _devoiceUserCommand;
-    public System.Windows.Input.ICommand DevoiceUserCommand => _devoiceUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/mode -v", u));
-
-    private RelayCommand<UserViewModel>? _kickUserCommand;
-    public System.Windows.Input.ICommand KickUserCommand => _kickUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/kick", u));
-
-    private RelayCommand<UserViewModel>? _banUserCommand;
-    public System.Windows.Input.ICommand BanUserCommand => _banUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/ban", u));
-
-    private RelayCommand<UserViewModel>? _kickBanUserCommand;
-    public System.Windows.Input.ICommand KickBanUserCommand => _kickBanUserCommand ??= new RelayCommand<UserViewModel>(u => RunUserCommand("/ban -k", u));
-
-    private void RunUserCommand(string commandPrefix, UserViewModel? user)
+    private UserViewModel? _selectedUser;
+    public UserViewModel? SelectedUser
     {
-        if (user == null)
+        get => _selectedUser;
+        set => SetProperty(ref _selectedUser, value);
+    }
+
+    private RelayCommand<string>? _userCommand;
+    public System.Windows.Input.ICommand UserCommand => _userCommand ??= new RelayCommand<string>(RunUserCommand);
+
+    private void RunUserCommand(string? commandPrefix)
+    {
+        if (SelectedUser == null || string.IsNullOrEmpty(commandPrefix))
             return;
 
-        OnExecute($"{commandPrefix} {user.Nick}");
+        OnExecute($"{commandPrefix} {SelectedUser.Nick}");
     }
 
     private void AddMessage(string msg)
