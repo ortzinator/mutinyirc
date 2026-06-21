@@ -1805,7 +1805,7 @@ namespace FlamingIRC
             lock (this)
             {
                 Buffer.Append("LINKS");
-                if (masks != null)
+                if (masks != null && masks.Length > 0)
                 {
                     Buffer.Append(SPACE);
                     Buffer.Append(masks[0]);
