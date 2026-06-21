@@ -1,11 +1,9 @@
-using System.Collections.Generic;
-using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
 using Avalonia.Input;
 using NUnit.Framework;
-using MutinyIRC.Common;
 using MutinyIRC.UI.Controls;
 using MutinyIRC.UI.ViewModels;
+using static MutinyIRC.UI.Tests.Controls.CommandTextBoxHarness;
 
 namespace MutinyIRC.UI.Tests.Controls;
 
@@ -17,33 +15,7 @@ namespace MutinyIRC.UI.Tests.Controls;
 [TestFixture]
 public class CommandTextBoxCompletionTests
 {
-    /// <summary>Minimal IrcViewModel whose only job is to hand the control a fixed candidate list.</summary>
-    private sealed class StubViewModel : IrcViewModel
-    {
-        private readonly IReadOnlyList<string> _candidates;
-        public StubViewModel(params string[] candidates) => _candidates = candidates;
-        public override Server? OwningServer => null;
-        public override IReadOnlyList<string> CompletionCandidates => _candidates;
-        public override void Dispose() { }
-    }
-
-    private static (CommandTextBox box, Window window) Host(IrcViewModel vm)
-    {
-        var window = new Window { Width = 400, Height = 200 };
-        var box = new CommandTextBox();
-        window.Content = box;
-        window.Show();
-        box.DataContext = vm;
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-        return (box, window);
-    }
-
-    private static bool PressTab(CommandTextBox box)
-    {
-        var args = new KeyEventArgs { Key = Key.Tab, RoutedEvent = InputElement.KeyDownEvent };
-        box.RaiseEvent(args);
-        return args.Handled;
-    }
+    private static bool PressTab(CommandTextBox box) => PressKey(box, Key.Tab);
 
     [AvaloniaTest]
     public void Tab_AtStartOfLine_CompletesWithColonSuffix()

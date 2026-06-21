@@ -1,10 +1,8 @@
-using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
 using Avalonia.Input;
 using NUnit.Framework;
-using MutinyIRC.Common;
 using MutinyIRC.UI.Controls;
-using MutinyIRC.UI.ViewModels;
+using static MutinyIRC.UI.Tests.Controls.CommandTextBoxHarness;
 
 namespace MutinyIRC.UI.Tests.Controls;
 
@@ -16,31 +14,6 @@ namespace MutinyIRC.UI.Tests.Controls;
 [TestFixture]
 public class CommandTextBoxHistoryTests
 {
-    /// <summary>Minimal IrcViewModel; history navigation doesn't need candidates or a server.</summary>
-    private sealed class StubViewModel : IrcViewModel
-    {
-        public override Server? OwningServer => null;
-        public override void Dispose() { }
-    }
-
-    private static (CommandTextBox box, Window window) Host()
-    {
-        var window = new Window { Width = 400, Height = 200 };
-        var box = new CommandTextBox();
-        window.Content = box;
-        window.Show();
-        box.DataContext = new StubViewModel();
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-        return (box, window);
-    }
-
-    private static bool PressKey(CommandTextBox box, Key key)
-    {
-        var args = new KeyEventArgs { Key = key, RoutedEvent = InputElement.KeyDownEvent };
-        box.RaiseEvent(args);
-        return args.Handled;
-    }
-
     /// <summary>Types <paramref name="text"/> and submits it via Enter, as the user would.</summary>
     private static void Submit(CommandTextBox box, string text)
     {
