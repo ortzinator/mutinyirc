@@ -31,6 +31,46 @@ public class ServerViewModelTests
         _vm?.Dispose();
     }
 
+    // A WHOIS reply is an RPL_WHOISUSER (311) followed by RPL_ENDOFWHOIS (318); the server fires
+    // WhoisReceived on 318, which the view model prints to the server tab via AddMessage.
+    private void ReceiveWhois(string nick = "bob")
+    {
+        _server.Connection.Listener.Parse($":irc.fake.com 311 me {nick} {nick}user {nick}host * :Real Name");
+        _server.Connection.Listener.Parse($":irc.fake.com 318 me {nick} :End of /WHOIS list.");
+    }
+
+    [Test]
+    public void WhoisReceivedWhileNotSelected_SetsHasUnread()
+    {
+        Assert.That(_vm.IsSelected, Is.False);
+        Assert.That(_vm.HasUnread, Is.False);
+
+        ReceiveWhois();
+
+        Assert.That(_vm.HasUnread, Is.True);
+    }
+
+    [Test]
+    public void WhoisReceivedWhileSelected_DoesNotSetHasUnread()
+    {
+        _vm.IsSelected = true;
+
+        ReceiveWhois();
+
+        Assert.That(_vm.HasUnread, Is.False);
+    }
+
+    [Test]
+    public void SelectingClearsHasUnread()
+    {
+        ReceiveWhois();
+        Assert.That(_vm.HasUnread, Is.True);
+
+        _vm.IsSelected = true;
+
+        Assert.That(_vm.HasUnread, Is.False);
+    }
+
     [Test]
     public void NowAwayReply_SetsIsAway()
     {

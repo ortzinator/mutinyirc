@@ -100,15 +100,28 @@
                                 <!-- Server entry -->
                                 <Button Theme="{StaticResource SidebarNavTheme}"
                                         Classes.active="{Binding IsSelected}"
+                                        Classes.unread="{Binding HasUnread}"
                                         Command="{Binding $parent[Window].DataContext.SelectPanelCommand}"
                                         CommandParameter="{Binding}"
                                         Padding="8,6" Margin="0,1,0,0">
+                                    <Button.Styles>
+                                        <!-- The server name is SemiBold by default; a local FontWeight
+                                             would block the theme's inherited Bold, so drive both weights
+                                             from the unread class on the named element instead. -->
+                                        <Style Selector="Button TextBlock#serverName">
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
+                                        <Style Selector="Button.unread TextBlock#serverName">
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </Button.Styles>
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <TextBlock Text="▸" FontSize="10"
                                                    VerticalAlignment="Center"
                                                    Foreground="{DynamicResource SidebarMutedForeground}"/>
-                                        <TextBlock Text="{Binding Name}"
-                                                   FontWeight="SemiBold" FontSize="12"
+                                        <TextBlock x:Name="serverName"
+                                                   Text="{Binding Name}"
+                                                   FontSize="12"
                                                    TextTrimming="CharacterEllipsis"
                                                    VerticalAlignment="Center"/>
                                         <TextBlock Text="(away)" FontSize="11"

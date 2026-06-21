@@ -89,7 +89,7 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_ServiceMessageReceived(object? sender, UserMessageEventArgs e)
     {
-        ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Message, e.User));
+        AddIncoming(new ChannelMessageViewModel(DateTime.Now, e.Message, e.User));
     }
 
     private void Server_ServiceMessageSent(object? sender, UserMessageEventArgs e)
@@ -99,7 +99,7 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_ServiceActionReceived(object? sender, UserMessageEventArgs e)
     {
-        ChatLines.Add(new ChannelActionViewModel(DateTime.Now, e.Message, e.User));
+        AddIncoming(new ChannelActionViewModel(DateTime.Now, e.Message, e.User));
     }
 
     public ServerViewModel()
@@ -200,7 +200,7 @@ public class ServerViewModel : IrcViewModel
             return;
         }
 
-        ChatLines.Add(new IrcErrorViewModel(DateTime.Now, e.Message, e.Code.ToString()));
+        AddIncoming(new IrcErrorViewModel(DateTime.Now, e.Message, e.Code.ToString()));
     }
 
     /// <summary>
@@ -234,7 +234,7 @@ public class ServerViewModel : IrcViewModel
 
     private void AddMessage(string message)
     {
-        ChatLines.Add(new ChatItemViewModel(DateTime.Now, message));
+        AddIncoming(new ChatItemViewModel(DateTime.Now, message));
     }
 
     private void DoRegister()
