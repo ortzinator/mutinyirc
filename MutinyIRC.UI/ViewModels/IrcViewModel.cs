@@ -1,6 +1,7 @@
 ﻿namespace MutinyIRC.UI.ViewModels;
 
 using System;
+using System.Collections.Generic;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using Common;
@@ -11,6 +12,12 @@ public abstract class IrcViewModel : ViewModelBase, IDisposable
 
     /// <summary>The server connection this panel belongs to, or null if it has none.</summary>
     public abstract Server? OwningServer { get; }
+
+    /// <summary>
+    ///   Nicknames the input box may offer for Tab completion, in display order. The base panel
+    ///   has none; channel and private-message panels override this with their participants.
+    /// </summary>
+    public virtual IReadOnlyList<string> CompletionCandidates => Array.Empty<string>();
 
     private bool _isSelected;
     public virtual bool IsSelected

@@ -41,6 +41,10 @@ public class ChannelViewModel : IrcViewModel
 
     public List<UserViewModel> UserList => userList;
 
+    /// <summary>Bare nicks of everyone in the channel, in the user list's display order.</summary>
+    public override IReadOnlyList<string> CompletionCandidates
+        => userList.ConvertAll(u => u.Nick);
+
     public ChannelViewModel(Channel channel, PluginManager pluginManager)
     {
         _pluginManager = pluginManager;

@@ -21,6 +21,10 @@ public class PrivateMessageViewModel : IrcViewModel
         protected set => SetProperty(ref _otherNick, value);
     }
 
+    /// <summary>The only completable name in a private chat is the person you're talking to.</summary>
+    public override System.Collections.Generic.IReadOnlyList<string> CompletionCandidates
+        => new[] { OtherNick };
+
     private bool _isServerConnected;
     public bool IsServerConnected
     {
