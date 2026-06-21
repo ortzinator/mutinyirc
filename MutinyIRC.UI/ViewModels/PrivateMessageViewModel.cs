@@ -21,13 +21,6 @@ public class PrivateMessageViewModel : IrcViewModel
         protected set => SetProperty(ref _otherNick, value);
     }
 
-    private bool _hasUnread;
-    public bool HasUnread
-    {
-        get => _hasUnread;
-        protected set => SetProperty(ref _hasUnread, value);
-    }
-
     private bool _isServerConnected;
     public bool IsServerConnected
     {
@@ -60,21 +53,9 @@ public class PrivateMessageViewModel : IrcViewModel
         _session.Server.ConnectionLost += Server_ConnectionLost;
     }
 
-    public override bool IsSelected
-    {
-        get => base.IsSelected;
-        set
-        {
-            base.IsSelected = value;
-            if (value)
-                HasUnread = false;
-        }
-    }
-
     private void Session_MessageReceived(object? sender, Common.DataEventArgs<string> e)
     {
-        ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Data, _session.User));
-        if (!IsSelected) HasUnread = true;
+        AddIncoming(new ChannelMessageViewModel(DateTime.Now, e.Data, _session.User));
     }
 
     private void Session_MessageSent(object? sender, Common.DataEventArgs<string> e)
@@ -84,8 +65,7 @@ public class PrivateMessageViewModel : IrcViewModel
 
     private void Session_ActionReceived(object? sender, Common.DataEventArgs<string> e)
     {
-        ChatLines.Add(new ChannelActionViewModel(DateTime.Now, e.Data, _session.User));
-        if (!IsSelected) HasUnread = true;
+        AddIncoming(new ChannelActionViewModel(DateTime.Now, e.Data, _session.User));
     }
 
     private void Session_ActionSent(object? sender, Common.DataEventArgs<string> e)

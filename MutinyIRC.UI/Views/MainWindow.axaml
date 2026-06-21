@@ -52,6 +52,12 @@
             <Style Selector="^.active">
                 <Setter Property="Foreground" Value="{DynamicResource SidebarHeaderForeground}"/>
             </Style>
+            <!-- Bold the nav item's text on unread. Set on the button so its content
+                 TextBlocks inherit FontWeight, the same way they inherit Foreground —
+                 a ControlTheme may not use a descendant selector to reach content. -->
+            <Style Selector="^.unread">
+                <Setter Property="FontWeight" Value="Bold"/>
+            </Style>
         </ControlTheme>
     </Window.Resources>
 
@@ -118,6 +124,7 @@
                                         <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
                                             <Button Theme="{StaticResource SidebarNavTheme}"
                                                     Classes.active="{Binding IsSelected}"
+                                                    Classes.unread="{Binding HasUnread}"
                                                     Command="{Binding $parent[Window].DataContext.SelectPanelCommand}"
                                                     CommandParameter="{Binding}"
                                                     Padding="20,4,8,4" Margin="0,1,0,0">
@@ -153,11 +160,6 @@
                                                         Command="{Binding $parent[Window].DataContext.SelectPanelCommand}"
                                                         CommandParameter="{Binding}"
                                                         Padding="20,4,28,4">
-                                                    <Button.Styles>
-                                                        <Style Selector="Button.unread TextBlock">
-                                                            <Setter Property="FontWeight" Value="Bold"/>
-                                                        </Style>
-                                                    </Button.Styles>
                                                     <TextBlock Text="{Binding OtherNick}"
                                                                FontSize="13"
                                                                TextTrimming="CharacterEllipsis"

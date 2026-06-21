@@ -127,12 +127,13 @@ public class ChannelViewModel : IrcViewModel
 
     private void Channel_OnAction(object? sender, UserMessageEventArgs e)
     {
-        ChatLines.Add(new ChannelActionViewModel(DateTime.Now, e.Message, e.User));
+        // OnAction also fires for our own /me, but then the channel is focused, so unread no-ops.
+        AddIncoming(new ChannelActionViewModel(DateTime.Now, e.Message, e.User));
     }
 
     private void Channel_OnMessage(object? sender, UserMessageEventArgs e)
     {
-        ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Message, e.User));
+        AddIncoming(new ChannelMessageViewModel(DateTime.Now, e.Message, e.User));
     }
 
     private void NickList_Updated(object? sender, EventArgs e)

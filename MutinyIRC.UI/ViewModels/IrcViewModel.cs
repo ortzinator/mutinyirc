@@ -16,7 +16,38 @@ public abstract class IrcViewModel : ViewModelBase, IDisposable
     public virtual bool IsSelected
     {
         get => _isSelected;
-        set => SetProperty(ref _isSelected, value);
+        set
+        {
+            SetProperty(ref _isSelected, value);
+            if (value)
+                HasUnread = false;   // viewing a panel clears its unread flag
+        }
+    }
+
+    private bool _hasUnread;
+    /// <summary>True when this panel has activity the user hasn't looked at yet.</summary>
+    public bool HasUnread
+    {
+        get => _hasUnread;
+        protected set => SetProperty(ref _hasUnread, value);
+    }
+
+    /// <summary>Flags unread activity, but only when this panel isn't the one on screen.</summary>
+    protected void MarkUnreadIfHidden()
+    {
+        if (!IsSelected)
+            HasUnread = true;
+    }
+
+    /// <summary>
+    ///   Appends a line that arrived from elsewhere (not something the local user sent) and flags
+    ///   the panel as unread if it isn't on screen. Use this for incoming content; use
+    ///   <see cref="ChatLines"/>.Add directly for the user's own outgoing lines.
+    /// </summary>
+    protected void AddIncoming(ChatItemViewModel item)
+    {
+        ChatLines.Add(item);
+        MarkUnreadIfHidden();
     }
 
     public IrcViewModel()
