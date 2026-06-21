@@ -36,18 +36,6 @@ namespace MutinyIRC.Tests
             _manager.ServerList.Clear();
         }
 
-        // A Server backed by a fake connection so IsConnected/Disconnect can be controlled and
-        // verified without opening a socket. Listener is stubbed to a real instance because
-        // Server.Disconnect -> UnhookEvents detaches handlers from Connection.Listener.
-        private static Server FakeServer(bool connected)
-        {
-            var conn = A.Fake<IConnection>();
-            A.CallTo(() => conn.Connected).Returns(connected);
-            A.CallTo(() => conn.Listener).Returns(new Listener());
-            A.CallTo(() => conn.ConnectionData).Returns(new ConnectionArgs("nick", "host", false));
-            return new Server { Connection = conn };
-        }
-
         [Test]
         public void Instance_ReturnsTheSameSingletonEachTime()
         {
@@ -121,7 +109,7 @@ namespace MutinyIRC.Tests
         [Test]
         public void Remove_ServerNotInList_DoesNotRaiseServerRemoved()
         {
-            var stranger = FakeServer(connected: false); // never added to the manager
+            var stranger = ServerTestFactory.FakeServer(connected: false); // never added to the manager
             bool raised = false;
             void Handler(object sender, ServerEventArgs e) => raised = true;
             _manager.ServerRemoved += Handler;
@@ -148,8 +136,8 @@ namespace MutinyIRC.Tests
         [Test]
         public void AnyConnected_WithOnlyDisconnectedServers_ReturnsFalse()
         {
-            _manager.ServerList.Add(FakeServer(connected: false));
-            _manager.ServerList.Add(FakeServer(connected: false));
+            _manager.ServerList.Add(ServerTestFactory.FakeServer(connected: false));
+            _manager.ServerList.Add(ServerTestFactory.FakeServer(connected: false));
 
             Assert.IsFalse(_manager.AnyConnected());
         }
@@ -157,8 +145,8 @@ namespace MutinyIRC.Tests
         [Test]
         public void AnyConnected_WithAtLeastOneConnectedServer_ReturnsTrue()
         {
-            _manager.ServerList.Add(FakeServer(connected: false));
-            _manager.ServerList.Add(FakeServer(connected: true));
+            _manager.ServerList.Add(ServerTestFactory.FakeServer(connected: false));
+            _manager.ServerList.Add(ServerTestFactory.FakeServer(connected: true));
 
             Assert.IsTrue(_manager.AnyConnected());
         }
@@ -166,8 +154,8 @@ namespace MutinyIRC.Tests
         [Test]
         public void DisconnectAll_DisconnectsConnectedServersAndSkipsTheRest()
         {
-            var connected = FakeServer(connected: true);
-            var disconnected = FakeServer(connected: false);
+            var connected = ServerTestFactory.FakeServer(connected: true);
+            var disconnected = ServerTestFactory.FakeServer(connected: false);
             _manager.ServerList.Add(connected);
             _manager.ServerList.Add(disconnected);
 

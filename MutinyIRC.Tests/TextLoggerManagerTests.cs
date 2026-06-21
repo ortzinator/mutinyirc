@@ -1,5 +1,4 @@
 using System.IO;
-using FakeItEasy;
 using FlamingIRC;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Legacy.ClassicAssert;
@@ -51,22 +50,13 @@ namespace MutinyIRC.Tests
                 Directory.Delete(_tempDir, recursive: true);
         }
 
-        // A Server backed by a fake connection so it carries a known Url (the log-file key) without
-        // opening a socket.
-        private static Server FakeServer(string host)
-        {
-            var conn = A.Fake<IConnection>();
-            A.CallTo(() => conn.ConnectionData).Returns(new ConnectionArgs("nick", host, false));
-            return new Server { Connection = conn };
-        }
-
         private static string ServerLogPath(string tempDir, string host)
             => Path.Combine(tempDir, host, "!" + host + ".log");
 
         [Test]
         public void EnablingLogger_RegistersServersAlreadyInTheManager()
         {
-            var server = FakeServer("a.example");
+            var server = ServerTestFactory.FakeServer("a.example");
             ServerManager.Instance.ServerList.Add(server);
 
             TextLoggerManager.LoggerActive = true;
@@ -91,7 +81,7 @@ namespace MutinyIRC.Tests
         [Test]
         public void EnablingLoggerTwice_DoesNotReRegisterExistingServers()
         {
-            var server = FakeServer("a.example");
+            var server = ServerTestFactory.FakeServer("a.example");
             ServerManager.Instance.ServerList.Add(server);
 
             TextLoggerManager.LoggerActive = true; // registers a.example once
@@ -117,7 +107,7 @@ namespace MutinyIRC.Tests
         [Test]
         public void TextEntry_WhileLoggerInactive_WritesNothingAndDoesNotThrow()
         {
-            var server = FakeServer("a.example"); // never registered
+            var server = ServerTestFactory.FakeServer("a.example"); // never registered
 
             // The per-call guard returns before touching the (absent) log file.
             Assert.DoesNotThrow(() => TextLoggerManager.TextEntry(server, "ignored"));
