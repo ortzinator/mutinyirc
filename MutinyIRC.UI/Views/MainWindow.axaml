@@ -62,7 +62,12 @@
         </ControlTheme>
     </Window.Resources>
 
-    <Grid ColumnDefinitions="220,*">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" MinWidth="150" MaxWidth="500"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
         <!-- ═══ Sidebar ═══ -->
         <DockPanel Grid.Column="0" Background="{DynamicResource SidebarBackground}">
@@ -202,8 +207,14 @@
             </ScrollViewer>
         </DockPanel>
 
+        <!-- ═══ Sidebar resize handle ═══ -->
+        <GridSplitter Grid.Column="1" Width="4"
+                      Background="Transparent"
+                      ResizeDirection="Columns"
+                      HorizontalAlignment="Stretch"/>
+
         <!-- ═══ Content area ═══ -->
-        <ContentControl Grid.Column="1" Content="{Binding SelectedPanel}"
+        <ContentControl Grid.Column="2" Content="{Binding SelectedPanel}"
                         Background="{DynamicResource AppBackground}">
             <ContentControl.DataTemplates>
                 <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
