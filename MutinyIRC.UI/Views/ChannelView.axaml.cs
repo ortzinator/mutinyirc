@@ -19,9 +19,22 @@ public partial class ChannelView : UserControl
 {
     private static readonly TimeSpan TopicSlideDuration = TimeSpan.FromMilliseconds(160);
 
+    private enum TopicState { Collapsed, Expanding, Expanded, Collapsing }
+
+    // Single source of truth for the topic's lifecycle. The expand/collapse handlers gate on this
+    // instead of inferring state from IsVisible, which is only mutated *after* the slide awaits and
+    // so can't safely guard against concurrent triggers (a click outside fires both the outside-click
+    // and LostFocus paths).
+    private TopicState _topicState = TopicState.Collapsed;
+
     // Captured when the topic expands so collapse can slide back to the same single-line height
     // (the collapsed TextBlock is hidden while expanded, so its DesiredSize is unavailable then).
     private double _topicCollapsedHeight;
+
+    // The TopLevel we attached the outside-click handler to, held so it can be removed on collapse
+    // or detach even when GetTopLevel(this) would return null mid-teardown.
+    private TopLevel? _topicOutsideClickRoot;
+
     public ChannelView()
     {
         InitializeComponent();
@@ -43,8 +56,9 @@ public partial class ChannelView : UserControl
 
     private async void TopicStrip_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (topicExpanded.IsVisible)
+        if (_topicState != TopicState.Collapsed)
             return;
+        _topicState = TopicState.Expanding;
 
         var collapsedHeight = topicStrip.Bounds.Height;
         _topicCollapsedHeight = collapsedHeight;
@@ -56,8 +70,7 @@ public partial class ChannelView : UserControl
 
         // Also watch for clicks anywhere outside the strip — a click on a non-focusable element
         // won't move focus, so LostFocus alone wouldn't catch it.
-        TopLevel.GetTopLevel(this)?.AddHandler(
-            PointerPressedEvent, TopLevel_PointerPressed, RoutingStrategies.Tunnel);
+        AddOutsideClickHandler();
 
         // Measure the full topic at the current width *before* pinning the height — otherwise the
         // pinned value would be reported back as the desired size and nothing would animate.
@@ -69,8 +82,8 @@ public partial class ChannelView : UserControl
         await SlideTopicHeightAsync(collapsedHeight, targetHeight);
 
         // Hand height back to auto so the strip reflows when the window is resized.
-        if (topicExpanded.IsVisible)
-            topicStrip.Height = double.NaN;
+        topicStrip.Height = double.NaN;
+        _topicState = TopicState.Expanded;
     }
 
     private void TopicStrip_LostFocus(object? sender, RoutedEventArgs e)
@@ -80,28 +93,29 @@ public partial class ChannelView : UserControl
         Dispatcher.UIThread.Post(() =>
         {
             var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Visual;
-            var stillInside = focused != null
-                && (focused == topicStrip || focused.GetVisualAncestors().Contains(topicStrip));
-            if (!stillInside)
+            if (!IsInsideTopic(focused))
                 CollapseTopic();
         });
     }
 
     private void TopLevel_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        var clicked = e.Source as Visual;
-        var insideStrip = clicked != null
-            && (clicked == topicStrip || clicked.GetVisualAncestors().Contains(topicStrip));
-        if (!insideStrip)
+        if (!IsInsideTopic(e.Source as Visual))
             CollapseTopic();
     }
 
+    // True when the visual is the topic strip or lives inside it — used by both collapse triggers
+    // to ignore focus moves and clicks that stay within the expanded topic.
+    private bool IsInsideTopic(Visual? v) =>
+        v != null && (v == topicStrip || v.GetVisualAncestors().Contains(topicStrip));
+
     private async void CollapseTopic()
     {
-        if (!topicExpanded.IsVisible)
+        if (_topicState != TopicState.Expanded)
             return;
+        _topicState = TopicState.Collapsing;
 
-        TopLevel.GetTopLevel(this)?.RemoveHandler(PointerPressedEvent, TopLevel_PointerPressed);
+        RemoveOutsideClickHandler();
 
         // Slide the strip back up to the single-line height, then swap back to the collapsed view.
         await SlideTopicHeightAsync(topicStrip.Bounds.Height, _topicCollapsedHeight);
@@ -109,6 +123,20 @@ public partial class ChannelView : UserControl
         topicExpanded.IsVisible = false;
         topicCollapsed.IsVisible = true;
         topicStrip.Height = double.NaN;
+        _topicState = TopicState.Collapsed;
+    }
+
+    private void AddOutsideClickHandler()
+    {
+        _topicOutsideClickRoot = TopLevel.GetTopLevel(this);
+        _topicOutsideClickRoot?.AddHandler(
+            PointerPressedEvent, TopLevel_PointerPressed, RoutingStrategies.Tunnel);
+    }
+
+    private void RemoveOutsideClickHandler()
+    {
+        _topicOutsideClickRoot?.RemoveHandler(PointerPressedEvent, TopLevel_PointerPressed);
+        _topicOutsideClickRoot = null;
     }
 
     private Task SlideTopicHeightAsync(double from, double to)
@@ -133,6 +161,14 @@ public partial class ChannelView : UserControl
             },
         };
         return animation.RunAsync(topicStrip);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        // The outside-click handler lives on the TopLevel, not on this view, so it would otherwise
+        // outlive a ChannelView that's removed while its topic is expanded.
+        RemoveOutsideClickHandler();
+        base.OnDetachedFromVisualTree(e);
     }
 
     private void UserBox_PointerPressed(object? sender, PointerPressedEventArgs e)
