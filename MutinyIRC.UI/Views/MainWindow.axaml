@@ -208,10 +208,16 @@
         </DockPanel>
 
         <!-- ═══ Sidebar resize handle ═══ -->
+        <!-- A 1px hairline marks the divider; the transparent GridSplitter overlays
+             it to provide a wider, easier-to-grab drag target. The Fluent GridSplitter
+             template only renders Background, so the hairline is a separate Border. -->
+        <Border Grid.Column="1" Width="1"
+                HorizontalAlignment="Center"
+                Background="{DynamicResource SidebarBorderBrush}"/>
         <GridSplitter Grid.Column="1" Width="4"
                       Background="Transparent"
                       ResizeDirection="Columns"
-                      HorizontalAlignment="Stretch"/>
+                      HorizontalAlignment="Center"/>
 
         <!-- ═══ Content area ═══ -->
         <ContentControl Grid.Column="2" Content="{Binding SelectedPanel}"
