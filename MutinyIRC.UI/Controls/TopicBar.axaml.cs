@@ -51,17 +51,9 @@ public partial class TopicBar : UserControl
     public TopicBar()
     {
         InitializeComponent();
-        IsVisible = !string.IsNullOrEmpty(Topic);
 
         AddHandler(PointerPressedEvent, OnPressed, RoutingStrategies.Tunnel);
         LostFocus += OnLostFocus;
-    }
-
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        base.OnPropertyChanged(change);
-        if (change.Property == TopicProperty)
-            IsVisible = !string.IsNullOrEmpty(Topic);
     }
 
     private async void OnPressed(object? sender, PointerPressedEventArgs e)

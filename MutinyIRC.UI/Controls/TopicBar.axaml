@@ -3,7 +3,9 @@
              x:Class="MutinyIRC.UI.Controls.TopicBar"
              x:Name="Root"
              ClipToBounds="True"
-             Focusable="True">
+             Focusable="True"
+             IsVisible="{Binding Topic, ElementName=Root,
+                         Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
     <Border Background="{DynamicResource ChannelHeaderBackground}"
             BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
             BorderThickness="0,0,0,1"
