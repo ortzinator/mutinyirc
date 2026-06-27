@@ -48,35 +48,8 @@
             </DockPanel>
         </Border>
 
-        <!-- ── Topic strip (hidden when empty) ── -->
-        <!-- Click to expand the full, selectable topic; collapses again when focus leaves. -->
-        <Border x:Name="topicStrip"
-                DockPanel.Dock="Top"
-                Focusable="True"
-                ClipToBounds="True"
-                Background="{DynamicResource ChannelHeaderBackground}"
-                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="16,5,16,5"
-                IsVisible="{Binding Topic, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            <Panel>
-                <!-- Collapsed: single line, click to expand -->
-                <TextBlock x:Name="topicCollapsed"
-                           Text="{Binding Topic}"
-                           FontSize="12"
-                           Foreground="{DynamicResource SidebarMutedForeground}"
-                           TextTrimming="CharacterEllipsis"
-                           Cursor="Hand"
-                           ToolTip.Tip="Click to expand"/>
-                <!-- Expanded: full text, selectable -->
-                <SelectableTextBlock x:Name="topicExpanded"
-                                     Text="{Binding Topic}"
-                                     FontSize="12"
-                                     Foreground="{DynamicResource SidebarMutedForeground}"
-                                     TextWrapping="Wrap"
-                                     IsVisible="False"/>
-            </Panel>
-        </Border>
+        <!-- ── Topic strip (hides itself when empty; click to expand the full topic) ── -->
+        <local:TopicBar DockPanel.Dock="Top" Topic="{Binding Topic}"/>
 
         <!-- ── Message input bar ── -->
         <Border DockPanel.Dock="Bottom"

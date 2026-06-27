@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MutinyIRC.UI.Controls.TopicBar"
+             x:Name="Root"
+             ClipToBounds="True"
+             Focusable="True">
+    <Border Background="{DynamicResource ChannelHeaderBackground}"
+            BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="16,5,16,5">
+        <Panel>
+            <!-- Collapsed: single line, click to expand -->
+            <TextBlock x:Name="topicCollapsed"
+                       Text="{Binding Topic, ElementName=Root}"
+                       FontSize="12"
+                       Foreground="{DynamicResource SidebarMutedForeground}"
+                       TextTrimming="CharacterEllipsis"
+                       Cursor="Hand"
+                       ToolTip.Tip="Click to expand"/>
+            <!-- Expanded: full text, selectable -->
+            <SelectableTextBlock x:Name="topicExpanded"
+                                 Text="{Binding Topic, ElementName=Root}"
+                                 FontSize="12"
+                                 Foreground="{DynamicResource SidebarMutedForeground}"
+                                 TextWrapping="Wrap"
+                                 IsVisible="False"/>
+        </Panel>
+    </Border>
+</UserControl>
