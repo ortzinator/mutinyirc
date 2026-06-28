@@ -74,6 +74,33 @@ namespace MutinyIRC.Tests
         }
 
         [Test]
+        public void ConnectionLost_ClearsChannelMembershipButKeepsTheChannel()
+        {
+            var conn = OfflineConnection();
+            var server = new Server(conn);
+
+            // Stand the channel up as joined directly rather than via a self-JOIN line: parsing
+            // one would make Listener_OnJoin fire a NAMES request through the real Sender into a
+            // dead socket. This mirrors the setup in ServerTests.InChannel_JoinedChannel_*.
+            var chan = new Channel(server, "#room") { Membership = ChannelMembership.Joined };
+            server.Channels.Add("#room", chan);
+            Assert.IsTrue(server.InChannel("#room"));
+
+            conn.Disconnect(DisconnectReason.SocketError);
+
+            // Membership is connection-scoped, so the drop must leave us not-joined — otherwise a
+            // disconnected client would still report itself in the channel.
+            Assert.AreEqual(ChannelMembership.NotJoined, chan.Membership,
+                "A dropped connection must reset channel membership to NotJoined.");
+            Assert.IsFalse(server.InChannel("#room"),
+                "InChannel must report false once the connection is lost.");
+            // The Channel object itself survives so its panel stays open and a reconnect can
+            // rejoin in place; only the membership flag is cleared.
+            Assert.IsTrue(server.Channels.ContainsKey("#room"),
+                "The channel must be kept across the drop so its panel persists for a rejoin.");
+        }
+
+        [Test]
         public void Disconnect_AfterUnhookEvents_DoesNotSurfaceAsDisconnected()
         {
             var conn = OfflineConnection();
