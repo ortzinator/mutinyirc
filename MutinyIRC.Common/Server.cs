@@ -165,6 +165,12 @@ namespace MutinyIRC.Common
 
         private void Connection_ConnectionLost(object sender, DisconnectEventArgs e)
         {
+            // Membership is connection-scoped: once the link drops we are no longer in any
+            // channel, even though the Channel objects survive (their panels stay open so a
+            // reconnect can rejoin in place). Reset each so nothing treats a stale channel as
+            // joined while disconnected, and so a rejoin transitions cleanly through Joining.
+            ResetChannelMembership();
+
             if (e.Reason == DisconnectReason.UserInitiated)
             {
                 Disconnected.Fire(this, e);
@@ -173,6 +179,16 @@ namespace MutinyIRC.Common
             {
                 ConnectionLost.Fire(this, e);
             }
+        }
+
+        /// <summary>
+        ///   Marks every tracked channel <see cref="ChannelMembership.NotJoined"/>. Called when
+        ///   the connection drops; the channels themselves are kept so their panels persist.
+        /// </summary>
+        private void ResetChannelMembership()
+        {
+            foreach (Channel chan in Channels.Values)
+                chan.Membership = ChannelMembership.NotJoined;
         }
 
         private void Listener_OnPrivate(object sender, UserMessageEventArgs e)

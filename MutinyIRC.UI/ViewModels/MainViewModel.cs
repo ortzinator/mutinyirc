@@ -31,12 +31,18 @@ public class MainViewModel : ViewModelBase
 
     private RelayCommand<IrcViewModel?>? _selectPanelCommand;
     public System.Windows.Input.ICommand SelectPanelCommand =>
-        _selectPanelCommand ??= new RelayCommand<IrcViewModel?>(panel =>
-        {
-            if (_selectedPanel != null) _selectedPanel.IsSelected = false;
-            SelectedPanel = panel;
-            if (panel != null) panel.IsSelected = true;
-        });
+        _selectPanelCommand ??= new RelayCommand<IrcViewModel?>(SelectPanel);
+
+    /// <summary>
+    ///   Makes <paramref name="panel"/> the active panel, deselecting whichever panel was
+    ///   previously selected. Passing null clears the selection.
+    /// </summary>
+    private void SelectPanel(IrcViewModel? panel)
+    {
+        if (_selectedPanel != null) _selectedPanel.IsSelected = false;
+        SelectedPanel = panel;
+        if (panel != null) panel.IsSelected = true;
+    }
 
     public MainViewModel(PluginManager pluginManager)
     {
@@ -67,6 +73,18 @@ public class MainViewModel : ViewModelBase
 
     private void Server_JoinSelf(object? sender, Common.DataEventArgs<Channel> e)
     {
+        // A reconnect (or any rejoin) re-fires JoinSelf for a channel whose panel is still
+        // open: the Channel object survives in Server.Channels across a dropped connection, so
+        // CreateChannel hands back the existing instance. Reuse its panel instead of opening a
+        // duplicate; just bring it back to the foreground.
+        var existing = Panels.OfType<ChannelViewModel>()
+            .FirstOrDefault(c => c.Channel == e.Data);
+        if (existing != null)
+        {
+            SelectPanel(existing);
+            return;
+        }
+
         var chan = CompositionRoot.Resolve<ChannelViewModel>(new ConstructorArgument("channel", e.Data));
         chan.RequestClose += Chan_RequestClose;
         Panels.Add(chan);
@@ -74,9 +92,7 @@ public class MainViewModel : ViewModelBase
         if (_serverMap.TryGetValue(e.Data.Server, out var serverVm))
             serverVm.Channels.Add(chan);
 
-        if (_selectedPanel != null) _selectedPanel.IsSelected = false;
-        SelectedPanel = chan;
-        chan.IsSelected = true;
+        SelectPanel(chan);
     }
 
     private void Server_PrivateNotice(object? sender, UserMessageEventArgs e)
