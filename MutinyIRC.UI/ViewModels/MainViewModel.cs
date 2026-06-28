@@ -52,7 +52,16 @@ public class MainViewModel : ViewModelBase
 
         ServerManager.Instance.ServerAdded += Instance_ServerCreated;
         Server.ChannelRemoved += Server_ChannelRemoved;
+    }
 
+    /// <summary>
+    ///   Runs the one-time startup work that has external side effects: applies logging
+    ///   settings, auto-connects the configured servers, and loads plugins from disk. Kept out
+    ///   of the constructor so the view model can be created in tests without opening sockets or
+    ///   scanning the plugins directory. Call once, after construction.
+    /// </summary>
+    public void Start()
+    {
         LoadSettings();
 
         List<ServerSettings> servers = IrcSettingsManager.Instance.GetAutoConnectServers();
@@ -62,8 +71,9 @@ public class MainViewModel : ViewModelBase
             if (server.Nick == null)
                 server.Nick = AppSettings.Instance.FirstNick;
 
+            // Create fires ServerManager.ServerAdded synchronously, so CreateServerPanel has
+            // already wired this server's JoinSelf handler by the time Connect() runs.
             Server newServer = ServerManager.Instance.Create(new ConnectionArgs(server.Nick, server.Url, server.Ssl));
-            newServer.JoinSelf += Server_JoinSelf;
             newServer.Connect();
         }
 
@@ -206,13 +216,16 @@ public class MainViewModel : ViewModelBase
         CreateServerPanel(e.Server);
     }
 
-    private void CreateServerPanel(Server server)
+    // internal so MainViewModel tests can register a server (with a faked connection) without
+    // going through ServerManager.Create, which would open a real connection.
+    internal void CreateServerPanel(Server server)
     {
         var vm = new ServerViewModel(server, _pluginManager);
         _serverMap[server] = vm;
         Panels.Add(vm);
         Servers.Add(vm);
 
+        server.JoinSelf += Server_JoinSelf;
         server.PrivateMessageSessionAdded += Server_PrivateMessageSessionAdded;
         server.PrivateNotice += Server_PrivateNotice;
         server.AwayReplyReceived += Server_AwayReplyReceived;

@@ -20,6 +20,7 @@ public partial class App : Application
         {
             CompositionRoot.Wire(new Bindings());
             var viewModel = CompositionRoot.Resolve<MainViewModel>();
+            viewModel.Start();
             var window = new MainWindow { DataContext = viewModel };
             bool closing = false;
             viewModel.RequestClose += (_, _) => window.Close();
