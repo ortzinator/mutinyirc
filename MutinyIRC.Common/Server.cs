@@ -13,6 +13,16 @@ namespace MutinyIRC.Common
         private IConnection _connection;
         private bool _disposed;
 
+        // Automatic-reconnect policy. After a failed attempt or a non-user-initiated drop, the
+        // next reconnect is scheduled with exponential backoff: ReconnectBaseDelay doubled per
+        // consecutive attempt, capped at ReconnectMaxDelay. The counter resets on a successful
+        // registration; the timer is cancelled on a user-initiated disconnect or Dispose so it
+        // never revives a connection the user has quit.
+        private static readonly TimeSpan ReconnectBaseDelay = TimeSpan.FromSeconds(4);
+        private static readonly TimeSpan ReconnectMaxDelay = TimeSpan.FromMinutes(5);
+        private int _reconnectAttempt;
+        private Timer _reconnectTimer;
+
         /// <summary>
         ///   Nicknames whose PRIVMSGs bypass the PM tab UI and surface in the server
         ///   window instead (NickServ, ChanServ, etc). Hosts seed this per connection
@@ -178,6 +188,7 @@ namespace MutinyIRC.Common
             else
             {
                 ConnectionLost.Fire(this, e);
+                ScheduleReconnect();
             }
         }
 
@@ -320,6 +331,14 @@ namespace MutinyIRC.Common
         /// </summary>
         public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
 
+        /// <summary>
+        ///   Fired when an automatic reconnect has been scheduled (after a failed attempt or a
+        ///   non-user-initiated drop). The argument is the delay until that attempt, which grows
+        ///   with exponential backoff. The reconnect runs internally, so hosts should render a
+        ///   notice rather than calling <see cref="Connect"/> themselves.
+        /// </summary>
+        public event EventHandler<DataEventArgs<TimeSpan>> Reconnecting;
+
         public event EventHandler<DataEventArgs<string>> RawMessageReceived;
 
         public event EventHandler<ChannelMessageEventArgs> ChannelMessaged;
@@ -419,6 +438,8 @@ namespace MutinyIRC.Common
                 return;
             _disposed = true;
 
+            CancelReconnect();
+
             // _connection is null for a Server built with the parameterless constructor that
             // never had a Connection assigned; guard against an NRE.
             if (_connection != null)
@@ -467,8 +488,41 @@ namespace MutinyIRC.Common
 
         public void Disconnect(string reason)
         {
+            CancelReconnect();
             Connection.Disconnect(reason);
             UnhookEvents();
+        }
+
+        /// <summary>
+        ///   Schedules the next automatic reconnect with exponential backoff and announces it via
+        ///   <see cref="Reconnecting"/>. The delay is ReconnectBaseDelay * 2^attempt clamped to
+        ///   ReconnectMaxDelay; the attempt counter stops climbing once the cap is reached so it
+        ///   can never run away. Any pending reconnect is cancelled first so only one is in flight.
+        /// </summary>
+        private void ScheduleReconnect()
+        {
+            var delay = TimeSpan.FromSeconds(Math.Min(
+                ReconnectBaseDelay.TotalSeconds * Math.Pow(2, _reconnectAttempt),
+                ReconnectMaxDelay.TotalSeconds));
+            if (delay < ReconnectMaxDelay)
+                _reconnectAttempt++;
+
+            CancelReconnect();
+            // Guard against the dispose race: if the Server is torn down while this is pending, the
+            // timer is disposed below, but an already-firing callback still checks _disposed.
+            _reconnectTimer = new Timer(_ => { if (!_disposed) Connect(); }, null,
+                delay, Timeout.InfiniteTimeSpan);
+
+            Reconnecting.Fire(this, new DataEventArgs<TimeSpan>(delay));
+        }
+
+        /// <summary>
+        ///   Cancels any pending automatic reconnect. Safe to call when none is scheduled.
+        /// </summary>
+        private void CancelReconnect()
+        {
+            _reconnectTimer?.Dispose();
+            _reconnectTimer = null;
         }
 
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
@@ -535,6 +589,7 @@ namespace MutinyIRC.Common
         private void Connection_ConnectFailed(object sender, ConnectFailedEventArgs e)
         {
             ConnectFailed.Fire(this, e);
+            ScheduleReconnect();
         }
 
         private void Listener_OnPublic(object sender, UserChannelMessageEventArgs ea)
@@ -599,6 +654,8 @@ namespace MutinyIRC.Common
 
         private void Listener_OnRegistered(object sender, EventArgs e)
         {
+            // Back online: clear the backoff so the next drop retries from ReconnectBaseDelay.
+            _reconnectAttempt = 0;
             Registered?.Invoke(this, e);
         }
 

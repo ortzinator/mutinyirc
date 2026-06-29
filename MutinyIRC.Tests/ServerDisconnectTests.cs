@@ -54,7 +54,9 @@ namespace MutinyIRC.Tests
         public void Disconnect_NonUserInitiated_SurfacesAsConnectionLostNotDisconnected()
         {
             var conn = OfflineConnection();
-            var server = new Server(conn);
+            // using: a non-user-initiated drop now schedules an automatic reconnect, so dispose
+            // the Server when the test ends to cancel that pending timer before it fires.
+            using var server = new Server(conn);
 
             bool connectionLostFired = false;
             bool disconnectedFired = false;
@@ -77,7 +79,9 @@ namespace MutinyIRC.Tests
         public void ConnectionLost_ClearsChannelMembershipButKeepsTheChannel()
         {
             var conn = OfflineConnection();
-            var server = new Server(conn);
+            // using: the SocketError drop below schedules an automatic reconnect; dispose the
+            // Server when the test ends to cancel that pending timer before it fires.
+            using var server = new Server(conn);
 
             // Stand the channel up as joined directly rather than via a self-JOIN line: parsing
             // one would make Listener_OnJoin fire a NAMES request through the real Sender into a

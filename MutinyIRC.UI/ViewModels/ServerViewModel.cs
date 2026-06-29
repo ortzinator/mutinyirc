@@ -48,6 +48,7 @@ public class ServerViewModel : IrcViewModel
         Name = server.Url;
         server.Registered += Server_Registered;
         server.ConnectFailed += Server_ConnectFailed;
+        server.Reconnecting += Server_Reconnecting;
         server.ErrorMessageRecieved += Server_ErrorMessageRecieved;
         server.Connecting += Server_Connecting;
         server.Disconnected += Server_Disconnected;
@@ -165,12 +166,12 @@ public class ServerViewModel : IrcViewModel
     {
         ResetAwayState();
         AddMessage(ServerStrings.ConnectionLost.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
+    }
 
-        if (e.Reason != DisconnectReason.UserInitiated)
-        {
-            AddMessage(ServerStrings.AttemptingReconnect);
-            ThreadHelper.InvokeAfter(TimeSpan.FromSeconds(4), delegate { server.Connect(); });
-        }
+    // The Server owns the reconnect timer and backoff; we just render the announced delay.
+    private void Server_Reconnecting(object? sender, Common.DataEventArgs<TimeSpan> e)
+    {
+        AddMessage(ServerStrings.AttemptingReconnect.With((int)e.Data.TotalSeconds));
     }
 
     private void Server_Disconnected(object? sender, EventArgs e)
@@ -212,7 +213,6 @@ public class ServerViewModel : IrcViewModel
     private void Server_ConnectFailed(object? sender, ConnectFailedEventArgs e)
     {
         AddMessage(ServerStrings.ConnectionFailedMessage.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
-        ThreadHelper.InvokeAfter(TimeSpan.FromSeconds(4), delegate { server.Connect(); });
     }
 
     private void Server_Registered(object? sender, EventArgs e)
@@ -345,6 +345,7 @@ public class ServerViewModel : IrcViewModel
         // doesn't keep it alive. Keep this list in sync with the constructor's subscriptions.
         server.Registered -= Server_Registered;
         server.ConnectFailed -= Server_ConnectFailed;
+        server.Reconnecting -= Server_Reconnecting;
         server.ErrorMessageRecieved -= Server_ErrorMessageRecieved;
         server.Connecting -= Server_Connecting;
         server.Disconnected -= Server_Disconnected;
