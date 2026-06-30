@@ -18,8 +18,15 @@ namespace MutinyIRC.Common
         // consecutive attempt, capped at ReconnectMaxDelay. The counter resets on a successful
         // registration; the timer is cancelled on a user-initiated disconnect or Dispose so it
         // never revives a connection the user has quit.
+        //
+        // The drop/fail/registered events arrive on FlamingIRC's socket-IO threads while
+        // Disconnect/Dispose run on the UI thread, so every read or write of the reconnect state
+        // below is serialized through _reconnectGate. The timer callback re-checks, under the
+        // gate, that it is still the installed timer before reconnecting, so a cancelled or
+        // superseded timer that has already begun firing is a no-op.
         private static readonly TimeSpan ReconnectBaseDelay = TimeSpan.FromSeconds(4);
         private static readonly TimeSpan ReconnectMaxDelay = TimeSpan.FromMinutes(5);
+        private readonly object _reconnectGate = new object();
         private int _reconnectAttempt;
         private Timer _reconnectTimer;
 
@@ -436,9 +443,16 @@ namespace MutinyIRC.Common
         {
             if (_disposed)
                 return;
-            _disposed = true;
 
-            CancelReconnect();
+            // Mark disposed and drop the pending reconnect together under the gate the timer
+            // callback locks on, so an in-flight callback either observes _disposed or finds its
+            // timer cleared — it can never revive a Server that is being torn down.
+            lock (_reconnectGate)
+            {
+                _disposed = true;
+                _reconnectTimer?.Dispose();
+                _reconnectTimer = null;
+            }
 
             // _connection is null for a Server built with the parameterless constructor that
             // never had a Connection assigned; guard against an NRE.
@@ -501,17 +515,35 @@ namespace MutinyIRC.Common
         /// </summary>
         private void ScheduleReconnect()
         {
-            var delay = TimeSpan.FromSeconds(Math.Min(
-                ReconnectBaseDelay.TotalSeconds * Math.Pow(2, _reconnectAttempt),
-                ReconnectMaxDelay.TotalSeconds));
-            if (delay < ReconnectMaxDelay)
-                _reconnectAttempt++;
+            TimeSpan delay;
+            lock (_reconnectGate)
+            {
+                // A teardown that has already started must not be re-armed.
+                if (_disposed)
+                    return;
 
-            CancelReconnect();
-            // Guard against the dispose race: if the Server is torn down while this is pending, the
-            // timer is disposed below, but an already-firing callback still checks _disposed.
-            _reconnectTimer = new Timer(_ => { if (!_disposed) Connect(); }, null,
-                delay, Timeout.InfiniteTimeSpan);
+                delay = TimeSpan.FromSeconds(Math.Min(
+                    ReconnectBaseDelay.TotalSeconds * Math.Pow(2, _reconnectAttempt),
+                    ReconnectMaxDelay.TotalSeconds));
+                if (delay < ReconnectMaxDelay)
+                    _reconnectAttempt++;
+
+                _reconnectTimer?.Dispose();
+                Timer timer = null;
+                timer = new Timer(_ =>
+                {
+                    lock (_reconnectGate)
+                    {
+                        // Only the timer still installed as _reconnectTimer may reconnect. A
+                        // user-initiated Disconnect or a Dispose nulls it under this same gate, so
+                        // it always wins the race against a callback that has already begun firing.
+                        if (_disposed || !ReferenceEquals(_reconnectTimer, timer))
+                            return;
+                        Connect();
+                    }
+                }, null, delay, Timeout.InfiniteTimeSpan);
+                _reconnectTimer = timer;
+            }
 
             Reconnecting.Fire(this, new DataEventArgs<TimeSpan>(delay));
         }
@@ -521,8 +553,11 @@ namespace MutinyIRC.Common
         /// </summary>
         private void CancelReconnect()
         {
-            _reconnectTimer?.Dispose();
-            _reconnectTimer = null;
+            lock (_reconnectGate)
+            {
+                _reconnectTimer?.Dispose();
+                _reconnectTimer = null;
+            }
         }
 
         private void Listener_OnKick(User user, string channel, string kickee, string reason)
@@ -655,7 +690,8 @@ namespace MutinyIRC.Common
         private void Listener_OnRegistered(object sender, EventArgs e)
         {
             // Back online: clear the backoff so the next drop retries from ReconnectBaseDelay.
-            _reconnectAttempt = 0;
+            lock (_reconnectGate)
+                _reconnectAttempt = 0;
             Registered?.Invoke(this, e);
         }
 
