@@ -291,6 +291,16 @@ namespace FlamingIRC
         /// </remarks>
         private void SendKeepAlive()
         {
+            // The timer runs from construction and is not stopped on every disconnect path (remote
+            // drops tear down in TcpTextClient without touching it), so it can tick while the link
+            // is dead — before the first Connect(), or during the reconnect backoff window. Gate on
+            // Connected, the one flag that stays true only while there's a live socket: a half-open
+            // link keeps it set (no FIN/RST arrives) so timeout detection still works, and every
+            // real disconnect clears it so stray ticks can't ping a null stream or raise a second
+            // spurious ConnectionLost.
+            if (!Connected)
+                return;
+
             switch (EvaluateKeepAlive(DateTime.Now - _lastTraffic, KeepAliveInterval, PingTimeout))
             {
                 case KeepAliveAction.Ping:
@@ -300,9 +310,6 @@ namespace FlamingIRC
                 case KeepAliveAction.Timeout:
                     Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                                       string.Format("[{0}] Connection::SendKeepAlive() ping timeout; tearing down half-open connection", Thread.CurrentThread.Name));
-                    // Stop the timer before tearing down so a slow socket close can't let the next
-                    // tick re-enter and raise a second disconnect for the same dead link.
-                    _activityTimer.Stop();
                     Disconnect(DisconnectReason.PingTimeout);
                     break;
             }
