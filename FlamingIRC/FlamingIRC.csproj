@@ -6,4 +6,8 @@
     <AssemblyName>FlamingIRC</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="FlamingIRC.Tests" />
+  </ItemGroup>
+
 </Project>

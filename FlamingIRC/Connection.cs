@@ -51,6 +51,11 @@ namespace FlamingIRC
         private DateTime _timeLastSent;
 
         /// <summary>
+        /// How long the link may go without inbound traffic before a keep-alive PING is sent.
+        /// </summary>
+        private static readonly TimeSpan KeepAliveInterval = TimeSpan.FromSeconds(30);
+
+        /// <summary>
         /// Used for internal test purposes only.
         /// </summary>
         internal Connection(ConnectionArgs args)
@@ -79,7 +84,7 @@ namespace FlamingIRC
 
             _lastTraffic = DateTime.Now;
 
-            _activityTimer = new System.Timers.Timer { Interval = TimeSpan.FromSeconds(30).TotalMilliseconds };
+            _activityTimer = new System.Timers.Timer { Interval = KeepAliveInterval.TotalMilliseconds };
             _activityTimer.Elapsed += activityTimer_Elapsed;
             _activityTimer.Start();
         }
@@ -180,6 +185,14 @@ namespace FlamingIRC
         public TimeSpan IdleTime => DateTime.Now - _timeLastSent;
 
         /// <summary>
+        /// How long the connection may receive no traffic at all before it is judged half-open and
+        /// torn down with <see cref="DisconnectReason.PingTimeout" />. Should stay larger than the
+        /// 30-second keep-alive interval so the server has a chance to answer the keep-alive PING.
+        /// </summary>
+        /// <value>Defaults to 90 seconds.</value>
+        public TimeSpan PingTimeout { get; set; } = TimeSpan.FromSeconds(90);
+
+        /// <summary>
         /// The object used to send commands to the IRC server.
         /// </summary>
         /// <value>Read-only Sender.</value>
@@ -265,12 +278,55 @@ namespace FlamingIRC
         }
 
         /// <summary>
-        /// Sends the keep alive, if appropriate.
+        /// Sends a keep-alive PING after a spell of silence and, when the silence stretches past
+        /// <see cref="PingTimeout" />, tears down a half-open connection.
         /// </summary>
+        /// <remarks>
+        /// A half-open TCP connection — the peer vanished without a FIN/RST — produces no read
+        /// error, so the pending receive would otherwise wait forever. By prodding the server with
+        /// a PING and relying on any inbound traffic (the PONG included) to reset
+        /// <see cref="_lastTraffic" />, a dead link surfaces as a
+        /// <see cref="DisconnectReason.PingTimeout" /> disconnect that the higher layers treat like
+        /// any other lost connection, so auto-reconnect kicks in.
+        /// </remarks>
         private void SendKeepAlive()
         {
-            if (DateTime.Now - _lastTraffic > TimeSpan.FromSeconds(30))
-                Sender.Ping();
+            switch (EvaluateKeepAlive(DateTime.Now - _lastTraffic, KeepAliveInterval, PingTimeout))
+            {
+                case KeepAliveAction.Ping:
+                    Sender.Ping();
+                    break;
+
+                case KeepAliveAction.Timeout:
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                                      string.Format("[{0}] Connection::SendKeepAlive() ping timeout; tearing down half-open connection", Thread.CurrentThread.Name));
+                    // Stop the timer before tearing down so a slow socket close can't let the next
+                    // tick re-enter and raise a second disconnect for the same dead link.
+                    _activityTimer.Stop();
+                    Disconnect(DisconnectReason.PingTimeout);
+                    break;
+            }
+        }
+
+        internal enum KeepAliveAction
+        {
+            None,
+            Ping,
+            Timeout
+        }
+
+        /// <summary>
+        /// Pure keep-alive decision: from how long the link has been silent, decide whether to do
+        /// nothing, send a keep-alive PING, or declare a ping timeout. Side-effect free so it can be
+        /// unit tested without a socket or timer.
+        /// </summary>
+        internal static KeepAliveAction EvaluateKeepAlive(TimeSpan idle, TimeSpan keepAliveInterval, TimeSpan pingTimeout)
+        {
+            if (idle > pingTimeout)
+                return KeepAliveAction.Timeout;
+            if (idle > keepAliveInterval)
+                return KeepAliveAction.Ping;
+            return KeepAliveAction.None;
         }
 
         private bool CustomParse(string line)
@@ -386,6 +442,10 @@ namespace FlamingIRC
                 if (Connected)
                     throw new Exception("Connection with IRC server already opened.");
                 ServerProperties = new ServerProperties();
+                // Reset the idle clock: this Connection object is reused across reconnects, so a
+                // timestamp left over from the dropped link must not be read as fresh silence and
+                // trip an immediate ping timeout before any traffic has had a chance to arrive.
+                _lastTraffic = DateTime.Now;
                 _activityTimer.Start();
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
                                   string.Format("[{0}] Connection::Connect()", Thread.CurrentThread.Name));
