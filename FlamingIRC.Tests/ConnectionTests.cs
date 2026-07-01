@@ -80,5 +80,21 @@ namespace FlamingIRC.Tests
             Assert.AreEqual(Connection.KeepAliveAction.Ping,
                 Connection.EvaluateKeepAlive(PingTimeout, KeepAlive, PingTimeout));
         }
+
+        [Test]
+        public void SendKeepAlive_WhenNotConnected_DoesNotTearDown()
+        {
+            // The timer keeps ticking while the link is dead (before Connect(), during reconnect
+            // backoff). A negative PingTimeout forces the timeout branch if the guard were missing,
+            // so a raised ConnectionLost here would mean the guard let a dead-link tick tear down.
+            _connection.PingTimeout = TimeSpan.FromSeconds(-1);
+            var lost = false;
+            _connection.ConnectionLost += (_, _) => lost = true;
+
+            Assert.IsFalse(_connection.Connected, "precondition: a fresh Connection is not connected");
+            _connection.SendKeepAlive();
+
+            Assert.IsFalse(lost, "a keep-alive tick on a disconnected link must not raise ConnectionLost");
+        }
     }
 }

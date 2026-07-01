@@ -289,7 +289,7 @@ namespace FlamingIRC
         /// <see cref="DisconnectReason.PingTimeout" /> disconnect that the higher layers treat like
         /// any other lost connection, so auto-reconnect kicks in.
         /// </remarks>
-        private void SendKeepAlive()
+        internal void SendKeepAlive()
         {
             // The timer runs from construction and is not stopped on every disconnect path (remote
             // drops tear down in TcpTextClient without touching it), so it can tick while the link
