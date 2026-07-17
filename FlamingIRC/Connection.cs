@@ -186,11 +186,28 @@ namespace FlamingIRC
 
         /// <summary>
         /// How long the connection may receive no traffic at all before it is judged half-open and
-        /// torn down with <see cref="DisconnectReason.PingTimeout" />. Should stay larger than the
-        /// 30-second keep-alive interval so the server has a chance to answer the keep-alive PING.
+        /// torn down with <see cref="DisconnectReason.PingTimeout" />. Must stay larger than the
+        /// keep-alive interval so a keep-alive PING is actually sent, giving the server a chance to
+        /// answer before the link is declared dead.
         /// </summary>
         /// <value>Defaults to 90 seconds.</value>
-        public TimeSpan PingTimeout { get; set; } = TimeSpan.FromSeconds(90);
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if set to a value that is not greater than the keep-alive interval; otherwise the
+        /// timeout would fire before any PING is ever sent.
+        /// </exception>
+        public TimeSpan PingTimeout
+        {
+            get => _pingTimeout;
+            set
+            {
+                if (value <= KeepAliveInterval)
+                    throw new ArgumentOutOfRangeException(nameof(value), value,
+                        string.Format("PingTimeout must be greater than the keep-alive interval ({0}).", KeepAliveInterval));
+                _pingTimeout = value;
+            }
+        }
+
+        private TimeSpan _pingTimeout = TimeSpan.FromSeconds(90);
 
         /// <summary>
         /// The object used to send commands to the IRC server.
@@ -335,6 +352,12 @@ namespace FlamingIRC
                 return KeepAliveAction.Ping;
             return KeepAliveAction.None;
         }
+
+        /// <summary>
+        /// Test seam: backdate the last-traffic clock so keep-alive behaviour can be exercised
+        /// without a live socket to feed it inbound traffic.
+        /// </summary>
+        internal void SetLastTrafficForTest(DateTime when) => _lastTraffic = when;
 
         private bool CustomParse(string line)
         {
