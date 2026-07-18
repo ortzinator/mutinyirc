@@ -22,112 +22,111 @@
  * the archive of this library for complete text of license.
  */
 
-namespace FlamingIRC
+using System.Net;
+
+namespace FlamingIRC;
+
+/// <summary>
+/// This class encapsulates all the information known
+/// about a remote user in the context of a DCC session.
+/// </summary>
+public sealed class DccUser : User
 {
-    using System.Net;
+    internal IPEndPoint remoteEndPoint;
 
     /// <summary>
-    /// This class encapsulates all the information known
-    /// about a remote user in the context of a DCC session.
+    /// Create a new instance.
     /// </summary>
-    public sealed class DccUser : User
+    /// <param name="connection">The originating connection instance.</param>
+    /// <param name="userParts">The parsed nick!user@host string</param>
+    /// <param name="remoteEndPoint">The TCP/IP settings from the other user.</param>
+    internal DccUser(Connection connection, string[] userParts, IPEndPoint remoteEndPoint) :
+        base(userParts[0], userParts[1], userParts[2])
     {
-        internal IPEndPoint remoteEndPoint;
+        Connection = connection;
+        this.remoteEndPoint = remoteEndPoint;
+    }
 
-        /// <summary>
-        /// Create a new instance.
-        /// </summary>
-        /// <param name="connection">The originating connection instance.</param>
-        /// <param name="userParts">The parsed nick!user@host string</param>
-        /// <param name="remoteEndPoint">The TCP/IP settings from the other user.</param>
-        internal DccUser(Connection connection, string[] userParts, IPEndPoint remoteEndPoint) :
-            base(userParts[0], userParts[1], userParts[2])
-        {
-            Connection = connection;
-            this.remoteEndPoint = remoteEndPoint;
-        }
+    internal DccUser(Connection connection, string[] userParts) :
+        base(userParts[0], userParts[1], userParts[2])
+    {
+        Connection = connection;
+    }
+    /// <summary>
+    /// Create an instance that represents a user.
+    /// </summary>
+    /// <param name="connection">The IRC server connection which the remote user
+    /// is on.</param>
+    /// <param name="nick">The remote user's nick.</param>
+    public DccUser(Connection connection, string nick) :
+        base(nick, "", "")
+    {
+        Connection = connection;
+    }
 
-        internal DccUser(Connection connection, string[] userParts) :
-            base(userParts[0], userParts[1], userParts[2])
+    /// <summary>
+    /// Read only property that returns the
+    /// IP address of the remote user.
+    /// </summary>
+    /// <value>An instance of IPAddress or null if the session
+    /// has not been opened.</value>
+    public IPAddress RemoteAddress
+    {
+        get
         {
-            Connection = connection;
+            if (remoteEndPoint == null)
+            {
+                return null;
+            }
+            return remoteEndPoint.Address;
         }
-        /// <summary>
-        /// Create an instance that represents a user.
-        /// </summary>
-        /// <param name="connection">The IRC server connection which the remote user
-        /// is on.</param>
-        /// <param name="nick">The remote user's nick.</param>
-        public DccUser(Connection connection, string nick) :
-            base(nick, "", "")
+    }
+    /// <summary>
+    /// Read only property that returns the port
+    /// of the connection to the remote user.
+    /// </summary>
+    /// <remarks>
+    /// This will be a listen port if the remote user was
+    /// the initiator of the session or else it is simply a client port.
+    /// </remarks>
+    /// <value>The port as an integer. Will return -1 if the session
+    /// has not yet been opened.</value>
+    public int Port
+    {
+        get
         {
-            Connection = connection;
+            if (remoteEndPoint == null)
+            {
+                return -1;
+            }
+            return remoteEndPoint.Port;
         }
+    }
+    /// <summary>
+    /// The remote users TCP/IP information.
+    /// </summary>
+    /// <value>A read-only instance of IPEndPoint</value>
+    public IPEndPoint RemoteEndPoint => remoteEndPoint;
+    /// <summary>
+    /// The connection representing on which IRC server
+    /// the remote user can be found.
+    /// </summary>
+    /// <value>A read-only instance of Connection</value>
+    public Connection Connection { get; }
 
-        /// <summary>
-        /// Read only property that returns the
-        /// IP address of the remote user.
-        /// </summary>
-        /// <value>An instance of IPAddress or null if the session
-        /// has not been opened.</value>
-        public IPAddress RemoteAddress
+    /// <summary>
+    /// A friendly representation of this object.
+    /// </summary>
+    /// <returns>The remote's user nick and his IP address, e.g. Nick@192.168.0.23</returns>
+    public override string ToString()
+    {
+        if (RemoteAddress == null)
         {
-            get
-            {
-                if (remoteEndPoint == null)
-                {
-                    return null;
-                }
-                return remoteEndPoint.Address;
-            }
+            return Nick;
         }
-        /// <summary>
-        /// Read only property that returns the port
-        /// of the connection to the remote user. 
-        /// </summary>
-        /// <remarks>
-        /// This will be a listen port if the remote user was
-        /// the initiator of the session or else it is simply a client port.
-        /// </remarks>
-        /// <value>The port as an integer. Will return -1 if the session 
-        /// has not yet been opened.</value>
-        public int Port
+        else
         {
-            get
-            {
-                if (remoteEndPoint == null)
-                {
-                    return -1;
-                }
-                return remoteEndPoint.Port;
-            }
-        }
-        /// <summary>
-        /// The remote users TCP/IP information.
-        /// </summary>
-        /// <value>A read-only instance of IPEndPoint</value>
-        public IPEndPoint RemoteEndPoint => remoteEndPoint;
-        /// <summary>
-        /// The connection representing on which IRC server
-        /// the remote user can be found.
-        /// </summary>
-        /// <value>A read-only instance of Connection</value>
-        public Connection Connection { get; }
-
-        /// <summary>
-        /// A friendly representation of this object.
-        /// </summary>
-        /// <returns>The remote's user nick and his IP address, e.g. Nick@192.168.0.23</returns>
-        public override string ToString()
-        {
-            if (RemoteAddress == null)
-            {
-                return Nick;
-            }
-            else
-            {
-                return Nick + "@" + RemoteAddress.ToString();
-            }
+            return Nick + "@" + RemoteAddress.ToString();
         }
     }
 }

@@ -22,105 +22,104 @@
  * the archive of this library for complete text of license.
 */
 
-namespace FlamingIRC
+using System.Collections;
+
+namespace FlamingIRC;
+
+/// <summary>
+/// A simple struct designed to hold all the attributes that
+/// are contain in a Channel mode.
+/// </summary>
+public sealed class ChannelModeInfo
 {
-    using System.Collections;
 
     /// <summary>
-    /// A simple struct designed to hold all the attributes that 
-    /// are contain in a Channel mode. 
+    /// Whether the mode is being added or removed. In the case of a Channel mode
+    /// request this will always be 'added'.
     /// </summary>
-    public sealed class ChannelModeInfo
+    public ModeAction Action { get; set; }
+
+    /// <summary>
+    /// What mode is being added or removed.
+    /// </summary>
+    public ChannelMode Mode { get; set; }
+    /// <summary>
+    /// Any additional parameters that belong to the mode. For example
+    /// user masks or a maximum numbers of user allowed in a channel.
+    /// </summary>
+    public string Parameter { get; set; }
+
+
+    public override string ToString()
     {
+        return string.Format("Action={0} Mode={1} Parameter={2}", Action, Mode, Parameter);
+    }
 
-        /// <summary>
-        /// Whether the mode is being added or removed. In the case of a Channel mode
-        /// request this will always be 'added'.
-        /// </summary>
-        public ModeAction Action { get; set; }
-
-        /// <summary>
-        /// What mode is being added or removed.
-        /// </summary>
-        public ChannelMode Mode { get; set; }
-        /// <summary>
-        /// Any additional parameters that belong to the mode. For example
-        /// user masks or a maximum numbers of user allowed in a channel.
-        /// </summary>
-        public string Parameter { get; set; }
-
-
-        public override string ToString()
+    internal static ChannelModeInfo[] ParseModes(string[] tokens, int start)
+    {
+        //This nice piece of code was contributed by Klemen Šavs.
+        //25 October 2003
+        ArrayList modeInfoArray = new ArrayList();
+        int i = start;
+        while (i < tokens.Length)
         {
-            return string.Format("Action={0} Mode={1} Parameter={2}", Action, Mode, Parameter);
-        }
-
-        internal static ChannelModeInfo[] ParseModes(string[] tokens, int start)
-        {
-            //This nice piece of code was contributed by Klemen Šavs.
-            //25 October 2003
-            ArrayList modeInfoArray = new ArrayList();
-            int i = start;
-            while (i < tokens.Length)
+            ChannelModeInfo modeInfo = new ChannelModeInfo();
+            int parmIndex = i + 1;
+            for (int j = 0; j < tokens[i].Length; j++)
             {
-                ChannelModeInfo modeInfo = new ChannelModeInfo();
-                int parmIndex = i + 1;
-                for (int j = 0; j < tokens[i].Length; j++)
+
+                while (j < tokens[i].Length && tokens[i][j] == '+')
                 {
-
-                    while (j < tokens[i].Length && tokens[i][j] == '+')
-                    {
-                        modeInfo.Action = ModeAction.Add;
-                        j++;
-                    }
-
-                    while (j < tokens[i].Length && tokens[i][j] == '-')
-                    {
-                        modeInfo.Action = ModeAction.Remove;
-                        j++;
-                    }
-
-                    if (j == 0)
-                    {
-                        break;
-                    }
-                    else if (j < tokens[i].Length)
-                    {
-                        switch (tokens[i][j])
-                        {
-                            case 'o':
-                            case 'h':
-                            case 'v':
-                            case 'b':
-                            case 'e':
-                            case 'I':
-                            case 'k':
-                            case 'O':
-                                modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
-                                modeInfo.Parameter = tokens[parmIndex++];
-                                break;
-                            case 'l':
-                                modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
-                                modeInfo.Parameter = modeInfo.Action == ModeAction.Add ? tokens[parmIndex++] : "";
-                                break;
-                            default:
-                                modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
-                                modeInfo.Parameter = "";
-                                break;
-                        }
-
-                    }
-                    modeInfoArray.Add(modeInfo.MemberwiseClone());
+                    modeInfo.Action = ModeAction.Add;
+                    j++;
                 }
-                i = parmIndex;
-            }
 
-            ChannelModeInfo[] modes = new ChannelModeInfo[modeInfoArray.Count];
-            for (int k = 0; k < modeInfoArray.Count; k++)
-            {
-                modes[k] = (ChannelModeInfo)modeInfoArray[k];
+                while (j < tokens[i].Length && tokens[i][j] == '-')
+                {
+                    modeInfo.Action = ModeAction.Remove;
+                    j++;
+                }
+
+                if (j == 0)
+                {
+                    break;
+                }
+                else if (j < tokens[i].Length)
+                {
+                    switch (tokens[i][j])
+                    {
+                        case 'o':
+                        case 'h':
+                        case 'v':
+                        case 'b':
+                        case 'e':
+                        case 'I':
+                        case 'k':
+                        case 'O':
+                            modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
+                            modeInfo.Parameter = tokens[parmIndex++];
+                            break;
+                        case 'l':
+                            modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
+                            modeInfo.Parameter = modeInfo.Action == ModeAction.Add ? tokens[parmIndex++] : "";
+                            break;
+                        default:
+                            modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
+                            modeInfo.Parameter = "";
+                            break;
+                    }
+
+                }
+                modeInfoArray.Add(modeInfo.MemberwiseClone());
             }
-            return modes;
+            i = parmIndex;
         }
+
+        ChannelModeInfo[] modes = new ChannelModeInfo[modeInfoArray.Count];
+        for (int k = 0; k < modeInfoArray.Count; k++)
+        {
+            modes[k] = (ChannelModeInfo)modeInfoArray[k];
+        }
+        return modes;
     }
 }

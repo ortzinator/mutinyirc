@@ -22,74 +22,73 @@
  * the archive of this library for complete text of license.
 */
 
-namespace FlamingIRC
+using System;
+using System.Text;
+
+namespace FlamingIRC;
+
+/// <summary>
+/// CommandBuilder provides the support methods needed
+/// by its subclasses to build correctly formatted messages for
+/// the IRC server. It is never itself instantiated.
+/// </summary>
+public abstract class CommandBuilder
 {
-    using System;
-    using System.Text;
+    // Buffer to hold commands 
+
+    //Containing connection instance
+
+    internal const char SPACE = ' ';
+    internal const string SPACE_COLON = " :";
+    internal const int MAX_COMMAND_SIZE = 512;
+    internal const char CtcpQuote = '\u0001';
+
+    internal CommandBuilder(Connection connection)
+    {
+        Connection = connection;
+        Buffer = new StringBuilder(MAX_COMMAND_SIZE);
+    }
+
+    internal Connection Connection { get; }
+    internal StringBuilder Buffer { get; }
 
     /// <summary>
-    /// CommandBuilder provides the support methods needed
-    /// by its subclasses to build correctly formatted messages for
-    /// the IRC server. It is never itself instantiated.
+    /// This methods actually sends the notice and privmsg commands.
+    /// It assumes that the message has already been broken up
+    /// and has a valid target.
     /// </summary>
-    public abstract class CommandBuilder
+    internal void SendMessage(string type, string target, string message)
     {
-        // Buffer to hold commands 
-
-        //Containing connection instance
-
-        internal const char SPACE = ' ';
-        internal const string SPACE_COLON = " :";
-        internal const int MAX_COMMAND_SIZE = 512;
-        internal const char CtcpQuote = '\u0001';
-
-        internal CommandBuilder(Connection connection)
+        Buffer.Append(type);
+        Buffer.Append(SPACE);
+        Buffer.Append(target);
+        Buffer.Append(SPACE_COLON);
+        Buffer.Append(message);
+        Connection.SendCommand(Buffer);
+    }
+    /// <summary>
+    /// Clear the contents of the string buffer.
+    /// </summary>
+    internal void ClearBuffer()
+    {
+        Buffer.Remove(0, Buffer.Length);
+    }
+    /// <summary>
+    /// Break up a large message into smaller pieces that will fit within the IRC
+    /// max message size.
+    /// </summary>
+    /// <param name="message">The text to be broken up</param>
+    /// <param name="maxSize">The largest size a piece can be</param>
+    /// <returns>A string array holding the correctly sized messages.</returns>
+    internal string[] BreakUpMessage(string message, int maxSize)
+    {
+        int pieces = (int)Math.Ceiling(message.Length / (float)maxSize);
+        string[] parts = new string[pieces];
+        for (int i = 0; i < pieces; i++)
         {
-            Connection = connection;
-            Buffer = new StringBuilder(MAX_COMMAND_SIZE);
+            int start = i * maxSize;
+            parts[i] = i == pieces - 1 ? message.Substring(start) : message.Substring(start, maxSize);
         }
-
-        internal Connection Connection { get; }
-        internal StringBuilder Buffer { get; }
-
-        /// <summary>
-        /// This methods actually sends the notice and privmsg commands.
-        /// It assumes that the message has already been broken up
-        /// and has a valid target.
-        /// </summary>
-        internal void SendMessage(string type, string target, string message)
-        {
-            Buffer.Append(type);
-            Buffer.Append(SPACE);
-            Buffer.Append(target);
-            Buffer.Append(SPACE_COLON);
-            Buffer.Append(message);
-            Connection.SendCommand(Buffer);
-        }
-        /// <summary>
-        /// Clear the contents of the string buffer.
-        /// </summary>
-        internal void ClearBuffer()
-        {
-            Buffer.Remove(0, Buffer.Length);
-        }
-        /// <summary>
-        /// Break up a large message into smaller pieces that will fit within the IRC
-        /// max message size.
-        /// </summary>
-        /// <param name="message">The text to be broken up</param>
-        /// <param name="maxSize">The largest size a piece can be</param>
-        /// <returns>A string array holding the correctly sized messages.</returns>
-        internal string[] BreakUpMessage(string message, int maxSize)
-        {
-            int pieces = (int)Math.Ceiling(message.Length / (float)maxSize);
-            string[] parts = new string[pieces];
-            for (int i = 0; i < pieces; i++)
-            {
-                int start = i * maxSize;
-                parts[i] = i == pieces - 1 ? message.Substring(start) : message.Substring(start, maxSize);
-            }
-            return parts;
-        }
+        return parts;
     }
 }

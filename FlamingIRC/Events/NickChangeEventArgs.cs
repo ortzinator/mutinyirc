@@ -1,23 +1,22 @@
-﻿namespace FlamingIRC
+﻿using System;
+
+namespace FlamingIRC;
+
+public class NickChangeEventArgs : EventArgs
 {
-    using System;
+    /// <summary>
+    /// The user who is changing his nick.
+    /// </summary>
+    public User User;
 
-    public class NickChangeEventArgs : EventArgs
+    /// <summary>
+    /// The new nickname.
+    /// </summary>
+    public string NewNick;
+
+    public NickChangeEventArgs(User user, string newNewNick)
     {
-        /// <summary>
-        /// The user who is changing his nick.
-        /// </summary>
-        public User User;
-
-        /// <summary>
-        /// The new nickname.
-        /// </summary>
-        public string NewNick;
-
-        public NickChangeEventArgs(User user, string newNewNick)
-        {
-            User = user;
-            NewNick = newNewNick;
-        }
+        User = user;
+        NewNick = newNewNick;
     }
 }

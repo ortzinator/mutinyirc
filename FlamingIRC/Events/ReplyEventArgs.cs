@@ -1,19 +1,18 @@
-﻿namespace FlamingIRC
+﻿using System;
+
+namespace FlamingIRC;
+
+/// <summary>
+/// Messages that are not handled by other events and are not errors.
+/// </summary>
+public class ReplyEventArgs : EventArgs
 {
-    using System;
+    public ReplyCode ReplyCode;
+    public string Message;
 
-    /// <summary>
-    /// Messages that are not handled by other events and are not errors.
-    /// </summary>
-    public class ReplyEventArgs : EventArgs
+    public ReplyEventArgs(ReplyCode code, string message)
     {
-        public ReplyCode ReplyCode;
-        public string Message;
-
-        public ReplyEventArgs(ReplyCode code, string message)
-        {
-            ReplyCode = code;
-            Message = message;
-        }
+        ReplyCode = code;
+        Message = message;
     }
 }

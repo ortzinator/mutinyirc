@@ -1,18 +1,17 @@
-﻿namespace FlamingIRC
+﻿using System;
+
+namespace FlamingIRC;
+
+public class UserChannelMessageEventArgs : EventArgs
 {
-    using System;
+    public User User;
+    public string Channel;
+    public string Message;
 
-    public class UserChannelMessageEventArgs : EventArgs
+    public UserChannelMessageEventArgs(User user, string channel, string message)
     {
-        public User User;
-        public string Channel;
-        public string Message;
-
-        public UserChannelMessageEventArgs(User user, string channel, string message)
-        {
-            User = user;
-            Channel = channel;
-            Message = message;
-        }
+        User = user;
+        Channel = channel;
+        Message = message;
     }
 }

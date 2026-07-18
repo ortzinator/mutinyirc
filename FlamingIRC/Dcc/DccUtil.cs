@@ -20,125 +20,124 @@
  * the archive of this library for complete text of license.
 */
 
-namespace FlamingIRC
+using System;
+using System.Net;
+using System.Diagnostics;
+using System.Globalization;
+
+namespace FlamingIRC;
+
+/// <summary>
+/// Utility methods needed to handle DCC requests.
+/// </summary>
+public sealed class DccUtil
 {
-    using System;
-    using System.Net;
-    using System.Diagnostics;
-    using System.Globalization;
+    internal static TraceSwitch DccTrace = new TraceSwitch("DccTraceSwitch", "Debug level for DCC classes.");
+
+    //Should never be called so make it private
+    private DccUtil() { }
 
     /// <summary>
-    /// Utility methods needed to handle DCC requests.
+    /// Get the IPAddress object for the local machine.
     /// </summary>
-    public sealed class DccUtil
+    /// <returns>An instance of IPAddress.</returns>
+    public static IPAddress LocalHost()
     {
-        internal static TraceSwitch DccTrace = new TraceSwitch("DccTraceSwitch", "Debug level for DCC classes.");
-
-        //Should never be called so make it private
-        private DccUtil() { }
-
-        /// <summary>
-        /// Get the IPAddress object for the local machine.
-        /// </summary>
-        /// <returns>An instance of IPAddress.</returns>
-        public static IPAddress LocalHost()
+        return IPAddress.Loopback;
+    }
+    /// <summary>
+    /// Convert a signed long into an unsigned int in
+    /// network byte order.
+    /// </summary>
+    /// <param name="bytesReceived">The number of bytes received as a long.</param>
+    /// <returns>An unsigned int as a 4 byte array.</returns>
+    public static byte[] DccBytesReceivedFormat(long bytesReceived)
+    {
+        byte[] size = new byte[4];
+        byte[] longBytes = BitConverter.GetBytes(NetworkUnsignedLong(bytesReceived));
+        Array.Copy(longBytes, 0, size, 0, 4);
+        return size;
+    }
+    /// <summary>
+    /// Convert the 4 byte current DCC position
+    /// into a host order long.
+    /// </summary>
+    /// <param name="received">The 4 byte unsigned integer.</param>
+    /// <returns>A long</returns>
+    public static long DccBytesToLong(byte[] received)
+    {
+        return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(received, 0));
+    }
+    /// <summary>
+    /// Convert an IP address into the network order
+    /// long required by the DCC protocol.
+    /// </summary>
+    /// <param name="ipAddress">A valid IPAddress</param>
+    /// <returns>The IP as a long</returns>
+    public static long IPAddressToLong(IPAddress ipAddress)
+    {
+        long num = 0;
+        if (ipAddress.ToString() == string.Empty)
         {
-            return IPAddress.Loopback;
+            return 0;
         }
-        /// <summary>
-        /// Convert a signed long into an unsigned int in
-        /// network byte order.
-        /// </summary>
-        /// <param name="bytesReceived">The number of bytes received as a long.</param>
-        /// <returns>An unsigned int as a 4 byte array.</returns>
-        public static byte[] DccBytesReceivedFormat(long bytesReceived)
+        else
         {
-            byte[] size = new byte[4];
-            byte[] longBytes = BitConverter.GetBytes(NetworkUnsignedLong(bytesReceived));
-            Array.Copy(longBytes, 0, size, 0, 4);
-            return size;
-        }
-        /// <summary>
-        /// Convert the 4 byte current DCC position
-        /// into a host order long.
-        /// </summary>
-        /// <param name="received">The 4 byte unsigned integer.</param>
-        /// <returns>A long</returns>
-        public static long DccBytesToLong(byte[] received)
-        {
-            return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(received, 0));
-        }
-        /// <summary>
-        /// Convert an IP address into the network order
-        /// long required by the DCC protocol.
-        /// </summary>
-        /// <param name="ipAddress">A valid IPAddress</param>
-        /// <returns>The IP as a long</returns>
-        public static long IPAddressToLong(IPAddress ipAddress)
-        {
-            long num = 0;
-            if (ipAddress.ToString() == string.Empty)
+            string[] octets = ipAddress.ToString().Split('.');
+            for (int i = octets.Length - 1; i >= 0; --i)
             {
-                return 0;
+                num += (long)((int.Parse(octets[i]) % 256) * Math.Pow(256, 3 - i));
             }
-            else
-            {
-                string[] octets = ipAddress.ToString().Split('.');
-                for (int i = octets.Length - 1; i >= 0; --i)
-                {
-                    num += (long)((int.Parse(octets[i]) % 256) * Math.Pow(256, 3 - i));
-                }
-                return num;
-            }
+            return num;
         }
-        /// <summary>
-        /// Convert the network order address received from a DCC
-        /// request into an IP address.
-        /// </summary>
-        /// <param name="networkOrder">The address long in string form.</param>
-        /// <returns>An IpAddress object</returns>
-        public static IPAddress LongToIPAddress(string networkOrder)
+    }
+    /// <summary>
+    /// Convert the network order address received from a DCC
+    /// request into an IP address.
+    /// </summary>
+    /// <param name="networkOrder">The address long in string form.</param>
+    /// <returns>An IpAddress object</returns>
+    public static IPAddress LongToIPAddress(string networkOrder)
+    {
+        if (networkOrder == null || networkOrder.Trim() == "")
         {
-            if (networkOrder == null || networkOrder.Trim() == "")
-            {
-                throw new ArgumentException("Network order address cannot be null or empty.");
-            }
-            try
-            {
-                //Johan's routine
-                byte[] quads = BitConverter.GetBytes(long.Parse(networkOrder, CultureInfo.InvariantCulture));
-                return IPAddress.Parse(quads[3] + "." + quads[2] + "." + quads[1] + "." + quads[0]);
-            }
-            catch (FormatException)
-            {
-                throw new ArgumentException(networkOrder + " is not a valid network address.");
-            }
-
+            throw new ArgumentException("Network order address cannot be null or empty.");
         }
-
-        /// <summary>
-        /// Convert the spaces in a file name to underscores.
-        /// </summary>
-        /// <param name="fileName">The file name.</param>
-        /// <returns>Underscored string.</returns>
-        public static string SpacesToUnderscores(string fileName)
+        try
         {
-            return fileName.Replace(' ', '_');
+            //Johan's routine
+            byte[] quads = BitConverter.GetBytes(long.Parse(networkOrder, CultureInfo.InvariantCulture));
+            return IPAddress.Parse(quads[3] + "." + quads[2] + "." + quads[1] + "." + quads[0]);
         }
-
-        /// <summary>
-        /// Convert a long into an unsigned 4 byte in in network order
-        /// </summary>
-        /// <param name="hostOrderLong">A long in host order</param>
-        /// <returns>The long as unsigned int in network order</returns>
-        public static long NetworkUnsignedLong(long hostOrderLong)
+        catch (FormatException)
         {
-            long networkLong = IPAddress.HostToNetworkOrder(hostOrderLong);
-            //Network order has the octets in reverse order starting with byte 7
-            //To get the correct string simply shift them down 4 bytes
-            //and zero out the first 4 bytes.
-            return (networkLong >> 32) & 0x00000000ffffffff;
+            throw new ArgumentException(networkOrder + " is not a valid network address.");
         }
 
     }
+
+    /// <summary>
+    /// Convert the spaces in a file name to underscores.
+    /// </summary>
+    /// <param name="fileName">The file name.</param>
+    /// <returns>Underscored string.</returns>
+    public static string SpacesToUnderscores(string fileName)
+    {
+        return fileName.Replace(' ', '_');
+    }
+
+    /// <summary>
+    /// Convert a long into an unsigned 4 byte in in network order
+    /// </summary>
+    /// <param name="hostOrderLong">A long in host order</param>
+    /// <returns>The long as unsigned int in network order</returns>
+    public static long NetworkUnsignedLong(long hostOrderLong)
+    {
+        long networkLong = IPAddress.HostToNetworkOrder(hostOrderLong);
+        //Network order has the octets in reverse order starting with byte 7
+        //To get the correct string simply shift them down 4 bytes
+        //and zero out the first 4 bytes.
+        return (networkLong >> 32) & 0x00000000ffffffff;
+    }
+
 }

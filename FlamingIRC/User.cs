@@ -22,151 +22,150 @@
  * the archive of this library for complete text of license.
 */
 
-namespace FlamingIRC
+using System;
+using System.Collections.Generic;
+
+namespace FlamingIRC;
+
+/// <summary>
+/// Represents a user in a single channel
+/// </summary>
+public class User : IComparable<User>
 {
-    using System;
-    using System.Collections.Generic;
+    // Active channel status symbols held by this user (e.g. '@' and '+' simultaneously).
+    private readonly List<char> _statuses = new List<char>();
+
+    // Status symbols from highest rank to lowest. Used to pick the symbol shown in nick lists.
+    private static readonly char[] StatusRank = { '~', '&', '@', '%', '+' };
+
+    public User() { }
 
     /// <summary>
-    /// Represents a user in a single channel
+    /// This constructors assumes nick contains no prefix (as in the rest of the library).
+    /// Params: nick!user@host
     /// </summary>
-    public class User : IComparable<User>
+    /// <param name="nick">nick</param>
+    /// <param name="user">user</param>
+    /// <param name="host">host</param>
+    public User(string nick, string user, string host)
     {
-        // Active channel status symbols held by this user (e.g. '@' and '+' simultaneously).
-        private readonly List<char> _statuses = new List<char>();
+        Nick = nick;
+        UserName = user;
+        HostMask = host;
+        Prefix = '\0';
+    }
 
-        // Status symbols from highest rank to lowest. Used to pick the symbol shown in nick lists.
-        private static readonly char[] StatusRank = { '~', '&', '@', '%', '+' };
+    public static User Empty => new User();
 
-        public User() { }
+    /// <summary>The user's fully qualified host name</summary>
+    public string HostMask { get; set; } = string.Empty;
 
-        /// <summary>
-        /// This constructors assumes nick contains no prefix (as in the rest of the library).
-        /// Params: nick!user@host
-        /// </summary>
-        /// <param name="nick">nick</param>
-        /// <param name="user">user</param>
-        /// <param name="host">host</param>
-        public User(string nick, string user, string host)
+    /// <summary> Nickname plus mode symbol prefix </summary>
+    public string NamesLiteral => Prefix != '\0' ? Prefix + Nick : Nick;
+
+    /// <summary>The user's nickname.</summary>
+    public string Nick { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The highest-ranked channel status symbol the user currently holds (e.g. '@' for a user
+    /// who is both op and voiced), or '\0' if the user holds no status.
+    /// </summary>
+    /// <remarks>
+    /// Setting replaces all statuses with the single given symbol ('\0' clears all). To track
+    /// op and voice independently use <see cref="AddStatus"/> / <see cref="RemoveStatus"/>.
+    /// </remarks>
+    public char Prefix
+    {
+        get
         {
-            Nick = nick;
-            UserName = user;
-            HostMask = host;
-            Prefix = '\0';
+            foreach (char symbol in StatusRank)
+                if (_statuses.Contains(symbol))
+                    return symbol;
+            return '\0';
         }
-
-        public static User Empty => new User();
-
-        /// <summary>The user's fully qualified host name</summary>
-        public string HostMask { get; set; } = string.Empty;
-
-        /// <summary> Nickname plus mode symbol prefix </summary>
-        public string NamesLiteral => Prefix != '\0' ? Prefix + Nick : Nick;
-
-        /// <summary>The user's nickname.</summary>
-        public string Nick { get; set; } = string.Empty;
-
-        /// <summary>
-        /// The highest-ranked channel status symbol the user currently holds (e.g. '@' for a user
-        /// who is both op and voiced), or '\0' if the user holds no status.
-        /// </summary>
-        /// <remarks>
-        /// Setting replaces all statuses with the single given symbol ('\0' clears all). To track
-        /// op and voice independently use <see cref="AddStatus"/> / <see cref="RemoveStatus"/>.
-        /// </remarks>
-        public char Prefix
+        set
         {
-            get
+            if (value != '\0' && !UserModeValidator.IsValid(value))
             {
-                foreach (char symbol in StatusRank)
-                    if (_statuses.Contains(symbol))
-                        return symbol;
-                return '\0';
+                throw new ArgumentOutOfRangeException("value");
             }
-            set
-            {
-                if (value != '\0' && !UserModeValidator.IsValid(value))
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
-                _statuses.Clear();
-                if (value != '\0')
-                    _statuses.Add(value);
-            }
+            _statuses.Clear();
+            if (value != '\0')
+                _statuses.Add(value);
         }
+    }
 
-        /// <summary>Returns true if the user currently holds the given status symbol.</summary>
-        public bool HasStatus(char symbol) => _statuses.Contains(symbol);
+    /// <summary>Returns true if the user currently holds the given status symbol.</summary>
+    public bool HasStatus(char symbol) => _statuses.Contains(symbol);
 
-        /// <summary>Grants the user a channel status symbol (e.g. '@' for op) if not already held.</summary>
-        public void AddStatus(char symbol)
+    /// <summary>Grants the user a channel status symbol (e.g. '@' for op) if not already held.</summary>
+    public void AddStatus(char symbol)
+    {
+        if (!UserModeValidator.IsValid(symbol))
         {
-            if (!UserModeValidator.IsValid(symbol))
-            {
-                throw new ArgumentOutOfRangeException("symbol");
-            }
-            if (!_statuses.Contains(symbol))
-                _statuses.Add(symbol);
+            throw new ArgumentOutOfRangeException("symbol");
         }
+        if (!_statuses.Contains(symbol))
+            _statuses.Add(symbol);
+    }
 
-        /// <summary>Revokes a channel status symbol from the user, if held.</summary>
-        public void RemoveStatus(char symbol)
+    /// <summary>Revokes a channel status symbol from the user, if held.</summary>
+    public void RemoveStatus(char symbol)
+    {
+        _statuses.Remove(symbol);
+    }
+
+    /// <summary>The user's "real name", immediately before the @</summary>
+    public string RealName { get; set; } = string.Empty;
+    /// <summary>The user's username on the local machine</summary>
+    public string UserName { get; set; } = string.Empty;
+    /// <summary>
+    /// Takes a nick string from a NAMES and parses it as a User object
+    /// </summary>
+    public static User FromNames(string nick)
+    {
+        if (nick == string.Empty)
+            return null;
+
+        var user = new User();
+
+        int i = 0;
+        while (i < nick.Length && UserModeValidator.IsValid(nick[i]))
         {
-            _statuses.Remove(symbol);
+            user.AddStatus(nick[i]);
+            i++;
         }
+        user.Nick = nick.Substring(i);
 
-        /// <summary>The user's "real name", immediately before the @</summary>
-        public string RealName { get; set; } = string.Empty;
-        /// <summary>The user's username on the local machine</summary>
-        public string UserName { get; set; } = string.Empty;
-        /// <summary>
-        ///   Takes a nick string from a NAMES and parses it as a User object
-        /// </summary>
-        public static User FromNames(string nick)
-        {
-            if (nick == string.Empty)
-                return null;
+        return user;
+    }
 
-            var user = new User();
+    public int CompareTo(User other)
+    {
+        return NamesLiteral.CompareTo(other.NamesLiteral);
+    }
 
-            int i = 0;
-            while (i < nick.Length && UserModeValidator.IsValid(nick[i]))
-            {
-                user.AddStatus(nick[i]);
-                i++;
-            }
-            user.Nick = nick.Substring(i);
+    public override bool Equals(object obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        return obj.GetType() == typeof(User) && Equals((User)obj);
+    }
 
-            return user;
-        }
+    public bool Equals(User other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
 
-        public int CompareTo(User other)
-        {
-            return NamesLiteral.CompareTo(other.NamesLiteral);
-        }
+        return Equals(other.Nick, Nick);
+    }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == typeof(User) && Equals((User)obj);
-        }
-
-        public bool Equals(User other)
-        {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
-
-            return Equals(other.Nick, Nick);
-        }
-
-        public override int GetHashCode()
-        {
-            return Nick != null ? Nick.GetHashCode() : 0;
-        }
-        public override string ToString()
-        {
-            return NamesLiteral;
-        }
+    public override int GetHashCode()
+    {
+        return Nick != null ? Nick.GetHashCode() : 0;
+    }
+    public override string ToString()
+    {
+        return NamesLiteral;
     }
 }

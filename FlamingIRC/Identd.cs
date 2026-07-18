@@ -22,131 +22,130 @@
  * the archive of this library for complete text of license.
 */
 
-namespace FlamingIRC
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+
+namespace FlamingIRC;
+
+/// <summary>
+/// An Ident daemon is still used by some IRC networks for
+/// authentication. It is a simple service which when queried
+/// by a remote system returns a username. The server is controlled via static
+/// methods all of which are Thread safe.
+/// </summary>
+public sealed class Identd
 {
-    using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Threading;
+    private static TcpListener listener;
+    private static bool running;
+    private static object lockObject;
+    private static string username;
+    private const string Reply = " : USERID : UNIX : ";
+    private const int IdentdPort = 113;
+
+    static Identd()
+    {
+        running = false;
+        lockObject = new object();
+    }
+
+    //Declare constructor private so it cannot be instatiated.
+    private Identd() { }
 
     /// <summary>
-    /// An Ident daemon is still used by some IRC networks for 
-    /// authentication. It is a simple service which when queried
-    /// by a remote system returns a username. The server is controlled via static
-    /// methods all of which are Thread safe.
+    /// The Identd server will start listening for queries
+    /// in its own thread. It can be stopped by calling
+    /// <see cref="Stop"/>.
     /// </summary>
-    public sealed class Identd
+    /// <param name="userName">Should be the same username as the one used
+    /// in the ConnectionArgs object when establishing a connection.</param>
+    /// <exception cref="Exception">If the server has already been started.</exception>
+    public static void Start(string userName)
     {
-        private static TcpListener listener;
-        private static bool running;
-        private static object lockObject;
-        private static string username;
-        private const string Reply = " : USERID : UNIX : ";
-        private const int IdentdPort = 113;
-
-        static Identd()
+        lock (lockObject)
         {
-            running = false;
-            lockObject = new object();
+            if (running)
+            {
+                throw new Exception("Identd already started.");
+            }
+            running = true;
+            username = userName;
+            Thread socketThread = new Thread(Run) { Name = "Identd", IsBackground = true };
+            socketThread.Start();
         }
-
-        //Declare constructor private so it cannot be instatiated.
-        private Identd() { }
-
-        /// <summary>
-        /// The Identd server will start listening for queries
-        /// in its own thread. It can be stopped by calling
-        /// <see cref="Stop"/>.
-        /// </summary>
-        /// <param name="userName">Should be the same username as the one used
-        /// in the ConnectionArgs object when establishing a connection.</param>
-        /// <exception cref="Exception">If the server has already been started.</exception>
-        public static void Start(string userName)
+    }
+    /// <summary>
+    /// Check if the Identd server is running
+    /// </summary>
+    /// <returns>True if it is running</returns>
+    public static bool IsRunning()
+    {
+        lock (lockObject)
         {
-            lock (lockObject)
-            {
-                if (running)
-                {
-                    throw new Exception("Identd already started.");
-                }
-                running = true;
-                username = userName;
-                Thread socketThread = new Thread(Run) { Name = "Identd", IsBackground = true };
-                socketThread.Start();
-            }
+            return running;
         }
-        /// <summary>
-        /// Check if the Identd server is running
-        /// </summary>
-        /// <returns>True if it is running</returns>
-        public static bool IsRunning()
+    }
+    /// <summary>
+    /// Stop the Identd server and close the thread.
+    /// </summary>
+    public static void Stop()
+    {
+        lock (lockObject)
         {
-            lock (lockObject)
+            if (running)
             {
-                return running;
-            }
-        }
-        /// <summary>
-        /// Stop the Identd server and close the thread.
-        /// </summary>
-        public static void Stop()
-        {
-            lock (lockObject)
-            {
-                if (running)
-                {
-                    listener.Stop();
-                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Stop()");
-                    listener = null;
-                    running = false;
-                }
-            }
-        }
-
-        private static void Run()
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run()");
-            try
-            {
-                listener = new TcpListener(IPAddress.Loopback, IdentdPort);
-                listener.Start();
-
-            loop:
-                {
-                    try
-                    {
-                        TcpClient client = listener.AcceptTcpClient();
-                        //Read query
-                        StreamReader reader = new StreamReader(client.GetStream());
-                        string line = reader.ReadLine();
-                        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Identd::Run() received=" + line);
-
-                        //Send back reply
-                        StreamWriter writer = new StreamWriter(client.GetStream());
-                        writer.WriteLine(line.Trim() + Reply + username);
-                        writer.Flush();
-
-                        //Close connection with client
-                        client.Close();
-                    }
-                    catch (IOException ioe)
-                    {
-                        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Identd::Run() exception=" + ioe);
-                    }
-                    goto loop;
-                }
-            }
-            catch (Exception)
-            {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run() Identd stopped");
-            }
-            finally
-            {
+                listener.Stop();
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Stop()");
+                listener = null;
                 running = false;
             }
         }
-
     }
+
+    private static void Run()
+    {
+        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run()");
+        try
+        {
+            listener = new TcpListener(IPAddress.Loopback, IdentdPort);
+            listener.Start();
+
+        loop:
+            {
+                try
+                {
+                    TcpClient client = listener.AcceptTcpClient();
+                    //Read query
+                    StreamReader reader = new StreamReader(client.GetStream());
+                    string line = reader.ReadLine();
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Identd::Run() received=" + line);
+
+                    //Send back reply
+                    StreamWriter writer = new StreamWriter(client.GetStream());
+                    writer.WriteLine(line.Trim() + Reply + username);
+                    writer.Flush();
+
+                    //Close connection with client
+                    client.Close();
+                }
+                catch (IOException ioe)
+                {
+                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Identd::Run() exception=" + ioe);
+                }
+                goto loop;
+            }
+        }
+        catch (Exception)
+        {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run() Identd stopped");
+        }
+        finally
+        {
+            running = false;
+        }
+    }
+
 }

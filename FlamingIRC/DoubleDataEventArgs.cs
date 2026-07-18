@@ -1,17 +1,16 @@
-﻿namespace FlamingIRC
+﻿using System;
+
+namespace FlamingIRC;
+
+public class FlamingDoubleDataEventArgs<TFirst, TSecond> : EventArgs
 {
-    using System;
+    public TFirst First { get; private set; }
 
-    public class FlamingDoubleDataEventArgs<TFirst, TSecond> : EventArgs
+    public TSecond Second { get; private set; }
+
+    public FlamingDoubleDataEventArgs(TFirst first, TSecond second)
     {
-        public TFirst First { get; private set; }
-
-        public TSecond Second { get; private set; }
-
-        public FlamingDoubleDataEventArgs(TFirst first, TSecond second)
-        {
-            First = first;
-            Second = second;
-        }
+        First = first;
+        Second = second;
     }
 }

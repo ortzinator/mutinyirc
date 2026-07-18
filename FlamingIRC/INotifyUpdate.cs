@@ -1,9 +1,8 @@
-﻿namespace FlamingIRC
-{
-    using System;
+﻿using System;
 
-    public interface INotifyUpdate
-    {
-        event EventHandler Updated;
-    }
+namespace FlamingIRC;
+
+public interface INotifyUpdate
+{
+    event EventHandler Updated;
 }

@@ -1,14 +1,13 @@
-﻿namespace FlamingIRC
+﻿using System;
+
+namespace FlamingIRC;
+
+public class DataEventArgs<T> : EventArgs
 {
-    using System;
+    public T Data { get; private set; }
 
-    public class DataEventArgs<T> : EventArgs
+    public DataEventArgs(T data)
     {
-        public T Data { get; private set; }
-
-        public DataEventArgs(T data)
-        {
-            Data = data;
-        }
+        Data = data;
     }
 }

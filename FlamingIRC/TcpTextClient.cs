@@ -24,261 +24,260 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace FlamingIRC
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Security;
+using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+
+namespace FlamingIRC;
+
+public enum ConnectError
 {
-    using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Net.Security;
-    using System.Net.Sockets;
-    using System.Security.Authentication;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Text;
-    using System.Threading;
+    ConnectionRefused,
+    AuthenticationFailed,
+    SocketError,
+    Other
+}
 
-    public enum ConnectError
+public enum DisconnectReason
+{
+    UserInitiated,
+    PingTimeout,
+    SocketError,
+    RemoteHostClosedConnection,
+    Other
+}
+
+public abstract class TcpTextClient
+{
+    private const int BufferLength = 512;
+    private readonly byte[] _byteBuffer;
+    private Socket _socket;
+    private readonly StringBuilder _textBuffer;
+    private string _serverName;
+    private SslStream _sslStream;
+    private Stream _stream;
+    private bool _usesSsl;
+
+    protected TcpTextClient()
     {
-        ConnectionRefused,
-        AuthenticationFailed,
-        SocketError,
-        Other
+        _byteBuffer = new byte[BufferLength];
+        _textBuffer = new StringBuilder();
+        TextEncoding = Encoding.UTF8;
+        _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     }
 
-    public enum DisconnectReason
+    public Encoding TextEncoding { get; protected set; }
+
+    public bool Connected { get; protected set; }
+
+    /// <summary>
+    /// Create a new connection to the server. Will call OnConnected or OnDisconnected depending
+    /// on connection attempt outcome.
+    /// </summary>
+    /// <param name="server">A <see cref="string" /></param>
+    /// <param name="port">A <see cref="int" /></param>
+    /// <param name="ssl">A <see cref="bool" /></param>
+    protected void Connect(string server, int port, bool ssl)
     {
-        UserInitiated,
-        PingTimeout,
-        SocketError,
-        RemoteHostClosedConnection,
-        Other
+        _usesSsl = ssl;
+        _serverName = server;
+        _socket.BeginConnect(server, port, OnConnect, null);
     }
 
-    public abstract class TcpTextClient
+    /// <summary>
+    /// Close the connection to the server.
+    /// </summary>
+    /// <remarks>
+    /// The client need not be actually connected. This method will also "give up" an attept to
+    /// connect or revert to a disconnected state after an error.
+    /// </remarks>
+    public void Disconnect(DisconnectReason reason)
     {
-        private const int BufferLength = 512;
-        private readonly byte[] _byteBuffer;
-        private Socket _socket;
-        private readonly StringBuilder _textBuffer;
-        private string _serverName;
-        private SslStream _sslStream;
-        private Stream _stream;
-        private bool _usesSsl;
+        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+            string.Format("[{0}] TcpTextClient::Disconnect() reason={1}", Thread.CurrentThread.Name, reason));
+        try { _socket.Shutdown(SocketShutdown.Both); } catch (SocketException) { }
+        _socket.Close();
+        _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        Connected = false;
+        OnDisconnect(reason, null);
+    }
 
-        protected TcpTextClient()
+    /// <summary>
+    /// Sends a string message to the server.
+    /// </summary>
+    /// <param name="message">A <see cref="string" /></param>
+    public void Send(string message)
+    {
+        message += "\r\n";
+        byte[] buffer = TextEncoding.GetBytes(message);
+        _stream.BeginWrite(buffer, 0, buffer.Length, OnSend, null);
+        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+            string.Format("[{0}] TcpTextClient::Send() {1}", Thread.CurrentThread.Name, message.TrimEnd()));
+    }
+
+    private void OnConnect(IAsyncResult res)
+    {
+        try
         {
-            _byteBuffer = new byte[BufferLength];
-            _textBuffer = new StringBuilder();
-            TextEncoding = Encoding.UTF8;
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        }
+            _socket.EndConnect(res);
+            _stream = new NetworkStream(_socket);
 
-        public Encoding TextEncoding { get; protected set; }
-
-        public bool Connected { get; protected set; }
-
-        /// <summary>
-        /// Create a new connection to the server. Will call OnConnected or OnDisconnected depending
-        /// on connection attempt outcome.
-        /// </summary>
-        /// <param name="server">A <see cref="string" /></param>
-        /// <param name="port">A <see cref="int" /></param>
-        /// <param name="ssl">A <see cref="bool" /></param>
-        protected void Connect(string server, int port, bool ssl)
-        {
-            _usesSsl = ssl;
-            _serverName = server;
-            _socket.BeginConnect(server, port, OnConnect, null);
-        }
-
-        /// <summary>
-        /// Close the connection to the server.
-        /// </summary>
-        /// <remarks>
-        /// The client need not be actually connected. This method will also "give up" an attept to
-        /// connect or revert to a disconnected state after an error.
-        /// </remarks>
-        public void Disconnect(DisconnectReason reason)
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                string.Format("[{0}] TcpTextClient::Disconnect() reason={1}", Thread.CurrentThread.Name, reason));
-            try { _socket.Shutdown(SocketShutdown.Both); } catch (SocketException) { }
-            _socket.Close();
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Connected = false;
-            OnDisconnect(reason, null);
-        }
-
-        /// <summary>
-        /// Sends a string message to the server.
-        /// </summary>
-        /// <param name="message">A <see cref="string" /></param>
-        public void Send(string message)
-        {
-            message += "\r\n";
-            byte[] buffer = TextEncoding.GetBytes(message);
-            _stream.BeginWrite(buffer, 0, buffer.Length, OnSend, null);
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                string.Format("[{0}] TcpTextClient::Send() {1}", Thread.CurrentThread.Name, message.TrimEnd()));
-        }
-
-        private void OnConnect(IAsyncResult res)
-        {
-            try
+            if (_usesSsl)
             {
-                _socket.EndConnect(res);
-                _stream = new NetworkStream(_socket);
-
-                if (_usesSsl)
-                {
-                    _sslStream = new SslStream(_stream, false, OnCertificateValidate);
-                    _sslStream.BeginAuthenticateAsClient(_serverName, OnAuthenticate, null);
-                    _stream = _sslStream;
-                }
-                else
-                {
-                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                        string.Format("[{0}] TcpTextClient::OnConnect() TCP connected to {1}", Thread.CurrentThread.Name, _serverName));
-                    OnConnect();
-                    WaitForData();
-                }
+                _sslStream = new SslStream(_stream, false, OnCertificateValidate);
+                _sslStream.BeginAuthenticateAsClient(_serverName, OnAuthenticate, null);
+                _stream = _sslStream;
             }
-            catch (SocketException e)
+            else
             {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                    string.Format("[{0}] TcpTextClient::OnConnect() SocketException={1}", Thread.CurrentThread.Name, e.SocketErrorCode));
-                OnConnectFailed(ConnectError.SocketError, e.ErrorCode);
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                    string.Format("[{0}] TcpTextClient::OnConnect() exception={1}", Thread.CurrentThread.Name, e.Message));
-                OnConnectFailed(ConnectError.SocketError, null);
-                throw;
-            }
-        }
-
-        private bool OnCertificateValidate(object sender, X509Certificate certificate, X509Chain chain,
-                                           SslPolicyErrors errors)
-        {
-            if (errors != SslPolicyErrors.None)
-            {
-                return OnCertificateValidatecateFailed(certificate, chain, errors);
-            }
-
-            return true;
-        }
-
-        private void OnAuthenticate(IAsyncResult res)
-        {
-            try
-            {
-                _sslStream.EndAuthenticateAsClient(res);
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                    string.Format("[{0}] TcpTextClient::OnAuthenticate() SSL authenticated to {1}", Thread.CurrentThread.Name, _serverName));
+                    string.Format("[{0}] TcpTextClient::OnConnect() TCP connected to {1}", Thread.CurrentThread.Name, _serverName));
                 OnConnect();
                 WaitForData();
             }
-            catch (AuthenticationException e)
-            {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                    string.Format("[{0}] TcpTextClient::OnAuthenticate() SSL authentication failed={1}", Thread.CurrentThread.Name, e.Message));
-                _socket.Shutdown(SocketShutdown.Both);
-                Connected = false;
-                OnConnectFailed(ConnectError.AuthenticationFailed, null);
-            }
         }
-
-        private void WaitForData()
+        catch (SocketException e)
         {
-            try
-            {
-                _stream.BeginRead(_byteBuffer, 0, BufferLength, OnDataReceived, null);
-            }
-            catch (Exception)
-            {
-                _socket.Shutdown(SocketShutdown.Both);
-                Connected = false;
-                OnDisconnect(DisconnectReason.SocketError, null);
-                throw; //Wasn't really handled so pass it through
-            }
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                string.Format("[{0}] TcpTextClient::OnConnect() SocketException={1}", Thread.CurrentThread.Name, e.SocketErrorCode));
+            OnConnectFailed(ConnectError.SocketError, e.ErrorCode);
         }
-
-        private void OnDataReceived(IAsyncResult res)
+        catch (Exception e)
         {
-            if (!_socket.Connected)
-                return;
-
-            try
-            {
-                int bytes = _stream.EndRead(res);
-
-                if (bytes == 0)
-                {
-                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                        string.Format("[{0}] TcpTextClient::OnDataReceived() remote host closed connection", Thread.CurrentThread.Name));
-                    _socket.Shutdown(SocketShutdown.Both);
-                    Connected = false;
-                    OnDisconnect(DisconnectReason.RemoteHostClosedConnection, null);
-                    return;
-                }
-
-                string text =
-                    TextEncoding.GetString((bytes == BufferLength) ? _byteBuffer : _byteBuffer.Slice(0, bytes));
-                foreach (char item in text)
-                {
-                    switch (item)
-                    {
-                        case '\r':
-                            continue;
-
-                        case '\n':
-                            OnReceiveLine(_textBuffer.ToString());
-                            _textBuffer.Clear();
-                            break;
-
-                        default:
-                            _textBuffer.Append(item);
-                            break;
-                    }
-                }
-
-                WaitForData();
-            }
-            catch (IOException)
-            {
-                Disconnect(DisconnectReason.SocketError);
-            }
-            catch (SocketException) //hack - What kind of exception?
-            {
-                Disconnect(DisconnectReason.SocketError);
-                throw; //Wasn't really handled so pass it through
-            }
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                string.Format("[{0}] TcpTextClient::OnConnect() exception={1}", Thread.CurrentThread.Name, e.Message));
+            OnConnectFailed(ConnectError.SocketError, null);
+            throw;
         }
-
-        private void OnSend(IAsyncResult res)
-        {
-            try
-            {
-                _stream.EndWrite(res);
-            }
-            catch (Exception)
-            {
-                _socket.Shutdown(SocketShutdown.Both);
-                Connected = false;
-                OnDisconnect(DisconnectReason.SocketError, null);
-                throw; //Wasn't really handled so pass it through
-            }
-        }
-
-        protected abstract void OnConnect();
-
-        protected abstract bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain,
-                                                                SslPolicyErrors errors);
-
-        protected abstract void OnDisconnect(DisconnectReason reason, int? socketErrorCode);
-
-        protected abstract void OnConnectFailed(ConnectError error, int? socketErrorCode);
-
-        protected abstract void OnReceiveLine(string line);
     }
+
+    private bool OnCertificateValidate(object sender, X509Certificate certificate, X509Chain chain,
+                                       SslPolicyErrors errors)
+    {
+        if (errors != SslPolicyErrors.None)
+        {
+            return OnCertificateValidatecateFailed(certificate, chain, errors);
+        }
+
+        return true;
+    }
+
+    private void OnAuthenticate(IAsyncResult res)
+    {
+        try
+        {
+            _sslStream.EndAuthenticateAsClient(res);
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                string.Format("[{0}] TcpTextClient::OnAuthenticate() SSL authenticated to {1}", Thread.CurrentThread.Name, _serverName));
+            OnConnect();
+            WaitForData();
+        }
+        catch (AuthenticationException e)
+        {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                string.Format("[{0}] TcpTextClient::OnAuthenticate() SSL authentication failed={1}", Thread.CurrentThread.Name, e.Message));
+            _socket.Shutdown(SocketShutdown.Both);
+            Connected = false;
+            OnConnectFailed(ConnectError.AuthenticationFailed, null);
+        }
+    }
+
+    private void WaitForData()
+    {
+        try
+        {
+            _stream.BeginRead(_byteBuffer, 0, BufferLength, OnDataReceived, null);
+        }
+        catch (Exception)
+        {
+            _socket.Shutdown(SocketShutdown.Both);
+            Connected = false;
+            OnDisconnect(DisconnectReason.SocketError, null);
+            throw; //Wasn't really handled so pass it through
+        }
+    }
+
+    private void OnDataReceived(IAsyncResult res)
+    {
+        if (!_socket.Connected)
+            return;
+
+        try
+        {
+            int bytes = _stream.EndRead(res);
+
+            if (bytes == 0)
+            {
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                    string.Format("[{0}] TcpTextClient::OnDataReceived() remote host closed connection", Thread.CurrentThread.Name));
+                _socket.Shutdown(SocketShutdown.Both);
+                Connected = false;
+                OnDisconnect(DisconnectReason.RemoteHostClosedConnection, null);
+                return;
+            }
+
+            string text =
+                TextEncoding.GetString((bytes == BufferLength) ? _byteBuffer : _byteBuffer.Slice(0, bytes));
+            foreach (char item in text)
+            {
+                switch (item)
+                {
+                    case '\r':
+                        continue;
+
+                    case '\n':
+                        OnReceiveLine(_textBuffer.ToString());
+                        _textBuffer.Clear();
+                        break;
+
+                    default:
+                        _textBuffer.Append(item);
+                        break;
+                }
+            }
+
+            WaitForData();
+        }
+        catch (IOException)
+        {
+            Disconnect(DisconnectReason.SocketError);
+        }
+        catch (SocketException) //hack - What kind of exception?
+        {
+            Disconnect(DisconnectReason.SocketError);
+            throw; //Wasn't really handled so pass it through
+        }
+    }
+
+    private void OnSend(IAsyncResult res)
+    {
+        try
+        {
+            _stream.EndWrite(res);
+        }
+        catch (Exception)
+        {
+            _socket.Shutdown(SocketShutdown.Both);
+            Connected = false;
+            OnDisconnect(DisconnectReason.SocketError, null);
+            throw; //Wasn't really handled so pass it through
+        }
+    }
+
+    protected abstract void OnConnect();
+
+    protected abstract bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain,
+                                                            SslPolicyErrors errors);
+
+    protected abstract void OnDisconnect(DisconnectReason reason, int? socketErrorCode);
+
+    protected abstract void OnConnectFailed(ConnectError error, int? socketErrorCode);
+
+    protected abstract void OnReceiveLine(string line);
 }

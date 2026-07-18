@@ -1,15 +1,14 @@
-﻿namespace FlamingIRC
+﻿using System;
+using System.Linq;
+
+namespace FlamingIRC;
+
+public class UserModeValidator
 {
-    using System;
-    using System.Linq;
+    public static char[] Modes { get; } = new char[] { '@', '+', '%', '&', '~' };
 
-    public class UserModeValidator
+    public static bool IsValid(char value)
     {
-        public static char[] Modes { get; } = new char[] { '@', '+', '%', '&', '~' };
-
-        public static bool IsValid(char value)
-        {
-            return Modes.Contains(value);
-        }
+        return Modes.Contains(value);
     }
 }

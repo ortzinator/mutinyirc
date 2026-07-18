@@ -1,16 +1,15 @@
-﻿namespace FlamingIRC
+﻿using System;
+
+namespace FlamingIRC;
+
+public class UserMessageEventArgs : EventArgs
 {
-    using System;
+    public User User;
+    public string Message;
 
-    public class UserMessageEventArgs : EventArgs
+    public UserMessageEventArgs(User user, string message)
     {
-        public User User;
-        public string Message;
-
-        public UserMessageEventArgs(User user, string message)
-        {
-            User = user;
-            Message = message;
-        }
+        User = user;
+        Message = message;
     }
 }

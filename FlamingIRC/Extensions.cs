@@ -24,44 +24,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace FlamingIRC
+using System.Text;
+
+namespace FlamingIRC;
+
+internal static class Extensions
 {
-    using System.Text;
-
-    internal static class Extensions
+    /// <summary>
+    /// Get the array slice between the two indexes.
+    /// Inclusive for start index, exclusive for end index.
+    /// Stolen - literally: http://dotnetperls.com/array-slice
+    /// </summary>
+    public static T[] Slice<T>(this T[] source, int start, int end)
     {
-        /// <summary>
-        /// Get the array slice between the two indexes.
-        /// Inclusive for start index, exclusive for end index.
-        /// Stolen - literally: http://dotnetperls.com/array-slice
-        /// </summary>
-        public static T[] Slice<T>(this T[] source, int start, int end)
+        // Handles negative ends
+        if (end < 0)
         {
-            // Handles negative ends
-            if (end < 0)
-            {
-                end = source.Length - start - end - 1;
-            }
-            int len = end - start;
-
-            // Return new array
-            var res = new T[len];
-            for (int i = 0; i < len; i++)
-            {
-                res[i] = source[i + start];
-            }
-            return res;
+            end = source.Length - start - end - 1;
         }
+        int len = end - start;
 
-        /// <summary>
-        /// Empty the StringBuffer of all its precious data!
-        /// </summary>
-        /// <param name="builder">
-        /// A <see cref="StringBuilder"/>
-        /// </param>
-        public static void Clear(this StringBuilder builder)
+        // Return new array
+        var res = new T[len];
+        for (int i = 0; i < len; i++)
         {
-            builder.Remove(0, builder.Length);
+            res[i] = source[i + start];
         }
+        return res;
+    }
+
+    /// <summary>
+    /// Empty the StringBuffer of all its precious data!
+    /// </summary>
+    /// <param name="builder">
+    /// A <see cref="StringBuilder"/>
+    /// </param>
+    public static void Clear(this StringBuilder builder)
+    {
+        builder.Remove(0, builder.Length);
     }
 }

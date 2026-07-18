@@ -22,632 +22,631 @@
  * the archive of this library for complete text of license.
 */
 
-namespace FlamingIRC
+using System;
+using System.Collections;
+using System.Diagnostics;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Timers;
+
+namespace FlamingIRC;
+
+/// <summary>
+/// This class manages the connection to the IRC server and provides
+/// access to all the objects needed to send and receive messages.
+/// </summary>
+public class Connection : TcpTextClient, IConnection
 {
-    using System;
-    using System.Collections;
-    using System.Diagnostics;
-    using System.Net.Security;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Threading;
-    using System.Timers;
+    private readonly System.Timers.Timer _activityTimer;
+    private readonly ArrayList _parsers;
+    private readonly Regex _propertiesRegex;
+    private ConnectionArgs _connectionArgs;
+    private bool _ctcpEnabled;
+    private CtcpListener _ctcpListener;
+    private CtcpResponder _ctcpResponder;
+    private DateTime _lastTraffic;
+    private DateTime _timeLastSent;
 
     /// <summary>
-    /// This class manages the connection to the IRC server and provides
-    /// access to all the objects needed to send and receive messages.
+    /// How long the link may go without inbound traffic before a keep-alive PING is sent.
     /// </summary>
-    public class Connection : TcpTextClient, IConnection
+    private static readonly TimeSpan KeepAliveInterval = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// Used for internal test purposes only.
+    /// </summary>
+    internal Connection(ConnectionArgs args)
+        : this(args, true, true) { }
+
+    /// <summary>
+    /// Prepare a connection to an IRC server but do not open it. This sets the text Encoding to Default.
+    /// </summary>
+    /// <param name="args">The set of information need to connect to an IRC server</param>
+    /// <param name="enableCtcp">True if this Connection should support CTCP.</param>
+    /// <param name="enableDcc">True if this Connection should support DCC.</param>
+    public Connection(ConnectionArgs args, bool enableCtcp, bool enableDcc)
     {
-        private readonly System.Timers.Timer _activityTimer;
-        private readonly ArrayList _parsers;
-        private readonly Regex _propertiesRegex;
-        private ConnectionArgs _connectionArgs;
-        private bool _ctcpEnabled;
-        private CtcpListener _ctcpListener;
-        private CtcpResponder _ctcpResponder;
-        private DateTime _lastTraffic;
-        private DateTime _timeLastSent;
+        _propertiesRegex = new Regex("([A-Z]+)=([^\\s]+)", RegexOptions.Compiled | RegexOptions.Singleline);
+        Registered = false;
+        HandleNickTaken = true;
+        _connectionArgs = args;
+        _parsers = new ArrayList();
+        _sender = new Sender(this);
+        Listener = new Listener();
+        RegisterDelegates();
+        _timeLastSent = DateTime.Now;
+        EnableCtcp = enableCtcp;
+        EnableDcc = enableDcc;
+        TextEncoding = Encoding.Default;
 
-        /// <summary>
-        /// How long the link may go without inbound traffic before a keep-alive PING is sent.
-        /// </summary>
-        private static readonly TimeSpan KeepAliveInterval = TimeSpan.FromSeconds(30);
+        _lastTraffic = DateTime.Now;
 
-        /// <summary>
-        /// Used for internal test purposes only.
-        /// </summary>
-        internal Connection(ConnectionArgs args)
-            : this(args, true, true) { }
+        _activityTimer = new System.Timers.Timer { Interval = KeepAliveInterval.TotalMilliseconds };
+        _activityTimer.Elapsed += activityTimer_Elapsed;
+        _activityTimer.Start();
+    }
 
-        /// <summary>
-        /// Prepare a connection to an IRC server but do not open it. This sets the text Encoding to Default.
-        /// </summary>
-        /// <param name="args">The set of information need to connect to an IRC server</param>
-        /// <param name="enableCtcp">True if this Connection should support CTCP.</param>
-        /// <param name="enableDcc">True if this Connection should support DCC.</param>
-        public Connection(ConnectionArgs args, bool enableCtcp, bool enableDcc)
+    /// <summary>
+    /// Prepare a connection to an IRC server but do not open it.
+    /// </summary>
+    /// <param name="args">The set of information need to connect to an IRC server</param>
+    /// <param name="enableCtcp">True if this Connection should support CTCP.</param>
+    /// <param name="enableDcc">True if this Connection should support DCC.</param>
+    /// <param name="textEncoding">The text encoding for the incoming stream.</param>
+    public Connection(Encoding textEncoding, ConnectionArgs args, bool enableCtcp, bool enableDcc)
+        : this(args, enableCtcp, enableDcc)
+    {
+        TextEncoding = textEncoding;
+    }
+
+    /// <summary>
+    /// A read-only property indicating whether the connection has been opened with the IRC
+    /// server and the socket has been successfully registered.
+    /// </summary>
+    /// <value>True if the socket is connected and registered.</value>
+    public bool Registered { get; private set; }
+
+    /// <summary>
+    /// By default the connection itself will handle the case where, while attempting to
+    /// register the socket's nick is already in use. It does this by simply appending 2 random
+    /// numbers to the end of the nick.
+    /// </summary>
+    /// <remarks>
+    /// The NickError event is shows that the nick collision has happened and it is fixed by
+    /// calling Sender's Register() method passing in the replacement nickname.
+    /// </remarks>
+    /// <value>
+    /// True if the connection should handle this case and false if the socket will handle it itself.
+    /// </value>
+    public bool HandleNickTaken { get; set; }
+
+    /// <summary>
+    /// A user friendly name of this Connection in the form 'nick@host'
+    /// </summary>
+    /// <value>Read only string</value>
+    public string Name => _connectionArgs.Nick + "@" + _connectionArgs.Hostname;
+
+    /// <summary>
+    /// Whether Ctcp commands should be processed and if Ctcp events will be raised.
+    /// </summary>
+    /// <value>
+    /// True will enable the CTCP sender and listener and false will cause their property calls
+    /// to return null.
+    /// </value>
+    public bool EnableCtcp
+    {
+        get => _ctcpEnabled;
+        set
         {
-            _propertiesRegex = new Regex("([A-Z]+)=([^\\s]+)", RegexOptions.Compiled | RegexOptions.Singleline);
-            Registered = false;
-            HandleNickTaken = true;
-            _connectionArgs = args;
-            _parsers = new ArrayList();
-            _sender = new Sender(this);
-            Listener = new Listener();
-            RegisterDelegates();
-            _timeLastSent = DateTime.Now;
-            EnableCtcp = enableCtcp;
-            EnableDcc = enableDcc;
-            TextEncoding = Encoding.Default;
+            if (value && !_ctcpEnabled)
+            {
+                _ctcpListener = new CtcpListener(this);
+                CtcpSender = new CtcpSender(this);
+            }
+            else if (!value)
+            {
+                _ctcpListener = null;
+                CtcpSender = null;
+            }
+            _ctcpEnabled = value;
+        }
+    }
 
+    /// <summary>
+    /// Whether DCC requests should be processed or ignored by this Connection. Since the
+    /// DccListener is a singleton and shared by all Connections, listeners to DccListener
+    /// events should be manually removed when no longer needed.
+    /// </summary>
+    /// <value>True to process DCC requests.</value>
+    public bool EnableDcc { get; set; }
+
+    /// <summary>
+    /// Sets an automatic responder to Ctcp queries.
+    /// </summary>
+    /// <value>Once this is set it can be removed by setting it to null.</value>
+    public CtcpResponder CtcpResponder
+    {
+        get => _ctcpResponder;
+        set
+        {
+            if (value == null && _ctcpResponder != null)
+                _ctcpResponder.Disable();
+            _ctcpResponder = value;
+        }
+    }
+
+    /// <summary>
+    /// The amount of time that has passed since the socket sent a command to the IRC server.
+    /// </summary>
+    /// <value>Read only TimeSpan</value>
+    public TimeSpan IdleTime => DateTime.Now - _timeLastSent;
+
+    /// <summary>
+    /// How long the connection may receive no traffic at all before it is judged half-open and
+    /// torn down with <see cref="DisconnectReason.PingTimeout" />. Must stay larger than the
+    /// keep-alive interval so a keep-alive PING is actually sent, giving the server a chance to
+    /// answer before the link is declared dead.
+    /// </summary>
+    /// <value>Defaults to 90 seconds.</value>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown if set to a value that is not greater than the keep-alive interval; otherwise the
+    /// timeout would fire before any PING is ever sent.
+    /// </exception>
+    public TimeSpan PingTimeout
+    {
+        get => _pingTimeout;
+        set
+        {
+            if (value <= KeepAliveInterval)
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    string.Format("PingTimeout must be greater than the keep-alive interval ({0}).", KeepAliveInterval));
+            _pingTimeout = value;
+        }
+    }
+
+    private TimeSpan _pingTimeout = TimeSpan.FromSeconds(90);
+
+    /// <summary>
+    /// The object used to send commands to the IRC server.
+    /// </summary>
+    /// <value>Read-only Sender.</value>
+    private Sender _sender;
+    public ISender Sender => _sender;
+
+    /// <summary>
+    /// The object that parses messages and notifies the appropriate delegate.
+    /// </summary>
+    /// <value>Read only Listener.</value>
+    public Listener Listener { get; private set; }
+
+    /// <summary>
+    /// The object used to send CTCP commands to the IRC server.
+    /// </summary>
+    /// <value>Read only CtcpSender. Null if CtcpEnabled is false.</value>
+    public CtcpSender CtcpSender { get; private set; }
+
+    /// <summary>
+    /// The object that parses CTCP messages and notifies the appropriate delegate.
+    /// </summary>
+    /// <value>Read only CtcpListener. Null if CtcpEnabled is false.</value>
+    public CtcpListener CtcpListener => _ctcpEnabled ? _ctcpListener : null;
+
+    /// <summary>
+    /// The collection of data used to establish this connection.
+    /// </summary>
+    /// <value>Read only ConnectionArgs.</value>
+    public ConnectionArgs ConnectionData => _connectionArgs;
+
+    /// <summary>
+    /// A read-only collection of string key/value pairs representing IRC server proprties.
+    /// </summary>
+    /// <value>
+    /// This connection's ServerProperties object is null if it has not been created.
+    /// </value>
+    public ServerProperties ServerProperties { get; private set; }
+
+    public string Nick
+    {
+        get => _connectionArgs.Nick;
+        set
+        {
+            _connectionArgs.Nick = value ?? throw new ArgumentNullException();
+        }
+    }
+
+    internal ConnectionArgs ConnectionArgs => _connectionArgs;
+
+    /// <summary>
+    /// Receive all the messages, unparsed, sent by the IRC server. This is typically only
+    /// required for debugging purposes.
+    /// </summary>
+    public event EventHandler<DataEventArgs<string>> RawMessageReceived;
+
+    /// <summary>
+    /// Receive all the raw messages sent to the IRC from this connection
+    /// </summary>
+    public event EventHandler<DataEventArgs<string>> RawMessageSent;
+
+    /// <summary>
+    /// Indicates that a connection has been made with the server.
+    /// </summary>
+    /// <remarks>
+    /// Does not mean you are ready to use the server. For that, see <see
+    /// cref="Listener.OnRegistered" />.
+    /// </remarks>
+    public event EventHandler ConnectionEstablished;
+
+    /// <summary>
+    /// We were unable to connect to the server.
+    /// </summary>
+    public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
+
+    /// <summary>
+    /// The connection to the server was lost.
+    /// </summary>
+    public event EventHandler<DisconnectEventArgs> ConnectionLost;
+
+    private void activityTimer_Elapsed(object sender, ElapsedEventArgs e)
+    {
+        SendKeepAlive();
+    }
+
+    /// <summary>
+    /// Sends a keep-alive PING after a spell of silence and, when the silence stretches past
+    /// <see cref="PingTimeout" />, tears down a half-open connection.
+    /// </summary>
+    /// <remarks>
+    /// A half-open TCP connection — the peer vanished without a FIN/RST — produces no read
+    /// error, so the pending receive would otherwise wait forever. By prodding the server with
+    /// a PING and relying on any inbound traffic (the PONG included) to reset
+    /// <see cref="_lastTraffic" />, a dead link surfaces as a
+    /// <see cref="DisconnectReason.PingTimeout" /> disconnect that the higher layers treat like
+    /// any other lost connection, so auto-reconnect kicks in.
+    /// </remarks>
+    internal void SendKeepAlive()
+    {
+        // The timer runs from construction and is not stopped on every disconnect path (remote
+        // drops tear down in TcpTextClient without touching it), so it can tick while the link
+        // is dead — before the first Connect(), or during the reconnect backoff window. Gate on
+        // Connected, the one flag that stays true only while there's a live socket: a half-open
+        // link keeps it set (no FIN/RST arrives) so timeout detection still works, and every
+        // real disconnect clears it so stray ticks can't ping a null stream or raise a second
+        // spurious ConnectionLost.
+        if (!Connected)
+            return;
+
+        switch (EvaluateKeepAlive(DateTime.Now - _lastTraffic, KeepAliveInterval, PingTimeout))
+        {
+            case KeepAliveAction.Ping:
+                Sender.Ping();
+                break;
+
+            case KeepAliveAction.Timeout:
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                                  string.Format("[{0}] Connection::SendKeepAlive() ping timeout; tearing down half-open connection", Thread.CurrentThread.Name));
+                Disconnect(DisconnectReason.PingTimeout);
+                break;
+        }
+    }
+
+    internal enum KeepAliveAction
+    {
+        None,
+        Ping,
+        Timeout
+    }
+
+    /// <summary>
+    /// Pure keep-alive decision: from how long the link has been silent, decide whether to do
+    /// nothing, send a keep-alive PING, or declare a ping timeout. Side-effect free so it can be
+    /// unit tested without a socket or timer.
+    /// </summary>
+    internal static KeepAliveAction EvaluateKeepAlive(TimeSpan idle, TimeSpan keepAliveInterval, TimeSpan pingTimeout)
+    {
+        if (idle > pingTimeout)
+            return KeepAliveAction.Timeout;
+        if (idle > keepAliveInterval)
+            return KeepAliveAction.Ping;
+        return KeepAliveAction.None;
+    }
+
+    /// <summary>
+    /// Test seam: backdate the last-traffic clock so keep-alive behaviour can be exercised
+    /// without a live socket to feed it inbound traffic.
+    /// </summary>
+    internal void SetLastTrafficForTest(DateTime when) => _lastTraffic = when;
+
+    private bool CustomParse(string line)
+    {
+        foreach (IParser parser in _parsers)
+        {
+            if (parser.CanParse(line))
+            {
+                parser.Parse(line);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Respond to IRC keep-alives.
+    /// </summary>
+    /// <param name="message">The message that should be echoed back</param>
+    private void KeepAlive(string message)
+    {
+        _sender.Pong(message);
+    }
+
+    private void UpdateLastTime(object sender, EventArgs e)
+    {
+        _lastTraffic = DateTime.Now;
+    }
+
+    /// <summary>
+    /// Update the ConnectionArgs object when the user changes his nick.
+    /// </summary>
+    private void MyNickChanged(object sender, NickChangeEventArgs e)
+    {
+        if (_connectionArgs.Nick == e.User.Nick)
+            _connectionArgs.Nick = e.NewNick;
+    }
+
+    private void OnRegistered(object sender, EventArgs e)
+    {
+        Registered = true;
+        Listener.OnRegistered -= OnRegistered;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    private void OnNickError(object sender, NickErrorEventArgs ea)
+    {
+        //If this is our initial connection attempt
+        if (!Registered && HandleNickTaken)
+        {
+            string nick = "MutinyIRC" + Random.Shared.Next(1000, 10000);
+            //Try to reconnect
+            Sender.Register(nick);
+        }
+    }
+
+    /// <summary>
+    /// Listen for the 005 info messages sent during registration so that the maximum lengths of
+    /// certain items (Nick, Away, Topic) can be determined dynamically.
+    /// </summary>
+    private void OnReply(object sender, ReplyEventArgs a)
+    {
+        if (a.ReplyCode != ReplyCode.RPL_BOUNCE) return;
+
+        //Populate properties from name/value matches
+        MatchCollection matches = _propertiesRegex.Matches(a.Message);
+        if (matches.Count > 0)
+        {
+            foreach (Match match in matches)
+                ServerProperties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
+        }
+        //Extract ones we are interested in
+        ExtractProperties();
+    }
+
+    private void ExtractProperties()
+    {
+        //For the moment the only one we care about is NickLen
+        //In fact we don't cae about any but keep here as an example
+        /*
+        if( properties.ContainsKey("NICKLEN") )
+        {
+            try
+            {
+                maxNickLength = int.Parse( properties[ "NICKLEN" ] );
+            }
+            catch( Exception e )
+            {
+            }
+        }
+        */
+    }
+
+    private void RegisterDelegates()
+    {
+        Listener.OnPing += KeepAlive;
+        Listener.OnAnything += UpdateLastTime;
+        Listener.OnNick += MyNickChanged;
+        Listener.OnNickError += OnNickError;
+        Listener.OnReply += OnReply;
+        Listener.OnRegistered += OnRegistered;
+    }
+
+    /// <summary>
+    /// Connect to the IRC server and start listening for messages asynchronously
+    /// </summary>
+    public void Connect()
+    {
+        lock (this)
+        {
+            if (Connected)
+                throw new Exception("Connection with IRC server already opened.");
+            ServerProperties = new ServerProperties();
+            // Reset the idle clock: this Connection object is reused across reconnects, so a
+            // timestamp left over from the dropped link must not be read as fresh silence and
+            // trip an immediate ping timeout before any traffic has had a chance to arrive.
             _lastTraffic = DateTime.Now;
-
-            _activityTimer = new System.Timers.Timer { Interval = KeepAliveInterval.TotalMilliseconds };
-            _activityTimer.Elapsed += activityTimer_Elapsed;
             _activityTimer.Start();
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                              string.Format("[{0}] Connection::Connect()", Thread.CurrentThread.Name));
+
+            Connect(_connectionArgs.Hostname, _connectionArgs.Port, _connectionArgs.Ssl);
+        }
+    }
+
+    /// <summary>
+    /// Send a message to the IRC server and clear the command buffer.
+    /// </summary>
+    internal void SendCommand(StringBuilder command)
+    {
+        try
+        {
+            Send(command.ToString());
+
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                              string.Format("[{0}] Connection::SendCommand() sent= {1}", Thread.CurrentThread.Name, command));
+            _timeLastSent = DateTime.Now;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                              string.Format("[{0}] Connection::SendCommand() exception={1}", Thread.CurrentThread.Name, ex));
         }
 
-        /// <summary>
-        /// Prepare a connection to an IRC server but do not open it.
-        /// </summary>
-        /// <param name="args">The set of information need to connect to an IRC server</param>
-        /// <param name="enableCtcp">True if this Connection should support CTCP.</param>
-        /// <param name="enableDcc">True if this Connection should support DCC.</param>
-        /// <param name="textEncoding">The text encoding for the incoming stream.</param>
-        public Connection(Encoding textEncoding, ConnectionArgs args, bool enableCtcp, bool enableDcc)
-            : this(args, enableCtcp, enableDcc)
+        RawMessageSent.Fire(this, new DataEventArgs<string>(command.ToString()));
+
+        command.Remove(0, command.Length);
+    }
+
+    /// <summary>
+    /// Send a message to the IRC server which does not affect the socket's idle time. Used for
+    /// automatic replies such as PONG or Ctcp repsones.
+    /// </summary>
+    internal void SendAutomaticReply(StringBuilder command)
+    {
+        try
         {
-            TextEncoding = textEncoding;
+            Send(command.ToString());
+
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                              string.Format("[{0}] Connection::SendAutomaticReply() message={1}", Thread.CurrentThread.Name, command));
         }
-
-        /// <summary>
-        /// A read-only property indicating whether the connection has been opened with the IRC
-        /// server and the socket has been successfully registered.
-        /// </summary>
-        /// <value>True if the socket is connected and registered.</value>
-        public bool Registered { get; private set; }
-
-        /// <summary>
-        /// By default the connection itself will handle the case where, while attempting to
-        /// register the socket's nick is already in use. It does this by simply appending 2 random
-        /// numbers to the end of the nick.
-        /// </summary>
-        /// <remarks>
-        /// The NickError event is shows that the nick collision has happened and it is fixed by
-        /// calling Sender's Register() method passing in the replacement nickname.
-        /// </remarks>
-        /// <value>
-        /// True if the connection should handle this case and false if the socket will handle it itself.
-        /// </value>
-        public bool HandleNickTaken { get; set; }
-
-        /// <summary>
-        /// A user friendly name of this Connection in the form 'nick@host'
-        /// </summary>
-        /// <value>Read only string</value>
-        public string Name => _connectionArgs.Nick + "@" + _connectionArgs.Hostname;
-
-        /// <summary>
-        /// Whether Ctcp commands should be processed and if Ctcp events will be raised.
-        /// </summary>
-        /// <value>
-        /// True will enable the CTCP sender and listener and false will cause their property calls
-        /// to return null.
-        /// </value>
-        public bool EnableCtcp
+        catch (Exception ex)
         {
-            get => _ctcpEnabled;
-            set
-            {
-                if (value && !_ctcpEnabled)
-                {
-                    _ctcpListener = new CtcpListener(this);
-                    CtcpSender = new CtcpSender(this);
-                }
-                else if (!value)
-                {
-                    _ctcpListener = null;
-                    CtcpSender = null;
-                }
-                _ctcpEnabled = value;
-            }
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                              string.Format("[{0}] Connection::SendAutomaticReply() exception={1}", Thread.CurrentThread.Name, ex));
         }
+        command.Remove(0, command.Length);
+    }
 
-        /// <summary>
-        /// Whether DCC requests should be processed or ignored by this Connection. Since the
-        /// DccListener is a singleton and shared by all Connections, listeners to DccListener
-        /// events should be manually removed when no longer needed.
-        /// </summary>
-        /// <value>True to process DCC requests.</value>
-        public bool EnableDcc { get; set; }
-
-        /// <summary>
-        /// Sets an automatic responder to Ctcp queries.
-        /// </summary>
-        /// <value>Once this is set it can be removed by setting it to null.</value>
-        public CtcpResponder CtcpResponder
+    /// <summary>
+    /// Sends a 'Quit' message to the server, and closes the connection.
+    /// </summary>
+    /// <remarks>
+    /// The state of the connection will remain the same even after a disconnect, so the
+    /// connection can be reopened. All the event handlers will remain registered.
+    /// </remarks>
+    /// <param name="reason">A message displayed to other IRC users upon disconnect.</param>
+    public void Disconnect(string reason)
+    {
+        lock (this)
         {
-            get => _ctcpResponder;
-            set
-            {
-                if (value == null && _ctcpResponder != null)
-                    _ctcpResponder.Disable();
-                _ctcpResponder = value;
-            }
-        }
-
-        /// <summary>
-        /// The amount of time that has passed since the socket sent a command to the IRC server.
-        /// </summary>
-        /// <value>Read only TimeSpan</value>
-        public TimeSpan IdleTime => DateTime.Now - _timeLastSent;
-
-        /// <summary>
-        /// How long the connection may receive no traffic at all before it is judged half-open and
-        /// torn down with <see cref="DisconnectReason.PingTimeout" />. Must stay larger than the
-        /// keep-alive interval so a keep-alive PING is actually sent, giving the server a chance to
-        /// answer before the link is declared dead.
-        /// </summary>
-        /// <value>Defaults to 90 seconds.</value>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown if set to a value that is not greater than the keep-alive interval; otherwise the
-        /// timeout would fire before any PING is ever sent.
-        /// </exception>
-        public TimeSpan PingTimeout
-        {
-            get => _pingTimeout;
-            set
-            {
-                if (value <= KeepAliveInterval)
-                    throw new ArgumentOutOfRangeException(nameof(value), value,
-                        string.Format("PingTimeout must be greater than the keep-alive interval ({0}).", KeepAliveInterval));
-                _pingTimeout = value;
-            }
-        }
-
-        private TimeSpan _pingTimeout = TimeSpan.FromSeconds(90);
-
-        /// <summary>
-        /// The object used to send commands to the IRC server.
-        /// </summary>
-        /// <value>Read-only Sender.</value>
-        private Sender _sender;
-        public ISender Sender => _sender;
-
-        /// <summary>
-        /// The object that parses messages and notifies the appropriate delegate.
-        /// </summary>
-        /// <value>Read only Listener.</value>
-        public Listener Listener { get; private set; }
-
-        /// <summary>
-        /// The object used to send CTCP commands to the IRC server.
-        /// </summary>
-        /// <value>Read only CtcpSender. Null if CtcpEnabled is false.</value>
-        public CtcpSender CtcpSender { get; private set; }
-
-        /// <summary>
-        /// The object that parses CTCP messages and notifies the appropriate delegate.
-        /// </summary>
-        /// <value>Read only CtcpListener. Null if CtcpEnabled is false.</value>
-        public CtcpListener CtcpListener => _ctcpEnabled ? _ctcpListener : null;
-
-        /// <summary>
-        /// The collection of data used to establish this connection.
-        /// </summary>
-        /// <value>Read only ConnectionArgs.</value>
-        public ConnectionArgs ConnectionData => _connectionArgs;
-
-        /// <summary>
-        /// A read-only collection of string key/value pairs representing IRC server proprties.
-        /// </summary>
-        /// <value>
-        /// This connection's ServerProperties object is null if it has not been created.
-        /// </value>
-        public ServerProperties ServerProperties { get; private set; }
-
-        public string Nick
-        {
-            get => _connectionArgs.Nick;
-            set
-            {
-                _connectionArgs.Nick = value ?? throw new ArgumentNullException();
-            }
-        }
-
-        internal ConnectionArgs ConnectionArgs => _connectionArgs;
-
-        /// <summary>
-        /// Receive all the messages, unparsed, sent by the IRC server. This is typically only
-        /// required for debugging purposes.
-        /// </summary>
-        public event EventHandler<DataEventArgs<string>> RawMessageReceived;
-
-        /// <summary>
-        /// Receive all the raw messages sent to the IRC from this connection
-        /// </summary>
-        public event EventHandler<DataEventArgs<string>> RawMessageSent;
-
-        /// <summary>
-        /// Indicates that a connection has been made with the server.
-        /// </summary>
-        /// <remarks>
-        /// Does not mean you are ready to use the server. For that, see <see
-        /// cref="Listener.OnRegistered" />.
-        /// </remarks>
-        public event EventHandler ConnectionEstablished;
-
-        /// <summary>
-        /// We were unable to connect to the server.
-        /// </summary>
-        public event EventHandler<ConnectFailedEventArgs> ConnectFailed;
-
-        /// <summary>
-        /// The connection to the server was lost.
-        /// </summary>
-        public event EventHandler<DisconnectEventArgs> ConnectionLost;
-
-        private void activityTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            SendKeepAlive();
-        }
-
-        /// <summary>
-        /// Sends a keep-alive PING after a spell of silence and, when the silence stretches past
-        /// <see cref="PingTimeout" />, tears down a half-open connection.
-        /// </summary>
-        /// <remarks>
-        /// A half-open TCP connection — the peer vanished without a FIN/RST — produces no read
-        /// error, so the pending receive would otherwise wait forever. By prodding the server with
-        /// a PING and relying on any inbound traffic (the PONG included) to reset
-        /// <see cref="_lastTraffic" />, a dead link surfaces as a
-        /// <see cref="DisconnectReason.PingTimeout" /> disconnect that the higher layers treat like
-        /// any other lost connection, so auto-reconnect kicks in.
-        /// </remarks>
-        internal void SendKeepAlive()
-        {
-            // The timer runs from construction and is not stopped on every disconnect path (remote
-            // drops tear down in TcpTextClient without touching it), so it can tick while the link
-            // is dead — before the first Connect(), or during the reconnect backoff window. Gate on
-            // Connected, the one flag that stays true only while there's a live socket: a half-open
-            // link keeps it set (no FIN/RST arrives) so timeout detection still works, and every
-            // real disconnect clears it so stray ticks can't ping a null stream or raise a second
-            // spurious ConnectionLost.
             if (!Connected)
                 return;
 
-            switch (EvaluateKeepAlive(DateTime.Now - _lastTraffic, KeepAliveInterval, PingTimeout))
-            {
-                case KeepAliveAction.Ping:
-                    Sender.Ping();
-                    break;
-
-                case KeepAliveAction.Timeout:
-                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                                      string.Format("[{0}] Connection::SendKeepAlive() ping timeout; tearing down half-open connection", Thread.CurrentThread.Name));
-                    Disconnect(DisconnectReason.PingTimeout);
-                    break;
-            }
-        }
-
-        internal enum KeepAliveAction
-        {
-            None,
-            Ping,
-            Timeout
-        }
-
-        /// <summary>
-        /// Pure keep-alive decision: from how long the link has been silent, decide whether to do
-        /// nothing, send a keep-alive PING, or declare a ping timeout. Side-effect free so it can be
-        /// unit tested without a socket or timer.
-        /// </summary>
-        internal static KeepAliveAction EvaluateKeepAlive(TimeSpan idle, TimeSpan keepAliveInterval, TimeSpan pingTimeout)
-        {
-            if (idle > pingTimeout)
-                return KeepAliveAction.Timeout;
-            if (idle > keepAliveInterval)
-                return KeepAliveAction.Ping;
-            return KeepAliveAction.None;
-        }
-
-        /// <summary>
-        /// Test seam: backdate the last-traffic clock so keep-alive behaviour can be exercised
-        /// without a live socket to feed it inbound traffic.
-        /// </summary>
-        internal void SetLastTrafficForTest(DateTime when) => _lastTraffic = when;
-
-        private bool CustomParse(string line)
-        {
-            foreach (IParser parser in _parsers)
-            {
-                if (parser.CanParse(line))
-                {
-                    parser.Parse(line);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Respond to IRC keep-alives.
-        /// </summary>
-        /// <param name="message">The message that should be echoed back</param>
-        private void KeepAlive(string message)
-        {
-            _sender.Pong(message);
-        }
-
-        private void UpdateLastTime(object sender, EventArgs e)
-        {
-            _lastTraffic = DateTime.Now;
-        }
-
-        /// <summary>
-        /// Update the ConnectionArgs object when the user changes his nick.
-        /// </summary>
-        private void MyNickChanged(object sender, NickChangeEventArgs e)
-        {
-            if (_connectionArgs.Nick == e.User.Nick)
-                _connectionArgs.Nick = e.NewNick;
-        }
-
-        private void OnRegistered(object sender, EventArgs e)
-        {
-            Registered = true;
-            Listener.OnRegistered -= OnRegistered;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        private void OnNickError(object sender, NickErrorEventArgs ea)
-        {
-            //If this is our initial connection attempt
-            if (!Registered && HandleNickTaken)
-            {
-                string nick = "MutinyIRC" + Random.Shared.Next(1000, 10000);
-                //Try to reconnect
-                Sender.Register(nick);
-            }
-        }
-
-        /// <summary>
-        /// Listen for the 005 info messages sent during registration so that the maximum lengths of
-        /// certain items (Nick, Away, Topic) can be determined dynamically.
-        /// </summary>
-        private void OnReply(object sender, ReplyEventArgs a)
-        {
-            if (a.ReplyCode != ReplyCode.RPL_BOUNCE) return;
-
-            //Populate properties from name/value matches
-            MatchCollection matches = _propertiesRegex.Matches(a.Message);
-            if (matches.Count > 0)
-            {
-                foreach (Match match in matches)
-                    ServerProperties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
-            }
-            //Extract ones we are interested in
-            ExtractProperties();
-        }
-
-        private void ExtractProperties()
-        {
-            //For the moment the only one we care about is NickLen
-            //In fact we don't cae about any but keep here as an example
-            /*
-            if( properties.ContainsKey("NICKLEN") )
-            {
-                try
-                {
-                    maxNickLength = int.Parse( properties[ "NICKLEN" ] );
-                }
-                catch( Exception e )
-                {
-                }
-            }
-            */
-        }
-
-        private void RegisterDelegates()
-        {
-            Listener.OnPing += KeepAlive;
-            Listener.OnAnything += UpdateLastTime;
-            Listener.OnNick += MyNickChanged;
-            Listener.OnNickError += OnNickError;
-            Listener.OnReply += OnReply;
-            Listener.OnRegistered += OnRegistered;
-        }
-
-        /// <summary>
-        /// Connect to the IRC server and start listening for messages asynchronously
-        /// </summary>
-        public void Connect()
-        {
-            lock (this)
-            {
-                if (Connected)
-                    throw new Exception("Connection with IRC server already opened.");
-                ServerProperties = new ServerProperties();
-                // Reset the idle clock: this Connection object is reused across reconnects, so a
-                // timestamp left over from the dropped link must not be read as fresh silence and
-                // trip an immediate ping timeout before any traffic has had a chance to arrive.
-                _lastTraffic = DateTime.Now;
-                _activityTimer.Start();
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                                  string.Format("[{0}] Connection::Connect()", Thread.CurrentThread.Name));
-
-                Connect(_connectionArgs.Hostname, _connectionArgs.Port, _connectionArgs.Ssl);
-            }
-        }
-
-        /// <summary>
-        /// Send a message to the IRC server and clear the command buffer.
-        /// </summary>
-        internal void SendCommand(StringBuilder command)
-        {
-            try
-            {
-                Send(command.ToString());
-
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                                  string.Format("[{0}] Connection::SendCommand() sent= {1}", Thread.CurrentThread.Name, command));
-                _timeLastSent = DateTime.Now;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                                  string.Format("[{0}] Connection::SendCommand() exception={1}", Thread.CurrentThread.Name, ex));
-            }
-
-            RawMessageSent.Fire(this, new DataEventArgs<string>(command.ToString()));
-
-            command.Remove(0, command.Length);
-        }
-
-        /// <summary>
-        /// Send a message to the IRC server which does not affect the socket's idle time. Used for
-        /// automatic replies such as PONG or Ctcp repsones.
-        /// </summary>
-        internal void SendAutomaticReply(StringBuilder command)
-        {
-            try
-            {
-                Send(command.ToString());
-
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                                  string.Format("[{0}] Connection::SendAutomaticReply() message={1}", Thread.CurrentThread.Name, command));
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                                  string.Format("[{0}] Connection::SendAutomaticReply() exception={1}", Thread.CurrentThread.Name, ex));
-            }
-            command.Remove(0, command.Length);
-        }
-
-        /// <summary>
-        /// Sends a 'Quit' message to the server, and closes the connection.
-        /// </summary>
-        /// <remarks>
-        /// The state of the connection will remain the same even after a disconnect, so the
-        /// connection can be reopened. All the event handlers will remain registered.
-        /// </remarks>
-        /// <param name="reason">A message displayed to other IRC users upon disconnect.</param>
-        public void Disconnect(string reason)
-        {
-            lock (this)
-            {
-                if (!Connected)
-                    return;
-
-                _sender.Quit(reason);
-                Disconnect(DisconnectReason.UserInitiated);
-                _activityTimer.Stop();
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                                  string.Format("[{0}] Connection::Disconnect()", Thread.CurrentThread.Name));
-            }
-        }
-
-        /// <summary>
-        /// A friendly name for this connection.
-        /// </summary>
-        /// <returns>The Name property</returns>
-        public override string ToString()
-        {
-            return Name;
-        }
-
-        /// <summary>
-        /// Adds a parser class to a list of custom parsers. Any number can be added. The custom
-        /// parsers will be tested using <c>CanParse()</c> before the default parsers. The last
-        /// parser to be added will be the first to process a message.
-        /// </summary>
-        /// <param name="parser">Any class that implements IParser.</param>
-        public void AddParser(IParser parser)
-        {
-            _parsers.Insert(0, parser);
-        }
-
-        /// <summary>
-        /// Remove a custom parser class.
-        /// </summary>
-        /// <param name="parser">Any class that implements IParser.</param>
-        public void RemoveParser(IParser parser)
-        {
-            _parsers.Remove(parser);
-        }
-
-        protected override void OnConnect()
-        {
-            ConnectionEstablished.Fire(this, new EventArgs());
-            _sender.RegisterConnection(_connectionArgs);
-            Connected = true;
-        }
-
-        protected override bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain,
-                                                                SslPolicyErrors errors)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void OnDisconnect(DisconnectReason reason, int? socketErrorCode)
-        {
-            if (ConnectionLost == null) return;
-
-            if (socketErrorCode == null)
-                ConnectionLost(this, new DisconnectEventArgs(reason));
-            else
-                ConnectionLost(this, new DisconnectEventArgs(reason, (int)socketErrorCode));
-        }
-
-        protected override void OnConnectFailed(ConnectError reason, int? socketErrorCode)
-        {
-            if (ConnectFailed == null) return;
-
-            if (socketErrorCode == null)
-                ConnectFailed(this, new ConnectFailedEventArgs(reason));
-            else
-                ConnectFailed(this, new ConnectFailedEventArgs(reason, (int)socketErrorCode));
-        }
-
-        /// <summary>
-        /// Read in message lines from the IRC server and send them to a parser for processing.
-        /// Discard CTCP and DCC messages if these protocols are not enabled.
-        /// </summary>
-        protected override void OnReceiveLine(string line)
-        {
+            _sender.Quit(reason);
+            Disconnect(DisconnectReason.UserInitiated);
+            _activityTimer.Stop();
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                              string.Format("[{0}] Connection::ReceiveIRCMessages()", Thread.CurrentThread.Name));
-
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                              string.Format("[{0}] Connection::ReceiveIRCMessages() rec'd:{1}", Thread.CurrentThread.Name, line));
-            //Try any custom parsers first
-            if (CustomParse(line))
-            {
-                //One of the custom parsers handled this message so
-                //we go back to listening
-                return;
-            }
-            if (DccListener.IsDccRequest(line))
-            {
-                if (EnableDcc)
-                    DccListener.DefaultInstance.Parse(this, line);
-            }
-            else if (CtcpListener.IsCtcpMessage(line))
-            {
-                if (_ctcpEnabled)
-                    _ctcpListener.Parse(line);
-            }
-            else
-            {
-                Listener.Parse(line);
-            }
-
-            RawMessageReceived.Fire(this, new DataEventArgs<string>(line));
+                              string.Format("[{0}] Connection::Disconnect()", Thread.CurrentThread.Name));
         }
+    }
+
+    /// <summary>
+    /// A friendly name for this connection.
+    /// </summary>
+    /// <returns>The Name property</returns>
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    /// <summary>
+    /// Adds a parser class to a list of custom parsers. Any number can be added. The custom
+    /// parsers will be tested using <c>CanParse()</c> before the default parsers. The last
+    /// parser to be added will be the first to process a message.
+    /// </summary>
+    /// <param name="parser">Any class that implements IParser.</param>
+    public void AddParser(IParser parser)
+    {
+        _parsers.Insert(0, parser);
+    }
+
+    /// <summary>
+    /// Remove a custom parser class.
+    /// </summary>
+    /// <param name="parser">Any class that implements IParser.</param>
+    public void RemoveParser(IParser parser)
+    {
+        _parsers.Remove(parser);
+    }
+
+    protected override void OnConnect()
+    {
+        ConnectionEstablished.Fire(this, new EventArgs());
+        _sender.RegisterConnection(_connectionArgs);
+        Connected = true;
+    }
+
+    protected override bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain,
+                                                            SslPolicyErrors errors)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override void OnDisconnect(DisconnectReason reason, int? socketErrorCode)
+    {
+        if (ConnectionLost == null) return;
+
+        if (socketErrorCode == null)
+            ConnectionLost(this, new DisconnectEventArgs(reason));
+        else
+            ConnectionLost(this, new DisconnectEventArgs(reason, (int)socketErrorCode));
+    }
+
+    protected override void OnConnectFailed(ConnectError reason, int? socketErrorCode)
+    {
+        if (ConnectFailed == null) return;
+
+        if (socketErrorCode == null)
+            ConnectFailed(this, new ConnectFailedEventArgs(reason));
+        else
+            ConnectFailed(this, new ConnectFailedEventArgs(reason, (int)socketErrorCode));
+    }
+
+    /// <summary>
+    /// Read in message lines from the IRC server and send them to a parser for processing.
+    /// Discard CTCP and DCC messages if these protocols are not enabled.
+    /// </summary>
+    protected override void OnReceiveLine(string line)
+    {
+        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                          string.Format("[{0}] Connection::ReceiveIRCMessages()", Thread.CurrentThread.Name));
+
+        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
+                          string.Format("[{0}] Connection::ReceiveIRCMessages() rec'd:{1}", Thread.CurrentThread.Name, line));
+        //Try any custom parsers first
+        if (CustomParse(line))
+        {
+            //One of the custom parsers handled this message so
+            //we go back to listening
+            return;
+        }
+        if (DccListener.IsDccRequest(line))
+        {
+            if (EnableDcc)
+                DccListener.DefaultInstance.Parse(this, line);
+        }
+        else if (CtcpListener.IsCtcpMessage(line))
+        {
+            if (_ctcpEnabled)
+                _ctcpListener.Parse(line);
+        }
+        else
+        {
+            Listener.Parse(line);
+        }
+
+        RawMessageReceived.Fire(this, new DataEventArgs<string>(line));
     }
 }
