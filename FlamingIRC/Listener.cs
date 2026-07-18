@@ -240,7 +240,6 @@ public class Listener
     private const string KILL = "KILL";
     private const string ACTION = "\u0001ACTION";
     private readonly char[] Separator = { ' ' };
-    private readonly Regex userPattern;
     private readonly Regex channelPattern;
     private readonly Regex _replyRegex;
 
@@ -256,7 +255,6 @@ public class Listener
     /// </summary>
     public Listener()
     {
-        userPattern = new Regex("([\\w\\-" + Rfc2812Util.specialReg + "]+![\\~\\w]+@[\\w\\.\\-]+)", RegexOptions.Compiled | RegexOptions.Singleline);
         channelPattern = new Regex("([#!+&]\\w+)", RegexOptions.Compiled | RegexOptions.Singleline);
         _replyRegex = new Regex("^:([^\\s]*) ([\\d]{3}) ([^\\s]*) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
     }

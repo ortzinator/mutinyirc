@@ -9,20 +9,6 @@ namespace FlamingIRC.Tests;
 [TestFixture]
 public class UserTests
 {
-    private User _user;
-
-    [SetUp]
-    public void Setup()
-    {
-
-    }
-
-    [TearDown]
-    public void Teardown()
-    {
-        _user = null;
-    }
-
     [Test]
     public void FromNames_ValidNickWithModeChar_UserReturned()
     {

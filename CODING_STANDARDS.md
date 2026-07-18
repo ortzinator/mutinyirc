@@ -226,22 +226,28 @@ document that only original-provenance files carry it.
 
 ### 3. Style warning backlog
 
-Style rules became build-enforced only recently, so the tree carries **216 pre-existing style
+Style rules became build-enforced only recently, so the tree carries **207 pre-existing style
 warnings**. The build is green (0 errors) and these are visible as a worklist. The bulk:
 
 | Rule | Count | What it wants |
 |---|---|---|
 | `IDE0022` | 71 | Use **block** body for method |
-| `IDE1006` | 70 | Naming rule — this is item 1 above |
+| `IDE1006` | 67 | Naming rule — this is item 1 above |
 | `IDE0370` | 22 | Suppression is unnecessary (stale `#pragma`/attributes) |
 | `IDE0060` | 11 | Unused parameter |
-| `IDE0052` | 4 | Private member can be removed; value never read |
 
 **Decision needed** on `IDE0022` specifically: the config prefers block bodies, but 71 methods use
 expression bodies, including recently written ones. The codebase is voting against the setting, so
-the config is the likelier thing to change. The `IDE0052` hits are genuine dead code
-(`DccFileSession.listenIPAddress`, `Listener.userPattern`, `Rfc2812Util.userRegex`). Promote
-individual rules to `error` as their counts reach zero.
+the config is the likelier thing to change.
+
+`IDE0060` needs judgement rather than a sweep. Nearly all current hits are structurally required
+parameters that the analyzer cannot see are load-bearing: the plugin framework dispatches command
+overloads **by first-parameter type**, so a `context`/`channel`/`server` parameter is part of the
+dispatch contract even when the body ignores it. Suppress or keep those; only remove a parameter
+that is genuinely free.
+
+Promote individual rules to `error` as their counts reach zero — `IDE0052` has already been
+promoted this way.
 
 Note that `resharper_csharp_max_line_length = 100` remains ReSharper/Rider-only — it is not
 enforced by the build. `IDE0001` and `IDE0002` likewise report under `dotnet format` but not at

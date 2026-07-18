@@ -36,6 +36,7 @@ dotnet_diagnostic.IDE0005.severity = none # Remove unnecessary using directives 
 dotnet_diagnostic.CS8019.severity = error # Remove unnecessary using directives
 
 dotnet_diagnostic.CA1823.severity = error # Avoid unused private fields
+dotnet_diagnostic.IDE0052.severity = error # Remove unread private members (count is zero; keep it there)
 
 # CA1801/CA1804/CA1811 are legacy FxCop rules that no longer ship in the .NET analyzers; setting
 # their severity here did nothing. The live equivalents are IDE0060 (unused parameters), IDE0059

@@ -69,7 +69,6 @@ public sealed class DccFileSession
     private bool waitingOnAccept;
     private readonly byte[] buffer;
     private readonly int listenPort;
-    private string listenIPAddress;
     private Socket socket;
     private Socket serverSocket;
     private Thread thread;
@@ -514,9 +513,7 @@ public sealed class DccFileSession
             session = new DccFileSession(dccUser, dccFileInfo, bufferSize, listenPort, "S" + listenPort)
             {
                 //set turbo mode
-                turboMode = turbo,
-                //Set server IP address
-                listenIPAddress = listenIPAddress
+                turboMode = turbo
             };
             //Add session to active sessions hashtable
             DccFileSessionManager.DefaultInstance.AddSession(session);

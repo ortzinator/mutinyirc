@@ -35,9 +35,7 @@ namespace FlamingIRC;
 /// </summary>
 public sealed class Rfc2812Util
 {
-    // Regex that matches the standard IRC 'nick!user@host' 
-    private static readonly Regex userRegex;
-    // Regex that matches a legal IRC nick 
+    // Regex that matches a legal IRC nick
     private static readonly Regex nickRegex;
     //Regex to create a User from a string
     private static readonly Regex nameSplitterRegex;
@@ -57,7 +55,6 @@ public sealed class Rfc2812Util
     /// </summary>
     static Rfc2812Util()
     {
-        userRegex = new Regex(userReg);
         nickRegex = new Regex(nickReg);
         nameSplitterRegex = new Regex("[!@]", RegexOptions.Compiled | RegexOptions.Singleline);
     }
