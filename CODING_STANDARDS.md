@@ -15,19 +15,18 @@ Which of its settings are actually enforced, and by what, is covered under
 
 - **Target framework:** `net8.0` across every project.
 - **Language:** C# (default language version for .NET 8).
-- **Build check:** run `dotnet build MutinyIRC.sln` after changes. Note that `IDE####` style
-  severities in `.editorconfig` do **not** affect the build (see
-  [Known Contradictions](#known-contradictions)); to check them, run
-  `dotnet format style MutinyIRC.sln --verify-no-changes --severity warn`.
-- **Unused code is an error**, enforced via analyzers:
-  - `CS8019` — unnecessary `using` directives.
-  - `CA1801` — unused parameters.
-  - `CA1804` — unused locals.
-  - `CA1811` — uncalled private code.
-  - `CA1823` — unused private fields.
+- **Build check:** run `dotnet build MutinyIRC.sln` after changes. `EnforceCodeStyleInBuild` is set
+  in `Directory.Build.props`, so the `IDE####` severities declared in `.editorconfig` apply to the
+  build. Style diagnostics are **warnings**; a clean build is 0 errors.
+- **Unused code**, enforced at build time:
+  - `CS8019` — unnecessary `using` directives (**error**).
+  - `CA1823` — unused private fields (**error**).
+  - `IDE0051` / `IDE0059` / `IDE0060` — uncalled private code, unused locals, unused parameters
+    (warnings).
 
-Because these are build-breaking, remove dead usings, parameters, locals, and private members as
-you go rather than leaving them for later.
+Remove dead usings, parameters, locals, and private members as you go rather than leaving them for
+later. There is a standing backlog of pre-existing style warnings (see
+[Known Contradictions](#known-contradictions)) — don't add to it.
 
 ## Files and Encoding
 
@@ -225,13 +224,25 @@ project** (`MutinyIRC.Common`, UI, etc. have no header). **Decision needed:** ei
 header to all FlamingIRC files (it is a separately-licensed framework), drop it entirely, or
 document that only original-provenance files carry it.
 
-### 3. Style analyzer severities are not enforced at build time
+### 3. Style warning backlog
 
-`EnforceCodeStyleInBuild` is not set in any project or a `Directory.Build.props`, so every
-`IDE####` severity in `.editorconfig` — including
-`dotnet_analyzer_diagnostic.category-Style.severity = error` — is inert during `dotnet build`.
-Those settings apply only in the IDE and under `dotnet format`. The same is true of
-`resharper_csharp_max_line_length = 100`, which is honored by ReSharper/Rider only.
-**Decision needed:** set `EnforceCodeStyleInBuild = true` to make the declared severities real
-(note that the `Style`-category-as-error setting would then be load-bearing, so it likely needs to
-drop to `warning` first), or lower the declared severities to match what is actually enforced.
+Style rules became build-enforced only recently, so the tree carries **216 pre-existing style
+warnings**. The build is green (0 errors) and these are visible as a worklist. The bulk:
+
+| Rule | Count | What it wants |
+|---|---|---|
+| `IDE0022` | 71 | Use **block** body for method |
+| `IDE1006` | 70 | Naming rule — this is item 1 above |
+| `IDE0370` | 22 | Suppression is unnecessary (stale `#pragma`/attributes) |
+| `IDE0060` | 11 | Unused parameter |
+| `IDE0052` | 4 | Private member can be removed; value never read |
+
+**Decision needed** on `IDE0022` specifically: the config prefers block bodies, but 71 methods use
+expression bodies, including recently written ones. The codebase is voting against the setting, so
+the config is the likelier thing to change. The `IDE0052` hits are genuine dead code
+(`DccFileSession.listenIPAddress`, `Listener.userPattern`, `Rfc2812Util.userRegex`). Promote
+individual rules to `error` as their counts reach zero.
+
+Note that `resharper_csharp_max_line_length = 100` remains ReSharper/Rider-only — it is not
+enforced by the build. `IDE0001` and `IDE0002` likewise report under `dotnet format` but not at
+build time.

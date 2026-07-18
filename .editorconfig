@@ -6,7 +6,11 @@ insert_final_newline = true
 # dotnet format rewrites files with CRLF on Windows.
 end_of_line = lf
 
-dotnet_analyzer_diagnostic.category-Style.severity = error
+# Style diagnostics are warnings, not errors: they are enforced at build time (see
+# Directory.Build.props) and promoting every cosmetic preference to build-breaking would rank a
+# stale #pragma the same as real dead code. Promote individual rules to error once their count
+# reaches zero.
+dotnet_analyzer_diagnostic.category-Style.severity = warning
 
 # Here we ignore some rule violations that they are not really important for us
 dotnet_diagnostic.IDE0008.severity = silent # Explicit type, not var
@@ -31,10 +35,11 @@ dotnet_diagnostic.IDE0010.severity = silent
 dotnet_diagnostic.IDE0005.severity = none # Remove unnecessary using directives (using CS8019 instead)
 dotnet_diagnostic.CS8019.severity = error # Remove unnecessary using directives
 
-dotnet_diagnostic.CA1801.severity = error # Review unused parameters
-dotnet_diagnostic.CA1804.severity = error # Remove unused locals
-dotnet_diagnostic.CA1811.severity = error # Avoid uncalled private code
 dotnet_diagnostic.CA1823.severity = error # Avoid unused private fields
+
+# CA1801/CA1804/CA1811 are legacy FxCop rules that no longer ship in the .NET analyzers; setting
+# their severity here did nothing. The live equivalents are IDE0060 (unused parameters), IDE0059
+# (unused locals), and IDE0051 (uncalled private code), which run via EnforceCodeStyleInBuild.
 
 # Microsoft .NET properties
 csharp_new_line_before_members_in_object_initializers = false

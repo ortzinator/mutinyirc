@@ -1,0 +1,13 @@
+<Project>
+
+  <PropertyGroup>
+    <!--
+      Without this, every IDE#### severity in .editorconfig is inert during `dotnet build` and
+      applies only in the IDE and under `dotnet format`. Turning it on is what makes the declared
+      style rules real, including IDE0051/IDE0059/IDE0060, which replace the long-dead
+      CA1801/CA1804/CA1811 settings.
+    -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+</Project>
