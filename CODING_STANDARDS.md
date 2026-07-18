@@ -1,0 +1,219 @@
+# Coding Standards
+
+This document describes the coding conventions used in MutinyIRC. It is derived from the
+existing `.editorconfig` and from the conventions actually present in the source tree. Where the
+two disagree, or where the codebase is internally inconsistent, that is called out explicitly in
+[Known Contradictions](#known-contradictions) at the end — those are open questions to resolve,
+not settled rules.
+
+`.editorconfig` is the machine-enforced source of truth. This document explains the intent behind
+those settings and captures the conventions that `.editorconfig` does not encode.
+
+## Language and Tooling
+
+- **Target framework:** `net8.0` across every project.
+- **Language:** C# (default language version for .NET 8).
+- **Build check:** run `dotnet build MutinyIRC.sln` after changes. `Style` category analyzer
+  diagnostics are promoted to **errors** (`dotnet_analyzer_diagnostic.category-Style.severity =
+  error`), so a formatting slip fails the build unless the specific rule is silenced.
+- **Unused code is an error**, enforced via analyzers:
+  - `CS8019` — unnecessary `using` directives.
+  - `CA1801` — unused parameters.
+  - `CA1804` — unused locals.
+  - `CA1811` — uncalled private code.
+  - `CA1823` — unused private fields.
+
+Because these are build-breaking, remove dead usings, parameters, locals, and private members as
+you go rather than leaving them for later.
+
+## Files and Encoding
+
+- **Line endings:** LF for source and text files, enforced via `.gitattributes` and
+  `end_of_line = lf` in `.editorconfig` (the latter keeps `dotnet format` from rewriting files
+  with CRLF on Windows). Project and solution files (`*.csproj`, `*.sln`) use CRLF per Visual
+  Studio convention. Do not commit files with mixed or platform-native endings.
+- **Final newline:** every `.cs` file ends with a newline (`insert_final_newline = true`).
+- **One-time setup:** configure `git config blame.ignoreRevsFile .git-blame-ignore-revs` so the
+  line-ending renormalization commit doesn't pollute `git blame` (see `CONTRIBUTING.md`).
+
+## Layout and Formatting
+
+These follow the `.editorconfig` (Microsoft + ReSharper sections):
+
+- **Braces on a new line** for all constructs (`csharp_new_line_before_open_brace = all`).
+- **Modifier order:** `private, protected, internal, async, file, public, override, sealed,
+  virtual, static, abstract, readonly, extern, unsafe, volatile, new, required`.
+- **Max line length: 100** (`resharper_csharp_max_line_length = 100`). Note this is a ReSharper
+  hint, not a build-enforced rule.
+- **Single-line blocks and expression-bodied members are preserved** on one line where they
+  already fit (`csharp_preserve_single_line_blocks = true`,
+  `resharper_place_expr_property_on_single_line = true`).
+- **Object and collection initializers** wrap one item per line
+  (`resharper_wrap_object_and_collection_initializer_style = chop_always`).
+- **No trailing comma** in multi-line lists (`resharper_trailing_comma_in_multiline_lists =
+  false`).
+- **Redundant parentheses are removed** (`resharper_parentheses_redundancy_style = remove`),
+  except arithmetic/other binary operators, which prefer explicit grouping for clarity.
+
+### `var` vs explicit types
+
+The `.editorconfig` leans toward **explicit types**:
+
+- `csharp_style_var_for_built_in_types = false` — use `int`, `string`, etc., not `var`, for
+  built-ins.
+- `csharp_style_var_when_type_is_apparent = true` — `var` is acceptable when the type is obvious
+  from the right-hand side (e.g. a constructor call).
+- `resharper_object_creation_when_type_evident = explicitly_typed`.
+
+`IDE0008` ("use explicit type instead of var") is **silenced**, so this is a preference, not
+enforced. Prefer explicit types; use `var` only when the type is plainly apparent.
+
+### Braces on control flow
+
+`IDE0011` ("add braces") is **silenced** and ReSharper is set to `braces_for_if = not_required`.
+The codebase routinely omits braces on single-statement `if`/`foreach` bodies:
+
+```csharp
+if (UserList == null || UserList.Count == 0)
+    return base.Name;
+```
+
+This is allowed. Keep the body on its own line, indented — do not place the statement on the same
+line as the `if`.
+
+### Empty strings
+
+Prefer `string.Empty` over `""` (`resharper_empty_string = string_empty`). This is followed
+consistently in the source (fields initialize to `string.Empty`).
+
+## Naming
+
+- **Types, methods, properties, events:** PascalCase.
+- **Parameters and locals:** camelCase.
+- **Private instance fields:** `_camelCase` with a leading underscore (e.g. `_channel`,
+  `_connection`, `_reconnectTimer`).
+- **Private static / const fields:** PascalCase (e.g. `ReconnectBaseDelay`, `ReconnectMaxDelay`),
+  so constant-like fields are not flagged for the underscore convention.
+- **Interfaces:** `I`-prefixed (`IConnection`, `IPlugin`, `ICommand`, `ISender`).
+- **Event handler methods:** `Source_EventName` (e.g. `Channel_OnMessage`, `Server_Disconnected`).
+
+Field naming is enforced by `dotnet_naming_rule` entries in `.editorconfig` (diagnostic
+`IDE1006`) at **warning** severity. The legacy FlamingIRC socket subsystem is the one exception —
+see [Known Contradictions](#known-contradictions).
+
+## Namespaces and Usings
+
+- **File-scoped namespaces** (`csharp_style_namespace_declarations = file_scoped`): `namespace X;`,
+  not `namespace X { ... }`. Enforced through the Style analyzer category.
+- **`using` directives go outside the namespace** (`csharp_using_directive_placement =
+  outside_namespace`) — above the namespace declaration, never inside it.
+
+## Nullable Reference Types
+
+`<Nullable>enable</Nullable>` is set **only in `MutinyIRC.UI`**. The other projects do not opt in.
+
+- In UI code, annotate reference types (`Server?`, `RelayCommand?`) and handle the null case
+  correctly. When resolving a nullable warning, fix the actual null path — do not mask it with a
+  fallback value or a `!` that hides a real bug. Prefer `null!` initialization only for fields
+  that are genuinely assigned before use (e.g. DI-injected or set in a lifecycle hook), to avoid
+  cascading warnings (per `CLAUDE.md`).
+- In non-UI projects, nullable annotations are not required and generally absent.
+
+## Documentation Comments
+
+- Public FlamingIRC and PluginFramework API surface is documented with XML doc comments
+  (`/// <summary>`), often with `<remarks>`, `<example>`, and `<see cref="..."/>` cross-references.
+- MutinyIRC.Common uses XML docs for non-obvious public members.
+- **Exactly one space after `///`**, with no extra indentation on prose. Indent nested XML with
+  spaces, one level (2 spaces) per level of nesting — never tabs:
+
+  ```csharp
+  /// <summary>
+  /// A PONG message is a reply to a server PING message.
+  /// </summary>
+  /// <remarks>
+  /// Possible Errors
+  /// <list type="bullet">
+  ///   <item><description>ERR_NOORIGIN</description></item>
+  ///   <item><description>ERR_NOSUCHSERVER</description></item>
+  /// </list>
+  /// </remarks>
+  ```
+- Follow the documentation voice described in `CLAUDE.md`: explain the *why* before the *how*, use
+  second person, keep paragraphs tight, and pair concepts with short concrete examples.
+
+## Architecture Conventions
+
+These are load-bearing design rules (see `CLAUDE.md` for the full rationale):
+
+- **Layering:** `FlamingIRC` (protocol) → `MutinyIRC.Common` (domain) → `MutinyIRC.UI` (MVVM).
+  Logic shared beyond the UI belongs in `MutinyIRC.Common`, never in `MutinyIRC.UI`.
+- **Event-driven flow:** IRC events propagate `Listener` → `Server`/`Channel` → ViewModels via C#
+  events, not a message bus.
+- **FlamingIRC is a public framework.** Do not delete unused public members merely because nothing
+  in this repo calls them; remove a public member only when it has no plausible use case.
+- **MVVM:** UI uses `CommunityToolkit.Mvvm` (`ObservableObject`, `SetProperty`, `RelayCommand`)
+  and Ninject for DI, wired in `CompositionRoot`.
+- **Plugins/commands** are discovered by reflection from the `plugins/` folder via the `[Plugin]`
+  attribute — they are not registered statically.
+
+## Testing
+
+- **Framework:** NUnit 4 with FakeItEasy for mocking.
+- UI tests use `Avalonia.Headless.NUnit`; see the `avalonia-headless-test` skill for patterns.
+- Test projects mirror the layer they cover: `FlamingIRC.Tests`, `MutinyIRC.Tests`,
+  `MutinyIRC.UI.Tests`, `MutinyIRC.PluginFramework.Tests`.
+- `InternalsVisibleTo` exposes internals to the matching test project (e.g. FlamingIRC →
+  FlamingIRC.Tests).
+
+## Source Control
+
+- **Do not commit without asking first.** Suggest a commit message and let the maintainer decide.
+- **Commit message prefix:** `[FlamingIRC]` or `[MutinyIRC]` depending on which code changed.
+- **One line** per commit message, except for significant architectural changes.
+- **No `Co-Authored-By` trailers.**
+
+---
+
+## Known Contradictions
+
+These are the places where the `.editorconfig`, the codebase, and/or `CLAUDE.md` disagree, or
+where the codebase is inconsistent with itself. Each needs a decision.
+
+### 1. FlamingIRC legacy fields do not follow the field naming rule
+
+~35 private fields in the legacy FlamingIRC socket subsystem (`Dcc/`, `Ctcp/`, `Listener`,
+`UserList`, `ServerProperties`) use bare `camelCase` instead of `_camelCase`. This is why the
+naming rule sits at `warning` rather than `error`. The subsystem is internally consistent, has
+thin test coverage, and uses collision-prone bare names (`buffer`, `socket`, `thread`, `server`,
+`list`) that a text-based rename would corrupt. **Decision needed:** migrate them via a
+Roslyn-aware rename (safe against shadowing), or leave the legacy subsystem on its own convention
+permanently.
+
+### 2. GPL license headers are inconsistent
+
+The full GPLv2 header appears on **26 legacy `FlamingIRC` files** (`Sender.cs`, `Listener.cs`,
+`Connection.cs`, the `Dcc/` and `Ctcp/` trees, etc.) but is **absent** from newer FlamingIRC files
+(`Events/*`, `IConnection.cs`, `ThreadHelper.cs`, `Extensions.cs`) and from **every other
+project** (`MutinyIRC.Common`, UI, etc. have no header). **Decision needed:** either add the
+header to all FlamingIRC files (it is a separately-licensed framework), drop it entirely, or
+document that only original-provenance files carry it.
+
+### 3. `IDE0044` (readonly) is silenced but immutability is otherwise favored
+
+`dotnet_diagnostic.IDE0044.severity = silent` disables the "add readonly modifier" suggestion, yet
+much of the code deliberately uses `readonly`/`static readonly` (e.g. `_reconnectGate`,
+`ReconnectBaseDelay`). **Decision needed:** re-enabling `IDE0044` as a suggestion would nudge
+fields toward `readonly` where possible without breaking the build. Low-risk; worth reconsidering.
+
+### 4. String formatting style is mixed
+
+Both `string.Format("{0} ({1})", ...)` (e.g. `ChannelViewModel.Name`) and string interpolation
+appear. No rule governs this. **Decision needed:** prefer interpolation for new code? (Recommended,
+but purely stylistic — flagging for consistency only.)
+
+### 5. Line-length hint is ReSharper-only
+
+`resharper_csharp_max_line_length = 100` is honored by ReSharper/Rider but not by `dotnet format`
+or the build, and `CLAUDE.md` prose wraps at ~120. Editor-dependent. **Decision needed:** none
+required, but be aware the 100-column limit is not enforced in CI.
