@@ -1,9 +1,9 @@
-﻿namespace MutinyIRC.UI.ViewModels;
-
-using System;
+﻿using System;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
+namespace MutinyIRC.UI.ViewModels;
 
 public abstract class ViewModelBase : ObservableObject
 {
@@ -14,10 +14,10 @@ public abstract class ViewModelBase : ObservableObject
         set => SetProperty(ref _name, value);
     }
 
-    private RelayCommand? closeCommand;
+    private RelayCommand? _closeCommand;
     public ICommand CloseCommand
     {
-        get { return closeCommand ?? (closeCommand = new RelayCommand(Close, CanClose)); }
+        get { return _closeCommand ?? (_closeCommand = new RelayCommand(Close, CanClose)); }
     }
 
     public event EventHandler? RequestClose;

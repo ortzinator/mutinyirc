@@ -2,8 +2,6 @@
 
 namespace MutinyIRC.UI;
 
-using Resources;
-
 internal static class SocketErrorTranslator
 {
     public static string GetMessage(int errorCode)

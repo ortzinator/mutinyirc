@@ -1,10 +1,11 @@
-namespace MutinyIRC.UI.ViewModels;
 
 using System;
 using FlamingIRC;
-using Common;
-using PluginFramework;
-using Resources;
+using MutinyIRC.Common;
+using MutinyIRC.PluginFramework;
+using MutinyIRC.UI.Resources;
+
+namespace MutinyIRC.UI.ViewModels;
 
 public class PrivateMessageViewModel : IrcViewModel
 {

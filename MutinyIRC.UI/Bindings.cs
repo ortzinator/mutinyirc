@@ -4,8 +4,6 @@ using MutinyIRC.PluginFramework;
 
 namespace MutinyIRC.UI;
 
-using ViewModels;
-
 internal class Bindings : NinjectModule
 {
     public override void Load()

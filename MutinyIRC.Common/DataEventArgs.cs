@@ -1,14 +1,13 @@
 ﻿using System;
 
-namespace MutinyIRC.Common
-{
-    public class DataEventArgs<T> : EventArgs
-    {
-        public DataEventArgs(T data)
-        {
-            Data = data;
-        }
+namespace MutinyIRC.Common;
 
-        public T Data { get; private set; }
+public class DataEventArgs<T> : EventArgs
+{
+    public DataEventArgs(T data)
+    {
+        Data = data;
     }
+
+    public T Data { get; private set; }
 }

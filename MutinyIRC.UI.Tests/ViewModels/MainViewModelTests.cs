@@ -11,11 +11,11 @@ using MutinyIRC.UI.ViewModels;
 namespace MutinyIRC.UI.Tests.ViewModels;
 
 /// <summary>
-///   Regression coverage for the duplicate-panel bug. After a dropped connection the client
-///   reconnects and rejoins its channels; because a <see cref="Channel"/> survives in
-///   <c>Server.Channels</c> across the drop, the rejoin re-fires <c>JoinSelf</c> for a channel
-///   whose <see cref="ChannelViewModel"/> panel is still open. MainViewModel must reuse that
-///   panel rather than open a second one.
+/// Regression coverage for the duplicate-panel bug. After a dropped connection the client
+/// reconnects and rejoins its channels; because a <see cref="Channel"/> survives in
+/// <c>Server.Channels</c> across the drop, the rejoin re-fires <c>JoinSelf</c> for a channel
+/// whose <see cref="ChannelViewModel"/> panel is still open. MainViewModel must reuse that
+/// panel rather than open a second one.
 /// </summary>
 [TestFixture]
 public class MainViewModelTests

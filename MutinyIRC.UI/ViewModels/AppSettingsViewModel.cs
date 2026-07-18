@@ -1,6 +1,6 @@
-﻿namespace MutinyIRC.UI.ViewModels;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-using CommunityToolkit.Mvvm.ComponentModel;
+namespace MutinyIRC.UI.ViewModels;
 
 public partial class AppSettingsViewModel : ObservableObject
 {

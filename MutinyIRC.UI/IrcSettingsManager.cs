@@ -1,12 +1,12 @@
-﻿namespace MutinyIRC.UI;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Common;
+using MutinyIRC.Common;
+
+namespace MutinyIRC.UI;
 
 public sealed class IrcSettingsManager
 {

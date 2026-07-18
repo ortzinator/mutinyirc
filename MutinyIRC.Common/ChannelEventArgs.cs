@@ -1,14 +1,13 @@
 ﻿using System;
 
-namespace MutinyIRC.Common
-{
-    public class ChannelEventArgs : EventArgs
-    {
-        public ChannelEventArgs(Channel channel)
-        {
-            Channel = channel;
-        }
+namespace MutinyIRC.Common;
 
-        public Channel Channel { get; private set; }
+public class ChannelEventArgs : EventArgs
+{
+    public ChannelEventArgs(Channel channel)
+    {
+        Channel = channel;
     }
+
+    public Channel Channel { get; private set; }
 }

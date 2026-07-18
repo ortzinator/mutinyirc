@@ -1,14 +1,13 @@
-namespace MutinyIRC.PluginFramework.Tests.Fixtures
-{
-    using System;
-    using MutinyIRC.PluginFramework;
+using System;
+using MutinyIRC.PluginFramework;
 
-    [Plugin("throws")]
-    public class ThrowingCommand : ICommand
+namespace MutinyIRC.PluginFramework.Tests.Fixtures;
+
+[Plugin("throws")]
+public class ThrowingCommand : ICommand
+{
+    public CommandResultInfo Execute(TestMessageContext ctx)
     {
-        public CommandResultInfo Execute(TestMessageContext ctx)
-        {
-            throw new InvalidOperationException("boom");
-        }
+        throw new InvalidOperationException("boom");
     }
 }

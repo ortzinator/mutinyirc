@@ -1,6 +1,6 @@
-﻿namespace MutinyIRC.UI;
+﻿using System.Collections.Generic;
 
-using System.Collections.Generic;
+namespace MutinyIRC.UI;
 
 public class NetworkSettingsList : List<NetworkSettings>
 {

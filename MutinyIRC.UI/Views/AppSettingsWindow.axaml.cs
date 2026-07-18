@@ -1,8 +1,8 @@
-﻿namespace MutinyIRC.UI.Views;
-
-using global::Avalonia.Controls;
+﻿using global::Avalonia.Controls;
 using global::Avalonia.Interactivity;
-using ViewModels;
+using MutinyIRC.UI.ViewModels;
+
+namespace MutinyIRC.UI.Views;
 
 public partial class AppSettingsWindow : Window
 {

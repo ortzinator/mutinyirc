@@ -1,8 +1,8 @@
-﻿namespace MutinyIRC.UI;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+
+namespace MutinyIRC.UI;
 
 public class ServerSettings : IEquatable<ServerSettings>
 {

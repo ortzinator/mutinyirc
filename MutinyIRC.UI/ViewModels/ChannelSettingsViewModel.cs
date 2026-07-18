@@ -1,7 +1,8 @@
-namespace MutinyIRC.UI.ViewModels;
 
-using Common;
+using MutinyIRC.Common;
 using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace MutinyIRC.UI.ViewModels;
 
 public partial class ChannelSettingsViewModel : ObservableObject
 {

@@ -1,9 +1,9 @@
-﻿namespace MutinyIRC.UI.ViewModels.Design;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using FlamingIRC;
-using Common;
+using MutinyIRC.Common;
+
+namespace MutinyIRC.UI.ViewModels.Design;
 
 public class DesignChannelViewModel : IrcViewModel
 {

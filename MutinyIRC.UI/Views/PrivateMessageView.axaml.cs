@@ -1,6 +1,7 @@
-namespace MutinyIRC.UI.Views;
 
 using global::Avalonia.Controls;
+
+namespace MutinyIRC.UI.Views;
 
 public partial class PrivateMessageView : UserControl
 {

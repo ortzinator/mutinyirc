@@ -1,4 +1,3 @@
-namespace MutinyIRC.UI.Controls;
 
 using System;
 using System.Linq;
@@ -14,10 +13,11 @@ using global::Avalonia.Styling;
 using global::Avalonia.Threading;
 using global::Avalonia.VisualTree;
 
+namespace MutinyIRC.UI.Controls;
 /// <summary>
-///   A channel topic strip that shows a single trimmed line and expands to the full, selectable
-///   text on click, sliding back to one line when focus or a click moves elsewhere. Hides itself
-///   while the topic is empty.
+/// A channel topic strip that shows a single trimmed line and expands to the full, selectable
+/// text on click, sliding back to one line when focus or a click moves elsewhere. Hides itself
+/// while the topic is empty.
 /// </summary>
 public partial class TopicBar : UserControl
 {

@@ -1,7 +1,7 @@
-﻿namespace MutinyIRC.UI.Views;
-
-using global::Avalonia.Controls;
+﻿using global::Avalonia.Controls;
 using global::Avalonia.Interactivity;
+
+namespace MutinyIRC.UI.Views;
 
 public partial class MainWindow : Window
 {

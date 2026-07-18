@@ -1,23 +1,23 @@
-﻿namespace MutinyIRC.UI.Controls;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using global::Avalonia.Controls;
 using global::Avalonia.Input;
-using ViewModels;
+using MutinyIRC.UI.ViewModels;
+
+namespace MutinyIRC.UI.Controls;
 
 public class CommandTextBox : TextBox
 {
-    private int historyIndex;
-    private List<string> cmdHistory;
+    private int _historyIndex;
+    private List<string> _cmdHistory;
 
     // ── Tab-completion cycle state ──
     // Set when a Tab completion is in progress so repeated Tabs cycle through matches in place.
     // Any other key, a submit, or history navigation clears it via ResetCompletion().
-    private int completionStart;        // index in the text where the completed token begins
-    private List<string>? completionMatches;
-    private int completionIndex;        // which match is currently inserted
-    private bool completing;            // guards against our own Selection/Text edits resetting state
+    private int _completionStart;        // index in the text where the completed token begins
+    private List<string>? _completionMatches;
+    private int _completionIndex;        // which match is currently inserted
+    private bool _completing;            // guards against our own Selection/Text edits resetting state
 
     /// <summary>Appended after a completed nick when it's the first word on the line.</summary>
     private const string StartOfLineSuffix = ": ";
@@ -28,7 +28,7 @@ public class CommandTextBox : TextBox
 
     public CommandTextBox()
     {
-        cmdHistory = new List<string>(40);
+        _cmdHistory = new List<string>(40);
         AddHandler(KeyDownEvent, HandleKeyDown, handledEventsToo: true);
     }
 
@@ -38,16 +38,16 @@ public class CommandTextBox : TextBox
         var text = Text;
         if (!string.IsNullOrWhiteSpace(text))
         {
-            if (historyIndex != cmdHistory.Count)
-                cmdHistory.RemoveAt(historyIndex);
-            cmdHistory.Add(text);
+            if (_historyIndex != _cmdHistory.Count)
+                _cmdHistory.RemoveAt(_historyIndex);
+            _cmdHistory.Add(text);
 
             var vm = DataContext as IrcViewModel;
             vm?.ExecuteCommand.Execute(text);
 
             CommandEntered?.Invoke(this, new CommandEventArgs(text));
             Clear();
-            historyIndex = cmdHistory.Count;
+            _historyIndex = _cmdHistory.Count;
         }
     }
 
@@ -66,10 +66,10 @@ public class CommandTextBox : TextBox
                 break;
 
             case Key.Up:
-                if (historyIndex > 0)
+                if (_historyIndex > 0)
                 {
-                    historyIndex--;
-                    Text = cmdHistory[historyIndex];
+                    _historyIndex--;
+                    Text = _cmdHistory[_historyIndex];
                     CaretIndex = Text.Length;
                     e.Handled = true;
                 }
@@ -77,23 +77,23 @@ public class CommandTextBox : TextBox
 
             case Key.Down:
                 var text = Text;
-                if (historyIndex == cmdHistory.Count && !string.IsNullOrWhiteSpace(text))
+                if (_historyIndex == _cmdHistory.Count && !string.IsNullOrWhiteSpace(text))
                 {
-                    cmdHistory.Add(text);
-                    historyIndex = cmdHistory.Count;
+                    _cmdHistory.Add(text);
+                    _historyIndex = _cmdHistory.Count;
                     Clear();
                     e.Handled = true;
                 }
-                else if (historyIndex == cmdHistory.Count - 1)
+                else if (_historyIndex == _cmdHistory.Count - 1)
                 {
-                    historyIndex++;
+                    _historyIndex++;
                     Clear();
                     e.Handled = true;
                 }
-                else if (historyIndex < cmdHistory.Count)
+                else if (_historyIndex < _cmdHistory.Count)
                 {
-                    historyIndex++;
-                    Text = cmdHistory[historyIndex];
+                    _historyIndex++;
+                    Text = _cmdHistory[_historyIndex];
                     CaretIndex = Text.Length;
                     e.Handled = true;
                 }
@@ -107,16 +107,16 @@ public class CommandTextBox : TextBox
     }
 
     /// <summary>
-    ///   Completes the nickname being typed at the caret. The first Tab replaces the partial token
-    ///   with the first matching nick; each further Tab cycles to the next match in place.
+    /// Completes the nickname being typed at the caret. The first Tab replaces the partial token
+    /// with the first matching nick; each further Tab cycles to the next match in place.
     /// </summary>
     private void CompleteNick()
     {
         // Already mid-cycle: advance to the next match.
-        if (completionMatches != null)
+        if (_completionMatches != null)
         {
-            completionIndex = (completionIndex + 1) % completionMatches.Count;
-            ApplyCompletion(completionMatches[completionIndex]);
+            _completionIndex = (_completionIndex + 1) % _completionMatches.Count;
+            ApplyCompletion(_completionMatches[_completionIndex]);
             return;
         }
 
@@ -144,36 +144,36 @@ public class CommandTextBox : TextBox
         if (matches.Count == 0)
             return;
 
-        completionStart = start;
-        completionMatches = matches;
-        completionIndex = 0;
+        _completionStart = start;
+        _completionMatches = matches;
+        _completionIndex = 0;
         ApplyCompletion(matches[0]);
     }
 
     /// <summary>
-    ///   Replaces the token from <see cref="completionStart"/> through the current caret with
-    ///   <paramref name="nick"/>, adding the start-of-line suffix or a trailing space as appropriate.
+    /// Replaces the token from <see cref="_completionStart"/> through the current caret with
+    /// <paramref name="nick"/>, adding the start-of-line suffix or a trailing space as appropriate.
     /// </summary>
     private void ApplyCompletion(string nick)
     {
         var text = Text ?? string.Empty;
-        int caret = Math.Clamp(CaretIndex, completionStart, text.Length);
+        int caret = Math.Clamp(CaretIndex, _completionStart, text.Length);
 
-        string suffix = completionStart == 0 ? StartOfLineSuffix : " ";
+        string suffix = _completionStart == 0 ? StartOfLineSuffix : " ";
         string replacement = nick + suffix;
 
-        completing = true;
-        Text = text.Substring(0, completionStart) + replacement + text.Substring(caret);
-        CaretIndex = completionStart + replacement.Length;
-        completing = false;
+        _completing = true;
+        Text = text.Substring(0, _completionStart) + replacement + text.Substring(caret);
+        CaretIndex = _completionStart + replacement.Length;
+        _completing = false;
     }
 
     private void ResetCompletion()
     {
-        if (completing)
+        if (_completing)
             return;   // don't tear down state while we're applying our own edit
 
-        completionMatches = null;
-        completionIndex = 0;
+        _completionMatches = null;
+        _completionIndex = 0;
     }
 }

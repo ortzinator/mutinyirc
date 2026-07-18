@@ -1,8 +1,7 @@
-﻿namespace MutinyIRC.PluginFramework
+﻿namespace MutinyIRC.PluginFramework;
+
+public enum Result
 {
-    public enum Result
-    {
-        Success,
-        Fail
-    }
+    Success,
+    Fail
 }

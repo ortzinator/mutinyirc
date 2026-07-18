@@ -1,76 +1,75 @@
-namespace MutinyIRC.Tests
+using System.Collections.Generic;
+using FakeItEasy;
+using FlamingIRC;
+using MutinyIRC.Commands;
+using MutinyIRC.Common;
+using MutinyIRC.PluginFramework;
+using NUnit.Framework;
+
+namespace MutinyIRC.Tests;
+
+[TestFixture]
+public class InviteCommandTests
 {
-    using System.Collections.Generic;
-    using FakeItEasy;
-    using FlamingIRC;
-    using MutinyIRC.Commands;
-    using MutinyIRC.Common;
-    using MutinyIRC.PluginFramework;
-    using NUnit.Framework;
+    private ISender _fakeSender;
+    private Server _server;
+    private Channel _channel;
+    private PrivateMessageSession _pm;
+    private PluginManager _manager;
 
-    [TestFixture]
-    public class InviteCommandTests
+    [SetUp]
+    public void Setup()
     {
-        private ISender _fakeSender;
-        private Server _server;
-        private Channel _channel;
-        private PrivateMessageSession _pm;
-        private PluginManager _manager;
+        _fakeSender = A.Fake<ISender>();
+        var fakeConn = A.Fake<IConnection>();
+        A.CallTo(() => fakeConn.Sender).Returns(_fakeSender);
+        _server = new Server { Connection = fakeConn };
+        _channel = new Channel(_server, "#mutiny");
+        _pm = new PrivateMessageSession(_server, new User { Nick = "someone" });
 
-        [SetUp]
-        public void Setup()
+        _manager = new PluginManager();
+        var type = typeof(Invite);
+        _manager._commands.Add(type.FullName,
+            new CommandInfo(type.Assembly.Location, type.FullName, "invite", typeof(ICommand)));
+    }
+
+    private CommandResultInfo Dispatch(MessageContext context, params string[] args)
+        => _manager.ExecuteCommand(new CommandExecutionInfo
         {
-            _fakeSender = A.Fake<ISender>();
-            var fakeConn = A.Fake<IConnection>();
-            A.CallTo(() => fakeConn.Sender).Returns(_fakeSender);
-            _server = new Server { Connection = fakeConn };
-            _channel = new Channel(_server, "#mutiny");
-            _pm = new PrivateMessageSession(_server, new User { Nick = "someone" });
+            Name = "invite",
+            Context = context,
+            ParameterList = new List<object>(args),
+        });
 
-            _manager = new PluginManager();
-            var type = typeof(Invite);
-            _manager._commands.Add(type.FullName,
-                new CommandInfo(type.Assembly.Location, type.FullName, "invite", typeof(ICommand)));
-        }
+    [Test]
+    public void NickAndChannel_SendsInvite()
+    {
+        Dispatch(_channel, "someone", "#other");
 
-        private CommandResultInfo Dispatch(MessageContext context, params string[] args)
-            => _manager.ExecuteCommand(new CommandExecutionInfo
-            {
-                Name = "invite",
-                Context = context,
-                ParameterList = new List<object>(args),
-            });
+        A.CallTo(() => _fakeSender.Invite("someone", "#other")).MustHaveHappened();
+    }
 
-        [Test]
-        public void NickAndChannel_SendsInvite()
-        {
-            Dispatch(_channel, "someone", "#other");
+    [Test]
+    public void NickOnly_FromChannel_InvitesToCurrentChannel()
+    {
+        Dispatch(_channel, "someone");
 
-            A.CallTo(() => _fakeSender.Invite("someone", "#other")).MustHaveHappened();
-        }
+        A.CallTo(() => _fakeSender.Invite("someone", "#mutiny")).MustHaveHappened();
+    }
 
-        [Test]
-        public void NickOnly_FromChannel_InvitesToCurrentChannel()
-        {
-            Dispatch(_channel, "someone");
+    [Test]
+    public void NickAndChannel_FromServer_SendsInvite()
+    {
+        Dispatch(_server, "someone", "#other");
 
-            A.CallTo(() => _fakeSender.Invite("someone", "#mutiny")).MustHaveHappened();
-        }
+        A.CallTo(() => _fakeSender.Invite("someone", "#other")).MustHaveHappened();
+    }
 
-        [Test]
-        public void NickAndChannel_FromServer_SendsInvite()
-        {
-            Dispatch(_server, "someone", "#other");
+    [Test]
+    public void NickAndChannel_FromPrivateMessage_SendsInvite()
+    {
+        Dispatch(_pm, "someone", "#other");
 
-            A.CallTo(() => _fakeSender.Invite("someone", "#other")).MustHaveHappened();
-        }
-
-        [Test]
-        public void NickAndChannel_FromPrivateMessage_SendsInvite()
-        {
-            Dispatch(_pm, "someone", "#other");
-
-            A.CallTo(() => _fakeSender.Invite("someone", "#other")).MustHaveHappened();
-        }
+        A.CallTo(() => _fakeSender.Invite("someone", "#other")).MustHaveHappened();
     }
 }

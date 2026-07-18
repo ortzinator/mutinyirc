@@ -1,11 +1,11 @@
-﻿namespace MutinyIRC.UI.Converters;
-
-using System;
+﻿using System;
 using System.Globalization;
 using global::Avalonia;
 using global::Avalonia.Data.Converters;
 using global::Avalonia.Media;
-using ViewModels;
+using MutinyIRC.UI.ViewModels;
+
+namespace MutinyIRC.UI.Converters;
 
 public class ModeToBrushConverter : IValueConverter
 {

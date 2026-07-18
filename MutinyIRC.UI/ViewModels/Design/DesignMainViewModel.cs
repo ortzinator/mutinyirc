@@ -1,6 +1,6 @@
-﻿namespace MutinyIRC.UI.ViewModels.Design;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-using CommunityToolkit.Mvvm.ComponentModel;
+namespace MutinyIRC.UI.ViewModels.Design;
 
 public class DesignMainViewModel : ObservableObject
 {

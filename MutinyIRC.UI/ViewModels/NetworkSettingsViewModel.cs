@@ -1,9 +1,10 @@
-namespace MutinyIRC.UI.ViewModels;
 
 using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
+namespace MutinyIRC.UI.ViewModels;
 
 public partial class NetworkSettingsViewModel : ObservableObject
 {

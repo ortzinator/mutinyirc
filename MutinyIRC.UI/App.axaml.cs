@@ -1,11 +1,11 @@
-﻿namespace MutinyIRC.UI;
-
-using global::Avalonia;
+﻿using global::Avalonia;
 using global::Avalonia.Controls.ApplicationLifetimes;
 using global::Avalonia.Markup.Xaml;
-using Common;
-using ViewModels;
-using Views;
+using MutinyIRC.Common;
+using MutinyIRC.UI.ViewModels;
+using MutinyIRC.UI.Views;
+
+namespace MutinyIRC.UI;
 
 public partial class App : Application
 {

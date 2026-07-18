@@ -1,21 +1,21 @@
 ﻿using Ninject;
 
-namespace MutinyIRC.UI.ViewModels;
-
 using System;
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.Input;
 using FlamingIRC;
-using Common;
-using PluginFramework;
-using Resources;
+using MutinyIRC.Common;
+using MutinyIRC.PluginFramework;
+using MutinyIRC.UI.Resources;
+
+namespace MutinyIRC.UI.ViewModels;
 
 public class ChannelViewModel : IrcViewModel
 {
     private Channel _channel;
     public Channel Channel => _channel;
     public override Server? OwningServer => _channel.Server;
-    private List<UserViewModel> userList = new();
+    private List<UserViewModel> _userList = new();
     private PluginManager _pluginManager;
 
     public PluginManager PluginManager => _pluginManager;
@@ -39,11 +39,11 @@ public class ChannelViewModel : IrcViewModel
         }
     }
 
-    public List<UserViewModel> UserList => userList;
+    public List<UserViewModel> UserList => _userList;
 
     /// <summary>Bare nicks of everyone in the channel, in the user list's display order.</summary>
     public override IReadOnlyList<string> CompletionCandidates
-        => userList.ConvertAll(u => u.Nick);
+        => _userList.ConvertAll(u => u.Nick);
 
     public ChannelViewModel(Channel channel, PluginManager pluginManager)
     {
@@ -142,10 +142,10 @@ public class ChannelViewModel : IrcViewModel
 
     private void NickList_Updated(object? sender, EventArgs e)
     {
-        userList = new List<UserViewModel>();
+        _userList = new List<UserViewModel>();
         foreach (User user in _channel.Users)
-            userList.Add(new UserViewModel(user));
-        userList.Sort((user1, user2) => user1.CompareTo(user2));
+            _userList.Add(new UserViewModel(user));
+        _userList.Sort((user1, user2) => user1.CompareTo(user2));
         OnPropertyChanged("UserList");
         OnPropertyChanged("Name");
     }

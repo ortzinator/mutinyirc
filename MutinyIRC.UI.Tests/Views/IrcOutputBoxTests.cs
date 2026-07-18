@@ -14,17 +14,17 @@ namespace MutinyIRC.UI.Tests.Views;
 /// Regression tests for IrcOutputBox scroll-pinning behavior.
 ///
 /// Bug 1 — System.Reactive dependency:
-///   A previous version of IrcOutputBox used System.Reactive's Observable.FromEventPattern
-///   to wire the CollectionChanged subscription.  When System.Reactive was removed from the
-///   project references the scroll-pinning silently stopped working.  The rewrite to plain
-///   C# events has no such dependency.  These tests run in a project that does NOT reference
-///   System.Reactive, so compilation alone validates that regression is gone.
+/// A previous version of IrcOutputBox used System.Reactive's Observable.FromEventPattern
+/// to wire the CollectionChanged subscription.  When System.Reactive was removed from the
+/// project references the scroll-pinning silently stopped working.  The rewrite to plain
+/// C# events has no such dependency.  These tests run in a project that does NOT reference
+/// System.Reactive, so compilation alone validates that regression is gone.
 ///
 /// Bug 2 — Scroll pin broken after ItemsSource rebind:
-///   The old code subscribed once in the constructor and never re-subscribed when the
-///   ItemsSource binding resolved later (asynchronously via DataContext).  New items then
-///   didn't trigger the scroll-to-bottom handler.  The fix listens to
-///   ItemsControl.ItemsSourceProperty changes and re-wires the subscription each time.
+/// The old code subscribed once in the constructor and never re-subscribed when the
+/// ItemsSource binding resolved later (asynchronously via DataContext).  New items then
+/// didn't trigger the scroll-to-bottom handler.  The fix listens to
+/// ItemsControl.ItemsSourceProperty changes and re-wires the subscription each time.
 /// </summary>
 [TestFixture]
 public class IrcOutputBoxTests

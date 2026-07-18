@@ -1,14 +1,13 @@
 ﻿using System;
 
-namespace MutinyIRC.Common
-{
-    public class ServerEventArgs : EventArgs
-    {
-        public ServerEventArgs(Server server)
-        {
-            Server = server;
-        }
+namespace MutinyIRC.Common;
 
-        public Server Server { get; private set; }
+public class ServerEventArgs : EventArgs
+{
+    public ServerEventArgs(Server server)
+    {
+        Server = server;
     }
+
+    public Server Server { get; private set; }
 }

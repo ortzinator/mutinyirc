@@ -1,6 +1,5 @@
-﻿namespace MutinyIRC.PluginFramework
+﻿namespace MutinyIRC.PluginFramework;
+
+public interface ICommand : IPlugin
 {
-    public interface ICommand : IPlugin
-    {
-    }
 }

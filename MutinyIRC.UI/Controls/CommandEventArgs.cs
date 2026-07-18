@@ -1,6 +1,6 @@
-﻿namespace MutinyIRC.UI.Controls;
+﻿using System;
 
-using System;
+namespace MutinyIRC.UI.Controls;
 
 public class CommandEventArgs : EventArgs
 {

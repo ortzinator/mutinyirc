@@ -1,10 +1,10 @@
-﻿namespace MutinyIRC.UI.Views;
-
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using global::Avalonia;
 using global::Avalonia.Controls;
 using global::Avalonia.Input;
 using global::Avalonia.Threading;
+
+namespace MutinyIRC.UI.Views;
 
 public partial class IrcOutputBox : UserControl
 {

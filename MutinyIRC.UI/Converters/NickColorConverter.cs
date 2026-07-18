@@ -1,9 +1,9 @@
-﻿namespace MutinyIRC.UI.Converters;
-
-using System;
+﻿using System;
 using System.Globalization;
 using global::Avalonia.Data.Converters;
 using global::Avalonia.Media;
+
+namespace MutinyIRC.UI.Converters;
 
 public class NickColorConverter : IValueConverter
 {

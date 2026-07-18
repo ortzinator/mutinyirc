@@ -1,8 +1,8 @@
-﻿namespace MutinyIRC.UI.ViewModels;
-
-using System;
+﻿using System;
 using FlamingIRC;
 using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace MutinyIRC.UI.ViewModels;
 
 public class ChatItemViewModel : ObservableObject
 {

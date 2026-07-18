@@ -1,9 +1,9 @@
-﻿namespace MutinyIRC.UI;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+
+namespace MutinyIRC.UI;
 
 public sealed class AppSettings
 {
@@ -31,9 +31,9 @@ public sealed class AppSettings
     public string ThirdNick { get; set; } = "MutinyIRC__";
 
     /// <summary>
-    ///   Nicknames treated as server-side services. PRIVMSGs to or from these nicks
-    ///   bypass the PM tab UI and are routed to the server window. Edit the JSON file
-    ///   directly to customise; there is intentionally no settings UI.
+    /// Nicknames treated as server-side services. PRIVMSGs to or from these nicks
+    /// bypass the PM tab UI and are routed to the server window. Edit the JSON file
+    /// directly to customise; there is intentionally no settings UI.
     /// </summary>
     public List<string> ServiceNicks { get; set; } = new()
     {

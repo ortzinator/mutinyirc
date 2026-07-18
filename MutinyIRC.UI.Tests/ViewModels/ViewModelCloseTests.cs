@@ -58,8 +58,8 @@ public class ViewModelCloseTests
     /// <summary>
     /// Simulates the App.axaml.cs closing-guard pattern that prevented the SOE regression.
     /// Without the `closing` flag, the call chain:
-    ///   window.Closing → viewModel.Close() → RequestClose → window.Close()
-    ///   → window.Closing → viewModel.Close() → ... (SOE)
+    /// window.Closing → viewModel.Close() → RequestClose → window.Close()
+    /// → window.Closing → viewModel.Close() → ... (SOE)
     /// would cause infinite recursion.  The guard makes it a one-shot.
     /// </summary>
     [Test]

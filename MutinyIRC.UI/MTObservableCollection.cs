@@ -1,8 +1,8 @@
-﻿namespace MutinyIRC.UI;
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using global::Avalonia.Threading;
+
+namespace MutinyIRC.UI;
 
 public class MTObservableCollection<T> : ObservableCollection<T>
 {

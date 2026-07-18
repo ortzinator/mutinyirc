@@ -1,38 +1,37 @@
 ﻿using System;
 using FlamingIRC;
 
-namespace MutinyIRC.Common
+namespace MutinyIRC.Common;
+
+public class ChannelInfo
 {
-    public class ChannelInfo
+    public ChannelInfo(string name)
     {
-        public ChannelInfo(string name)
-        {
-            if (!Rfc2812Util.IsValidChannelName(name))
-                throw new ArgumentException("Invalid channel name", nameof(name));
+        if (!Rfc2812Util.IsValidChannelName(name))
+            throw new ArgumentException("Invalid channel name", nameof(name));
 
-            Name = name;
-        }
+        Name = name;
+    }
 
-        /// <summary>
-        /// Channel name, eg. #php
-        /// </summary>
-        public string Name { get; private set; }
+    /// <summary>
+    /// Channel name, eg. #php
+    /// </summary>
+    public string Name { get; private set; }
 
-        /// <summary>
-        /// The channel topic
-        /// </summary>
-        public string Topic { get; set; }
+    /// <summary>
+    /// The channel topic
+    /// </summary>
+    public string Topic { get; set; }
 
-        /// <summary>
-        /// The current key
-        /// </summary>
-        public string Key { get; set; } // TODO 2: Fully implement (wrong passwords, joining, changed key, etc.)
+    /// <summary>
+    /// The current key
+    /// </summary>
+    public string Key { get; set; } // TODO 2: Fully implement (wrong passwords, joining, changed key, etc.)
 
-        public int Limit { get; set; }
+    public int Limit { get; set; }
 
-        public override string ToString()
-        {
-            return string.Format("{0} - {1}", Name, Topic);
-        }
+    public override string ToString()
+    {
+        return string.Format("{0} - {1}", Name, Topic);
     }
 }

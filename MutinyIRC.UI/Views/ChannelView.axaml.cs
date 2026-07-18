@@ -1,10 +1,10 @@
-﻿namespace MutinyIRC.UI.Views;
-
-using global::Avalonia;
+﻿using global::Avalonia;
 using global::Avalonia.Controls;
 using global::Avalonia.Input;
 using global::Avalonia.Interactivity;
 using global::Avalonia.VisualTree;
+
+namespace MutinyIRC.UI.Views;
 
 public partial class ChannelView : UserControl
 {

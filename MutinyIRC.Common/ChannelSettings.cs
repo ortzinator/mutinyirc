@@ -3,54 +3,53 @@ using System.Xml.Serialization;
 using System.Xml.Schema;
 using System.Xml;
 
-namespace MutinyIRC.Common
+namespace MutinyIRC.Common;
+
+public class ChannelSettings : IXmlSerializable, IEquatable<ChannelSettings>
 {
-    public class ChannelSettings : IXmlSerializable, IEquatable<ChannelSettings>
+    public ChannelSettings(string name, bool autojoin, string description, string key)
+        : this(name, autojoin)
     {
-        public ChannelSettings(string name, bool autojoin, string description, string key)
-            : this(name, autojoin)
-        {
-            Description = description;
-            Key = key;
-        }
+        Description = description;
+        Key = key;
+    }
 
-        public ChannelSettings(string name, bool autojoin)
-        {
-            Name = name;
-            AutoJoin = autojoin;
-        }
+    public ChannelSettings(string name, bool autojoin)
+    {
+        Name = name;
+        AutoJoin = autojoin;
+    }
 
-        public ChannelSettings() { }
+    public ChannelSettings() { }
 
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Key { get; set; }
-        public bool AutoJoin { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public string Key { get; set; }
+    public bool AutoJoin { get; set; }
 
-        public XmlSchema GetSchema()
-        {
-            return null;
-        }
+    public XmlSchema GetSchema()
+    {
+        return null;
+    }
 
-        public void ReadXml(XmlReader reader)
-        {
-            Description = reader.GetAttribute("Description") ?? string.Empty;
-            Name = reader.GetAttribute("Name");
-            Key = reader.GetAttribute("Key");
-            AutoJoin = reader.GetAttribute("AutoJoin") == "True";
-        }
+    public void ReadXml(XmlReader reader)
+    {
+        Description = reader.GetAttribute("Description") ?? string.Empty;
+        Name = reader.GetAttribute("Name");
+        Key = reader.GetAttribute("Key");
+        AutoJoin = reader.GetAttribute("AutoJoin") == "True";
+    }
 
-        public void WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttributeString("Description", Description);
-            writer.WriteAttributeString("Name", Name);
-            writer.WriteAttributeString("Key", Key);
-            writer.WriteAttributeString("AutoJoin", AutoJoin.ToString());
-        }
+    public void WriteXml(XmlWriter writer)
+    {
+        writer.WriteAttributeString("Description", Description);
+        writer.WriteAttributeString("Name", Name);
+        writer.WriteAttributeString("Key", Key);
+        writer.WriteAttributeString("AutoJoin", AutoJoin.ToString());
+    }
 
-        public bool Equals(ChannelSettings other)
-        {
-            return other != null && other.Name == Name;
-        }
+    public bool Equals(ChannelSettings other)
+    {
+        return other != null && other.Name == Name;
     }
 }

@@ -1,8 +1,6 @@
 ﻿using Ninject;
 using Ninject.Parameters;
 
-namespace MutinyIRC.UI.ViewModels;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,8 +9,10 @@ using System.Windows.Input;
 using FlamingIRC;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Common;
-using PluginFramework;
+using MutinyIRC.Common;
+using MutinyIRC.PluginFramework;
+
+namespace MutinyIRC.UI.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {
@@ -34,8 +34,8 @@ public class MainViewModel : ViewModelBase
         _selectPanelCommand ??= new RelayCommand<IrcViewModel?>(SelectPanel);
 
     /// <summary>
-    ///   Makes <paramref name="panel"/> the active panel, deselecting whichever panel was
-    ///   previously selected. Passing null clears the selection.
+    /// Makes <paramref name="panel"/> the active panel, deselecting whichever panel was
+    /// previously selected. Passing null clears the selection.
     /// </summary>
     private void SelectPanel(IrcViewModel? panel)
     {
@@ -55,10 +55,10 @@ public class MainViewModel : ViewModelBase
     }
 
     /// <summary>
-    ///   Runs the one-time startup work that has external side effects: applies logging
-    ///   settings, auto-connects the configured servers, and loads plugins from disk. Kept out
-    ///   of the constructor so the view model can be created in tests without opening sockets or
-    ///   scanning the plugins directory. Call once, after construction.
+    /// Runs the one-time startup work that has external side effects: applies logging
+    /// settings, auto-connects the configured servers, and loads plugins from disk. Kept out
+    /// of the constructor so the view model can be created in tests without opening sockets or
+    /// scanning the plugins directory. Call once, after construction.
     /// </summary>
     public void Start()
     {
@@ -185,9 +185,9 @@ public class MainViewModel : ViewModelBase
     }
 
     /// <summary>
-    ///   When the panel being closed is the selected one, deselects it and selects the
-    ///   first remaining panel (if any). Call after the panel has been removed from
-    ///   <see cref="Panels"/> so the replacement is picked from what's left.
+    /// When the panel being closed is the selected one, deselects it and selects the
+    /// first remaining panel (if any). Call after the panel has been removed from
+    /// <see cref="Panels"/> so the replacement is picked from what's left.
     /// </summary>
     private void SelectNextAfterClosing(IrcViewModel closed)
     {

@@ -1,8 +1,8 @@
-﻿namespace MutinyIRC.UI;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Common;
+using MutinyIRC.Common;
+
+namespace MutinyIRC.UI;
 
 public class NetworkSettings : IEquatable<NetworkSettings>
 {

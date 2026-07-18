@@ -1,17 +1,16 @@
 ﻿using System;
 
-namespace MutinyIRC.Common
+namespace MutinyIRC.Common;
+
+public class DoubleDataEventArgs<TFirst, TSecond> : EventArgs
 {
-    public class DoubleDataEventArgs<TFirst, TSecond> : EventArgs
+    public DoubleDataEventArgs(TFirst first, TSecond second)
     {
-        public DoubleDataEventArgs(TFirst first, TSecond second)
-        {
-            First = first;
-            Second = second;
-        }
-
-        public TFirst First { get; private set; }
-
-        public TSecond Second { get; private set; }
+        First = first;
+        Second = second;
     }
+
+    public TFirst First { get; private set; }
+
+    public TSecond Second { get; private set; }
 }

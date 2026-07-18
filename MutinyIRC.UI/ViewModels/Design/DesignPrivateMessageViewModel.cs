@@ -1,6 +1,7 @@
-namespace MutinyIRC.UI.ViewModels.Design;
 
 using System;
+
+namespace MutinyIRC.UI.ViewModels.Design;
 
 public class DesignPrivateMessageViewModel : PrivateMessageViewModel
 {

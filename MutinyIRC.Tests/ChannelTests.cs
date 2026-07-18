@@ -4,476 +4,475 @@ using MutinyIRC.Common;
 using FakeItEasy;
 using FlamingIRC;
 
-namespace MutinyIRC.Tests
+namespace MutinyIRC.Tests;
+
+[TestFixture]
+public class ChannelTests
 {
-    [TestFixture]
-    public class ChannelTests
+    private Channel _channel;
+
+    [SetUp]
+    public void Setup()
     {
-        private Channel _channel;
+        Server serverMock = A.Fake<Server>();
+        _channel = new Channel(serverMock, "#mutiny");
+    }
 
-        [SetUp]
-        public void Setup()
+    [TearDown]
+    public void Teardown()
+    {
+        _channel = null;
+    }
+
+    [Test]
+    public void ShowTopic_TopicReceivedRegistered_EventFires()
+    {
+
+        bool eventWasRaised = false;
+        const string expected = "Topic here and stuff";
+
+        string topic = string.Empty;
+        _channel.TopicReceived += delegate (object sender, Common.DataEventArgs<string> e)
         {
-            Server serverMock = A.Fake<Server>();
-            _channel = new Channel(serverMock, "#mutiny");
-        }
+            eventWasRaised = true;
+            topic = e.Data;
+        };
+        _channel.ShowTopic(expected);
+        Assert.IsTrue(eventWasRaised, "TopicReceived event was not fired");
+        Assert.AreEqual(expected, topic);
+    }
 
-        [TearDown]
-        public void Teardown()
+    private static Channel CreateChannelWithConnection()
+    {
+        var fakeSender = A.Fake<ISender>();
+        var fakeConn = A.Fake<IConnection>();
+        A.CallTo(() => fakeConn.Sender).Returns(fakeSender);
+        var server = A.Fake<Server>();
+        A.CallTo(() => server.Connection).Returns(fakeConn);
+        A.CallTo(() => server.UserNick).Returns("TestUser");
+        return new Channel(server, "#mutiny");
+    }
+
+    [Test]
+    public void Act_Always_FiresOnAction()
+    {
+        var channel = CreateChannelWithConnection();
+        bool onActionFired = false;
+        channel.OnAction += (_, _) => onActionFired = true;
+
+        channel.Act("waves");
+
+        Assert.IsTrue(onActionFired, "OnAction must fire when the local user calls Act()");
+    }
+
+    [Test]
+    public void Act_Always_DoesNotFireMessagedChannel()
+    {
+        var channel = CreateChannelWithConnection();
+        bool messagedChannelFired = false;
+        channel.MessagedChannel += (_, _) => messagedChannelFired = true;
+
+        channel.Act("waves");
+
+        Assert.IsFalse(messagedChannelFired,
+            "Act() must not fire MessagedChannel; actions are not regular messages");
+    }
+
+    [Test]
+    [Category("Profile")]
+    public void Server_OnNick_Updates_Nick()
+    {
+        _channel.Users = A.Fake<UserList>();
+        User gotUser = new User("Ortzinator", "Ortzinator", "");
+        A.CallTo(() => _channel.Users.GetUser(A<User>.Ignored)).Returns(gotUser);
+
+        _channel.Server_OnNick(null, new NickChangeEventArgs(null, "BillNye"));
+
+        Assert.AreEqual(gotUser.Nick, "BillNye");
+    }
+
+    [Test]
+    public void Server_OnNick_UserInChannel_FiresNickChanged()
+    {
+        _channel.Users = A.Fake<UserList>();
+        User cached = new User("Ortzinator", "Ortzinator", "");
+        A.CallTo(() => _channel.Users.GetUser(A<User>.Ignored)).Returns(cached);
+
+        NickChangeEventArgs received = null;
+        _channel.NickChanged += (_, e) => received = e;
+
+        var args = new NickChangeEventArgs(new User("Ortzinator", "Ortzinator", ""), "BillNye");
+        _channel.Server_OnNick(null, args);
+
+        Assert.IsNotNull(received, "NickChanged must fire when the renamed user is in the channel");
+        Assert.AreEqual("BillNye", received.NewNick);
+    }
+
+    [Test]
+    public void Server_OnNick_UserNotInChannel_DoesNotFireNickChanged()
+    {
+        _channel.Users = A.Fake<UserList>();
+        A.CallTo(() => _channel.Users.GetUser(A<User>.Ignored)).Returns(null);
+
+        bool fired = false;
+        _channel.NickChanged += (_, _) => fired = true;
+
+        _channel.Server_OnNick(null, new NickChangeEventArgs(new User("Stranger", "Stranger", ""), "BillNye"));
+
+        Assert.IsFalse(fired, "NickChanged must not fire for a user that is not in this channel");
+    }
+
+    private static User MakeUser(string nick) => new User(nick, nick, "");
+
+    [Test]
+    public void UserJoin_NewUser_AddsToUserList()
+    {
+        var channel = CreateChannelWithConnection();
+
+        channel.UserJoin(MakeUser("Bob"));
+
+        Assert.IsNotNull(channel.Users.GetUser("Bob"),
+            "UserJoin must add the user to the channel's user list");
+    }
+
+    [Test]
+    public void UserJoin_SameNickTwice_NotAddedTwice()
+    {
+        var channel = CreateChannelWithConnection();
+
+        channel.UserJoin(MakeUser("Bob"));
+        channel.UserJoin(MakeUser("Bob"));
+
+        Assert.AreEqual(1, channel.Users.Count,
+            "UserJoin must not add a duplicate for a user already in the channel");
+    }
+
+    [Test]
+    public void UserJoin_Always_FiresOnJoin()
+    {
+        var channel = CreateChannelWithConnection();
+        bool onJoinFired = false;
+        channel.OnJoin += (_, _) => onJoinFired = true;
+
+        channel.UserJoin(MakeUser("Bob"));
+
+        Assert.IsTrue(onJoinFired, "UserJoin must fire OnJoin");
+    }
+
+    [Test]
+    public void RemoveUser_ExistingNick_RemovesUser()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+
+        channel.RemoveUser("Bob");
+
+        Assert.IsNull(channel.Users.GetUser("Bob"));
+    }
+
+    [Test]
+    public void RemoveUser_UnknownNick_DoesNotThrowOrChangeList()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+
+        Assert.DoesNotThrow(() => channel.RemoveUser("Nobody"));
+        Assert.AreEqual(1, channel.Users.Count);
+    }
+
+    [Test]
+    public void UserPart_OtherUser_RemovesUserAndFiresOtherUserParted()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+        bool partedFired = false;
+        channel.OtherUserParted += (_, _) => partedFired = true;
+
+        channel.UserPart(MakeUser("Bob"), "bye");
+
+        Assert.IsNull(channel.Users.GetUser("Bob"), "UserPart must remove the parting user");
+        Assert.IsTrue(partedFired, "UserPart must fire OtherUserParted for a non-local user");
+    }
+
+    [Test]
+    public void UserQuit_UserInChannel_RemovesUserAndFiresUserQuitted()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+        bool quitFired = false;
+        channel.UserQuitted += (_, _) => quitFired = true;
+
+        channel.UserQuit(MakeUser("Bob"), "quit");
+
+        Assert.IsNull(channel.Users.GetUser("Bob"), "UserQuit must remove the quitting user");
+        Assert.IsTrue(quitFired, "UserQuit must fire UserQuitted when the user was in the channel");
+    }
+
+    [Test]
+    public void UserQuit_UserNotInChannel_DoesNotFireUserQuitted()
+    {
+        var channel = CreateChannelWithConnection();
+        bool quitFired = false;
+        channel.UserQuitted += (_, _) => quitFired = true;
+
+        channel.UserQuit(MakeUser("Ghost"), "quit");
+
+        Assert.IsFalse(quitFired,
+            "UserQuit must not fire UserQuitted for a user who is not in the channel");
+    }
+
+    [Test]
+    public void UserKick_Always_RemovesKickeeAndFiresOnKick()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Victim"));
+        bool kickFired = false;
+        channel.OnKick += (_, _) => kickFired = true;
+
+        channel.UserKick(MakeUser("Op"), "Victim", "rules");
+
+        Assert.IsNull(channel.Users.GetUser("Victim"), "UserKick must remove the kicked user");
+        Assert.IsTrue(kickFired, "UserKick must fire OnKick");
+    }
+
+    [Test]
+    public void ApplyModeChanges_AddOperator_SetsAtPrefix()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+
+        channel.ApplyModeChanges(new[]
         {
-            _channel = null;
-        }
-
-        [Test]
-        public void ShowTopic_TopicReceivedRegistered_EventFires()
-        {
-
-            bool eventWasRaised = false;
-            const string expected = "Topic here and stuff";
-
-            string topic = string.Empty;
-            _channel.TopicReceived += delegate (object sender, Common.DataEventArgs<string> e)
+            new ChannelModeInfo
             {
-                eventWasRaised = true;
-                topic = e.Data;
-            };
-            _channel.ShowTopic(expected);
-            Assert.IsTrue(eventWasRaised, "TopicReceived event was not fired");
-            Assert.AreEqual(expected, topic);
-        }
+                Action = ModeAction.Add,
+                Mode = ChannelMode.ChannelOperator,
+                Parameter = "Bob"
+            }
+        });
 
-        private static Channel CreateChannelWithConnection()
+        Assert.AreEqual('@', channel.Users.GetUser("Bob").Prefix);
+    }
+
+    [Test]
+    public void ApplyModeChanges_AddVoice_SetsPlusPrefix()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+
+        channel.ApplyModeChanges(new[]
         {
-            var fakeSender = A.Fake<ISender>();
-            var fakeConn = A.Fake<IConnection>();
-            A.CallTo(() => fakeConn.Sender).Returns(fakeSender);
-            var server = A.Fake<Server>();
-            A.CallTo(() => server.Connection).Returns(fakeConn);
-            A.CallTo(() => server.UserNick).Returns("TestUser");
-            return new Channel(server, "#mutiny");
-        }
-
-        [Test]
-        public void Act_Always_FiresOnAction()
-        {
-            var channel = CreateChannelWithConnection();
-            bool onActionFired = false;
-            channel.OnAction += (_, _) => onActionFired = true;
-
-            channel.Act("waves");
-
-            Assert.IsTrue(onActionFired, "OnAction must fire when the local user calls Act()");
-        }
-
-        [Test]
-        public void Act_Always_DoesNotFireMessagedChannel()
-        {
-            var channel = CreateChannelWithConnection();
-            bool messagedChannelFired = false;
-            channel.MessagedChannel += (_, _) => messagedChannelFired = true;
-
-            channel.Act("waves");
-
-            Assert.IsFalse(messagedChannelFired,
-                "Act() must not fire MessagedChannel; actions are not regular messages");
-        }
-
-        [Test]
-        [Category("Profile")]
-        public void Server_OnNick_Updates_Nick()
-        {
-            _channel.Users = A.Fake<UserList>();
-            User gotUser = new User("Ortzinator", "Ortzinator", "");
-            A.CallTo(() => _channel.Users.GetUser(A<User>.Ignored)).Returns(gotUser);
-
-            _channel.Server_OnNick(null, new NickChangeEventArgs(null, "BillNye"));
-
-            Assert.AreEqual(gotUser.Nick, "BillNye");
-        }
-
-        [Test]
-        public void Server_OnNick_UserInChannel_FiresNickChanged()
-        {
-            _channel.Users = A.Fake<UserList>();
-            User cached = new User("Ortzinator", "Ortzinator", "");
-            A.CallTo(() => _channel.Users.GetUser(A<User>.Ignored)).Returns(cached);
-
-            NickChangeEventArgs received = null;
-            _channel.NickChanged += (_, e) => received = e;
-
-            var args = new NickChangeEventArgs(new User("Ortzinator", "Ortzinator", ""), "BillNye");
-            _channel.Server_OnNick(null, args);
-
-            Assert.IsNotNull(received, "NickChanged must fire when the renamed user is in the channel");
-            Assert.AreEqual("BillNye", received.NewNick);
-        }
-
-        [Test]
-        public void Server_OnNick_UserNotInChannel_DoesNotFireNickChanged()
-        {
-            _channel.Users = A.Fake<UserList>();
-            A.CallTo(() => _channel.Users.GetUser(A<User>.Ignored)).Returns(null);
-
-            bool fired = false;
-            _channel.NickChanged += (_, _) => fired = true;
-
-            _channel.Server_OnNick(null, new NickChangeEventArgs(new User("Stranger", "Stranger", ""), "BillNye"));
-
-            Assert.IsFalse(fired, "NickChanged must not fire for a user that is not in this channel");
-        }
-
-        private static User MakeUser(string nick) => new User(nick, nick, "");
-
-        [Test]
-        public void UserJoin_NewUser_AddsToUserList()
-        {
-            var channel = CreateChannelWithConnection();
-
-            channel.UserJoin(MakeUser("Bob"));
-
-            Assert.IsNotNull(channel.Users.GetUser("Bob"),
-                "UserJoin must add the user to the channel's user list");
-        }
-
-        [Test]
-        public void UserJoin_SameNickTwice_NotAddedTwice()
-        {
-            var channel = CreateChannelWithConnection();
-
-            channel.UserJoin(MakeUser("Bob"));
-            channel.UserJoin(MakeUser("Bob"));
-
-            Assert.AreEqual(1, channel.Users.Count,
-                "UserJoin must not add a duplicate for a user already in the channel");
-        }
-
-        [Test]
-        public void UserJoin_Always_FiresOnJoin()
-        {
-            var channel = CreateChannelWithConnection();
-            bool onJoinFired = false;
-            channel.OnJoin += (_, _) => onJoinFired = true;
-
-            channel.UserJoin(MakeUser("Bob"));
-
-            Assert.IsTrue(onJoinFired, "UserJoin must fire OnJoin");
-        }
-
-        [Test]
-        public void RemoveUser_ExistingNick_RemovesUser()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.UserJoin(MakeUser("Bob"));
-
-            channel.RemoveUser("Bob");
-
-            Assert.IsNull(channel.Users.GetUser("Bob"));
-        }
-
-        [Test]
-        public void RemoveUser_UnknownNick_DoesNotThrowOrChangeList()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.UserJoin(MakeUser("Bob"));
-
-            Assert.DoesNotThrow(() => channel.RemoveUser("Nobody"));
-            Assert.AreEqual(1, channel.Users.Count);
-        }
-
-        [Test]
-        public void UserPart_OtherUser_RemovesUserAndFiresOtherUserParted()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.UserJoin(MakeUser("Bob"));
-            bool partedFired = false;
-            channel.OtherUserParted += (_, _) => partedFired = true;
-
-            channel.UserPart(MakeUser("Bob"), "bye");
-
-            Assert.IsNull(channel.Users.GetUser("Bob"), "UserPart must remove the parting user");
-            Assert.IsTrue(partedFired, "UserPart must fire OtherUserParted for a non-local user");
-        }
-
-        [Test]
-        public void UserQuit_UserInChannel_RemovesUserAndFiresUserQuitted()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.UserJoin(MakeUser("Bob"));
-            bool quitFired = false;
-            channel.UserQuitted += (_, _) => quitFired = true;
-
-            channel.UserQuit(MakeUser("Bob"), "quit");
-
-            Assert.IsNull(channel.Users.GetUser("Bob"), "UserQuit must remove the quitting user");
-            Assert.IsTrue(quitFired, "UserQuit must fire UserQuitted when the user was in the channel");
-        }
-
-        [Test]
-        public void UserQuit_UserNotInChannel_DoesNotFireUserQuitted()
-        {
-            var channel = CreateChannelWithConnection();
-            bool quitFired = false;
-            channel.UserQuitted += (_, _) => quitFired = true;
-
-            channel.UserQuit(MakeUser("Ghost"), "quit");
-
-            Assert.IsFalse(quitFired,
-                "UserQuit must not fire UserQuitted for a user who is not in the channel");
-        }
-
-        [Test]
-        public void UserKick_Always_RemovesKickeeAndFiresOnKick()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.UserJoin(MakeUser("Victim"));
-            bool kickFired = false;
-            channel.OnKick += (_, _) => kickFired = true;
-
-            channel.UserKick(MakeUser("Op"), "Victim", "rules");
-
-            Assert.IsNull(channel.Users.GetUser("Victim"), "UserKick must remove the kicked user");
-            Assert.IsTrue(kickFired, "UserKick must fire OnKick");
-        }
-
-        [Test]
-        public void ApplyModeChanges_AddOperator_SetsAtPrefix()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.UserJoin(MakeUser("Bob"));
-
-            channel.ApplyModeChanges(new[]
+            new ChannelModeInfo
             {
-                new ChannelModeInfo
-                {
-                    Action = ModeAction.Add,
-                    Mode = ChannelMode.ChannelOperator,
-                    Parameter = "Bob"
-                }
-            });
+                Action = ModeAction.Add,
+                Mode = ChannelMode.Voice,
+                Parameter = "Bob"
+            }
+        });
 
-            Assert.AreEqual('@', channel.Users.GetUser("Bob").Prefix);
-        }
+        Assert.AreEqual('+', channel.Users.GetUser("Bob").Prefix);
+    }
 
-        [Test]
-        public void ApplyModeChanges_AddVoice_SetsPlusPrefix()
+    [Test]
+    public void ApplyModeChanges_RemoveMatchingOperator_ClearsPrefix()
+    {
+        var channel = CreateChannelWithConnection();
+        User bob = MakeUser("Bob");
+        bob.Prefix = '@';
+        channel.UserJoin(bob);
+
+        channel.ApplyModeChanges(new[]
         {
-            var channel = CreateChannelWithConnection();
-            channel.UserJoin(MakeUser("Bob"));
-
-            channel.ApplyModeChanges(new[]
+            new ChannelModeInfo
             {
-                new ChannelModeInfo
-                {
-                    Action = ModeAction.Add,
-                    Mode = ChannelMode.Voice,
-                    Parameter = "Bob"
-                }
-            });
+                Action = ModeAction.Remove,
+                Mode = ChannelMode.ChannelOperator,
+                Parameter = "Bob"
+            }
+        });
 
-            Assert.AreEqual('+', channel.Users.GetUser("Bob").Prefix);
-        }
+        Assert.AreEqual('\0', channel.Users.GetUser("Bob").Prefix);
+    }
 
-        [Test]
-        public void ApplyModeChanges_RemoveMatchingOperator_ClearsPrefix()
+    [Test]
+    public void ApplyModeChanges_UnknownUser_DoesNotThrow()
+    {
+        var channel = CreateChannelWithConnection();
+
+        Assert.DoesNotThrow(() => channel.ApplyModeChanges(new[]
         {
-            var channel = CreateChannelWithConnection();
-            User bob = MakeUser("Bob");
-            bob.Prefix = '@';
-            channel.UserJoin(bob);
-
-            channel.ApplyModeChanges(new[]
+            new ChannelModeInfo
             {
-                new ChannelModeInfo
-                {
-                    Action = ModeAction.Remove,
-                    Mode = ChannelMode.ChannelOperator,
-                    Parameter = "Bob"
-                }
-            });
+                Action = ModeAction.Add,
+                Mode = ChannelMode.ChannelOperator,
+                Parameter = "Nobody"
+            }
+        }));
+    }
 
-            Assert.AreEqual('\0', channel.Users.GetUser("Bob").Prefix);
-        }
+    [Test]
+    public void ApplyModeChanges_VoiceOnExistingOperator_StillShowsOperator()
+    {
+        var channel = CreateChannelWithConnection();
+        User bob = MakeUser("Bob");
+        bob.Prefix = '@';
+        channel.UserJoin(bob);
 
-        [Test]
-        public void ApplyModeChanges_UnknownUser_DoesNotThrow()
+        channel.ApplyModeChanges(new[]
         {
-            var channel = CreateChannelWithConnection();
-
-            Assert.DoesNotThrow(() => channel.ApplyModeChanges(new[]
+            new ChannelModeInfo
             {
-                new ChannelModeInfo
-                {
-                    Action = ModeAction.Add,
-                    Mode = ChannelMode.ChannelOperator,
-                    Parameter = "Nobody"
-                }
-            }));
-        }
+                Action = ModeAction.Add,
+                Mode = ChannelMode.Voice,
+                Parameter = "Bob"
+            }
+        });
 
-        [Test]
-        public void ApplyModeChanges_VoiceOnExistingOperator_StillShowsOperator()
+        User result = channel.Users.GetUser("Bob");
+        Assert.AreEqual('@', result.Prefix,
+            "An op who is also voiced must still display as op, not collapse to voice");
+        Assert.IsTrue(result.HasStatus('+'), "Voice status must still be tracked alongside op");
+    }
+
+    [Test]
+    public void ApplyModeChanges_RemoveOpFromOpAndVoiced_FallsBackToVoice()
+    {
+        var channel = CreateChannelWithConnection();
+        User bob = MakeUser("Bob");
+        bob.Prefix = '@';
+        channel.UserJoin(bob);
+        channel.ApplyModeChanges(new[]
         {
-            var channel = CreateChannelWithConnection();
-            User bob = MakeUser("Bob");
-            bob.Prefix = '@';
-            channel.UserJoin(bob);
+            new ChannelModeInfo { Action = ModeAction.Add, Mode = ChannelMode.Voice, Parameter = "Bob" }
+        });
 
-            channel.ApplyModeChanges(new[]
+        channel.ApplyModeChanges(new[]
+        {
+            new ChannelModeInfo
             {
-                new ChannelModeInfo
-                {
-                    Action = ModeAction.Add,
-                    Mode = ChannelMode.Voice,
-                    Parameter = "Bob"
-                }
-            });
+                Action = ModeAction.Remove,
+                Mode = ChannelMode.ChannelOperator,
+                Parameter = "Bob"
+            }
+        });
 
-            User result = channel.Users.GetUser("Bob");
-            Assert.AreEqual('@', result.Prefix,
-                "An op who is also voiced must still display as op, not collapse to voice");
-            Assert.IsTrue(result.HasStatus('+'), "Voice status must still be tracked alongside op");
-        }
+        Assert.AreEqual('+', channel.Users.GetUser("Bob").Prefix,
+            "Removing op from an op+voiced user must fall back to the voice prefix");
+    }
 
-        [Test]
-        public void ApplyModeChanges_RemoveOpFromOpAndVoiced_FallsBackToVoice()
+    [Test]
+    public void ApplyModeChanges_NonStatusMode_LeavesPrefixUnchanged()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+
+        channel.ApplyModeChanges(new[]
         {
-            var channel = CreateChannelWithConnection();
-            User bob = MakeUser("Bob");
-            bob.Prefix = '@';
-            channel.UserJoin(bob);
-            channel.ApplyModeChanges(new[]
+            new ChannelModeInfo
             {
-                new ChannelModeInfo { Action = ModeAction.Add, Mode = ChannelMode.Voice, Parameter = "Bob" }
-            });
+                Action = ModeAction.Add,
+                Mode = ChannelMode.Ban,
+                Parameter = "*!*@spam.host"
+            }
+        });
 
-            channel.ApplyModeChanges(new[]
-            {
-                new ChannelModeInfo
-                {
-                    Action = ModeAction.Remove,
-                    Mode = ChannelMode.ChannelOperator,
-                    Parameter = "Bob"
-                }
-            });
+        Assert.AreEqual('\0', channel.Users.GetUser("Bob").Prefix,
+            "A ban mode must not alter any member's op/voice prefix");
+    }
 
-            Assert.AreEqual('+', channel.Users.GetUser("Bob").Prefix,
-                "Removing op from an op+voiced user must fall back to the voice prefix");
-        }
+    [Test]
+    public void PendingNames_InterleavedWithAnotherChannel_EachChannelGetsOnlyItsOwnMembers()
+    {
+        var chanA = CreateChannelWithConnection();
+        var chanB = CreateChannelWithConnection();
 
-        [Test]
-        public void ApplyModeChanges_NonStatusMode_LeavesPrefixUnchanged()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.UserJoin(MakeUser("Bob"));
+        // Simulate the server pipelining NAMES runs for two channels:
+        //   353 #a alice bob / 353 #b carol dave / 366 #a / 366 #b
+        chanA.AddPendingNames(new[] { "alice", "bob" });
+        chanB.AddPendingNames(new[] { "carol", "dave" });
+        chanA.CommitPendingNames();
+        chanB.CommitPendingNames();
 
-            channel.ApplyModeChanges(new[]
-            {
-                new ChannelModeInfo
-                {
-                    Action = ModeAction.Add,
-                    Mode = ChannelMode.Ban,
-                    Parameter = "*!*@spam.host"
-                }
-            });
+        Assert.AreEqual(2, chanA.Users.Count);
+        Assert.IsNotNull(chanA.Users.GetUser("alice"));
+        Assert.IsNotNull(chanA.Users.GetUser("bob"));
+        Assert.IsNull(chanA.Users.GetUser("carol"), "channel A must not be contaminated by channel B's NAMES");
+        Assert.IsNull(chanA.Users.GetUser("dave"));
 
-            Assert.AreEqual('\0', channel.Users.GetUser("Bob").Prefix,
-                "A ban mode must not alter any member's op/voice prefix");
-        }
+        Assert.AreEqual(2, chanB.Users.Count);
+        Assert.IsNotNull(chanB.Users.GetUser("carol"));
+        Assert.IsNotNull(chanB.Users.GetUser("dave"),
+            "channel B must still be seeded even though channel A committed first");
+    }
 
-        [Test]
-        public void PendingNames_InterleavedWithAnotherChannel_EachChannelGetsOnlyItsOwnMembers()
-        {
-            var chanA = CreateChannelWithConnection();
-            var chanB = CreateChannelWithConnection();
+    [Test]
+    public void CommitPendingNames_ClearsBuffer_SoNextSeedIsIndependent()
+    {
+        var channel = CreateChannelWithConnection();
 
-            // Simulate the server pipelining NAMES runs for two channels:
-            //   353 #a alice bob / 353 #b carol dave / 366 #a / 366 #b
-            chanA.AddPendingNames(new[] { "alice", "bob" });
-            chanB.AddPendingNames(new[] { "carol", "dave" });
-            chanA.CommitPendingNames();
-            chanB.CommitPendingNames();
+        channel.AddPendingNames(new[] { "alice" });
+        channel.CommitPendingNames();
 
-            Assert.AreEqual(2, chanA.Users.Count);
-            Assert.IsNotNull(chanA.Users.GetUser("alice"));
-            Assert.IsNotNull(chanA.Users.GetUser("bob"));
-            Assert.IsNull(chanA.Users.GetUser("carol"), "channel A must not be contaminated by channel B's NAMES");
-            Assert.IsNull(chanA.Users.GetUser("dave"));
+        channel.AddPendingNames(new[] { "bob" });
+        channel.CommitPendingNames();
 
-            Assert.AreEqual(2, chanB.Users.Count);
-            Assert.IsNotNull(chanB.Users.GetUser("carol"));
-            Assert.IsNotNull(chanB.Users.GetUser("dave"),
-                "channel B must still be seeded even though channel A committed first");
-        }
+        Assert.AreEqual(1, channel.Users.Count,
+            "A committed NAMES buffer must be cleared so a later NAMES does not accumulate stale users");
+        Assert.IsNotNull(channel.Users.GetUser("bob"));
+        Assert.IsNull(channel.Users.GetUser("alice"));
+    }
 
-        [Test]
-        public void CommitPendingNames_ClearsBuffer_SoNextSeedIsIndependent()
-        {
-            var channel = CreateChannelWithConnection();
+    [Test]
+    public void Membership_NewChannel_DefaultsToNotJoined()
+    {
+        var channel = CreateChannelWithConnection();
 
-            channel.AddPendingNames(new[] { "alice" });
-            channel.CommitPendingNames();
+        Assert.AreEqual(ChannelMembership.NotJoined, channel.Membership);
+        Assert.IsFalse(channel.Joined, "A freshly created channel must not report as joined");
+    }
 
-            channel.AddPendingNames(new[] { "bob" });
-            channel.CommitPendingNames();
+    [Test]
+    public void Joined_MembershipJoinedButNoUsers_ReturnsTrue()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.Membership = ChannelMembership.Joined;
 
-            Assert.AreEqual(1, channel.Users.Count,
-                "A committed NAMES buffer must be cleared so a later NAMES does not accumulate stale users");
-            Assert.IsNotNull(channel.Users.GetUser("bob"));
-            Assert.IsNull(channel.Users.GetUser("alice"));
-        }
+        // Regression: between the JOIN echo and the NAMES reply the user list is
+        // empty, but we are still a member. Joined must not depend on Users.Count.
+        Assert.IsTrue(channel.Joined,
+            "Joined must reflect membership state, not whether the user list is populated");
+    }
 
-        [Test]
-        public void Membership_NewChannel_DefaultsToNotJoined()
-        {
-            var channel = CreateChannelWithConnection();
+    [Test]
+    public void Joined_MembershipNotJoinedButHasUsers_ReturnsFalse()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
 
-            Assert.AreEqual(ChannelMembership.NotJoined, channel.Membership);
-            Assert.IsFalse(channel.Joined, "A freshly created channel must not report as joined");
-        }
+        Assert.IsFalse(channel.Joined,
+            "A populated user list must not make a non-member channel report as joined");
+    }
 
-        [Test]
-        public void Joined_MembershipJoinedButNoUsers_ReturnsTrue()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.Membership = ChannelMembership.Joined;
+    [Test]
+    public void Joined_MembershipJoining_ReturnsFalse()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.Membership = ChannelMembership.Joining;
 
-            // Regression: between the JOIN echo and the NAMES reply the user list is
-            // empty, but we are still a member. Joined must not depend on Users.Count.
-            Assert.IsTrue(channel.Joined,
-                "Joined must reflect membership state, not whether the user list is populated");
-        }
+        Assert.IsFalse(channel.Joined,
+            "A channel awaiting its JOIN echo is not yet joined");
+    }
 
-        [Test]
-        public void Joined_MembershipNotJoinedButHasUsers_ReturnsFalse()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.UserJoin(MakeUser("Bob"));
+    [Test]
+    public void AddPendingNames_StripsStatusPrefixesIntoUserStatus()
+    {
+        var channel = CreateChannelWithConnection();
 
-            Assert.IsFalse(channel.Joined,
-                "A populated user list must not make a non-member channel report as joined");
-        }
+        channel.AddPendingNames(new[] { "@alice", "+bob", "charlie" });
+        channel.CommitPendingNames();
 
-        [Test]
-        public void Joined_MembershipJoining_ReturnsFalse()
-        {
-            var channel = CreateChannelWithConnection();
-            channel.Membership = ChannelMembership.Joining;
-
-            Assert.IsFalse(channel.Joined,
-                "A channel awaiting its JOIN echo is not yet joined");
-        }
-
-        [Test]
-        public void AddPendingNames_StripsStatusPrefixesIntoUserStatus()
-        {
-            var channel = CreateChannelWithConnection();
-
-            channel.AddPendingNames(new[] { "@alice", "+bob", "charlie" });
-            channel.CommitPendingNames();
-
-            Assert.AreEqual('@', channel.Users.GetUser("alice").Prefix);
-            Assert.AreEqual('+', channel.Users.GetUser("bob").Prefix);
-            Assert.AreEqual('\0', channel.Users.GetUser("charlie").Prefix);
-        }
+        Assert.AreEqual('@', channel.Users.GetUser("alice").Prefix);
+        Assert.AreEqual('+', channel.Users.GetUser("bob").Prefix);
+        Assert.AreEqual('\0', channel.Users.GetUser("charlie").Prefix);
     }
 }

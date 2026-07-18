@@ -1,25 +1,25 @@
-﻿namespace MutinyIRC.UI.ViewModels;
-
-using System;
+﻿using System;
 using FlamingIRC;
 using CommunityToolkit.Mvvm.ComponentModel;
 
+namespace MutinyIRC.UI.ViewModels;
+
 public class UserViewModel : ObservableObject, IComparable<UserViewModel>
 {
-    private readonly User user;
+    private readonly User _user;
 
-    public string FullNick => user.NamesLiteral;
+    public string FullNick => _user.NamesLiteral;
 
     /// <summary>The bare nickname without any mode prefix (used for command targets).</summary>
-    public string Nick => user.Nick;
+    public string Nick => _user.Nick;
 
-    private Mode mode;
-    public Mode Mode => mode;
+    private Mode _mode;
+    public Mode Mode => _mode;
 
     public UserViewModel(User user)
     {
-        this.user = user;
-        mode = user.Prefix switch
+        _user = user;
+        _mode = user.Prefix switch
         {
             '@' => Mode.Op,
             '+' => Mode.Voice,
