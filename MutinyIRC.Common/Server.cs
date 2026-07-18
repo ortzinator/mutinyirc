@@ -858,7 +858,7 @@ public class Server : MessageContext, IDisposable
 
     public override string ToString()
     {
-        return string.Format("{0}:{1}", Url, Port);
+        return $"{Url}:{Port}";
     }
 
     public void ChangeNick(string nick)

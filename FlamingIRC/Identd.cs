@@ -41,7 +41,7 @@ public sealed class Identd
 {
     private static TcpListener listener;
     private static bool running;
-    private static object lockObject;
+    private static readonly object lockObject;
     private static string username;
     private const string Reply = " : USERID : UNIX : ";
     private const int IdentdPort = 113;

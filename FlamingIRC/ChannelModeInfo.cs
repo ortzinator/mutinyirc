@@ -52,7 +52,7 @@ public sealed class ChannelModeInfo
 
     public override string ToString()
     {
-        return string.Format("Action={0} Mode={1} Parameter={2}", Action, Mode, Parameter);
+        return $"Action={Action} Mode={Mode} Parameter={Parameter}";
     }
 
     internal static ChannelModeInfo[] ParseModes(string[] tokens, int start)

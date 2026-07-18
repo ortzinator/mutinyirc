@@ -33,7 +33,7 @@ namespace FlamingIRC;
 /// </summary>
 public sealed class CtcpResponder
 {
-    private Connection connection;
+    private readonly Connection connection;
     private long nextTime;
     private string fingerMessage;
 

@@ -67,8 +67,8 @@ public sealed class DccFileSession
     //Signals whether the session is waiting for an Accept message 
     //in reponse to a Resume request.
     private bool waitingOnAccept;
-    private byte[] buffer;
-    private int listenPort;
+    private readonly byte[] buffer;
+    private readonly int listenPort;
     private string listenIPAddress;
     private Socket socket;
     private Socket serverSocket;

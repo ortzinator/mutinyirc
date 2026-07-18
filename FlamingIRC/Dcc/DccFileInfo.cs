@@ -33,7 +33,7 @@ namespace FlamingIRC;
 /// </summary>
 public sealed class DccFileInfo
 {
-    private FileInfo fileInfo;
+    private readonly FileInfo fileInfo;
 
     //Where in the file to start reading or writing
     //Number of bytes sent or received so far in this

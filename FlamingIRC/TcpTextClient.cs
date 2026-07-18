@@ -100,7 +100,7 @@ public abstract class TcpTextClient
     public void Disconnect(DisconnectReason reason)
     {
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-            string.Format("[{0}] TcpTextClient::Disconnect() reason={1}", Thread.CurrentThread.Name, reason));
+            $"[{Thread.CurrentThread.Name}] TcpTextClient::Disconnect() reason={reason}");
         try { _socket.Shutdown(SocketShutdown.Both); } catch (SocketException) { }
         _socket.Close();
         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -118,7 +118,7 @@ public abstract class TcpTextClient
         byte[] buffer = TextEncoding.GetBytes(message);
         _stream.BeginWrite(buffer, 0, buffer.Length, OnSend, null);
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            string.Format("[{0}] TcpTextClient::Send() {1}", Thread.CurrentThread.Name, message.TrimEnd()));
+            $"[{Thread.CurrentThread.Name}] TcpTextClient::Send() {message.TrimEnd()}");
     }
 
     private void OnConnect(IAsyncResult res)
@@ -137,7 +137,7 @@ public abstract class TcpTextClient
             else
             {
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                    string.Format("[{0}] TcpTextClient::OnConnect() TCP connected to {1}", Thread.CurrentThread.Name, _serverName));
+                    $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() TCP connected to {_serverName}");
                 OnConnect();
                 WaitForData();
             }
@@ -145,13 +145,13 @@ public abstract class TcpTextClient
         catch (SocketException e)
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                string.Format("[{0}] TcpTextClient::OnConnect() SocketException={1}", Thread.CurrentThread.Name, e.SocketErrorCode));
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() SocketException={e.SocketErrorCode}");
             OnConnectFailed(ConnectError.SocketError, e.ErrorCode);
         }
         catch (Exception e)
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                string.Format("[{0}] TcpTextClient::OnConnect() exception={1}", Thread.CurrentThread.Name, e.Message));
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() exception={e.Message}");
             OnConnectFailed(ConnectError.SocketError, null);
             throw;
         }
@@ -174,14 +174,14 @@ public abstract class TcpTextClient
         {
             _sslStream.EndAuthenticateAsClient(res);
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                string.Format("[{0}] TcpTextClient::OnAuthenticate() SSL authenticated to {1}", Thread.CurrentThread.Name, _serverName));
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() SSL authenticated to {_serverName}");
             OnConnect();
             WaitForData();
         }
         catch (AuthenticationException e)
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                string.Format("[{0}] TcpTextClient::OnAuthenticate() SSL authentication failed={1}", Thread.CurrentThread.Name, e.Message));
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() SSL authentication failed={e.Message}");
             _socket.Shutdown(SocketShutdown.Both);
             Connected = false;
             OnConnectFailed(ConnectError.AuthenticationFailed, null);
@@ -215,7 +215,7 @@ public abstract class TcpTextClient
             if (bytes == 0)
             {
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                    string.Format("[{0}] TcpTextClient::OnDataReceived() remote host closed connection", Thread.CurrentThread.Name));
+                    $"[{Thread.CurrentThread.Name}] TcpTextClient::OnDataReceived() remote host closed connection");
                 _socket.Shutdown(SocketShutdown.Both);
                 Connected = false;
                 OnDisconnect(DisconnectReason.RemoteHostClosedConnection, null);

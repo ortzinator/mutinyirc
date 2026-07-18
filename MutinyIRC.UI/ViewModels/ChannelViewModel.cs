@@ -12,11 +12,11 @@ namespace MutinyIRC.UI.ViewModels;
 
 public class ChannelViewModel : IrcViewModel
 {
-    private Channel _channel;
+    private readonly Channel _channel;
     public Channel Channel => _channel;
     public override Server? OwningServer => _channel.Server;
     private List<UserViewModel> _userList = new();
-    private PluginManager _pluginManager;
+    private readonly PluginManager _pluginManager;
 
     public PluginManager PluginManager => _pluginManager;
 
@@ -35,7 +35,7 @@ public class ChannelViewModel : IrcViewModel
         {
             if (UserList == null || UserList.Count == 0)
                 return base.Name;
-            return string.Format("{0} ({1})", base.Name, UserList.Count);
+            return $"{base.Name} ({UserList.Count})";
         }
     }
 

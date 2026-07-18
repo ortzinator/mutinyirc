@@ -13,7 +13,7 @@ public class UserViewModel : ObservableObject, IComparable<UserViewModel>
     /// <summary>The bare nickname without any mode prefix (used for command targets).</summary>
     public string Nick => _user.Nick;
 
-    private Mode _mode;
+    private readonly Mode _mode;
     public Mode Mode => _mode;
 
     public UserViewModel(User user)

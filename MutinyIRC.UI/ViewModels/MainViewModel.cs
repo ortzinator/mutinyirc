@@ -16,8 +16,8 @@ namespace MutinyIRC.UI.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {
-    private PluginManager _pluginManager;
-    private Dictionary<Server, ServerViewModel> _serverMap = new();
+    private readonly PluginManager _pluginManager;
+    private readonly Dictionary<Server, ServerViewModel> _serverMap = new();
 
     public MTObservableCollection<IrcViewModel> Panels { get; protected set; }
     public MTObservableCollection<ServerViewModel> Servers { get; }

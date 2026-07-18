@@ -21,7 +21,7 @@ namespace FlamingIRC;
 /// </code></example>
 public sealed class ServerProperties
 {
-    private Hashtable properties;
+    private readonly Hashtable properties;
 
     /// <summary>
     /// Instances should only be created by the Connection class.

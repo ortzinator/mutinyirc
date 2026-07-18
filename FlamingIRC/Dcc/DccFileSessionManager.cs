@@ -41,14 +41,14 @@ public sealed class DccFileSessionManager
     //A clone of the session hashtable to iterate over
     private Hashtable sessionClone;
     //A place to store the active sessions
-    private Hashtable sessions;
+    private readonly Hashtable sessions;
     //Check for timeouts every 10 seconds
     private const int TimeoutCheckPeriod = 10000;
     //Default to tming out after 30 seconds of no activity.
     private const int DefaultTimeout = 30000;
     private static DccFileSessionManager defaultInstance;
-    private static object lockObject = new object();
-    private Timer timerThread;
+    private static readonly object lockObject = new object();
+    private readonly Timer timerThread;
     private bool timerStopped;
 
     private DccFileSessionManager()

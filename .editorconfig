@@ -11,7 +11,7 @@ dotnet_analyzer_diagnostic.category-Style.severity = error
 # Here we ignore some rule violations that they are not really important for us
 dotnet_diagnostic.IDE0008.severity = silent # Explicit type, not var
 dotnet_diagnostic.IDE0011.severity = silent # Add braces
-dotnet_diagnostic.IDE0044.severity = silent # Add readonly modifier
+dotnet_diagnostic.IDE0044.severity = warning # Add readonly modifier
 dotnet_diagnostic.IDE0090.severity = silent # Use implicit new
 dotnet_diagnostic.IDE0300.severity = silent # Use collection expression for array
 dotnet_diagnostic.IDE0301.severity = silent # Use collection expression for empty

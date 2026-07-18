@@ -37,7 +37,7 @@ namespace FlamingIRC;
 /// </summary>
 public sealed class CtcpSender : CommandBuilder
 {
-    private ArrayList pingList;
+    private readonly ArrayList pingList;
 
     /// <summary>
     /// Create an instance using a specific connection.

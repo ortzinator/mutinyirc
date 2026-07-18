@@ -6,16 +6,19 @@ two disagree, or where the codebase is internally inconsistent, that is called o
 [Known Contradictions](#known-contradictions) at the end — those are open questions to resolve,
 not settled rules.
 
-`.editorconfig` is the machine-enforced source of truth. This document explains the intent behind
-those settings and captures the conventions that `.editorconfig` does not encode.
+`.editorconfig` is the source of truth for anything a tool can check. This document explains the
+intent behind those settings and captures the conventions that `.editorconfig` does not encode.
+Which of its settings are actually enforced, and by what, is covered under
+[Known Contradictions](#known-contradictions).
 
 ## Language and Tooling
 
 - **Target framework:** `net8.0` across every project.
 - **Language:** C# (default language version for .NET 8).
-- **Build check:** run `dotnet build MutinyIRC.sln` after changes. `Style` category analyzer
-  diagnostics are promoted to **errors** (`dotnet_analyzer_diagnostic.category-Style.severity =
-  error`), so a formatting slip fails the build unless the specific rule is silenced.
+- **Build check:** run `dotnet build MutinyIRC.sln` after changes. Note that `IDE####` style
+  severities in `.editorconfig` do **not** affect the build (see
+  [Known Contradictions](#known-contradictions)); to check them, run
+  `dotnet format style MutinyIRC.sln --verify-no-changes --severity warn`.
 - **Unused code is an error**, enforced via analyzers:
   - `CS8019` — unnecessary `using` directives.
   - `CA1801` — unused parameters.
@@ -100,6 +103,29 @@ consistently in the source (fields initialize to `string.Empty`).
 Field naming is enforced by `dotnet_naming_rule` entries in `.editorconfig` (diagnostic
 `IDE1006`) at **warning** severity. The legacy FlamingIRC socket subsystem is the one exception —
 see [Known Contradictions](#known-contradictions).
+
+## Strings
+
+Use **string interpolation**, not `string.Format`:
+
+```csharp
+return $"{base.Name} ({UserList.Count})";
+```
+
+`string.Format` remains correct where the format string is not an inline literal — a stored
+constant or a runtime parameter — because there is nothing to interpolate:
+
+```csharp
+public static string MakeColor(string text, MircColor textColor)
+{
+    return string.Format(TextColorFormat, (int)textColor, text);
+}
+```
+
+## Immutability
+
+Mark private fields `readonly` (or `static readonly`) whenever they are assigned only in their
+declaration or a constructor. `IDE0044` is set to `warning` and will flag the ones you miss.
 
 ## Namespaces and Usings
 
@@ -199,21 +225,13 @@ project** (`MutinyIRC.Common`, UI, etc. have no header). **Decision needed:** ei
 header to all FlamingIRC files (it is a separately-licensed framework), drop it entirely, or
 document that only original-provenance files carry it.
 
-### 3. `IDE0044` (readonly) is silenced but immutability is otherwise favored
+### 3. Style analyzer severities are not enforced at build time
 
-`dotnet_diagnostic.IDE0044.severity = silent` disables the "add readonly modifier" suggestion, yet
-much of the code deliberately uses `readonly`/`static readonly` (e.g. `_reconnectGate`,
-`ReconnectBaseDelay`). **Decision needed:** re-enabling `IDE0044` as a suggestion would nudge
-fields toward `readonly` where possible without breaking the build. Low-risk; worth reconsidering.
-
-### 4. String formatting style is mixed
-
-Both `string.Format("{0} ({1})", ...)` (e.g. `ChannelViewModel.Name`) and string interpolation
-appear. No rule governs this. **Decision needed:** prefer interpolation for new code? (Recommended,
-but purely stylistic — flagging for consistency only.)
-
-### 5. Line-length hint is ReSharper-only
-
-`resharper_csharp_max_line_length = 100` is honored by ReSharper/Rider but not by `dotnet format`
-or the build, and `CLAUDE.md` prose wraps at ~120. Editor-dependent. **Decision needed:** none
-required, but be aware the 100-column limit is not enforced in CI.
+`EnforceCodeStyleInBuild` is not set in any project or a `Directory.Build.props`, so every
+`IDE####` severity in `.editorconfig` — including
+`dotnet_analyzer_diagnostic.category-Style.severity = error` — is inert during `dotnet build`.
+Those settings apply only in the IDE and under `dotnet format`. The same is true of
+`resharper_csharp_max_line_length = 100`, which is honored by ReSharper/Rider only.
+**Decision needed:** set `EnforceCodeStyleInBuild = true` to make the declared severities real
+(note that the `Style`-category-as-error setting would then be load-bearing, so it likely needs to
+drop to `warning` first), or lower the declared severities to match what is actually enforced.

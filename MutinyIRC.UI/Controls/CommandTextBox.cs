@@ -9,7 +9,7 @@ namespace MutinyIRC.UI.Controls;
 public class CommandTextBox : TextBox
 {
     private int _historyIndex;
-    private List<string> _cmdHistory;
+    private readonly List<string> _cmdHistory;
 
     // ── Tab-completion cycle state ──
     // Set when a Tab completion is in progress so repeated Tabs cycle through matches in place.

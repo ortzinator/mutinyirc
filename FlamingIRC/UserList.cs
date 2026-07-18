@@ -6,7 +6,7 @@ namespace FlamingIRC;
 
 public class UserList : IList<User>, INotifyUpdate
 {
-    private List<User> list;
+    private readonly List<User> list;
     private EventHandler onUpdate;
 
     /// <summary>

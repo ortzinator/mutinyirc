@@ -71,7 +71,7 @@ public class CtcpListener
 
     private static readonly Regex ctcpRegex;
     private static readonly string ctcpTypes;
-    private Connection connection;
+    private readonly Connection connection;
     private const int Name = 0;
     private const int Command = 1;
     private const int Text = 2;
