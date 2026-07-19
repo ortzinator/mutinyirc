@@ -50,6 +50,18 @@ These follow the `.editorconfig` (Microsoft + ReSharper sections):
 - **Single-line blocks and expression-bodied members are preserved** on one line where they
   already fit (`csharp_preserve_single_line_blocks = true`,
   `resharper_place_expr_property_on_single_line = true`).
+- **Expression bodies where the member fits on one line**, block bodies for anything that wraps
+  (`csharp_style_expression_bodied_* = when_on_single_line`):
+
+  ```csharp
+  public CommandResultInfo Execute() => CommandResultInfo.Success("no-context");
+  ```
+
+  This is a preference for new code, **not** enforced — the corresponding diagnostics
+  (`IDE0021`/`IDE0022`/`IDE0025`/`IDE0027`/`IDE0061`) are silenced. The tree holds both styles in
+  quantity (~71 expression-bodied methods against ~229 single-statement block-bodied ones), so
+  enforcing either direction would rewrite hundreds of methods for no behavioral gain. Don't
+  reformat existing members to match.
 - **Object and collection initializers** wrap one item per line
   (`resharper_wrap_object_and_collection_initializer_style = chop_always`).
 - **No trailing comma** in multi-line lists (`resharper_trailing_comma_in_multiline_lists =
@@ -226,19 +238,15 @@ document that only original-provenance files carry it.
 
 ### 3. Style warning backlog
 
-Style rules became build-enforced only recently, so the tree carries **207 pre-existing style
+Style rules became build-enforced only recently, so the tree carries **130 pre-existing style
 warnings**. The build is green (0 errors) and these are visible as a worklist. The bulk:
 
 | Rule | Count | What it wants |
 |---|---|---|
-| `IDE0022` | 71 | Use **block** body for method |
 | `IDE1006` | 67 | Naming rule — this is item 1 above |
 | `IDE0370` | 22 | Suppression is unnecessary (stale `#pragma`/attributes) |
 | `IDE0060` | 11 | Unused parameter |
-
-**Decision needed** on `IDE0022` specifically: the config prefers block bodies, but 71 methods use
-expression bodies, including recently written ones. The codebase is voting against the setting, so
-the config is the likelier thing to change.
+| `IDE0200` | 8 | Remove unnecessary lambda expression |
 
 `IDE0060` needs judgement rather than a sweep. Nearly all current hits are structurally required
 parameters that the analyzer cannot see are load-bearing: the plugin framework dispatches command

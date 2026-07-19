@@ -42,6 +42,28 @@ dotnet_diagnostic.IDE0052.severity = error # Remove unread private members (coun
 # their severity here did nothing. The live equivalents are IDE0060 (unused parameters), IDE0059
 # (unused locals), and IDE0051 (uncalled private code), which run via EnforceCodeStyleInBuild.
 
+# Expression bodies are preferred only where the member fits on a single line; anything that needs
+# to wrap gets a block body. The C# defaults disagree with the codebase here (they prefer block
+# bodies for methods and expression bodies for properties regardless of length).
+#
+# These are a preference, not a mandate: the diagnostics are silenced below. The tree holds both
+# styles (~71 expression-bodied methods, ~229 single-statement block-bodied ones), so enforcing
+# either direction would churn hundreds of methods for no behavioral gain. Write new code in this
+# style; leave existing code alone.
+dotnet_diagnostic.IDE0021.severity = silent # Use expression body for constructor
+dotnet_diagnostic.IDE0022.severity = silent # Use expression body for method
+dotnet_diagnostic.IDE0025.severity = silent # Use expression body for property
+dotnet_diagnostic.IDE0027.severity = silent # Use expression body for accessor
+dotnet_diagnostic.IDE0061.severity = silent # Use expression body for local function
+
+csharp_style_expression_bodied_methods = when_on_single_line
+csharp_style_expression_bodied_constructors = when_on_single_line
+csharp_style_expression_bodied_operators = when_on_single_line
+csharp_style_expression_bodied_local_functions = when_on_single_line
+csharp_style_expression_bodied_properties = when_on_single_line
+csharp_style_expression_bodied_indexers = when_on_single_line
+csharp_style_expression_bodied_accessors = when_on_single_line
+
 # Microsoft .NET properties
 csharp_new_line_before_members_in_object_initializers = false
 csharp_new_line_before_open_brace = all
