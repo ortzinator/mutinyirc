@@ -43,10 +43,7 @@ public sealed class WhoisInfo
     /// Create an empty instance where the operator
     /// property defaults to false.
     /// </summary>
-    internal WhoisInfo()
-    {
-        isOperator = false;
-    }
+    internal WhoisInfo() => isOperator = false;
 
     /// <summary>
     /// A user's nick, logon, and hostname.
@@ -79,18 +76,12 @@ public sealed class WhoisInfo
     /// <value>True if the user is an IRC operator.</value>
     public bool Operator => isOperator;
 
-    internal void SetChannels(string[] channels)
-    {
-        this.channels = channels;
-    }
+    internal void SetChannels(string[] channels) => this.channels = channels;
 
     /// <summary>
     /// An array of channel names. Names may have =,@, or + prefixed to them.
     /// </summary>
     /// <returns>A string array.</returns>
-    public string[] GetChannels()
-    {
-        return channels;
-    }
+    public string[] GetChannels() => channels;
 
 }

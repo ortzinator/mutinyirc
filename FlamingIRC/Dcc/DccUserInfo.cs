@@ -49,9 +49,7 @@ public sealed class DccUser : User
 
     internal DccUser(Connection connection, string[] userParts) :
         base(userParts[0], userParts[1], userParts[2])
-    {
-        Connection = connection;
-    }
+        => Connection = connection;
     /// <summary>
     /// Create an instance that represents a user.
     /// </summary>
@@ -60,9 +58,7 @@ public sealed class DccUser : User
     /// <param name="nick">The remote user's nick.</param>
     public DccUser(Connection connection, string nick) :
         base(nick, "", "")
-    {
-        Connection = connection;
-    }
+        => Connection = connection;
 
     /// <summary>
     /// Read only property that returns the

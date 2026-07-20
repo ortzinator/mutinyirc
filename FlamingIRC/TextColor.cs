@@ -1,4 +1,4 @@
-﻿/*
+/*
  * FlamingIRC IRC library
  * Copyright (C) 2008 Brian Ortiz & Max Schmeling <https://github.com/ortzinator/mutinyirc>
  * 
@@ -45,7 +45,8 @@ public sealed class TextColor
 
     static TextColor()
     {
-        colorPattern = new Regex("\\u0003[\\d]{1,2}(,[\\d]{1,2})?([^\\u0003]+)\\u0003", RegexOptions.Compiled | RegexOptions.Singleline);
+        colorPattern = new Regex("\\u0003[\\d]{1,2}(,[\\d]{1,2})?([^\\u0003]+)\\u0003",
+            RegexOptions.Compiled | RegexOptions.Singleline);
     }
 
     private TextColor()
@@ -89,40 +90,28 @@ public sealed class TextColor
     /// </summary>
     /// <param name="text">A piece of text.</param>
     /// <returns>The text with the added control codes.</returns>
-    public static string MakeBold(string text)
-    {
-        return BoldControl + text + BoldControl;
-    }
+    public static string MakeBold(string text) => BoldControl + text + BoldControl;
 
     /// <summary>
     /// Add Plain control codes.
     /// </summary>
     /// <param name="text">A piece of text.</param>
     /// <returns>The text with the added control codes.</returns>
-    public static string MakePlain(string text)
-    {
-        return PlainControl + text + PlainControl;
-    }
+    public static string MakePlain(string text) => PlainControl + text + PlainControl;
 
     /// <summary>
     /// Add Underline control codes.
     /// </summary>
     /// <param name="text">A piece of text.</param>
     /// <returns>The text with the added control codes.</returns>
-    public static string MakeUnderline(string text)
-    {
-        return UnderlineControl + text + UnderlineControl;
-    }
+    public static string MakeUnderline(string text) => UnderlineControl + text + UnderlineControl;
 
     /// <summary>
     /// Add Rverse Video control codes.
     /// </summary>
     /// <param name="text">A piece of text.</param>
     /// <returns>The text with the added control codes.</returns>
-    public static string MakeReverseVideo(string text)
-    {
-        return ReverseControl + text + ReverseControl;
-    }
+    public static string MakeReverseVideo(string text) => ReverseControl + text + ReverseControl;
 
     /// <summary>
     /// Add Color control codes.
@@ -131,9 +120,7 @@ public sealed class TextColor
     /// <param name="textColor">The color of the text taken from one of the mIRC color enums.</param>
     /// <returns>The text with the added control codes.</returns>
     public static string MakeColor(string text, MircColor textColor)
-    {
-        return string.Format(TextColorFormat, (int)textColor, text);
-    }
+        => string.Format(TextColorFormat, (int)textColor, text);
 
     /// <summary>
     /// Add Color control codes.
@@ -143,9 +130,7 @@ public sealed class TextColor
     /// <param name="backgroundColor">The background of the designated text.</param>
     /// <returns>The text with the added control codes.</returns>
     public static string MakeColor(string text, MircColor textColor, MircColor backgroundColor)
-    {
-        return string.Format(FullColorFormat, (int)textColor, (int)backgroundColor, text);
-    }
+        => string.Format(FullColorFormat, (int)textColor, (int)backgroundColor, text);
 
 
     private static bool IsControlCode(char c)
@@ -157,7 +142,4 @@ public sealed class TextColor
             '\x000F' or
             '\x0016';
     }
-
-
-
 }

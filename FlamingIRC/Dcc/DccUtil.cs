@@ -41,10 +41,7 @@ public sealed class DccUtil
     /// Get the IPAddress object for the local machine.
     /// </summary>
     /// <returns>An instance of IPAddress.</returns>
-    public static IPAddress LocalHost()
-    {
-        return IPAddress.Loopback;
-    }
+    public static IPAddress LocalHost() => IPAddress.Loopback;
     /// <summary>
     /// Convert a signed long into an unsigned int in
     /// network byte order.
@@ -65,9 +62,7 @@ public sealed class DccUtil
     /// <param name="received">The 4 byte unsigned integer.</param>
     /// <returns>A long</returns>
     public static long DccBytesToLong(byte[] received)
-    {
-        return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(received, 0));
-    }
+        => IPAddress.NetworkToHostOrder(BitConverter.ToInt32(received, 0));
     /// <summary>
     /// Convert an IP address into the network order
     /// long required by the DCC protocol.
@@ -121,10 +116,7 @@ public sealed class DccUtil
     /// </summary>
     /// <param name="fileName">The file name.</param>
     /// <returns>Underscored string.</returns>
-    public static string SpacesToUnderscores(string fileName)
-    {
-        return fileName.Replace(' ', '_');
-    }
+    public static string SpacesToUnderscores(string fileName) => fileName.Replace(' ', '_');
 
     /// <summary>
     /// Convert a long into an unsigned 4 byte in in network order

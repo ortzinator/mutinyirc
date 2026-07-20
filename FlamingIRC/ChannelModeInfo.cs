@@ -50,10 +50,7 @@ public sealed class ChannelModeInfo
     public string Parameter { get; set; }
 
 
-    public override string ToString()
-    {
-        return $"Action={Action} Mode={Mode} Parameter={Parameter}";
-    }
+    public override string ToString() => $"Action={Action} Mode={Mode} Parameter={Parameter}";
 
     internal static ChannelModeInfo[] ParseModes(string[] tokens, int start)
     {

@@ -274,10 +274,7 @@ public sealed class DccChatSession
     /// Summary information about this session.
     /// </summary>
     /// <returns>Simple information about this session in human readable format.</returns>
-    public override string ToString()
-    {
-        return "DccChatSession::" + ClientInfo.ToString();
-    }
+    public override string ToString() => "DccChatSession::" + ClientInfo.ToString();
 
     /// <summary>
     /// When another a remote user has sent a chat request, this
@@ -325,9 +322,7 @@ public sealed class DccChatSession
     /// client is behind a a NAT/Firewall system. </param>
     /// <param name="listenPort">The TCP/IP port to listen on</param>
     public static DccChatSession Request(DccUser dccUser, string listenIPAddress, int listenPort)
-    {
-        return Request(dccUser, listenIPAddress, listenPort, DefaultTimeout);
-    }
+        => Request(dccUser, listenIPAddress, listenPort, DefaultTimeout);
     /// <summary>
     /// Send a DCC Chat request to a remote user and wait for a connection
     /// using timeout period specified.

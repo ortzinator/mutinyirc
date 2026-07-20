@@ -134,10 +134,8 @@ public sealed class CtcpResponder
     /// of ticks. No Ctcp replies will be sent if the current time is not later
     /// than this value.
     /// </summary>
-    private void UpdateTime()
-    {
-        nextTime = DateTime.Now.ToFileTime() + (long)(ResponseDelay * TimeSpan.TicksPerMillisecond);
-    }
+    private void UpdateTime() => nextTime = DateTime.Now.ToFileTime() +
+        (long)(ResponseDelay * TimeSpan.TicksPerMillisecond);
     private void OnCtcpRequest(string command, User who)
     {
         if (DateTime.Now.ToFileTime() > nextTime)
@@ -171,9 +169,7 @@ public sealed class CtcpResponder
         }
     }
     private void OnCtcpPingRequest(User who, string timestamp)
-    {
-        connection.CtcpSender.CtcpPingReply(who.Nick, timestamp);
-    }
+        => connection.CtcpSender.CtcpPingReply(who.Nick, timestamp);
 
     /// <summary>
     /// Stop listening to the CtcpListener.

@@ -69,10 +69,8 @@ public abstract class CommandBuilder
     /// <summary>
     /// Clear the contents of the string buffer.
     /// </summary>
-    internal void ClearBuffer()
-    {
-        Buffer.Remove(0, Buffer.Length);
-    }
+    internal void ClearBuffer() => Buffer.Remove(0, Buffer.Length);
+
     /// <summary>
     /// Break up a large message into smaller pieces that will fit within the IRC
     /// max message size.

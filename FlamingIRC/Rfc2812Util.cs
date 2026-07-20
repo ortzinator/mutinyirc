@@ -197,9 +197,7 @@ public sealed class Rfc2812Util
     /// <param name="action">The action enum.</param>
     /// <returns>Either '+' or '-'.</returns>
     public static char ModeActionToChar(ModeAction action)
-    {
-        return Convert.ToChar((byte)action, CultureInfo.InvariantCulture);
-    }
+        => Convert.ToChar((byte)action, CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Converts the char received from the IRC server into
@@ -219,9 +217,7 @@ public sealed class Rfc2812Util
     /// <param name="mode">The mode enum.</param>
     /// <returns>The corresponding char.</returns>
     public static char UserModeToChar(UserMode mode)
-    {
-        return Convert.ToChar((byte)mode, CultureInfo.InvariantCulture);
-    }
+        => Convert.ToChar((byte)mode, CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Convert a string of UserModes characters to
@@ -279,9 +275,7 @@ public sealed class Rfc2812Util
     /// <param name="mode">The mode enum.</param>
     /// <returns>The corresponding char.</returns>
     public static char ChannelModeToChar(ChannelMode mode)
-    {
-        return Convert.ToChar((byte)mode, CultureInfo.InvariantCulture);
-    }
+        => Convert.ToChar((byte)mode, CultureInfo.InvariantCulture);
     /// <summary>
     /// Converts the char recived from the IRC server into
     /// its enum equivalent.
@@ -300,9 +294,7 @@ public sealed class Rfc2812Util
     /// <param name="query">The query enum.</param>
     /// <returns>The corresponding char.</returns>
     public static char StatsQueryToChar(StatsQuery query)
-    {
-        return Convert.ToChar((byte)query, CultureInfo.InvariantCulture);
-    }
+        => Convert.ToChar((byte)query, CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Converts the char recived from the IRC server into
@@ -316,13 +308,7 @@ public sealed class Rfc2812Util
         return (StatsQuery)Enum.Parse(typeof(StatsQuery), b.ToString(CultureInfo.InvariantCulture), false);
     }
 
-    private static bool IsValidModeChar(char c, string validList)
-    {
-        return validList.IndexOf(c) != -1;
-    }
+    private static bool IsValidModeChar(char c, string validList) => validList.IndexOf(c) != -1;
 
-    private static bool ContainsSpace(string text)
-    {
-        return text.IndexOf(Space, 0, text.Length) != -1;
-    }
+    private static bool ContainsSpace(string text) => text.IndexOf(Space, 0, text.Length) != -1;
 }

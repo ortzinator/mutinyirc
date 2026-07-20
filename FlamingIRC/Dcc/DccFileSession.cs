@@ -176,10 +176,7 @@ public sealed class DccFileSession
         }
         dccFileInfo.CloseFile();
     }
-    private void ResetActivityTimer()
-    {
-        LastActivity = DateTime.Now;
-    }
+    private void ResetActivityTimer() => LastActivity = DateTime.Now;
     private void SignalTransferStart()
     {
         ResetActivityTimer();
@@ -443,10 +440,8 @@ public sealed class DccFileSession
     /// Summary information about this session.
     /// </summary>
     /// <returns>Simple information about this session in human readable format.</returns>
-    public override string ToString()
-    {
-        return "DccFileSession:: ID=" + ID + " User=" + User.ToString() + " File=" + dccFileInfo.DccFileName;
-    }
+    public override string ToString() => "DccFileSession:: ID=" + ID + " User=" + User.ToString() +
+        " File=" + dccFileInfo.DccFileName;
 
     /// <summary>
     /// Ask a remote user to send a file. The remote user may or may not respond

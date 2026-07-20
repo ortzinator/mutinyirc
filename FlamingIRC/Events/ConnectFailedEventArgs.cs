@@ -38,8 +38,5 @@ public class ConnectFailedEventArgs : EventArgs
     /// socket error code (e.g. <see cref="ConnectError.AuthenticationFailed"/>).
     /// </summary>
     /// <param name="reason">Why the connection attempt failed.</param>
-    public ConnectFailedEventArgs(ConnectError reason)
-    {
-        Reason = reason;
-    }
+    public ConnectFailedEventArgs(ConnectError reason) => Reason = reason;
 }

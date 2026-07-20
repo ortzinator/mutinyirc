@@ -43,10 +43,7 @@ public sealed class CtcpSender : CommandBuilder
     /// Create an instance using a specific connection.
     /// </summary>
     /// <param name="connection">The connection to an IRC server.</param>
-    internal CtcpSender(Connection connection) : base(connection)
-    {
-        pingList = new ArrayList();
-    }
+    internal CtcpSender(Connection connection) : base(connection) => pingList = new ArrayList();
 
     /// <summary>
     /// Test if the timestamp is one that this client sent out.
@@ -55,19 +52,13 @@ public sealed class CtcpSender : CommandBuilder
     /// </summary>
     /// <param name="timestamp">The timstamp</param>
     /// <returns>True if the timestamp was sent by this client.</returns>
-    internal bool IsMyRequest(string timestamp)
-    {
-        return pingList.Contains(timestamp);
-    }
+    internal bool IsMyRequest(string timestamp) => pingList.Contains(timestamp);
     /// <summary>
     /// Remove a timstamp from the list
     /// we are maintaining.
     /// </summary>
     /// <param name="timestamp">The timestamp that was sent back.</param>
-    internal void ReplyReceived(string timestamp)
-    {
-        pingList.Remove(timestamp);
-    }
+    internal void ReplyReceived(string timestamp) => pingList.Remove(timestamp);
 
     /// <summary>
     /// Send a reply in response to a CTCP request. Replies that exceed

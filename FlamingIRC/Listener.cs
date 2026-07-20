@@ -351,9 +351,7 @@ public class Listener
     /// Tell listeners that an error has been encountered
     /// </summary>
     internal void Error(ReplyCode code, string message)
-    {
-        OnError.Fire(this, new ErrorMessageEventArgs(code, message));
-    }
+        => OnError.Fire(this, new ErrorMessageEventArgs(code, message));
 
     private void ProcessKillCommand(IrcMessage ircMessage)
     {
@@ -842,10 +840,7 @@ public class Listener
     /// </summary>
     /// <param name="text"></param>
     /// <returns></returns>
-    private string RemoveTrailingChar(string text)
-    {
-        return text.Substring(0, text.Length - 1);
-    }
+    private string RemoveTrailingChar(string text) => text.Substring(0, text.Length - 1);
 
     private StatsQuery GetQueryType(ReplyCode code)
     {

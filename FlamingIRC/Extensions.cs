@@ -59,8 +59,5 @@ internal static class Extensions
     /// <param name="builder">
     /// A <see cref="StringBuilder"/>
     /// </param>
-    public static void Clear(this StringBuilder builder)
-    {
-        builder.Remove(0, builder.Length);
-    }
+    public static void Clear(this StringBuilder builder) => builder.Remove(0, builder.Length);
 }

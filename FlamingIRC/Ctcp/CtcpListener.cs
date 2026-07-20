@@ -86,10 +86,7 @@ public class CtcpListener
     /// Create a new listener using a specific connection.
     /// </summary>
     /// <param name="connection">The connection to the IRC server.</param>
-    internal CtcpListener(Connection connection)
-    {
-        this.connection = connection;
-    }
+    internal CtcpListener(Connection connection) => this.connection = connection;
 
     private bool IsReply(string[] tokens)
     {
@@ -158,9 +155,6 @@ public class CtcpListener
     /// </summary>
     /// <param name="message">The raw message from the IRC server</param>
     /// <returns>True if this is a Ctcp request or reply.</returns>
-    public static bool IsCtcpMessage(string message)
-    {
-        return ctcpRegex.IsMatch(message);
-    }
+    public static bool IsCtcpMessage(string message) => ctcpRegex.IsMatch(message);
 
 }

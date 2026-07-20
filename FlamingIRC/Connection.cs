@@ -98,9 +98,7 @@ public class Connection : TcpTextClient, IConnection
     /// <param name="textEncoding">The text encoding for the incoming stream.</param>
     public Connection(Encoding textEncoding, ConnectionArgs args, bool enableCtcp, bool enableDcc)
         : this(args, enableCtcp, enableDcc)
-    {
-        TextEncoding = textEncoding;
-    }
+        => TextEncoding = textEncoding;
 
     /// <summary>
     /// A read-only property indicating whether the connection has been opened with the IRC
@@ -251,10 +249,7 @@ public class Connection : TcpTextClient, IConnection
     public string Nick
     {
         get => _connectionArgs.Nick;
-        set
-        {
-            _connectionArgs.Nick = value ?? throw new ArgumentNullException();
-        }
+        set => _connectionArgs.Nick = value ?? throw new ArgumentNullException();
     }
 
     internal ConnectionArgs ConnectionArgs => _connectionArgs;
@@ -289,10 +284,7 @@ public class Connection : TcpTextClient, IConnection
     /// </summary>
     public event EventHandler<DisconnectEventArgs> ConnectionLost;
 
-    private void activityTimer_Elapsed(object sender, ElapsedEventArgs e)
-    {
-        SendKeepAlive();
-    }
+    private void activityTimer_Elapsed(object sender, ElapsedEventArgs e) => SendKeepAlive();
 
     /// <summary>
     /// Sends a keep-alive PING after a spell of silence and, when the silence stretches past
@@ -376,15 +368,9 @@ public class Connection : TcpTextClient, IConnection
     /// Respond to IRC keep-alives.
     /// </summary>
     /// <param name="message">The message that should be echoed back</param>
-    private void KeepAlive(string message)
-    {
-        _sender.Pong(message);
-    }
+    private void KeepAlive(string message) => _sender.Pong(message);
 
-    private void UpdateLastTime(object sender, EventArgs e)
-    {
-        _lastTraffic = DateTime.Now;
-    }
+    private void UpdateLastTime(object sender, EventArgs e) => _lastTraffic = DateTime.Now;
 
     /// <summary>
     /// Update the ConnectionArgs object when the user changes his nick.
@@ -556,10 +542,7 @@ public class Connection : TcpTextClient, IConnection
     /// A friendly name for this connection.
     /// </summary>
     /// <returns>The Name property</returns>
-    public override string ToString()
-    {
-        return Name;
-    }
+    public override string ToString() => Name;
 
     /// <summary>
     /// Adds a parser class to a list of custom parsers. Any number can be added. The custom
@@ -567,19 +550,13 @@ public class Connection : TcpTextClient, IConnection
     /// parser to be added will be the first to process a message.
     /// </summary>
     /// <param name="parser">Any class that implements IParser.</param>
-    public void AddParser(IParser parser)
-    {
-        _parsers.Insert(0, parser);
-    }
+    public void AddParser(IParser parser) => _parsers.Insert(0, parser);
 
     /// <summary>
     /// Remove a custom parser class.
     /// </summary>
     /// <param name="parser">Any class that implements IParser.</param>
-    public void RemoveParser(IParser parser)
-    {
-        _parsers.Remove(parser);
-    }
+    public void RemoveParser(IParser parser) => _parsers.Remove(parser);
 
     protected override void OnConnect()
     {
@@ -588,11 +565,10 @@ public class Connection : TcpTextClient, IConnection
         Connected = true;
     }
 
-    protected override bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain,
+    protected override bool OnCertificateValidatecateFailed(X509Certificate certificate,
+                                                            X509Chain chain,
                                                             SslPolicyErrors errors)
-    {
-        throw new NotImplementedException();
-    }
+        => throw new NotImplementedException();
 
     protected override void OnDisconnect(DisconnectReason reason, int? socketErrorCode)
     {

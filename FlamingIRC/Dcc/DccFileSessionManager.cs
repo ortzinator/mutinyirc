@@ -105,10 +105,7 @@ public sealed class DccFileSessionManager
             }
         }
     }
-    internal bool ContainsSession(string sessionID)
-    {
-        return sessions.Contains(sessionID);
-    }
+    internal bool ContainsSession(string sessionID) => sessions.Contains(sessionID);
     internal DccFileSession LookupSession(string sessionID)
     {
         //Make sure this session is till active

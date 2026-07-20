@@ -7,8 +7,5 @@ public class UserModeValidator
 {
     public static char[] Modes { get; } = new char[] { '@', '+', '%', '&', '~' };
 
-    public static bool IsValid(char value)
-    {
-        return Modes.Contains(value);
-    }
+    public static bool IsValid(char value) => Modes.Contains(value);
 }

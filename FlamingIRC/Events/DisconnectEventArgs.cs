@@ -38,8 +38,5 @@ public class DisconnectEventArgs : EventArgs
     /// or <see cref="DisconnectReason.RemoteHostClosedConnection"/>).
     /// </summary>
     /// <param name="reason">Why the connection was closed.</param>
-    public DisconnectEventArgs(DisconnectReason reason)
-    {
-        Reason = reason;
-    }
+    public DisconnectEventArgs(DisconnectReason reason) => Reason = reason;
 }

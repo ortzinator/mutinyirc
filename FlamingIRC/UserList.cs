@@ -30,10 +30,7 @@ public class UserList : IList<User>, INotifyUpdate
 
     #region IList<User> Members
 
-    public int IndexOf(User item)
-    {
-        return list.IndexOf(item);
-    }
+    public int IndexOf(User item) => list.IndexOf(item);
 
     public void Insert(int index, User item)
     {
@@ -73,15 +70,9 @@ public class UserList : IList<User>, INotifyUpdate
         OnUpdate();
     }
 
-    public bool Contains(User item)
-    {
-        return list.Contains(item);
-    }
+    public bool Contains(User item) => list.Contains(item);
 
-    public void CopyTo(User[] array, int arrayIndex)
-    {
-        list.CopyTo(array, arrayIndex);
-    }
+    public void CopyTo(User[] array, int arrayIndex) => list.CopyTo(array, arrayIndex);
 
     public int Count => list.Count;
 
@@ -98,19 +89,13 @@ public class UserList : IList<User>, INotifyUpdate
 
     #region IEnumerable<User> Members
 
-    public IEnumerator<User> GetEnumerator()
-    {
-        return list.GetEnumerator();
-    }
+    public IEnumerator<User> GetEnumerator() => list.GetEnumerator();
 
     #endregion
 
     #region IEnumerable Members
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return list.GetEnumerator();
-    }
+    IEnumerator IEnumerable.GetEnumerator() => list.GetEnumerator();
 
     #endregion
 
@@ -138,21 +123,12 @@ public class UserList : IList<User>, INotifyUpdate
         return null;
     }
 
-    public virtual User GetUser(User user)
-    {
-        return GetUser(user.Nick);
-    }
+    public virtual User GetUser(User user) => GetUser(user.Nick);
 
     /// <summary>
     /// Triggers the Updated event
     /// </summary>
-    public void Refresh()
-    {
-        OnUpdate();
-    }
+    public void Refresh() => OnUpdate();
 
-    public void Sort(Comparison<User> comparison)
-    {
-        list.Sort(comparison);
-    }
+    public void Sort(Comparison<User> comparison) => list.Sort(comparison);
 }

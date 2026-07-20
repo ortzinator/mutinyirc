@@ -60,10 +60,7 @@ public class Sender : CommandBuilder, ISender
     /// </summary>
     internal Sender(Connection connection) : base(connection) { }
 
-    private bool IsEmpty(string aString)
-    {
-        return aString == null || aString.Trim().Length == 0;
-    }
+    private bool IsEmpty(string aString) => aString == null || aString.Trim().Length == 0;
 
     /// <summary>
     /// Truncate parameters which cause a command line
@@ -235,10 +232,7 @@ public class Sender : CommandBuilder, ISender
     /// </code></example>
     /// <exception cref="ArgumentException">If the channel name is not valid.</exception>
     /// <seealso cref="Listener.OnJoin"/>
-    public void Join(string channel)
-    {
-        Join(channel, string.Empty);
-    }
+    public void Join(string channel) => Join(channel, string.Empty);
 
     /// <summary>
     /// Join a passworded channel.
@@ -1456,10 +1450,7 @@ public class Sender : CommandBuilder, ISender
     /// </list>
     /// </remarks>
     /// <seealso cref="Listener.OnVersion"/>
-    public void Version()
-    {
-        Version(null);
-    }
+    public void Version() => Version(null);
     /// <summary>
     /// Used to query the version of the IRC server program.
     /// </summary>
@@ -1497,10 +1488,7 @@ public class Sender : CommandBuilder, ISender
     /// </list>
     /// </remarks>
     /// <seealso cref="Listener.OnMotd"/>
-    public void Motd()
-    {
-        Motd(null);
-    }
+    public void Motd() => Motd(null);
     /// <summary>
     /// Request the "Message Of The Day" from the given server.
     /// </summary>
@@ -1532,10 +1520,7 @@ public class Sender : CommandBuilder, ISender
     /// Request the local time from the current server.
     /// </summary>
     /// <seealso cref="Listener.OnTime"/>
-    public void Time()
-    {
-        Time(null);
-    }
+    public void Time() => Time(null);
     /// <summary>
     /// Request the local time from the given server.
     /// </summary>
@@ -1599,10 +1584,7 @@ public class Sender : CommandBuilder, ISender
     /// considered relevant.
     /// </remarks>
     /// <seealso cref="Listener.OnInfo"/>
-    public void Info()
-    {
-        Info(null);
-    }
+    public void Info() => Info(null);
     /// <summary>
     /// Request information about the software
     /// of the target IRC server.
@@ -1653,10 +1635,7 @@ public class Sender : CommandBuilder, ISender
     /// the IRC is configured to send as a response.
     /// </remarks>
     /// <seealso cref="Listener.OnAdmin"/>
-    public void Admin()
-    {
-        Admin(null);
-    }
+    public void Admin() => Admin(null);
     /// <summary>
     /// Request information about the administrator
     /// of the target IRC server.
@@ -1708,10 +1687,7 @@ public class Sender : CommandBuilder, ISender
     /// </list>
     /// </remarks>
     /// <seealso cref="Listener.OnLusers"/>
-    public void Lusers()
-    {
-        Lusers(null, null);
-    }
+    public void Lusers() => Lusers(null, null);
 
     /// <summary>
     /// Request statistics about the size of the IRC network.
@@ -1772,10 +1748,7 @@ public class Sender : CommandBuilder, ISender
     /// </list>
     /// </remarks>
     /// <seealso cref="Listener.OnLinks"/>
-    public void Links()
-    {
-        Links(null);
-    }
+    public void Links() => Links(null);
 
     /// <summary>
     /// Request all server names which are known by the target server
@@ -1842,10 +1815,7 @@ public class Sender : CommandBuilder, ISender
     /// connection.Sender.Stats( StatsQuery.Connections );
     /// </code></example>
     /// <seealso cref="Listener.OnStats"/>
-    public void Stats(StatsQuery query)
-    {
-        Stats(query, null);
-    }
+    public void Stats(StatsQuery query) => Stats(query, null);
 
     /// <summary>
     /// Request certain kinds of statistics about the current server.

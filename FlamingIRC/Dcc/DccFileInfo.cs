@@ -144,49 +144,31 @@ public sealed class DccFileInfo
     /// Does the position sent in the DCC Accept message
     /// match what we expect?
     /// </summary>
-    internal bool AcceptPositionMatches(long position)
-    {
-        return position == FileStartingPosition;
-    }
+    internal bool AcceptPositionMatches(long position) => position == FileStartingPosition;
     /// <summary>
     /// Our Resume request was accepted so start
     /// writing at the current position + 1.
     /// </summary>
-    internal void GotoWritePosition()
-    {
-        TransferStream.Seek(FileStartingPosition + 1, SeekOrigin.Begin);
-    }
+    internal void GotoWritePosition() => TransferStream.Seek(FileStartingPosition + 1, SeekOrigin.Begin);
     /// <summary>
     /// Advance to the correct reading start
     /// position.
     /// </summary>
-    internal void GotoReadPosition()
-    {
-        TransferStream.Seek(FileStartingPosition, SeekOrigin.Begin);
-    }
+    internal void GotoReadPosition() => TransferStream.Seek(FileStartingPosition, SeekOrigin.Begin);
     /// <summary>
     /// Is the position where the remote user would to to resume
     /// valid?
     /// </summary>
-    internal bool ResumePositionValid(long position)
-    {
-        return position > 1 && position < fileInfo.Length;
-    }
+    internal bool ResumePositionValid(long position) => position > 1 && position < fileInfo.Length;
     /// <summary>
     /// Can this file be resumed, i.e. does it
     /// support random access?
     /// </summary>
-    internal bool CanResume()
-    {
-        return TransferStream.CanSeek;
-    }
+    internal bool CanResume() => TransferStream.CanSeek;
     /// <summary>
     /// Start a Resume where the file last left off.
     /// </summary>
-    internal void SetResumeToFileSize()
-    {
-        FileStartingPosition = fileInfo.Length;
-    }
+    internal void SetResumeToFileSize() => FileStartingPosition = fileInfo.Length;
     /// <summary>
     /// Set the point at which the transfer will begin
     /// </summary>
@@ -198,10 +180,7 @@ public sealed class DccFileInfo
     /// <summary>
     /// Where in the file is the transfer currently at?
     /// </summary>
-    internal long CurrentFilePosition()
-    {
-        return BytesTransfered + FileStartingPosition;
-    }
+    internal long CurrentFilePosition() => BytesTransfered + FileStartingPosition;
     /// <summary>
     /// Have all the file's bytes been sent/received?
     /// </summary>
@@ -219,31 +198,19 @@ public sealed class DccFileInfo
     /// <summary>
     /// Close the file stream.
     /// </summary>
-    internal void CloseFile()
-    {
-        TransferStream?.Close();
-    }
+    internal void CloseFile() => TransferStream?.Close();
     /// <summary>
     /// Set this file stream to a read only one.
     /// </summary>
-    internal void OpenForRead()
-    {
-        TransferStream = fileInfo.OpenRead();
-    }
+    internal void OpenForRead() => TransferStream = fileInfo.OpenRead();
     /// <summary>
     /// Set this file stream to a write only one.
     /// </summary>
-    internal void OpenForWrite()
-    {
-        TransferStream = fileInfo.OpenWrite();
-    }
+    internal void OpenForWrite() => TransferStream = fileInfo.OpenWrite();
     /// <summary>
     /// Should we try to resume this file download?
     /// </summary>
-    internal bool ShouldResume()
-    {
-        return fileInfo.Length > 0 && CanResume();
-    }
+    internal bool ShouldResume() => fileInfo.Length > 0 && CanResume();
     /// <summary>
     /// Determine whether the acks sent during an upload
     /// signal that all bytes have been sent.

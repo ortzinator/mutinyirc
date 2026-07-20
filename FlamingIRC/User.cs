@@ -110,10 +110,7 @@ public class User : IComparable<User>
     }
 
     /// <summary>Revokes a channel status symbol from the user, if held.</summary>
-    public void RemoveStatus(char symbol)
-    {
-        _statuses.Remove(symbol);
-    }
+    public void RemoveStatus(char symbol) => _statuses.Remove(symbol);
 
     /// <summary>The user's "real name", immediately before the @</summary>
     public string RealName { get; set; } = string.Empty;
@@ -140,10 +137,7 @@ public class User : IComparable<User>
         return user;
     }
 
-    public int CompareTo(User other)
-    {
-        return NamesLiteral.CompareTo(other.NamesLiteral);
-    }
+    public int CompareTo(User other) => NamesLiteral.CompareTo(other.NamesLiteral);
 
     public override bool Equals(object obj)
     {
@@ -160,12 +154,6 @@ public class User : IComparable<User>
         return Equals(other.Nick, Nick);
     }
 
-    public override int GetHashCode()
-    {
-        return Nick != null ? Nick.GetHashCode() : 0;
-    }
-    public override string ToString()
-    {
-        return NamesLiteral;
-    }
+    public override int GetHashCode() => Nick != null ? Nick.GetHashCode() : 0;
+    public override string ToString() => NamesLiteral;
 }

@@ -26,10 +26,7 @@ public sealed class ServerProperties
     /// <summary>
     /// Instances should only be created by the Connection class.
     /// </summary>
-    internal ServerProperties()
-    {
-        properties = new Hashtable();
-    }
+    internal ServerProperties() => properties = new Hashtable();
 
     /// <summary>
     /// Read-only indexer for the various server
@@ -55,10 +52,7 @@ public sealed class ServerProperties
     /// Add a property retrieved from the IRC
     /// server.
     /// </summary>
-    internal void SetProperty(string key, string propertyValue)
-    {
-        properties.Add(key, propertyValue);
-    }
+    internal void SetProperty(string key, string propertyValue) => properties.Add(key, propertyValue);
 
     /// <summary>
     /// Get a read-only enumeration of all the elements
@@ -72,18 +66,12 @@ public sealed class ServerProperties
     /// Console.WriteLine("Key:" + entry.Key + " Value:" + entry.Value );
     /// }
     /// </code></example>
-    public IDictionaryEnumerator GetEnumerator()
-    {
-        return properties.GetEnumerator();
-    }
+    public IDictionaryEnumerator GetEnumerator() => properties.GetEnumerator();
     /// <summary>
     /// Test if this instance contains a given key.
     /// </summary>
     /// <param name="key">The server properties key to test.</param>
     /// <returns>True if it is present.</returns>
-    public bool ContainsKey(string key)
-    {
-        return properties[key] != null;
-    }
+    public bool ContainsKey(string key) => properties[key] != null;
 
 }

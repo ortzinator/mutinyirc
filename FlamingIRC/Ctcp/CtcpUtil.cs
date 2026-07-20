@@ -62,9 +62,6 @@ public sealed class CtcpUtil
     /// Generate a timestamp string suitable for the CTCP Ping command.
     /// </summary>
     /// <returns>The current time as a string.</returns>
-    public static string CreateTimestamp()
-    {
-        return DateTime.Now.ToFileTime().ToString(CultureInfo.InvariantCulture);
-    }
+    public static string CreateTimestamp() => DateTime.Now.ToFileTime().ToString(CultureInfo.InvariantCulture);
 
 }

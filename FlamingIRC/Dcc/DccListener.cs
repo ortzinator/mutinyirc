@@ -1,4 +1,4 @@
-﻿/*
+/*
  * FlamingIRC IRC library
  * Copyright (C) 2002 Aaron Hunter <thresher@sharkbite.org>
  * 
@@ -75,7 +75,10 @@ public sealed class DccListener
 
     static DccListener()
     {
-        dccMatchRegex = new Regex(":([^ ]+) PRIVMSG [^:]+:\u0001DCC (CHAT|SEND|GET|RESUME|ACCEPT)[^\u0001]*\u0001", RegexOptions.Compiled | RegexOptions.Singleline);
+        dccMatchRegex =
+            new Regex(
+                ":([^ ]+) PRIVMSG [^:]+:\u0001DCC (CHAT|SEND|GET|RESUME|ACCEPT)[^\u0001]*\u0001",
+                RegexOptions.Compiled | RegexOptions.Singleline);
     }
 
     private DccListener()
@@ -271,8 +274,5 @@ public sealed class DccListener
     /// </summary>
     /// <param name="message">The raw message from the IRC server</param>
     /// <returns>True if this is a DCC request.</returns>
-    public static bool IsDccRequest(string message)
-    {
-        return dccMatchRegex.IsMatch(message);
-    }
+    public static bool IsDccRequest(string message) => dccMatchRegex.IsMatch(message);
 }
