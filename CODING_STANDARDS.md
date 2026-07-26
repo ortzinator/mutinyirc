@@ -153,7 +153,7 @@ declaration or a constructor. `IDE0044` is set to `warning` and will flag the on
   correctly. When resolving a nullable warning, fix the actual null path — do not mask it with a
   fallback value or a `!` that hides a real bug. Prefer `null!` initialization only for fields
   that are genuinely assigned before use (e.g. DI-injected or set in a lifecycle hook), to avoid
-  cascading warnings (per `CLAUDE.md`).
+  cascading warnings.
 - In non-UI projects, nullable annotations are not required and generally absent.
 
 ## Documentation Comments
@@ -176,12 +176,12 @@ declaration or a constructor. `IDE0044` is set to `warning` and will flag the on
   /// </list>
   /// </remarks>
   ```
-- Follow the documentation voice described in `CLAUDE.md`: explain the *why* before the *how*, use
-  second person, keep paragraphs tight, and pair concepts with short concrete examples.
+- Documentation voice: explain the *why* before the *how*, use second person, keep paragraphs
+  tight, and pair concepts with short concrete examples.
 
 ## Architecture Conventions
 
-These are load-bearing design rules (see `CLAUDE.md` for the full rationale):
+These are load-bearing design rules:
 
 - **Layering:** `FlamingIRC` (protocol) → `MutinyIRC.Common` (domain) → `MutinyIRC.UI` (MVVM).
   Logic shared beyond the UI belongs in `MutinyIRC.Common`, never in `MutinyIRC.UI`.
@@ -214,8 +214,8 @@ These are load-bearing design rules (see `CLAUDE.md` for the full rationale):
 
 ## Known Contradictions
 
-These are the places where the `.editorconfig`, the codebase, and/or `CLAUDE.md` disagree, or
-where the codebase is inconsistent with itself. Each needs a decision.
+These are the places where the `.editorconfig` and the codebase disagree, or where the codebase is
+inconsistent with itself. Each needs a decision.
 
 ### 1. FlamingIRC legacy fields do not follow the field naming rule
 
