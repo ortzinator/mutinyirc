@@ -104,6 +104,23 @@ public class TextLoggerManagerTests
             ServerManager.Instance.Create(new ConnectionArgs("test", "irc.fake.com", false)));
     }
 
+    /// <summary>
+    /// Removing a server closes and drops its whole log-file table. Its channel events have to
+    /// come off at the same moment: a channel created afterwards would otherwise try to register
+    /// a log file under a table entry that no longer exists.
+    /// </summary>
+    [Test]
+    public void ServerRemovedWhileActive_ChannelCreatedOnIt_IsNotRegistered()
+    {
+        var server = ServerManager.Instance.Create(new ConnectionArgs("test", "irc.fake.com", false));
+        TextLoggerManager.LoggerActive = true;
+
+        ServerManager.Instance.Remove(server);
+
+        Assert.DoesNotThrow(() => server.CreateChannel("#gone"),
+            "A removed server's channel events must no longer reach the logger");
+    }
+
     [Test]
     public void TextEntry_WhileLoggerInactive_WritesNothingAndDoesNotThrow()
     {

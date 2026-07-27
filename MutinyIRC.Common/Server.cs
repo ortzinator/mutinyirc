@@ -92,9 +92,9 @@ public class Server : MessageContext, IDisposable
     public Dictionary<string, Channel> Channels { get; } =
         new Dictionary<string, Channel>(StringComparer.OrdinalIgnoreCase);
 
-    public static event EventHandler<ChannelEventArgs> ChannelCreated;
+    public event EventHandler<ChannelEventArgs> ChannelCreated;
 
-    public static event EventHandler<ChannelEventArgs> ChannelRemoved;
+    public event EventHandler<ChannelEventArgs> ChannelRemoved;
 
     public void SetupConnection(ConnectionArgs args)
     {

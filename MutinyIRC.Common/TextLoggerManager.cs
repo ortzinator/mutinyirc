@@ -54,14 +54,12 @@ public static class TextLoggerManager
 
     public static void TurnOn()
     {
-        Server.ChannelCreated += ChannelManager_ElementCreated;
-        Server.ChannelRemoved += ChannelManager_ElementRemoved;
-
         ServerManager.Instance.ServerAdded += ServerManager_ElementCreated;
         ServerManager.Instance.ServerRemoved += ServerManager_ElementRemoved;
 
         foreach (Server ntw in ServerManager.Instance.ServerList)
         {
+            HookChannelEvents(ntw);
             TextLogger.AddLoggable(ntw);
 
             foreach (Channel chan in ntw.Channels.Values)
@@ -71,22 +69,45 @@ public static class TextLoggerManager
 
     public static void TurnOff()
     {
-        Server.ChannelCreated -= ChannelManager_ElementCreated;
-        Server.ChannelRemoved -= ChannelManager_ElementRemoved;
-
         ServerManager.Instance.ServerAdded -= ServerManager_ElementCreated;
         ServerManager.Instance.ServerRemoved -= ServerManager_ElementRemoved;
+
+        foreach (Server ntw in ServerManager.Instance.ServerList)
+            UnhookChannelEvents(ntw);
 
         TextLogger.RemoveAllLoggables();
     }
 
+    /// <summary>
+    /// Starts logging the channels of <paramref name="server" />. Channel events are per-server,
+    /// so every server logging is active for needs its own subscription.
+    /// </summary>
+    private static void HookChannelEvents(Server server)
+    {
+        server.ChannelCreated += ChannelManager_ElementCreated;
+        server.ChannelRemoved += ChannelManager_ElementRemoved;
+    }
+
+    /// <summary>
+    /// The counterpart to <see cref="HookChannelEvents" />. Detaching matters: the server's log
+    /// files are gone by the time a removed server is unhooked, so a channel created afterwards
+    /// would look up a table entry that no longer exists.
+    /// </summary>
+    private static void UnhookChannelEvents(Server server)
+    {
+        server.ChannelCreated -= ChannelManager_ElementCreated;
+        server.ChannelRemoved -= ChannelManager_ElementRemoved;
+    }
+
     private static void ServerManager_ElementRemoved(object sender, ServerEventArgs args)
     {
+        UnhookChannelEvents(args.Server);
         TextLogger.RemoveLoggable(args.Server);
     }
 
     private static void ServerManager_ElementCreated(object sender, ServerEventArgs args)
     {
+        HookChannelEvents(args.Server);
         TextLogger.AddLoggable(args.Server);
     }
 

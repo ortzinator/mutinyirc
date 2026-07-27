@@ -76,16 +76,9 @@ public class ServerTests
         _server.Channels.Add("#test", chan);
 
         bool removedFired = false;
-        EventHandler<ChannelEventArgs> handler = (_, _) => removedFired = true;
-        Server.ChannelRemoved += handler;
-        try
-        {
-            _server.InChannel("#test");
-        }
-        finally
-        {
-            Server.ChannelRemoved -= handler;
-        }
+        _server.ChannelRemoved += (_, _) => removedFired = true;
+
+        _server.InChannel("#test");
 
         Assert.IsTrue(_server.Channels.ContainsKey("#test"),
             "InChannel must be a pure query and not prune the channel");
@@ -99,16 +92,9 @@ public class ServerTests
         chan.Membership = ChannelMembership.Joining;
 
         Channel removed = null;
-        EventHandler<ChannelEventArgs> handler = (_, e) => removed = e.Channel;
-        Server.ChannelRemoved += handler;
-        try
-        {
-            _server.Connection.Listener.Parse(":server.name 475 test #secret :Cannot join channel (+k)");
-        }
-        finally
-        {
-            Server.ChannelRemoved -= handler;
-        }
+        _server.ChannelRemoved += (_, e) => removed = e.Channel;
+
+        _server.Connection.Listener.Parse(":server.name 475 test #secret :Cannot join channel (+k)");
 
         Assert.IsFalse(_server.Channels.ContainsKey("#secret"),
             "A rejected JOIN must not leave the channel in the manager");
@@ -124,16 +110,9 @@ public class ServerTests
         chan.Membership = ChannelMembership.Joined;
 
         bool removedFired = false;
-        EventHandler<ChannelEventArgs> handler = (_, _) => removedFired = true;
-        Server.ChannelRemoved += handler;
-        try
-        {
-            _server.Connection.Listener.Parse(":server.name 475 test #secret :Cannot join channel (+k)");
-        }
-        finally
-        {
-            Server.ChannelRemoved -= handler;
-        }
+        _server.ChannelRemoved += (_, _) => removedFired = true;
+
+        _server.Connection.Listener.Parse(":server.name 475 test #secret :Cannot join channel (+k)");
 
         Assert.IsTrue(_server.Channels.ContainsKey("#secret"),
             "A stray rejection must not evict an already-joined channel");

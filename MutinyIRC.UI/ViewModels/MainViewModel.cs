@@ -51,7 +51,6 @@ public class MainViewModel : ViewModelBase
         Servers = new MTObservableCollection<ServerViewModel>();
 
         ServerManager.Instance.ServerAdded += Instance_ServerCreated;
-        Server.ChannelRemoved += Server_ChannelRemoved;
     }
 
     /// <summary>
@@ -237,18 +236,29 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private void Server_ChannelRemoved(object? sender, ChannelEventArgs e)
+    /// <summary>
+    /// Undoes <see cref="CreateServerPanel" />'s subscriptions. Keep this list in sync with the
+    /// hookups there.
+    /// </summary>
+    private void DetachServer(Server server)
     {
-        var chanVm = Panels.OfType<ChannelViewModel>()
-            .FirstOrDefault(c => c.Channel == e.Channel);
-        if (chanVm != null)
-            Chan_RequestClose(chanVm, EventArgs.Empty);
+        server.JoinSelf -= Server_JoinSelf;
+        server.PrivateMessageSessionAdded -= Server_PrivateMessageSessionAdded;
+        server.PrivateNotice -= Server_PrivateNotice;
+        server.AwayReplyReceived -= Server_AwayReplyReceived;
     }
 
     public override void Close()
     {
-        for (int i = 0; i < Panels.Count; i++)
-            Panels[i].Close();
+        // Iterate a snapshot: closing a channel or PM panel runs Chan_RequestClose /
+        // Pm_RequestClose, which removes it from Panels mid-loop. Indexing the live collection
+        // would skip every panel that shifted down, leaving it undisposed and still subscribed.
+        foreach (IrcViewModel panel in Panels.ToList())
+            panel.Close();
+
+        // Nothing removes a server at runtime, so shutdown is the only place these come off.
+        // Left attached, the ServerManager singleton would go on driving a closed view model.
+        ServerManager.Instance.ServerAdded -= Instance_ServerCreated;
 
         // App shutdown: dispose each server panel (detaching its handlers) and tear down the
         // underlying Server so it unhooks its FlamingIRC subscriptions and drops out of
@@ -256,6 +266,9 @@ public class MainViewModel : ViewModelBase
         // every Server for the process lifetime and the finalizer would never run.
         foreach (ServerViewModel serverVm in Servers.ToList())
         {
+            if (serverVm.OwningServer != null)
+                DetachServer(serverVm.OwningServer);
+
             serverVm.Dispose();
             serverVm.OwningServer?.Dispose();
         }

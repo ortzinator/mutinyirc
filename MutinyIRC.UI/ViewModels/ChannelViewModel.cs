@@ -67,6 +67,19 @@ public class ChannelViewModel : IrcViewModel
         _channel.OnNotice += Channel_OnNotice;
 
         _channel.Server.Disconnected += Server_Disconnected;
+        _channel.Server.ChannelRemoved += Server_ChannelRemoved;
+    }
+
+    /// <summary>
+    /// Closes this panel once the channel behind it stops being tracked — a self-part, or a
+    /// JOIN the server rejected. The panel watches for its own disappearance rather than
+    /// having <see cref="MainViewModel" /> scan for it, so the subscription is torn down by
+    /// the same <see cref="Dispose" /> that unwires everything else.
+    /// </summary>
+    private void Server_ChannelRemoved(object? sender, ChannelEventArgs e)
+    {
+        if (e.Channel == _channel)
+            Close();
     }
 
     private void Channel_NoticeSent(object? sender, UserMessageEventArgs e)
@@ -208,5 +221,6 @@ public class ChannelViewModel : IrcViewModel
         _channel.OnNotice -= Channel_OnNotice;
 
         _channel.Server.Disconnected -= Server_Disconnected;
+        _channel.Server.ChannelRemoved -= Server_ChannelRemoved;
     }
 }
