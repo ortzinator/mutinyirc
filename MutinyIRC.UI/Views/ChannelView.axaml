@@ -5,6 +5,7 @@
              xmlns:local="clr-namespace:MutinyIRC.UI.Controls"
              xmlns:conv="clr-namespace:MutinyIRC.UI.Converters"
              xmlns:views="clr-namespace:MutinyIRC.UI.Views"
+             xmlns:vm="clr-namespace:MutinyIRC.UI.ViewModels"
              xmlns:design="clr-namespace:MutinyIRC.UI.ViewModels.Design"
              xmlns:ic="using:FluentIcons.Avalonia"
              mc:Ignorable="d"
@@ -18,7 +19,19 @@
 
     <UserControl.Resources>
         <conv:ModeToBrushConverter x:Key="ModeToBrushConverter" />
+        <!-- App.axaml declares one of these too, but the view keeps its own so it resolves when
+             hosted without the full application (design preview, headless tests). -->
+        <conv:NickColorConverter x:Key="NickColorConverter" />
     </UserControl.Resources>
+
+    <UserControl.Styles>
+        <!-- The filter box draws its own rounded frame, so strip the one the Fluent TextBox
+             template paints (including the focus underline it swaps in). -->
+        <Style Selector="TextBox#userFilterBox /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+    </UserControl.Styles>
 
     <DockPanel>
 
@@ -87,84 +100,125 @@
             <!-- Chat output -->
             <views:IrcOutputBox x:Name="outputBox" Grid.Column="0"/>
 
-            <!-- Divider -->
-            <Border Grid.Column="1" Width="1"
-                    Background="{DynamicResource ChatBorderBrush}"
-                    HorizontalAlignment="Left"/>
+            <!-- ── User list ──
+                 A filter box over a grouped roster. Headers and user rows share one ListBox
+                 (see UserGroupHeaderViewModel) so selection and the right-click menu work
+                 across the whole list; the headers opt out of hit-testing via IsSelectable. -->
+            <Border Grid.Column="1" Width="248"
+                    Background="{DynamicResource SurfaceContent}"
+                    BorderBrush="{DynamicResource DividerBrush}"
+                    BorderThickness="1,0,0,0">
+                <DockPanel>
 
-            <!-- User list panel -->
-            <DockPanel Grid.Column="1" Width="190"
-                       Background="{DynamicResource AppBackground}">
+                    <!-- Filter -->
+                    <Border DockPanel.Dock="Top"
+                            Margin="12,12,12,8" Height="30"
+                            Background="{DynamicResource InputBackground}"
+                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                            BorderThickness="1" CornerRadius="4"
+                            Padding="10,0">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <ic:SymbolIcon Grid.Column="0" Symbol="Search" FontSize="13"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextTertiary}"/>
+                            <TextBox x:Name="userFilterBox" Grid.Column="1"
+                                     Margin="8,0,0,0" Padding="0" MinHeight="0"
+                                     Text="{Binding UserFilter, Mode=TwoWay}"
+                                     PlaceholderText="{Binding UserFilterWatermark}"
+                                     Background="Transparent" BorderThickness="0"
+                                     FontSize="12.5"
+                                     VerticalAlignment="Center"
+                                     VerticalContentAlignment="Center"
+                                     Foreground="{DynamicResource TextPrimary}"/>
+                        </Grid>
+                    </Border>
 
-                <!-- User list header -->
-                <Border DockPanel.Dock="Top"
-                        Padding="12,8,12,6"
-                        BorderBrush="{DynamicResource ChatBorderBrush}"
-                        BorderThickness="0,0,0,1">
-                    <TextBlock FontSize="11" FontWeight="SemiBold"
-                               Foreground="{DynamicResource SidebarMutedForeground}">
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="MEMBERS — {0}">
-                                <Binding Path="UserList.Count"/>
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-                </Border>
-
-                <!-- User entries -->
-                <ListBox x:Name="userBox"
-                         ItemsSource="{Binding UserList}"
-                         SelectedItem="{Binding SelectedUser}"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         Padding="4,4,4,4">
-                    <ListBox.ContextMenu>
-                        <ContextMenu x:Name="userContextMenu">
-                            <MenuItem Header="Whois"           Command="{Binding UserCommand}" CommandParameter="/whois"/>
-                            <MenuItem Header="Private message" Command="{Binding UserCommand}" CommandParameter="/query"/>
-                            <Separator/>
-                            <MenuItem Header="Op"              Command="{Binding UserCommand}" CommandParameter="/mode +o"/>
-                            <MenuItem Header="Deop"            Command="{Binding UserCommand}" CommandParameter="/mode -o"/>
-                            <MenuItem Header="Voice"           Command="{Binding UserCommand}" CommandParameter="/mode +v"/>
-                            <MenuItem Header="Devoice"         Command="{Binding UserCommand}" CommandParameter="/mode -v"/>
-                            <Separator/>
-                            <MenuItem Header="Kick"            Command="{Binding UserCommand}" CommandParameter="/kick"/>
-                            <MenuItem Header="Ban"             Command="{Binding UserCommand}" CommandParameter="/ban"/>
-                            <MenuItem Header="Kick + Ban"      Command="{Binding UserCommand}" CommandParameter="/ban -k"/>
-                        </ContextMenu>
-                    </ListBox.ContextMenu>
-                    <ListBox.ItemContainerTheme>
-                        <ControlTheme TargetType="ListBoxItem">
-                            <Setter Property="Padding" Value="8,3"/>
-                            <Setter Property="CornerRadius" Value="3"/>
-                            <Setter Property="Foreground" Value="{Binding Mode, Converter={StaticResource ModeToBrushConverter}}"/>
-                            <Setter Property="Template">
-                                <ControlTemplate>
-                                    <Border Background="{TemplateBinding Background}"
-                                            CornerRadius="{TemplateBinding CornerRadius}"
-                                            Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter Content="{TemplateBinding Content}"
-                                                          Foreground="{TemplateBinding Foreground}"/>
+                    <!-- Roster -->
+                    <ListBox x:Name="userBox"
+                             ItemsSource="{Binding UserRows}"
+                             SelectedItem="{Binding SelectedUser}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="8,0,8,12">
+                        <ListBox.ContextMenu>
+                            <ContextMenu x:Name="userContextMenu">
+                                <MenuItem Header="Whois"           Command="{Binding UserCommand}" CommandParameter="/whois"/>
+                                <MenuItem Header="Private message" Command="{Binding UserCommand}" CommandParameter="/query"/>
+                                <Separator/>
+                                <MenuItem Header="Op"              Command="{Binding UserCommand}" CommandParameter="/mode +o"/>
+                                <MenuItem Header="Deop"            Command="{Binding UserCommand}" CommandParameter="/mode -o"/>
+                                <MenuItem Header="Voice"           Command="{Binding UserCommand}" CommandParameter="/mode +v"/>
+                                <MenuItem Header="Devoice"         Command="{Binding UserCommand}" CommandParameter="/mode -v"/>
+                                <Separator/>
+                                <MenuItem Header="Kick"            Command="{Binding UserCommand}" CommandParameter="/kick"/>
+                                <MenuItem Header="Ban"             Command="{Binding UserCommand}" CommandParameter="/ban"/>
+                                <MenuItem Header="Kick + Ban"      Command="{Binding UserCommand}" CommandParameter="/ban -k"/>
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                        <ListBox.ItemContainerTheme>
+                            <ControlTheme TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="8,0"/>
+                                <Setter Property="CornerRadius" Value="4"/>
+                                <!-- Group headers report IsSelectable=false, which keeps the
+                                     pointer (and so hover and selection) off them entirely. -->
+                                <Setter Property="IsHitTestVisible" Value="{Binding IsSelectable}"/>
+                                <Setter Property="Focusable" Value="{Binding IsSelectable}"/>
+                                <Setter Property="Template">
+                                    <ControlTemplate>
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="{TemplateBinding CornerRadius}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter Content="{TemplateBinding Content}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter>
+                                <Style Selector="^:pointerover /template/ Border">
+                                    <Setter Property="Background" Value="{DynamicResource SubtleHoverBackground}"/>
+                                </Style>
+                                <Style Selector="^:selected /template/ Border">
+                                    <Setter Property="Background" Value="{DynamicResource SubtlePressBackground}"/>
+                                </Style>
+                            </ControlTheme>
+                        </ListBox.ItemContainerTheme>
+                        <ListBox.DataTemplates>
+                            <DataTemplate DataType="vm:UserGroupHeaderViewModel">
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,10,0,4">
+                                    <TextBlock Grid.Column="0" Text="{Binding Name}"
+                                               FontSize="11" FontWeight="SemiBold" LetterSpacing="0.4"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{DynamicResource TextTertiary}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Count}"
+                                               Margin="6,0,0,0"
+                                               FontSize="11" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextQuaternary}"/>
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate DataType="vm:UserViewModel">
+                                <Grid ColumnDefinitions="12,*,Auto" Height="32">
+                                    <TextBlock Grid.Column="0" Text="{Binding PrefixGlyph}"
+                                               FontSize="13" FontWeight="Bold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{Binding Mode, Converter={StaticResource ModeToBrushConverter}}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Nick}"
+                                               Margin="9,0,0,0"
+                                               FontSize="13" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{Binding Nick, Converter={StaticResource NickColorConverter}}"/>
+                                    <Border Grid.Column="2" Margin="9,0,0,0"
+                                            IsVisible="{Binding HasTag}"
+                                            VerticalAlignment="Center"
+                                            Padding="5,1" CornerRadius="3"
+                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                            BorderThickness="1">
+                                        <TextBlock Text="{Binding Tag}" FontSize="10"
+                                                   Foreground="{DynamicResource TextQuaternary}"/>
                                     </Border>
-                                </ControlTemplate>
-                            </Setter>
-                            <Style Selector="^:pointerover /template/ Border">
-                                <Setter Property="Background" Value="{DynamicResource SidebarItemHoverBackground}"/>
-                            </Style>
-                            <Style Selector="^:selected /template/ Border">
-                                <Setter Property="Background" Value="{DynamicResource SidebarItemSelectedBackground}"/>
-                            </Style>
-                        </ControlTheme>
-                    </ListBox.ItemContainerTheme>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding FullNick}"
-                                       FontSize="13"
-                                       TextTrimming="CharacterEllipsis"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </DockPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.DataTemplates>
+                    </ListBox>
+                </DockPanel>
+            </Border>
 
         </Grid>
     </DockPanel>

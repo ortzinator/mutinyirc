@@ -41,6 +41,52 @@ public class ChannelViewModel : IrcViewModel
 
     public List<UserViewModel> UserList => _userList;
 
+    // ── User list presentation ──
+    // UserList stays the flat source of truth (count, tab completion). UserRows is what the
+    // list renders: the same users grouped by status and narrowed by UserFilter, with a header
+    // in front of each non-empty group.
+
+    private IReadOnlyList<object> _userRows = UserListGrouping.Build(new List<UserViewModel>());
+    public IReadOnlyList<object> UserRows => _userRows;
+
+    private string _userFilter = string.Empty;
+
+    /// <summary>Substring typed into the user list's filter box. Empty shows everyone.</summary>
+    public string UserFilter
+    {
+        get => _userFilter;
+        set
+        {
+            if (SetProperty(ref _userFilter, value))
+                RebuildUserRows();
+        }
+    }
+
+    /// <summary>Placeholder for the filter box — it doubles as the channel's member count.</summary>
+    public string UserFilterWatermark =>
+        $"Filter {_userList.Count} member{(_userList.Count == 1 ? string.Empty : "s")}";
+
+    /// <summary>
+    /// The badge a user's row carries, or null for most people. Only two are worth calling out and
+    /// both come from data the server connection already holds: who you are, and which nicks the
+    /// network's services use.
+    /// </summary>
+    private string? TagFor(User user)
+    {
+        Server server = _channel.Server;
+
+        if (string.Equals(user.Nick, server.UserNick, StringComparison.OrdinalIgnoreCase))
+            return "you";
+
+        return server.ServiceNicks.Contains(user.Nick) ? "bot" : null;
+    }
+
+    private void RebuildUserRows()
+    {
+        _userRows = UserListGrouping.Build(_userList, _userFilter);
+        OnPropertyChanged(nameof(UserRows));
+    }
+
     /// <summary>Bare nicks of everyone in the channel, in the user list's display order.</summary>
     public override IReadOnlyList<string> CompletionCandidates
         => _userList.ConvertAll(u => u.Nick);
@@ -157,9 +203,11 @@ public class ChannelViewModel : IrcViewModel
     {
         _userList = new List<UserViewModel>();
         foreach (User user in _channel.Users)
-            _userList.Add(new UserViewModel(user));
+            _userList.Add(new UserViewModel(user, TagFor(user)));
         _userList.Sort((user1, user2) => user1.CompareTo(user2));
-        OnPropertyChanged("UserList");
+        RebuildUserRows();
+        OnPropertyChanged(nameof(UserList));
+        OnPropertyChanged(nameof(UserFilterWatermark));
         OnPropertyChanged("Name");
     }
 

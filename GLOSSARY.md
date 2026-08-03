@@ -12,6 +12,14 @@ into one of these by looking the user up in the channel's `UserList`, defaulting
 
 The content view for a single server or channel — what fills the main area when an entry is clicked in the sidebar. Modeled in code as `IrcViewModel` (base class), with `ServerViewModel` and `ChannelViewModel` as the concrete kinds. `MainViewModel` owns the `Panels` collection and tracks `SelectedPanel`.
 
+## Row list (user list)
+
+The flat `IReadOnlyList<object>` a channel's user list binds to (`ChannelViewModel.UserRows`),
+built by `UserListGrouping.Build`. It interleaves `UserGroupHeaderViewModel` section headings with
+the `UserViewModel` rows under each. One flat list rather than nested collections is what lets a
+single `ListBox` own selection and the right-click menu across the whole list; headers stay inert
+by reporting `IsSelectable == false`, which `ChannelView.axaml` binds to `IsHitTestVisible`.
+
 ## Sidebar
 
 The fixed-width navigation column on the left edge of `MainWindow`, listing servers and their channels. Clicking an entry sets `SelectedPanel` and swaps the main content area. Themed via the `Sidebar*` dynamic resources (`SidebarBackground`, `SidebarForeground`, `SidebarNavTheme`, etc.).

@@ -50,6 +50,12 @@ public class UserListContextMenuTests
     {
         public List<UserViewModel> UserList { get; }
 
+        /// <summary>What the ListBox actually binds to: group headers interleaved with users.</summary>
+        public IReadOnlyList<object> UserRows { get; }
+
+        public string UserFilter { get; set; } = string.Empty;
+        public string UserFilterWatermark => $"Filter {UserList.Count} members";
+
         private UserViewModel? _selectedUser;
         public UserViewModel? SelectedUser
         {
@@ -63,6 +69,7 @@ public class UserListContextMenuTests
         public ChannelStub(params UserViewModel[] users)
         {
             UserList = users.ToList();
+            UserRows = UserListGrouping.Build(UserList);
             UserCommand = new RelayCommand<string>(verb => LastInvokedVerb = verb);
         }
     }

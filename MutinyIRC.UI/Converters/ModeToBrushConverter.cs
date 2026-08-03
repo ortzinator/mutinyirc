@@ -16,8 +16,10 @@ public class ModeToBrushConverter : IValueConverter
 
         return mode switch
         {
-            Mode.Op => LookupBrush("ModeOpForeground", Brushes.Black),
-            Mode.Voice => LookupBrush("ModeVoiceForeground", Brushes.DarkOrange),
+            // Owner and admin share the op colour; their '~' / '&' glyph carries the rank.
+            Mode.Owner or Mode.Op => LookupBrush("ModeOpForeground", Brushes.Goldenrod),
+            Mode.HalfOp => LookupBrush("ModeHalfOpForeground", Brushes.SkyBlue),
+            Mode.Voice => LookupBrush("ModeVoiceForeground", Brushes.MediumSeaGreen),
             _ => LookupBrush("ModeRegularForeground", Brushes.Gray),
         };
     }

@@ -44,10 +44,46 @@
             <SolidColorBrush x:Key="ScrollIndicatorBackground"     Color="#3A3C43" />
             <SolidColorBrush x:Key="ScrollIndicatorForeground"     Color="#89FFFFFF" />
 
-            <!-- User list: mode colours -->
-            <SolidColorBrush x:Key="ModeOpForeground"              Color="#F1C40F" />
-            <SolidColorBrush x:Key="ModeVoiceForeground"           Color="#57F287" />
-            <SolidColorBrush x:Key="ModeRegularForeground"         Color="#B5BAC1" />
+            <!-- ══ New design foundation ══
+                 Surfaces, text tiers and control fills from the new design. Elements adopt
+                 these as they are reworked; the keys above stay until their element's turn. -->
+            <SolidColorBrush x:Key="SurfaceNav"                     Color="#202020" />
+            <SolidColorBrush x:Key="SurfaceContent"                 Color="#272727" />
+            <SolidColorBrush x:Key="SurfaceLayer"                   Color="#2C2C2C" />
+            <SolidColorBrush x:Key="SurfaceLayerAlt"                Color="#323232" />
+
+            <SolidColorBrush x:Key="TextPrimary"                    Color="#FFFFFF" />
+            <SolidColorBrush x:Key="TextSecondary"                  Color="#C8FFFFFF" />
+            <SolidColorBrush x:Key="TextTertiary"                   Color="#8BFFFFFF" />
+            <SolidColorBrush x:Key="TextQuaternary"                 Color="#5DFFFFFF" />
+
+            <SolidColorBrush x:Key="SubtleHoverBackground"          Color="#0FFFFFFF" />
+            <SolidColorBrush x:Key="SubtlePressBackground"          Color="#0BFFFFFF" />
+            <SolidColorBrush x:Key="ControlBackground"              Color="#0FFFFFFF" />
+            <SolidColorBrush x:Key="ControlHoverBackground"         Color="#15FFFFFF" />
+            <SolidColorBrush x:Key="ControlBorderBrush"             Color="#12FFFFFF" />
+            <SolidColorBrush x:Key="DividerBrush"                   Color="#15FFFFFF" />
+            <SolidColorBrush x:Key="InputBackground"                Color="#0FFFFFFF" />
+            <SolidColorBrush x:Key="AccentBrush"                    Color="#60CDFF" />
+
+            <!-- User list: status-prefix glyph colours. Owner (~) and admin (&) share the op
+                 colour: the glyph itself already carries the rank difference. -->
+            <SolidColorBrush x:Key="ModeOpForeground"               Color="#F2C94C" />
+            <SolidColorBrush x:Key="ModeHalfOpForeground"           Color="#8AD4E8" />
+            <SolidColorBrush x:Key="ModeVoiceForeground"            Color="#7DD87D" />
+            <SolidColorBrush x:Key="ModeRegularForeground"          Color="#5DFFFFFF" />
+
+            <!-- Nick colours. Ten stable hues picked by hashing the nick. -->
+            <SolidColorBrush x:Key="NickPalette0"                   Color="#60CDFF" />
+            <SolidColorBrush x:Key="NickPalette1"                   Color="#4CC2A0" />
+            <SolidColorBrush x:Key="NickPalette2"                   Color="#7DD87D" />
+            <SolidColorBrush x:Key="NickPalette3"                   Color="#F2C94C" />
+            <SolidColorBrush x:Key="NickPalette4"                   Color="#F2994A" />
+            <SolidColorBrush x:Key="NickPalette5"                   Color="#F28FB0" />
+            <SolidColorBrush x:Key="NickPalette6"                   Color="#B4A0FF" />
+            <SolidColorBrush x:Key="NickPalette7"                   Color="#FF8A8A" />
+            <SolidColorBrush x:Key="NickPalette8"                   Color="#8AD4E8" />
+            <SolidColorBrush x:Key="NickPalette9"                   Color="#C8E68A" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Light">
@@ -91,10 +127,43 @@
             <SolidColorBrush x:Key="ScrollIndicatorBackground"     Color="#E3E5E8" />
             <SolidColorBrush x:Key="ScrollIndicatorForeground"     Color="#89000000" />
 
-            <!-- User list: mode colours -->
-            <SolidColorBrush x:Key="ModeOpForeground"              Color="#8B5A00" />
-            <SolidColorBrush x:Key="ModeVoiceForeground"           Color="#1A7A42" />
-            <SolidColorBrush x:Key="ModeRegularForeground"         Color="#444444" />
+            <!-- ══ New design foundation ══ -->
+            <SolidColorBrush x:Key="SurfaceNav"                     Color="#F3F3F3" />
+            <SolidColorBrush x:Key="SurfaceContent"                 Color="#FFFFFF" />
+            <SolidColorBrush x:Key="SurfaceLayer"                   Color="#FFFFFF" />
+            <SolidColorBrush x:Key="SurfaceLayerAlt"                Color="#F9F9F9" />
+
+            <SolidColorBrush x:Key="TextPrimary"                    Color="#E4000000" />
+            <SolidColorBrush x:Key="TextSecondary"                  Color="#9B000000" />
+            <SolidColorBrush x:Key="TextTertiary"                   Color="#72000000" />
+            <SolidColorBrush x:Key="TextQuaternary"                 Color="#5C000000" />
+
+            <SolidColorBrush x:Key="SubtleHoverBackground"          Color="#0A000000" />
+            <SolidColorBrush x:Key="SubtlePressBackground"          Color="#06000000" />
+            <SolidColorBrush x:Key="ControlBackground"              Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ControlHoverBackground"         Color="#F6F6F6" />
+            <SolidColorBrush x:Key="ControlBorderBrush"             Color="#0F000000" />
+            <SolidColorBrush x:Key="DividerBrush"                   Color="#0F000000" />
+            <SolidColorBrush x:Key="InputBackground"                Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AccentBrush"                    Color="#005FB8" />
+
+            <!-- User list: status-prefix glyph colours -->
+            <SolidColorBrush x:Key="ModeOpForeground"               Color="#8A6D00" />
+            <SolidColorBrush x:Key="ModeHalfOpForeground"           Color="#1D6F8A" />
+            <SolidColorBrush x:Key="ModeVoiceForeground"            Color="#2E7D32" />
+            <SolidColorBrush x:Key="ModeRegularForeground"          Color="#5C000000" />
+
+            <!-- Nick colours -->
+            <SolidColorBrush x:Key="NickPalette0"                   Color="#0F5FA6" />
+            <SolidColorBrush x:Key="NickPalette1"                   Color="#0E7A66" />
+            <SolidColorBrush x:Key="NickPalette2"                   Color="#2E7D32" />
+            <SolidColorBrush x:Key="NickPalette3"                   Color="#8A6D00" />
+            <SolidColorBrush x:Key="NickPalette4"                   Color="#A65200" />
+            <SolidColorBrush x:Key="NickPalette5"                   Color="#B03A6E" />
+            <SolidColorBrush x:Key="NickPalette6"                   Color="#5B3FBB" />
+            <SolidColorBrush x:Key="NickPalette7"                   Color="#B3261E" />
+            <SolidColorBrush x:Key="NickPalette8"                   Color="#1D6F8A" />
+            <SolidColorBrush x:Key="NickPalette9"                   Color="#5C7A16" />
         </ResourceDictionary>
 
     </ResourceDictionary.ThemeDictionaries>

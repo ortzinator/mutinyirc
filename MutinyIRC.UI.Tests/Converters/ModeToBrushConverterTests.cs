@@ -72,6 +72,13 @@ public class ModeToBrushConverterTests
     }
 
     [AvaloniaTest]
+    public void Convert_HalfOpMode_ReturnsBrush()
+    {
+        var result = Converter.Convert(Mode.HalfOp, typeof(IBrush), null!, Culture);
+        Assert.That(result, Is.InstanceOf<IBrush>());
+    }
+
+    [AvaloniaTest]
     public void Convert_OwnerMode_ReturnsBrush()
     {
         var result = Converter.Convert(Mode.Owner, typeof(IBrush), null!, Culture);
@@ -79,10 +86,27 @@ public class ModeToBrushConverterTests
     }
 
     /// <summary>
+    /// Owner ('~') and admin ('&amp;') are ops wearing a higher glyph, so they deliberately share
+    /// the op colour. If they ever diverge that is a design decision, not a bug — but it should
+    /// be a deliberate one, so pin it here.
+    /// </summary>
+    [AvaloniaTest]
+    public void Convert_OwnerMode_MatchesOpBrush()
+    {
+        Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
+
+        var owner = Converter.Convert(Mode.Owner, typeof(IBrush), null!, Culture);
+        var op = Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
+
+        Assert.That(owner, Is.SameAs(op),
+            "Owner shares the op colour; the '~' glyph carries the rank difference");
+    }
+
+    /// <summary>
     /// Core theme-variant regression: Op brush in Dark theme must differ from Light theme
     /// because DefaultTheme.axaml defines different colors for ModeOpForeground in each
     /// ThemeDictionary entry.  If ActualThemeVariant is null (regression), TryGetResource
-    /// misses and both return the same fallback Brushes.Black.
+    /// misses and both return the same hardcoded fallback.
     /// </summary>
     [AvaloniaTest]
     public void Convert_OpMode_DarkAndLightThemeReturnDifferentBrushes()
@@ -93,8 +117,8 @@ public class ModeToBrushConverterTests
         Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
         var lightBrush = (IBrush)Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
 
-        // Dark: ModeOpForeground = #FFFFFFFF (white)
-        // Light: ModeOpForeground = #FF8B6200 (gold/amber)
+        // Dark: ModeOpForeground = #FFF2C94C (amber)
+        // Light: ModeOpForeground = #FF8A6D00 (deep gold)
         // They must not be equal — if they are, the theme variant lookup is broken.
         Assert.That(darkBrush.ToString(), Is.Not.EqualTo(lightBrush.ToString()),
             "Op brush must differ between Dark and Light themes; " +
@@ -115,9 +139,8 @@ public class ModeToBrushConverterTests
     }
 
     /// <summary>
-    /// With the correct theme, the converter must return a theme resource brush
-    /// rather than the hardcoded fallback.  Dark theme ModeOpForeground is white (#FF),
-    /// which is NOT the fallback Brushes.Black.
+    /// With the correct theme, the converter must return a theme resource brush rather than the
+    /// hardcoded fallback it falls back to when the resource lookup misses.
     /// </summary>
     [AvaloniaTest]
     public void Convert_OpMode_DarkTheme_ReturnsThemeResourceNotFallback()
@@ -125,10 +148,8 @@ public class ModeToBrushConverterTests
         Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
         var brush = (IBrush)Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
 
-        // If LookupBrush returned the fallback Brushes.Black the color would be #FF000000.
-        // The Dark theme resource is #FFFFFFFF (white), so they must differ.
-        Assert.That(brush, Is.Not.SameAs(Brushes.Black),
-            "Dark theme Op brush must be the themed resource, not the hardcoded fallback Black");
+        Assert.That(brush, Is.Not.SameAs(Brushes.Goldenrod),
+            "Dark theme Op brush must be the themed resource, not the hardcoded fallback");
     }
 
     [AvaloniaTest]
@@ -137,8 +158,7 @@ public class ModeToBrushConverterTests
         Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
         var brush = (IBrush)Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
 
-        // Light theme ModeOpForeground is #FF8B6200 (gold), not Black.
-        Assert.That(brush, Is.Not.SameAs(Brushes.Black),
-            "Light theme Op brush must be the themed resource, not the hardcoded fallback Black");
+        Assert.That(brush, Is.Not.SameAs(Brushes.Goldenrod),
+            "Light theme Op brush must be the themed resource, not the hardcoded fallback");
     }
 }
