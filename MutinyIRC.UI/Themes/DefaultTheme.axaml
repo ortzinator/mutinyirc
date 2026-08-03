@@ -102,7 +102,13 @@
     <!-- Padding for the header strip of a content panel. The client area is extended
          into the window decorations, so the caption buttons float over the top-right
          corner of whichever panel is showing. The right inset keeps header content
-         clear of them. -->
-    <Thickness x:Key="PanelHeaderPadding">16,0,148,0</Thickness>
+         clear of them.
+
+         The theme draws four buttons, not three: full screen, minimize, maximize and
+         close, at a 54px pitch. That is 216px, and the inset adds a little clearance
+         on top. Avalonia exposes no measured width for the caption block, so this
+         tracks the Fluent theme by hand - recheck it against a screenshot if the
+         theme or the button set changes. -->
+    <Thickness x:Key="PanelHeaderPadding">16,0,232,0</Thickness>
 
 </ResourceDictionary>
