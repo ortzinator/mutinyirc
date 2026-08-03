@@ -6,10 +6,13 @@
         xmlns:views="clr-namespace:MutinyIRC.UI.Views"
         xmlns:design="clr-namespace:MutinyIRC.UI.ViewModels.Design"
         xmlns:ic="using:FluentIcons.Avalonia"
+        xmlns:chrome="using:Avalonia.Controls.Chrome"
         mc:Ignorable="d"
         x:Class="MutinyIRC.UI.Views.MainWindow"
         Title="MutinyIRC" Height="700" Width="1100" MinWidth="600" MinHeight="400"
-        Background="{DynamicResource SidebarBackground}">
+        Background="{DynamicResource SidebarBackground}"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="48">
 
     <Design.DataContext>
         <design:DesignMainViewModel />
@@ -62,7 +65,10 @@
         </ControlTheme>
     </Window.Resources>
 
-    <Grid>
+    <!-- The client area runs edge to edge under the window decorations, so the root
+         grid pulls in by OffScreenMargin. That margin is non-zero only when maximized
+         on Windows, where the frame border sits outside the visible screen area. -->
+    <Grid Margin="{Binding $parent[Window].OffScreenMargin}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="220" MinWidth="150" MaxWidth="500"/>
             <ColumnDefinition Width="Auto"/>
@@ -72,16 +78,19 @@
         <!-- ═══ Sidebar ═══ -->
         <DockPanel Grid.Column="0" Background="{DynamicResource SidebarBackground}">
 
-            <!-- App header row -->
+            <!-- App header row. ElementRole=TitleBar hands this strip to the platform's
+                 non-client hit-testing, so it drags, double-click-maximizes and snaps
+                 like a real title bar. Child controls default to a role of None and
+                 keep receiving normal input. -->
             <Border DockPanel.Dock="Top" Height="48"
+                    chrome:WindowDecorationProperties.ElementRole="TitleBar"
                     Background="{DynamicResource SidebarBackground}"
                     BorderBrush="{DynamicResource SidebarBorderBrush}"
                     BorderThickness="0,0,0,1">
+                <!-- No app-name label here: the theme draws Window.Title into this
+                     strip once the client area is extended, so a label of our own
+                     would sit on top of it. -->
                 <Grid Margin="14,0,8,0">
-                    <TextBlock Text="MutinyIRC"
-                               FontWeight="SemiBold" FontSize="14"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource SidebarHeaderForeground}"/>
                     <Button Theme="{StaticResource SidebarNavTheme}"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             Padding="6" CornerRadius="20"

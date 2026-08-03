@@ -20,7 +20,7 @@
                 Background="{DynamicResource ChannelHeaderBackground}"
                 BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
                 BorderThickness="0,0,0,1"
-                Padding="16,0" Height="48">
+                Padding="{DynamicResource PanelHeaderPadding}" Height="48">
             <TextBlock Text="{Binding Name}"
                        FontWeight="SemiBold" FontSize="15"
                        VerticalAlignment="Center"
