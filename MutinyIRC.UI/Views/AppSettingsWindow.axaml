@@ -6,15 +6,15 @@
         Width="420" Height="400"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
-        Background="{DynamicResource AppBackground}">
+        Background="{DynamicResource SurfaceContent}">
 
     <DockPanel>
 
         <!-- ── Header ── -->
         <Border DockPanel.Dock="Top"
                 Height="48"
-                Background="{DynamicResource ChannelHeaderBackground}"
-                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                Background="{DynamicResource SurfaceLayer}"
+                BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="16,0">
             <TextBlock Text="Settings"
@@ -24,8 +24,8 @@
 
         <!-- ── Footer: OK / Cancel ── -->
         <Border DockPanel.Dock="Bottom"
-                Background="{DynamicResource ChatInputAreaBackground}"
-                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                Background="{DynamicResource SurfaceLayerAlt}"
+                BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,1,0,0"
                 Padding="12,8">
             <StackPanel Orientation="Horizontal"
@@ -44,17 +44,17 @@
                 <StackPanel Spacing="8">
                     <TextBlock Text="IDENTITY"
                                FontSize="11" FontWeight="SemiBold"
-                               Foreground="{DynamicResource SidebarMutedForeground}"/>
+                               Foreground="{DynamicResource TextTertiary}"/>
                     <Grid RowDefinitions="Auto,Auto,Auto"
                           ColumnDefinitions="110,*"
                           RowSpacing="6" ColumnSpacing="8">
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Primary nick"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Row="0" Grid.Column="1"
-                                Background="{DynamicResource ChannelHeaderBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding FirstNick}"
                                      BorderThickness="0" Background="Transparent" FontSize="13"
@@ -63,10 +63,10 @@
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Secondary nick"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Row="1" Grid.Column="1"
-                                Background="{DynamicResource ChannelHeaderBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SecondNick}"
                                      BorderThickness="0" Background="Transparent" FontSize="13"
@@ -75,10 +75,10 @@
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Tertiary nick"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Row="2" Grid.Column="1"
-                                Background="{DynamicResource ChannelHeaderBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding ThirdNick}"
                                      BorderThickness="0" Background="Transparent" FontSize="13"
@@ -91,7 +91,7 @@
                 <StackPanel Spacing="8">
                     <TextBlock Text="DISPLAY"
                                FontSize="11" FontWeight="SemiBold"
-                               Foreground="{DynamicResource SidebarMutedForeground}"/>
+                               Foreground="{DynamicResource TextTertiary}"/>
                     <CheckBox Content="Show timestamps"
                               IsChecked="{Binding ShowTimestamps}"
                               FontSize="13"/>
@@ -101,7 +101,7 @@
                 <StackPanel Spacing="8">
                     <TextBlock Text="LOGGING"
                                FontSize="11" FontWeight="SemiBold"
-                               Foreground="{DynamicResource SidebarMutedForeground}"/>
+                               Foreground="{DynamicResource TextTertiary}"/>
                     <CheckBox Content="Enable logging"
                               IsChecked="{Binding LoggerActivated}"
                               FontSize="13"/>
@@ -112,10 +112,10 @@
                     <Grid ColumnDefinitions="110,*" ColumnSpacing="8">
                         <TextBlock Grid.Column="0" Text="Timestamp format"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Column="1"
-                                Background="{DynamicResource ChannelHeaderBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding LoggerTimestampFormat}"
                                      BorderThickness="0" Background="Transparent" FontSize="13"

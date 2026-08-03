@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:MutinyIRC.UI.ViewModels"
              mc:Ignorable="d"
              x:Class="MutinyIRC.UI.Views.ServerView"
-             Background="{DynamicResource AppBackground}">
+             Background="{DynamicResource SurfaceContent}">
 
     <Design.DataContext>
         <vm:ServerViewModel />
@@ -17,8 +17,8 @@
 
         <!-- ── Server header ── -->
         <Border DockPanel.Dock="Top"
-                Background="{DynamicResource ChannelHeaderBackground}"
-                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                Background="{DynamicResource SurfaceLayer}"
+                BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="{DynamicResource PanelHeaderPadding}" Height="48">
             <TextBlock Text="{Binding Name}"
@@ -29,15 +29,15 @@
 
         <!-- ── Message input ── -->
         <Border DockPanel.Dock="Bottom"
-                Background="{DynamicResource ChatInputAreaBackground}"
-                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                Background="{DynamicResource SurfaceLayerAlt}"
+                BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,1,0,0"
                 Padding="12,8">
             <Grid ColumnDefinitions="*,Auto">
                 <Border Grid.Column="0"
-                        Background="{DynamicResource AppBackground}"
+                        Background="{DynamicResource InputBackground}"
                         CornerRadius="6"
-                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
                         BorderThickness="1"
                         Padding="4,0">
                     <local:CommandTextBox x:Name="commandBox"

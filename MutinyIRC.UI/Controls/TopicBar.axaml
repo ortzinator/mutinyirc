@@ -6,8 +6,8 @@
              Focusable="True"
              IsVisible="{Binding Topic, ElementName=Root,
                          Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-    <Border Background="{DynamicResource ChannelHeaderBackground}"
-            BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+    <Border Background="{DynamicResource SurfaceLayer}"
+            BorderBrush="{DynamicResource DividerBrush}"
             BorderThickness="0,0,0,1"
             Padding="16,5,16,5">
         <Panel>
@@ -15,7 +15,7 @@
             <TextBlock x:Name="topicCollapsed"
                        Text="{Binding Topic, ElementName=Root}"
                        FontSize="12"
-                       Foreground="{DynamicResource SidebarMutedForeground}"
+                       Foreground="{DynamicResource TextTertiary}"
                        TextTrimming="CharacterEllipsis"
                        Cursor="Hand"
                        ToolTip.Tip="Click to expand"/>
@@ -23,7 +23,7 @@
             <SelectableTextBlock x:Name="topicExpanded"
                                  Text="{Binding Topic, ElementName=Root}"
                                  FontSize="12"
-                                 Foreground="{DynamicResource SidebarMutedForeground}"
+                                 Foreground="{DynamicResource TextTertiary}"
                                  TextWrapping="Wrap"
                                  IsVisible="False"/>
         </Panel>

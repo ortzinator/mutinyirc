@@ -1,79 +1,59 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- The app's palette. Every colour an element draws comes from here.
+
+         Surfaces stack from back to front: SurfaceNav is the window chrome the
+         sidebar sits on, SurfaceContent is the reading area, and the two Layer
+         surfaces are the strips and cards that sit on top of it. Text picks one
+         of four tiers by how loud it should be. Everything else is an
+         interaction fill, a line, or a status colour. -->
+
     <ResourceDictionary.ThemeDictionaries>
 
         <ResourceDictionary x:Key="Dark">
-            <!-- Sidebar -->
-            <SolidColorBrush x:Key="SidebarBackground"            Color="#1E1F22" />
-            <SolidColorBrush x:Key="SidebarBorderBrush"           Color="#2B2D31" />
-            <SolidColorBrush x:Key="SidebarItemHoverBackground"    Color="#2E3035" />
-            <SolidColorBrush x:Key="SidebarItemSelectedBackground" Color="#35373C" />
-            <SolidColorBrush x:Key="SidebarForeground"             Color="#B5BAC1" />
-            <SolidColorBrush x:Key="SidebarMutedForeground"        Color="#6D6F78" />
-            <SolidColorBrush x:Key="SidebarHeaderForeground"       Color="#FFFFFF" />
-
-            <!-- Channel header -->
-            <SolidColorBrush x:Key="ChannelHeaderBackground"       Color="#2B2D31" />
-            <SolidColorBrush x:Key="ChannelHeaderBorderBrush"      Color="#3A3C43" />
-
-            <!-- Chat area -->
-            <SolidColorBrush x:Key="AppBackground"                 Color="#313338" />
-            <SolidColorBrush x:Key="ChatBorderBrush"               Color="#3A3C43" />
-
-            <!-- Message input -->
-            <SolidColorBrush x:Key="ChatInputAreaBackground"       Color="#383A40" />
-            <SolidColorBrush x:Key="ChatInputBorderBrush"          Color="#222327" />
-
-            <!-- Message text -->
-            <SolidColorBrush x:Key="ChatTimestampForeground"       Color="#72767D" />
-            <SolidColorBrush x:Key="SystemMessageForeground"       Color="#80848E" />
-            <SolidColorBrush x:Key="ActionMessageForeground"       Color="#A8C8A0" />
-            <SolidColorBrush x:Key="NoticeForeground"              Color="#FFEF8C" />
-            <SolidColorBrush x:Key="ErrorForeground"               Color="#FF6B6B" />
-
-            <!-- Message type backgrounds -->
-            <SolidColorBrush x:Key="ChatTimestampBackground"       Color="Transparent" />
-            <SolidColorBrush x:Key="ChatNickBackground"            Color="Transparent" />
-            <SolidColorBrush x:Key="ChatErrorBackground"           Color="#3D1515" />
-            <SolidColorBrush x:Key="ChatNoticeBackground"          Color="#2E2C1A" />
-            <Color x:Key="ChatActionGradientStart">#00000000</Color>
-            <Color x:Key="ChatActionGradientEnd">#00000000</Color>
-
-            <!-- Scroll indicator -->
-            <SolidColorBrush x:Key="ScrollIndicatorBackground"     Color="#3A3C43" />
-            <SolidColorBrush x:Key="ScrollIndicatorForeground"     Color="#89FFFFFF" />
-
-            <!-- ══ New design foundation ══
-                 Surfaces, text tiers and control fills from the new design. Elements adopt
-                 these as they are reworked; the keys above stay until their element's turn. -->
+            <!-- Surfaces, back to front -->
             <SolidColorBrush x:Key="SurfaceNav"                     Color="#202020" />
             <SolidColorBrush x:Key="SurfaceContent"                 Color="#272727" />
             <SolidColorBrush x:Key="SurfaceLayer"                   Color="#2C2C2C" />
             <SolidColorBrush x:Key="SurfaceLayerAlt"                Color="#323232" />
 
+            <!-- Text, loudest to quietest -->
             <SolidColorBrush x:Key="TextPrimary"                    Color="#FFFFFF" />
             <SolidColorBrush x:Key="TextSecondary"                  Color="#C8FFFFFF" />
             <SolidColorBrush x:Key="TextTertiary"                   Color="#8BFFFFFF" />
             <SolidColorBrush x:Key="TextQuaternary"                 Color="#5DFFFFFF" />
 
+            <!-- Interaction fills. Selected outranks hover, and press dips below
+                 it, so a list makes its current row obvious under the pointer. -->
             <SolidColorBrush x:Key="SubtleHoverBackground"          Color="#0FFFFFFF" />
             <SolidColorBrush x:Key="SubtlePressBackground"          Color="#0BFFFFFF" />
-            <SolidColorBrush x:Key="ControlBackground"              Color="#0FFFFFFF" />
-            <SolidColorBrush x:Key="ControlHoverBackground"         Color="#15FFFFFF" />
+            <SolidColorBrush x:Key="SubtleSelectedBackground"       Color="#1AFFFFFF" />
+
+            <!-- Controls and lines. ControlBorderBrush outlines a field or a card;
+                 DividerBrush rules the seam between two surfaces. -->
+            <SolidColorBrush x:Key="InputBackground"                Color="#0FFFFFFF" />
             <SolidColorBrush x:Key="ControlBorderBrush"             Color="#12FFFFFF" />
             <SolidColorBrush x:Key="DividerBrush"                   Color="#15FFFFFF" />
-            <SolidColorBrush x:Key="InputBackground"                Color="#0FFFFFFF" />
-            <SolidColorBrush x:Key="AccentBrush"                    Color="#60CDFF" />
+
+            <!-- Status. Notices and errors take their hue from the nick palette so
+                 a coloured message row sits with the rest of the chat, and their
+                 backgrounds are translucent tints that work over any surface. -->
+            <SolidColorBrush x:Key="StatusWarningForeground"        Color="#F2C94C" />
+            <SolidColorBrush x:Key="StatusWarningBackground"        Color="#26F2C94C" />
+            <SolidColorBrush x:Key="StatusErrorForeground"          Color="#FF8A8A" />
+            <SolidColorBrush x:Key="StatusErrorBackground"          Color="#26FF8A8A" />
 
             <!-- User list: status-prefix glyph colours. Owner (~) and admin (&) share the op
-                 colour: the glyph itself already carries the rank difference. -->
+                 colour: the glyph itself already carries the rank difference.
+                 Resolved by string key from ModeToBrushConverter, not DynamicResource. -->
             <SolidColorBrush x:Key="ModeOpForeground"               Color="#F2C94C" />
             <SolidColorBrush x:Key="ModeHalfOpForeground"           Color="#8AD4E8" />
             <SolidColorBrush x:Key="ModeVoiceForeground"            Color="#7DD87D" />
             <SolidColorBrush x:Key="ModeRegularForeground"          Color="#5DFFFFFF" />
 
-            <!-- Nick colours. Ten stable hues picked by hashing the nick. -->
+            <!-- Nick colours. Ten stable hues picked by hashing the nick.
+                 Resolved by string key from NickColorConverter, not DynamicResource. -->
             <SolidColorBrush x:Key="NickPalette0"                   Color="#60CDFF" />
             <SolidColorBrush x:Key="NickPalette1"                   Color="#4CC2A0" />
             <SolidColorBrush x:Key="NickPalette2"                   Color="#7DD87D" />
@@ -87,65 +67,35 @@
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Light">
-            <!-- Sidebar -->
-            <SolidColorBrush x:Key="SidebarBackground"            Color="#F2F3F5" />
-            <SolidColorBrush x:Key="SidebarBorderBrush"           Color="#E3E5E8" />
-            <SolidColorBrush x:Key="SidebarItemHoverBackground"    Color="#E3E5E8" />
-            <SolidColorBrush x:Key="SidebarItemSelectedBackground" Color="#D7D9DC" />
-            <SolidColorBrush x:Key="SidebarForeground"             Color="#2C2F33" />
-            <SolidColorBrush x:Key="SidebarMutedForeground"        Color="#868A92" />
-            <SolidColorBrush x:Key="SidebarHeaderForeground"       Color="#060607" />
-
-            <!-- Channel header -->
-            <SolidColorBrush x:Key="ChannelHeaderBackground"       Color="#FFFFFF" />
-            <SolidColorBrush x:Key="ChannelHeaderBorderBrush"      Color="#E3E5E8" />
-
-            <!-- Chat area -->
-            <SolidColorBrush x:Key="AppBackground"                 Color="#FFFFFF" />
-            <SolidColorBrush x:Key="ChatBorderBrush"               Color="#E3E5E8" />
-
-            <!-- Message input -->
-            <SolidColorBrush x:Key="ChatInputAreaBackground"       Color="#EDEEF0" />
-            <SolidColorBrush x:Key="ChatInputBorderBrush"          Color="#C7C9CF" />
-
-            <!-- Message text -->
-            <SolidColorBrush x:Key="ChatTimestampForeground"       Color="#A3A6AA" />
-            <SolidColorBrush x:Key="SystemMessageForeground"       Color="#A3A6AA" />
-            <SolidColorBrush x:Key="ActionMessageForeground"       Color="#2D6A1E" />
-            <SolidColorBrush x:Key="NoticeForeground"              Color="#7A5800" />
-            <SolidColorBrush x:Key="ErrorForeground"               Color="#C0392B" />
-
-            <!-- Message type backgrounds -->
-            <SolidColorBrush x:Key="ChatTimestampBackground"       Color="Transparent" />
-            <SolidColorBrush x:Key="ChatNickBackground"            Color="Transparent" />
-            <SolidColorBrush x:Key="ChatErrorBackground"           Color="#FDEAEA" />
-            <SolidColorBrush x:Key="ChatNoticeBackground"          Color="#FFFCDC" />
-            <Color x:Key="ChatActionGradientStart">#00000000</Color>
-            <Color x:Key="ChatActionGradientEnd">#00000000</Color>
-
-            <!-- Scroll indicator -->
-            <SolidColorBrush x:Key="ScrollIndicatorBackground"     Color="#E3E5E8" />
-            <SolidColorBrush x:Key="ScrollIndicatorForeground"     Color="#89000000" />
-
-            <!-- ══ New design foundation ══ -->
+            <!-- Surfaces, back to front. Content and Layer are both white here; the
+                 divider and the card outline carry the separation instead. -->
             <SolidColorBrush x:Key="SurfaceNav"                     Color="#F3F3F3" />
             <SolidColorBrush x:Key="SurfaceContent"                 Color="#FFFFFF" />
             <SolidColorBrush x:Key="SurfaceLayer"                   Color="#FFFFFF" />
             <SolidColorBrush x:Key="SurfaceLayerAlt"                Color="#F9F9F9" />
 
+            <!-- Text, loudest to quietest -->
             <SolidColorBrush x:Key="TextPrimary"                    Color="#E4000000" />
             <SolidColorBrush x:Key="TextSecondary"                  Color="#9B000000" />
             <SolidColorBrush x:Key="TextTertiary"                   Color="#72000000" />
             <SolidColorBrush x:Key="TextQuaternary"                 Color="#5C000000" />
 
+            <!-- Interaction fills -->
             <SolidColorBrush x:Key="SubtleHoverBackground"          Color="#0A000000" />
             <SolidColorBrush x:Key="SubtlePressBackground"          Color="#06000000" />
-            <SolidColorBrush x:Key="ControlBackground"              Color="#FFFFFF" />
-            <SolidColorBrush x:Key="ControlHoverBackground"         Color="#F6F6F6" />
+            <SolidColorBrush x:Key="SubtleSelectedBackground"       Color="#14000000" />
+
+            <!-- Controls and lines -->
+            <SolidColorBrush x:Key="InputBackground"                Color="#FFFFFF" />
             <SolidColorBrush x:Key="ControlBorderBrush"             Color="#0F000000" />
             <SolidColorBrush x:Key="DividerBrush"                   Color="#0F000000" />
-            <SolidColorBrush x:Key="InputBackground"                Color="#FFFFFF" />
-            <SolidColorBrush x:Key="AccentBrush"                    Color="#005FB8" />
+
+            <!-- Status. The foregrounds darken for contrast on white; the background
+                 tints keep the vivid hue, which is what reads as a tint over white. -->
+            <SolidColorBrush x:Key="StatusWarningForeground"        Color="#8A6D00" />
+            <SolidColorBrush x:Key="StatusWarningBackground"        Color="#33F2C94C" />
+            <SolidColorBrush x:Key="StatusErrorForeground"          Color="#B3261E" />
+            <SolidColorBrush x:Key="StatusErrorBackground"          Color="#33FF8A8A" />
 
             <!-- User list: status-prefix glyph colours -->
             <SolidColorBrush x:Key="ModeOpForeground"               Color="#8A6D00" />

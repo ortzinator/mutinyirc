@@ -6,7 +6,7 @@
         Width="940" Height="560"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
-        Background="{DynamicResource AppBackground}">
+        Background="{DynamicResource SurfaceContent}">
 
     <Window.Resources>
         <ControlTheme x:Key="SettingsListBoxItemTheme" TargetType="ListBoxItem">
@@ -23,10 +23,10 @@
                 </ControlTemplate>
             </Setter>
             <Style Selector="^:pointerover /template/ Border">
-                <Setter Property="Background" Value="{DynamicResource SidebarItemHoverBackground}"/>
+                <Setter Property="Background" Value="{DynamicResource SubtleHoverBackground}"/>
             </Style>
             <Style Selector="^:selected /template/ Border">
-                <Setter Property="Background" Value="{DynamicResource SidebarItemSelectedBackground}"/>
+                <Setter Property="Background" Value="{DynamicResource SubtleSelectedBackground}"/>
             </Style>
         </ControlTheme>
     </Window.Resources>
@@ -36,8 +36,8 @@
         <!-- Header -->
         <Border DockPanel.Dock="Top"
                 Height="48"
-                Background="{DynamicResource ChannelHeaderBackground}"
-                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                Background="{DynamicResource SurfaceLayer}"
+                BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="16,0">
             <TextBlock Text="Servers"
@@ -47,8 +47,8 @@
 
         <!-- Footer: OK / Cancel -->
         <Border DockPanel.Dock="Bottom"
-                Background="{DynamicResource ChatInputAreaBackground}"
-                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                Background="{DynamicResource SurfaceLayerAlt}"
+                BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,1,0,0"
                 Padding="12,8">
             <StackPanel Orientation="Horizontal"
@@ -68,7 +68,7 @@
                 <TextBlock DockPanel.Dock="Top"
                            Text="NETWORKS"
                            FontSize="11" FontWeight="SemiBold"
-                           Foreground="{DynamicResource SidebarMutedForeground}"
+                           Foreground="{DynamicResource TextTertiary}"
                            Margin="0,0,0,6"/>
 
                 <StackPanel DockPanel.Dock="Bottom"
@@ -87,8 +87,8 @@
                             Padding="10,5" FontSize="12"/>
                 </StackPanel>
 
-                <Border Background="{DynamicResource ChannelHeaderBackground}"
-                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                <Border Background="{DynamicResource SurfaceLayer}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="6">
                     <ListBox x:Name="networksListBox"
@@ -129,7 +129,7 @@
 
                 <TextBlock DockPanel.Dock="Top"
                            FontSize="11" FontWeight="SemiBold"
-                           Foreground="{DynamicResource SidebarMutedForeground}"
+                           Foreground="{DynamicResource TextTertiary}"
                            Margin="0,0,0,6">
                     <Run Text="SERVERS"/>
                     <Run Text=" — "/>
@@ -138,8 +138,8 @@
 
                 <!-- Server detail form -->
                 <Border DockPanel.Dock="Bottom"
-                        Background="{DynamicResource ChannelHeaderBackground}"
-                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                        Background="{DynamicResource SurfaceLayer}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="6"
                         Padding="12"
@@ -152,10 +152,10 @@
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="URL"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Row="0" Grid.Column="1"
-                                Background="{DynamicResource AppBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedServer.Url}"
                                      BorderThickness="0" Background="Transparent" FontSize="13"
@@ -164,10 +164,10 @@
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Description"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Row="1" Grid.Column="1"
-                                Background="{DynamicResource AppBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedServer.Description}"
                                      BorderThickness="0" Background="Transparent" FontSize="13"
@@ -176,10 +176,10 @@
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Ports"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Row="2" Grid.Column="1"
-                                Background="{DynamicResource AppBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedServer.Ports}"
                                      BorderThickness="0" Background="Transparent" FontSize="13"
@@ -188,10 +188,10 @@
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Nick"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Row="3" Grid.Column="1"
-                                Background="{DynamicResource AppBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedServer.Nick}"
                                      BorderThickness="0" Background="Transparent" FontSize="13"
@@ -224,8 +224,8 @@
                 </StackPanel>
 
                 <!-- Servers list -->
-                <Border Background="{DynamicResource ChannelHeaderBackground}"
-                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                <Border Background="{DynamicResource SurfaceLayer}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="6">
                     <ListBox ItemsSource="{Binding SelectedNetwork.Servers}"
@@ -249,7 +249,7 @@
 
                 <TextBlock DockPanel.Dock="Top"
                            FontSize="11" FontWeight="SemiBold"
-                           Foreground="{DynamicResource SidebarMutedForeground}"
+                           Foreground="{DynamicResource TextTertiary}"
                            Margin="0,0,0,6">
                     <Run Text="CHANNELS"/>
                     <Run Text=" — "/>
@@ -258,8 +258,8 @@
 
                 <!-- Channel detail form -->
                 <Border DockPanel.Dock="Bottom"
-                        Background="{DynamicResource ChannelHeaderBackground}"
-                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                        Background="{DynamicResource SurfaceLayer}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="6"
                         Padding="12"
@@ -272,10 +272,10 @@
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Name"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Row="0" Grid.Column="1"
-                                Background="{DynamicResource AppBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedChannel.Name}"
                                      BorderThickness="0" Background="Transparent" FontSize="13"
@@ -284,10 +284,10 @@
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Key"
                                    FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                   Foreground="{DynamicResource TextTertiary}"/>
                         <Border Grid.Row="1" Grid.Column="1"
-                                Background="{DynamicResource AppBackground}"
-                                BorderBrush="{DynamicResource ChatBorderBrush}"
+                                Background="{DynamicResource InputBackground}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1" CornerRadius="4" Padding="4,0">
                             <TextBox Text="{Binding SelectedNetwork.SelectedChannel.Key}"
                                      PasswordChar="•"
@@ -316,8 +316,8 @@
                 </StackPanel>
 
                 <!-- Channels list -->
-                <Border Background="{DynamicResource ChannelHeaderBackground}"
-                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                <Border Background="{DynamicResource SurfaceLayer}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="6">
                     <ListBox ItemsSource="{Binding SelectedNetwork.Channels}"

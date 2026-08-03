@@ -10,7 +10,7 @@
         mc:Ignorable="d"
         x:Class="MutinyIRC.UI.Views.MainWindow"
         Title="MutinyIRC" Height="700" Width="1100" MinWidth="600" MinHeight="400"
-        Background="{DynamicResource SidebarBackground}"
+        Background="{DynamicResource SurfaceNav}"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="48">
 
@@ -21,7 +21,7 @@
     <Window.Resources>
         <ControlTheme x:Key="SidebarNavTheme" TargetType="Button">
             <Setter Property="Background"                Value="Transparent"/>
-            <Setter Property="Foreground"                Value="{DynamicResource SidebarMutedForeground}"/>
+            <Setter Property="Foreground"                Value="{DynamicResource TextTertiary}"/>
             <Setter Property="BorderThickness"           Value="0"/>
             <Setter Property="HorizontalAlignment"       Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -42,19 +42,19 @@
                 </ControlTemplate>
             </Setter>
             <Style Selector="^:pointerover /template/ Border#PART_Border">
-                <Setter Property="Background" Value="{DynamicResource SidebarItemHoverBackground}"/>
+                <Setter Property="Background" Value="{DynamicResource SubtleHoverBackground}"/>
             </Style>
             <Style Selector="^:pressed /template/ Border#PART_Border">
-                <Setter Property="Background" Value="{DynamicResource SidebarItemSelectedBackground}"/>
+                <Setter Property="Background" Value="{DynamicResource SubtlePressBackground}"/>
             </Style>
             <Style Selector="^.active /template/ Border#PART_Border">
-                <Setter Property="Background" Value="{DynamicResource SidebarItemSelectedBackground}"/>
+                <Setter Property="Background" Value="{DynamicResource SubtleSelectedBackground}"/>
             </Style>
             <Style Selector="^:pointerover">
-                <Setter Property="Foreground" Value="{DynamicResource SidebarForeground}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             </Style>
             <Style Selector="^.active">
-                <Setter Property="Foreground" Value="{DynamicResource SidebarHeaderForeground}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             </Style>
             <!-- Bold the nav item's text on unread. Set on the button so its content
                  TextBlocks inherit FontWeight, the same way they inherit Foreground —
@@ -76,7 +76,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- ═══ Sidebar ═══ -->
-        <DockPanel Grid.Column="0" Background="{DynamicResource SidebarBackground}">
+        <DockPanel Grid.Column="0" Background="{DynamicResource SurfaceNav}">
 
             <!-- App header row. ElementRole=TitleBar hands this strip to the platform's
                  non-client hit-testing, so it drags, double-click-maximizes and snaps
@@ -84,8 +84,8 @@
                  keep receiving normal input. -->
             <Border DockPanel.Dock="Top" Height="48"
                     chrome:WindowDecorationProperties.ElementRole="TitleBar"
-                    Background="{DynamicResource SidebarBackground}"
-                    BorderBrush="{DynamicResource SidebarBorderBrush}"
+                    Background="{DynamicResource SurfaceNav}"
+                    BorderBrush="{DynamicResource DividerBrush}"
                     BorderThickness="0,0,0,1">
                 <!-- No app-name label here: the theme draws Window.Title into this
                      strip once the client area is extended, so a label of our own
@@ -133,7 +133,7 @@
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <ic:SymbolIcon Symbol="ChevronRight" FontSize="12"
                                                        VerticalAlignment="Center"
-                                                       Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                                       Foreground="{DynamicResource TextTertiary}"/>
                                         <TextBlock x:Name="serverName"
                                                    Text="{Binding Name}"
                                                    FontSize="12"
@@ -142,7 +142,7 @@
                                         <TextBlock Text="(away)" FontSize="11"
                                                    VerticalAlignment="Center"
                                                    IsVisible="{Binding IsAway}"
-                                                   Foreground="{DynamicResource SidebarMutedForeground}"/>
+                                                   Foreground="{DynamicResource TextTertiary}"/>
                                     </StackPanel>
                                 </Button>
 
@@ -199,7 +199,7 @@
                                                         Margin="0,0,4,0"
                                                         Background="Transparent" BorderThickness="0"
                                                         CornerRadius="3"
-                                                        Foreground="{DynamicResource SidebarMutedForeground}"
+                                                        Foreground="{DynamicResource TextTertiary}"
                                                         Command="{Binding CloseCommand}"
                                                         ToolTip.Tip="Close">
                                                     <ic:SymbolIcon Symbol="Dismiss" FontSize="11"
@@ -222,7 +222,7 @@
              template only renders Background, so the hairline is a separate Border. -->
         <Border Grid.Column="1" Width="1"
                 HorizontalAlignment="Center"
-                Background="{DynamicResource SidebarBorderBrush}"/>
+                Background="{DynamicResource DividerBrush}"/>
         <GridSplitter Grid.Column="1" Width="4"
                       Background="Transparent"
                       ResizeDirection="Columns"
@@ -230,7 +230,7 @@
 
         <!-- ═══ Content area ═══ -->
         <ContentControl Grid.Column="2" Content="{Binding SelectedPanel}"
-                        Background="{DynamicResource AppBackground}">
+                        Background="{DynamicResource SurfaceContent}">
             <ContentControl.DataTemplates>
                 <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
                     <views:ChannelView />

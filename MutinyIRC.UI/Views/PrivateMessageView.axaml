@@ -8,7 +8,7 @@
              mc:Ignorable="d"
              x:Class="MutinyIRC.UI.Views.PrivateMessageView"
              x:Name="pmPanel"
-             Background="{DynamicResource AppBackground}">
+             Background="{DynamicResource SurfaceContent}">
 
     <Design.DataContext>
         <design:DesignPrivateMessageViewModel />
@@ -18,15 +18,15 @@
 
         <!-- Header -->
         <Border DockPanel.Dock="Top"
-                Background="{DynamicResource ChannelHeaderBackground}"
-                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                Background="{DynamicResource SurfaceLayer}"
+                BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="{DynamicResource PanelHeaderPadding}" Height="48">
             <DockPanel VerticalAlignment="Center">
                 <TextBlock DockPanel.Dock="Right"
                            Text="(disconnected)"
                            FontSize="12"
-                           Foreground="{DynamicResource SidebarMutedForeground}"
+                           Foreground="{DynamicResource TextTertiary}"
                            VerticalAlignment="Center"
                            Margin="8,0,0,0"
                            IsVisible="{Binding !IsServerConnected}"/>
@@ -38,15 +38,15 @@
 
         <!-- Message input bar -->
         <Border DockPanel.Dock="Bottom"
-                Background="{DynamicResource ChatInputAreaBackground}"
-                BorderBrush="{DynamicResource ChannelHeaderBorderBrush}"
+                Background="{DynamicResource SurfaceLayerAlt}"
+                BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,1,0,0"
                 Padding="12,8">
             <Grid ColumnDefinitions="*,Auto">
                 <Border Grid.Column="0"
-                        Background="{DynamicResource AppBackground}"
+                        Background="{DynamicResource InputBackground}"
                         CornerRadius="6"
-                        BorderBrush="{DynamicResource ChatBorderBrush}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
                         BorderThickness="1"
                         Padding="4,0">
                     <local:CommandTextBox x:Name="commandBox"

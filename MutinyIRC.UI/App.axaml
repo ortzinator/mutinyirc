@@ -28,7 +28,7 @@
             <DockPanel Margin="16,2,16,2">
                 <TextBlock DockPanel.Dock="Left"
                            Text="{Binding Time, StringFormat='HH:mm'}"
-                           Foreground="{DynamicResource ChatTimestampForeground}"
+                           Foreground="{DynamicResource TextQuaternary}"
                            FontSize="11" Width="40" TextAlignment="Right"
                            VerticalAlignment="Top" Margin="0,2,10,0"
                            IsVisible="{Binding ShowTimestamps}"/>
@@ -46,44 +46,44 @@
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type vm:PrivateNoticeViewModel}">
-            <Border Margin="12,3,12,3" Background="{DynamicResource ChatNoticeBackground}"
+            <Border Margin="12,3,12,3" Background="{DynamicResource StatusWarningBackground}"
                     CornerRadius="4" Padding="10,6">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding Time, StringFormat='HH:mm'}"
-                               Foreground="{DynamicResource ChatTimestampForeground}"
+                               Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
                                IsVisible="{Binding ShowTimestamps}"/>
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding User.NamesLiteral}"
                                FontWeight="SemiBold"
-                               Foreground="{DynamicResource NoticeForeground}"
+                               Foreground="{DynamicResource StatusWarningForeground}"
                                VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
-                               Foreground="{DynamicResource NoticeForeground}"
+                               Foreground="{DynamicResource StatusWarningForeground}"
                                VerticalAlignment="Center"/>
                 </DockPanel>
             </Border>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type vm:OutgoingNoticeViewModel}">
-            <Border Margin="12,3,12,3" Background="{DynamicResource ChatNoticeBackground}"
+            <Border Margin="12,3,12,3" Background="{DynamicResource StatusWarningBackground}"
                     CornerRadius="4" Padding="10,6">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding Time, StringFormat='HH:mm'}"
-                               Foreground="{DynamicResource ChatTimestampForeground}"
+                               Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
                                IsVisible="{Binding ShowTimestamps}"/>
                     <TextBlock DockPanel.Dock="Left"
-                               Foreground="{DynamicResource NoticeForeground}"
+                               Foreground="{DynamicResource StatusWarningForeground}"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center" Margin="0,0,8,0">
                         <Run Text="&#x2192;"/>
                         <Run Text="-"/><Run Text="{Binding User.Nick}"/><Run Text="-"/>
                     </TextBlock>
                     <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
-                               Foreground="{DynamicResource NoticeForeground}"
+                               Foreground="{DynamicResource StatusWarningForeground}"
                                VerticalAlignment="Center"/>
                 </DockPanel>
             </Border>
@@ -93,7 +93,7 @@
             <DockPanel Margin="16,2,16,2">
                 <TextBlock DockPanel.Dock="Left"
                            Text="{Binding Time, StringFormat='HH:mm'}"
-                           Foreground="{DynamicResource ChatTimestampForeground}"
+                           Foreground="{DynamicResource TextQuaternary}"
                            FontSize="11" Width="40" TextAlignment="Right"
                            VerticalAlignment="Top" Margin="0,2,10,0"
                            IsVisible="{Binding ShowTimestamps}"/>
@@ -108,15 +108,15 @@
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type vm:IrcErrorViewModel}">
-            <Border Margin="12,3,12,3" Background="{DynamicResource ChatErrorBackground}"
+            <Border Margin="12,3,12,3" Background="{DynamicResource StatusErrorBackground}"
                     CornerRadius="4" Padding="10,6">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding Time, StringFormat='HH:mm'}"
-                               Foreground="{DynamicResource ChatTimestampForeground}"
+                               Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
                                IsVisible="{Binding ShowTimestamps}"/>
-                    <TextBlock Foreground="{DynamicResource ErrorForeground}" TextWrapping="Wrap">
+                    <TextBlock Foreground="{DynamicResource StatusErrorForeground}" TextWrapping="Wrap">
                         <TextBlock.Text>
                             <MultiBinding StringFormat="Error {0}: {1}">
                                 <Binding Path="Code" />
@@ -129,16 +129,16 @@
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type vm:ErrorMessageViewModel}">
-            <Border Margin="12,3,12,3" Background="{DynamicResource ChatErrorBackground}"
+            <Border Margin="12,3,12,3" Background="{DynamicResource StatusErrorBackground}"
                     CornerRadius="4" Padding="10,6">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding Time, StringFormat='HH:mm'}"
-                               Foreground="{DynamicResource ChatTimestampForeground}"
+                               Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
                                IsVisible="{Binding ShowTimestamps}"/>
                     <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
-                               Foreground="{DynamicResource ErrorForeground}"/>
+                               Foreground="{DynamicResource StatusErrorForeground}"/>
                 </DockPanel>
             </Border>
         </DataTemplate>
@@ -147,12 +147,12 @@
             <DockPanel Margin="16,1,16,1">
                 <TextBlock DockPanel.Dock="Left"
                            Text="{Binding Time, StringFormat='HH:mm'}"
-                           Foreground="{DynamicResource ChatTimestampForeground}"
+                           Foreground="{DynamicResource TextQuaternary}"
                            FontSize="11" Width="40" TextAlignment="Right"
                            VerticalAlignment="Center" Margin="0,0,10,0"
                            IsVisible="{Binding ShowTimestamps}"/>
                 <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
-                           Foreground="{DynamicResource SystemMessageForeground}"
+                           Foreground="{DynamicResource TextTertiary}"
                            FontStyle="Italic" VerticalAlignment="Center"/>
             </DockPanel>
         </DataTemplate>
