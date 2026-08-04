@@ -1,12 +1,8 @@
-using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using FlamingIRC;
 using NUnit.Framework;
 using MutinyIRC.UI.ViewModels;
@@ -41,43 +37,10 @@ public class UserListContextMenuTests
         ("Kick + Ban", "/ban -k"),
     };
 
-    /// <summary>
-    /// Minimal stand-in for ChannelViewModel exposing only what ChannelView's user list binds to.
-    /// We avoid the real ChannelViewModel because it needs a live Channel/Server/PluginManager.
-    /// <c>UserCommand</c> records the verb it was invoked with so the test can assert it.
-    /// </summary>
-    private sealed class ChannelStub : ObservableObject
-    {
-        public List<UserViewModel> UserList { get; }
-
-        /// <summary>What the ListBox actually binds to: group headers interleaved with users.</summary>
-        public IReadOnlyList<object> UserRows { get; }
-
-        public string UserFilter { get; set; } = string.Empty;
-        public string UserFilterWatermark => $"Filter {UserList.Count} members";
-
-        private UserViewModel? _selectedUser;
-        public UserViewModel? SelectedUser
-        {
-            get => _selectedUser;
-            set => SetProperty(ref _selectedUser, value);
-        }
-
-        public string? LastInvokedVerb { get; private set; }
-        public ICommand UserCommand { get; }
-
-        public ChannelStub(params UserViewModel[] users)
-        {
-            UserList = users.ToList();
-            UserRows = UserListGrouping.Build(UserList);
-            UserCommand = new RelayCommand<string>(verb => LastInvokedVerb = verb);
-        }
-    }
-
-    private static (ChannelStub stub, ContextMenu menu, UserViewModel user) OpenMenuForSelectedUser()
+    private static (ChannelViewStub stub, ContextMenu menu, UserViewModel user) OpenMenuForSelectedUser()
     {
         var user = new UserViewModel(new User("alice", "ident", "host"));
-        var stub = new ChannelStub(user);
+        var stub = new ChannelViewStub(user);
 
         var view = new ChannelView { DataContext = stub };
         var window = new Window { Content = view, Width = 600, Height = 400 };

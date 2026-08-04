@@ -14,11 +14,14 @@ The content view for a single server or channel — what fills the main area whe
 
 ## Row list (user list)
 
-The flat `IReadOnlyList<object>` a channel's user list binds to (`ChannelViewModel.UserRows`),
+The flat `IReadOnlyList<IUserListRow>` a channel's user list binds to (`ChannelViewModel.UserRows`),
 built by `UserListGrouping.Build`. It interleaves `UserGroupHeaderViewModel` section headings with
-the `UserViewModel` rows under each. One flat list rather than nested collections is what lets a
-single `ListBox` own selection and the right-click menu across the whole list; headers stay inert
-by reporting `IsSelectable == false`, which `ChannelView.axaml` binds to `IsHitTestVisible`.
+the `UserViewModel` rows under each; `IUserListRow` is the contract those two kinds share, and its
+sole member `IsSelectable` is the only thing the item container binds to — the rest comes from a
+per-type `DataTemplate`. One flat list rather than nested collections is what lets a single
+`ListBox` own selection and the right-click menu across the whole list; headings stay inert by
+reporting `IsSelectable == false`, which `ChannelView.axaml` binds to both `IsHitTestVisible` (so
+the pointer skips them) and `Focusable` (so keyboard navigation does too).
 
 ## Sidebar
 

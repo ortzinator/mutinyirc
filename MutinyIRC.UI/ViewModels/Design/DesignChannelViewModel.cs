@@ -13,7 +13,7 @@ public class DesignChannelViewModel : IrcViewModel
     public override Server? OwningServer => null;
 
     // Enough of each status to show every group heading and prefix glyph in the previewer.
-    public IReadOnlyList<object> UserRows { get; }
+    public IReadOnlyList<IUserListRow> UserRows { get; }
     public string UserFilter { get; set; } = string.Empty;
     public string UserFilterWatermark => $"Filter {UserList.Count} members";
 

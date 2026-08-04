@@ -28,9 +28,9 @@ public static class UserListGrouping
     /// Builds the row list. <paramref name="filter" /> is an optional case-insensitive substring
     /// match on the bare nick; a group with no surviving members drops out entirely, header and all.
     /// </summary>
-    public static IReadOnlyList<object> Build(IEnumerable<UserViewModel> users, string? filter = null)
+    public static IReadOnlyList<IUserListRow> Build(IEnumerable<UserViewModel> users, string? filter = null)
     {
-        var rows = new List<object>();
+        var rows = new List<IUserListRow>();
 
         foreach ((string name, Mode[] modes) in Groups)
         {

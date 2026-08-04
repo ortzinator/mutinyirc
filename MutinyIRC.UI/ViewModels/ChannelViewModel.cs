@@ -46,8 +46,8 @@ public class ChannelViewModel : IrcViewModel
     // list renders: the same users grouped by status and narrowed by UserFilter, with a header
     // in front of each non-empty group.
 
-    private IReadOnlyList<object> _userRows = UserListGrouping.Build(new List<UserViewModel>());
-    public IReadOnlyList<object> UserRows => _userRows;
+    private IReadOnlyList<IUserListRow> _userRows = UserListGrouping.Build(new List<UserViewModel>());
+    public IReadOnlyList<IUserListRow> UserRows => _userRows;
 
     private string _userFilter = string.Empty;
 

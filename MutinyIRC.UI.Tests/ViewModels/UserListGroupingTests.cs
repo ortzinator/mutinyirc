@@ -17,10 +17,10 @@ public class UserListGroupingTests
     private static List<UserViewModel> Users(params string[] namesLiterals) =>
         namesLiterals.Select(n => new UserViewModel(User.FromNames(n))).ToList();
 
-    private static List<string> HeaderNames(IReadOnlyList<object> rows) =>
+    private static List<string> HeaderNames(IReadOnlyList<IUserListRow> rows) =>
         rows.OfType<UserGroupHeaderViewModel>().Select(h => h.Name).ToList();
 
-    private static List<string> Nicks(IReadOnlyList<object> rows) =>
+    private static List<string> Nicks(IReadOnlyList<IUserListRow> rows) =>
         rows.OfType<UserViewModel>().Select(u => u.Nick).ToList();
 
     [Test]
@@ -134,8 +134,8 @@ public class UserListGroupingTests
     {
         var rows = UserListGrouping.Build(Users("@op"));
 
-        Assert.That(((UserGroupHeaderViewModel)rows[0]).IsSelectable, Is.False,
+        Assert.That(rows[0].IsSelectable, Is.False,
             "ChannelView binds ListBoxItem.IsHitTestVisible to IsSelectable to keep headers inert");
-        Assert.That(((UserViewModel)rows[1]).IsSelectable, Is.True);
+        Assert.That(rows[1].IsSelectable, Is.True);
     }
 }

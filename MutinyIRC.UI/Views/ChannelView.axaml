@@ -102,8 +102,8 @@
 
             <!-- ── User list ──
                  A filter box over a grouped roster. Headers and user rows share one ListBox
-                 (see UserGroupHeaderViewModel) so selection and the right-click menu work
-                 across the whole list; the headers opt out of hit-testing via IsSelectable. -->
+                 (both are IUserListRow) so selection and the right-click menu work across the
+                 whole list; the headers opt out of pointer and keyboard via IsSelectable. -->
             <Border Grid.Column="1" Width="248"
                     Background="{DynamicResource SurfaceContent}"
                     BorderBrush="{DynamicResource DividerBrush}"
@@ -159,8 +159,9 @@
                             <ControlTheme TargetType="ListBoxItem">
                                 <Setter Property="Padding" Value="8,0"/>
                                 <Setter Property="CornerRadius" Value="4"/>
-                                <!-- Group headers report IsSelectable=false, which keeps the
-                                     pointer (and so hover and selection) off them entirely. -->
+                                <!-- Group headers report IsSelectable=false. IsHitTestVisible
+                                     keeps the pointer (and so hover and selection) off them;
+                                     Focusable makes arrow keys, Home and End step over them. -->
                                 <Setter Property="IsHitTestVisible" Value="{Binding IsSelectable}"/>
                                 <Setter Property="Focusable" Value="{Binding IsSelectable}"/>
                                 <Setter Property="Template">

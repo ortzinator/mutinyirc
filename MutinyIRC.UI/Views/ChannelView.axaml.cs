@@ -26,13 +26,15 @@ public partial class ChannelView : UserControl
     }
 
     /// <summary>
-    /// The user list holds group headers as well as users. Headers aren't hit-testable, so the
-    /// pointer can't land on one, but arrow keys still walk over them — drop the selection rather
-    /// than push a header into the view model's UserViewModel-typed SelectedUser.
+    /// The user list holds group headers as well as users, and SelectedItem is typed object, so a
+    /// header can be pushed into it. No user input can do that — headers bind IsHitTestVisible and
+    /// Focusable to IsSelectable=false, which keeps the pointer off them and makes the ListBox's
+    /// own keyboard navigation step straight over them. This is the backstop for a programmatic
+    /// set, so the view model's UserViewModel-typed SelectedUser never sees a header.
     /// </summary>
     private void UserBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (userBox.SelectedItem is not null and not UserViewModel)
+        if (userBox.SelectedItem is IUserListRow { IsSelectable: false })
             userBox.SelectedItem = null;
     }
 

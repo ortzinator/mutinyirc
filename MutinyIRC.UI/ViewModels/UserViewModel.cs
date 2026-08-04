@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MutinyIRC.UI.ViewModels;
 
-public class UserViewModel : ObservableObject, IComparable<UserViewModel>
+public class UserViewModel : ObservableObject, IUserListRow, IComparable<UserViewModel>
 {
     private readonly User _user;
 
@@ -22,7 +22,8 @@ public class UserViewModel : ObservableObject, IComparable<UserViewModel>
     /// </summary>
     public string PrefixGlyph => _user.Prefix == '\0' ? "·" : _user.Prefix.ToString();
 
-    /// <summary>Rows in the user list are selectable; the group headers between them are not.</summary>
+    /// <inheritdoc />
+    /// <remarks>Always true — user rows are the ones you can click and select.</remarks>
     public bool IsSelectable => true;
 
     /// <summary>
