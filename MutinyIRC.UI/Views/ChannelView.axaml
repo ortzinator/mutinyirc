@@ -24,15 +24,6 @@
         <conv:NickColorConverter x:Key="NickColorConverter" />
     </UserControl.Resources>
 
-    <UserControl.Styles>
-        <!-- The filter box draws its own rounded frame, so strip the one the Fluent TextBox
-             template paints (including the focus underline it swaps in). -->
-        <Style Selector="TextBox#userFilterBox /template/ Border#PART_BorderElement">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-        </Style>
-    </UserControl.Styles>
-
     <DockPanel>
 
         <!-- ── Channel header ── -->
@@ -71,19 +62,11 @@
                 BorderThickness="0,1,0,0"
                 Padding="12,8">
             <Grid ColumnDefinitions="*,Auto">
-                <Border Grid.Column="0"
-                        Background="{DynamicResource InputBackground}"
-                        CornerRadius="6"
-                        BorderBrush="{DynamicResource ControlBorderBrush}"
-                        BorderThickness="1"
-                        Padding="4,0">
-                    <local:CommandTextBox x:Name="commandBox"
-                                          BorderThickness="0"
-                                          Background="Transparent"
-                                          PlaceholderText="Message..."
-                                          FontSize="14"
-                                          VerticalAlignment="Center"/>
-                </Border>
+                <local:CommandTextBox x:Name="commandBox"
+                                      Grid.Column="0"
+                                      PlaceholderText="Message..."
+                                      FontSize="14"
+                                      VerticalAlignment="Center"/>
                 <Button x:Name="sendButton"
                         Grid.Column="1"
                         Content="Send"
@@ -110,28 +93,21 @@
                     BorderThickness="1,0,0,0">
                 <DockPanel>
 
-                    <!-- Filter -->
-                    <Border DockPanel.Dock="Top"
-                            Margin="12,12,12,8" Height="30"
-                            Background="{DynamicResource InputBackground}"
-                            BorderBrush="{DynamicResource ControlBorderBrush}"
-                            BorderThickness="1" CornerRadius="4"
-                            Padding="10,0">
-                        <Grid ColumnDefinitions="Auto,*">
-                            <ic:SymbolIcon Grid.Column="0" Symbol="Search" FontSize="13"
+                    <!-- Filter. The search glyph rides in the TextBox's own left slot, so the
+                         field keeps the one frame the theme draws for every input. -->
+                    <TextBox x:Name="userFilterBox"
+                             DockPanel.Dock="Top"
+                             Margin="12,12,12,8"
+                             Text="{Binding UserFilter, Mode=TwoWay}"
+                             PlaceholderText="{Binding UserFilterWatermark}"
+                             FontSize="12.5">
+                        <TextBox.InnerLeftContent>
+                            <ic:SymbolIcon Symbol="Search" FontSize="13"
+                                           Margin="10,0,0,0"
                                            VerticalAlignment="Center"
                                            Foreground="{DynamicResource TextTertiary}"/>
-                            <TextBox x:Name="userFilterBox" Grid.Column="1"
-                                     Margin="8,0,0,0" Padding="0" MinHeight="0"
-                                     Text="{Binding UserFilter, Mode=TwoWay}"
-                                     PlaceholderText="{Binding UserFilterWatermark}"
-                                     Background="Transparent" BorderThickness="0"
-                                     FontSize="12.5"
-                                     VerticalAlignment="Center"
-                                     VerticalContentAlignment="Center"
-                                     Foreground="{DynamicResource TextPrimary}"/>
-                        </Grid>
-                    </Border>
+                        </TextBox.InnerLeftContent>
+                    </TextBox>
 
                     <!-- Roster -->
                     <ListBox x:Name="userBox"

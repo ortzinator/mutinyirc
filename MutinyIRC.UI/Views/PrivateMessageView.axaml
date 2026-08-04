@@ -43,20 +43,12 @@
                 BorderThickness="0,1,0,0"
                 Padding="12,8">
             <Grid ColumnDefinitions="*,Auto">
-                <Border Grid.Column="0"
-                        Background="{DynamicResource InputBackground}"
-                        CornerRadius="6"
-                        BorderBrush="{DynamicResource ControlBorderBrush}"
-                        BorderThickness="1"
-                        Padding="4,0">
-                    <local:CommandTextBox x:Name="commandBox"
-                                          BorderThickness="0"
-                                          Background="Transparent"
-                                          PlaceholderText="Message..."
-                                          FontSize="14"
-                                          VerticalAlignment="Center"
-                                          IsEnabled="{Binding IsServerConnected}"/>
-                </Border>
+                <local:CommandTextBox x:Name="commandBox"
+                                      Grid.Column="0"
+                                      PlaceholderText="Message..."
+                                      FontSize="14"
+                                      VerticalAlignment="Center"
+                                      IsEnabled="{Binding IsServerConnected}"/>
                 <Button x:Name="sendButton"
                         Grid.Column="1"
                         Content="Send"

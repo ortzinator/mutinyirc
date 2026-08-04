@@ -1,119 +1,310 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- The app's palette. Every colour an element draws comes from here.
+    <!-- The app's palette, ported from design/Mutiny IRC Client.dc.html. Every colour an
+         element draws comes from here, including the Fluent controls: the last block of
+         each variant points Fluent's own resource keys at these values, so a TextBox or a
+         CheckBox tracks the palette instead of shipping its own.
 
-         Surfaces stack from back to front: SurfaceNav is the window chrome the
-         sidebar sits on, SurfaceContent is the reading area, and the two Layer
-         surfaces are the strips and cards that sit on top of it. Text picks one
-         of four tiers by how loud it should be. Everything else is an
-         interaction fill, a line, or a status colour. -->
+         Each variant is in two halves. The Colors are the values; the brushes name the
+         roles. A value gets a Color of its own when more than one role uses it — that is
+         the only way one key can alias another, and it makes the sharing impossible to
+         break by editing one side. Values used by exactly one brush stay inline.
+
+         Surfaces stack from back to front: SurfaceNav is the window chrome the sidebar
+         sits on, SurfaceContent is the reading area, and the two Layer surfaces are the
+         strips and cards on top of it. Text picks one of four tiers by how loud it should
+         be. Everything else is an interaction fill, a line, or a status colour. -->
 
     <ResourceDictionary.ThemeDictionaries>
 
         <ResourceDictionary x:Key="Dark">
+
+            <!-- ═══ Values ═══ -->
+
+            <!-- Nick hues (design: nickColor). Three of them double as user-list mode
+                 glyphs, which is why they are Colors and not just brushes. -->
+            <Color x:Key="HueBlue">#60CDFF</Color>
+            <Color x:Key="HueTeal">#4CC2A0</Color>
+            <Color x:Key="HueGreen">#7DD87D</Color>
+            <Color x:Key="HueAmber">#F2C94C</Color>
+            <Color x:Key="HueOrange">#F2994A</Color>
+            <Color x:Key="HuePink">#F28FB0</Color>
+            <Color x:Key="HueViolet">#B4A0FF</Color>
+            <Color x:Key="HueRose">#FF8A8A</Color>
+            <Color x:Key="HueCyan">#8AD4E8</Color>
+            <Color x:Key="HueLime">#C8E68A</Color>
+
+            <Color x:Key="SurfaceLayerColor">#2C2C2C</Color>
+            <Color x:Key="SurfaceStrokeColor">#66000000</Color>
+
+            <Color x:Key="TextPrimaryColor">#FFFFFF</Color>
+            <Color x:Key="TextTertiaryColor">#8BFFFFFF</Color>
+            <Color x:Key="TextQuaternaryColor">#5DFFFFFF</Color>
+
+            <Color x:Key="ControlBackgroundColor">#0FFFFFFF</Color>
+            <Color x:Key="ControlHoverBackgroundColor">#15FFFFFF</Color>
+            <Color x:Key="ControlBorderColor">#12FFFFFF</Color>
+            <Color x:Key="InputBackgroundColor">#0FFFFFFF</Color>
+
+            <!-- The line that says "this is a field". Far stronger than ControlBorderColor,
+                 which is why a white input is still legible on a white card. -->
+            <Color x:Key="InputLineColor">#8BFFFFFF</Color>
+
+            <Color x:Key="AccentColor">#60CDFF</Color>
+            <Color x:Key="AccentHoverColor">#7FD8FF</Color>
+            <Color x:Key="AccentBaseColor">#0078D4</Color>
+            <Color x:Key="OnAccentColor">#E6000000</Color>
+
+            <Color x:Key="ScrollThumbColor">#47FFFFFF</Color>
+
+            <!-- ═══ Roles ═══ -->
+
             <!-- Surfaces, back to front -->
             <SolidColorBrush x:Key="SurfaceNav"                     Color="#202020" />
             <SolidColorBrush x:Key="SurfaceContent"                 Color="#272727" />
-            <SolidColorBrush x:Key="SurfaceLayer"                   Color="#2C2C2C" />
+            <SolidColorBrush x:Key="SurfaceLayer"                   Color="{StaticResource SurfaceLayerColor}" />
             <SolidColorBrush x:Key="SurfaceLayerAlt"                Color="#323232" />
 
             <!-- Text, loudest to quietest -->
-            <SolidColorBrush x:Key="TextPrimary"                    Color="#FFFFFF" />
+            <SolidColorBrush x:Key="TextPrimary"                    Color="{StaticResource TextPrimaryColor}" />
             <SolidColorBrush x:Key="TextSecondary"                  Color="#C8FFFFFF" />
-            <SolidColorBrush x:Key="TextTertiary"                   Color="#8BFFFFFF" />
-            <SolidColorBrush x:Key="TextQuaternary"                 Color="#5DFFFFFF" />
+            <SolidColorBrush x:Key="TextTertiary"                   Color="{StaticResource TextTertiaryColor}" />
+            <SolidColorBrush x:Key="TextQuaternary"                 Color="{StaticResource TextQuaternaryColor}" />
 
-            <!-- Interaction fills. Selected outranks hover, and press dips below
-                 it, so a list makes its current row obvious under the pointer. -->
+            <!-- Interaction fills. Press dips below hover, as in the reference. The
+                 reference has no selected fill at all — it marks the current row with an
+                 accent pill instead — so SubtleSelectedBackground is ours, and it is what
+                 keeps the active sidebar item legible without that pill. -->
             <SolidColorBrush x:Key="SubtleHoverBackground"          Color="#0FFFFFFF" />
             <SolidColorBrush x:Key="SubtlePressBackground"          Color="#0BFFFFFF" />
             <SolidColorBrush x:Key="SubtleSelectedBackground"       Color="#1AFFFFFF" />
 
-            <!-- Controls and lines. ControlBorderBrush outlines a field or a card;
-                 DividerBrush rules the seam between two surfaces. -->
-            <SolidColorBrush x:Key="InputBackground"                Color="#0FFFFFFF" />
-            <SolidColorBrush x:Key="ControlBorderBrush"             Color="#12FFFFFF" />
+            <!-- Lines. ControlBorderBrush outlines a card and DividerBrush rules the seam
+                 between two surfaces; they carry the same weight by design. An input frame
+                 uses InputLineColor instead, via the Fluent wiring below. -->
+            <SolidColorBrush x:Key="ControlBorderBrush"             Color="{StaticResource ControlBorderColor}" />
             <SolidColorBrush x:Key="DividerBrush"                   Color="#15FFFFFF" />
 
-            <!-- Status. Notices and errors take their hue from the nick palette so
-                 a coloured message row sits with the rest of the chat, and their
-                 backgrounds are translucent tints that work over any surface. -->
-            <SolidColorBrush x:Key="StatusWarningForeground"        Color="#F2C94C" />
-            <SolidColorBrush x:Key="StatusWarningBackground"        Color="#26F2C94C" />
-            <SolidColorBrush x:Key="StatusErrorForeground"          Color="#FF8A8A" />
-            <SolidColorBrush x:Key="StatusErrorBackground"          Color="#26FF8A8A" />
+            <!-- Accent tuned for text on a normal surface. The accent fills themselves have
+                 no brush of their own: only Fluent's controls use them, straight from
+                 AccentColor. Add one here the day a view needs to paint accent directly. -->
+            <SolidColorBrush x:Key="AccentTextBrush"                Color="#99EBFF" />
+
+            <!-- Status. The foregrounds are the reference's warn and danger tokens; the
+                 backgrounds are translucent tints of the same hue, so a notice or error
+                 row reads the same over any surface.
+
+                 The tints are ours: the reference gives notices no background at all and
+                 spends warn on a short label, where a saturated yellow costs nothing. Across
+                 a whole row it does, so the alpha stays low - a run of notices should not
+                 out-shout the conversation. -->
+            <SolidColorBrush x:Key="StatusWarningForeground"        Color="#FCE100" />
+            <SolidColorBrush x:Key="StatusWarningBackground"        Color="#14FCE100" />
+            <SolidColorBrush x:Key="StatusErrorForeground"          Color="#FF99A4" />
+            <SolidColorBrush x:Key="StatusErrorBackground"          Color="#14FF99A4" />
 
             <!-- User list: status-prefix glyph colours. Owner (~) and admin (&) share the op
-                 colour: the glyph itself already carries the rank difference.
+                 colour: the glyph itself already carries the rank difference. Each is a nick
+                 hue, so an op's glyph and an op's nick can never drift apart.
                  Resolved by string key from ModeToBrushConverter, not DynamicResource. -->
-            <SolidColorBrush x:Key="ModeOpForeground"               Color="#F2C94C" />
-            <SolidColorBrush x:Key="ModeHalfOpForeground"           Color="#8AD4E8" />
-            <SolidColorBrush x:Key="ModeVoiceForeground"            Color="#7DD87D" />
-            <SolidColorBrush x:Key="ModeRegularForeground"          Color="#5DFFFFFF" />
+            <SolidColorBrush x:Key="ModeOpForeground"               Color="{StaticResource HueAmber}" />
+            <SolidColorBrush x:Key="ModeHalfOpForeground"           Color="{StaticResource HueCyan}" />
+            <SolidColorBrush x:Key="ModeVoiceForeground"            Color="{StaticResource HueGreen}" />
+            <SolidColorBrush x:Key="ModeRegularForeground"          Color="{StaticResource TextQuaternaryColor}" />
 
             <!-- Nick colours. Ten stable hues picked by hashing the nick.
                  Resolved by string key from NickColorConverter, not DynamicResource. -->
-            <SolidColorBrush x:Key="NickPalette0"                   Color="#60CDFF" />
-            <SolidColorBrush x:Key="NickPalette1"                   Color="#4CC2A0" />
-            <SolidColorBrush x:Key="NickPalette2"                   Color="#7DD87D" />
-            <SolidColorBrush x:Key="NickPalette3"                   Color="#F2C94C" />
-            <SolidColorBrush x:Key="NickPalette4"                   Color="#F2994A" />
-            <SolidColorBrush x:Key="NickPalette5"                   Color="#F28FB0" />
-            <SolidColorBrush x:Key="NickPalette6"                   Color="#B4A0FF" />
-            <SolidColorBrush x:Key="NickPalette7"                   Color="#FF8A8A" />
-            <SolidColorBrush x:Key="NickPalette8"                   Color="#8AD4E8" />
-            <SolidColorBrush x:Key="NickPalette9"                   Color="#C8E68A" />
+            <SolidColorBrush x:Key="NickPalette0"                   Color="{StaticResource HueBlue}" />
+            <SolidColorBrush x:Key="NickPalette1"                   Color="{StaticResource HueTeal}" />
+            <SolidColorBrush x:Key="NickPalette2"                   Color="{StaticResource HueGreen}" />
+            <SolidColorBrush x:Key="NickPalette3"                   Color="{StaticResource HueAmber}" />
+            <SolidColorBrush x:Key="NickPalette4"                   Color="{StaticResource HueOrange}" />
+            <SolidColorBrush x:Key="NickPalette5"                   Color="{StaticResource HuePink}" />
+            <SolidColorBrush x:Key="NickPalette6"                   Color="{StaticResource HueViolet}" />
+            <SolidColorBrush x:Key="NickPalette7"                   Color="{StaticResource HueRose}" />
+            <SolidColorBrush x:Key="NickPalette8"                   Color="{StaticResource HueCyan}" />
+            <SolidColorBrush x:Key="NickPalette9"                   Color="{StaticResource HueLime}" />
+
+            <!-- ═══ Fluent control wiring ═══
+                 Fluent resolves these keys itself; overriding them here is what keeps its
+                 controls inside the palette. Without this block a TextBox, an accent Button
+                 and a CheckBox each draw from Fluent's own blues and greys. -->
+
+            <SolidColorBrush x:Key="TextControlBackground"                    Color="{StaticResource InputBackgroundColor}" />
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver"         Color="{StaticResource ControlHoverBackgroundColor}" />
+            <SolidColorBrush x:Key="TextControlBackgroundFocused"             Color="{StaticResource InputBackgroundColor}" />
+            <SolidColorBrush x:Key="TextControlBorderBrush"                   Color="{StaticResource InputLineColor}" />
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver"        Color="{StaticResource InputLineColor}" />
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused"            Color="{StaticResource AccentColor}" />
+            <SolidColorBrush x:Key="TextControlForeground"                    Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="TextControlForegroundPointerOver"         Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="TextControlForegroundFocused"             Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="TextControlPlaceholderForeground"         Color="{StaticResource TextTertiaryColor}" />
+            <SolidColorBrush x:Key="TextControlSelectionHighlightColor"       Color="{StaticResource AccentBaseColor}" />
+
+            <SolidColorBrush x:Key="ButtonBackground"                         Color="{StaticResource ControlBackgroundColor}" />
+            <SolidColorBrush x:Key="ButtonBackgroundPointerOver"              Color="{StaticResource ControlHoverBackgroundColor}" />
+            <SolidColorBrush x:Key="ButtonBackgroundPressed"                  Color="{StaticResource ControlBackgroundColor}" />
+            <SolidColorBrush x:Key="ButtonBorderBrush"                        Color="{StaticResource ControlBorderColor}" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPointerOver"             Color="{StaticResource ControlBorderColor}" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPressed"                 Color="{StaticResource ControlBorderColor}" />
+            <SolidColorBrush x:Key="ButtonForeground"                         Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="ButtonForegroundPointerOver"              Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="ButtonForegroundPressed"                  Color="{StaticResource TextPrimaryColor}" />
+
+            <SolidColorBrush x:Key="AccentButtonBackground"                   Color="{StaticResource AccentColor}" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver"        Color="{StaticResource AccentHoverColor}" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed"            Color="{StaticResource AccentBaseColor}" />
+            <SolidColorBrush x:Key="AccentButtonForeground"                   Color="{StaticResource OnAccentColor}" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver"        Color="{StaticResource OnAccentColor}" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed"            Color="{StaticResource OnAccentColor}" />
+
+            <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked"       Color="{StaticResource AccentColor}" />
+            <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{StaticResource AccentHoverColor}" />
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked"      Color="{StaticResource OnAccentColor}" />
+            <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked"   Color="{StaticResource InputLineColor}" />
+
+            <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver"            Color="{StaticResource ScrollThumbColor}" />
+
+            <SolidColorBrush x:Key="MenuFlyoutPresenterBackground"            Color="{StaticResource SurfaceLayerColor}" />
+            <SolidColorBrush x:Key="MenuFlyoutPresenterBorderBrush"           Color="{StaticResource SurfaceStrokeColor}" />
+            <SolidColorBrush x:Key="FlyoutPresenterBackground"                Color="{StaticResource SurfaceLayerColor}" />
+            <SolidColorBrush x:Key="FlyoutBorderThemeBrush"                   Color="{StaticResource SurfaceStrokeColor}" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Light">
-            <!-- Surfaces, back to front. Content and Layer are both white here; the
-                 divider and the card outline carry the separation instead. -->
+
+            <!-- ═══ Values ═══ -->
+
+            <Color x:Key="HueBlue">#0F5FA6</Color>
+            <Color x:Key="HueTeal">#0E7A66</Color>
+            <Color x:Key="HueGreen">#2E7D32</Color>
+            <Color x:Key="HueAmber">#8A6D00</Color>
+            <Color x:Key="HueOrange">#A65200</Color>
+            <Color x:Key="HuePink">#B03A6E</Color>
+            <Color x:Key="HueViolet">#5B3FBB</Color>
+            <Color x:Key="HueRose">#B3261E</Color>
+            <Color x:Key="HueCyan">#1D6F8A</Color>
+            <Color x:Key="HueLime">#5C7A16</Color>
+
+            <Color x:Key="SurfaceLayerColor">#FFFFFF</Color>
+            <Color x:Key="SurfaceStrokeColor">#66757575</Color>
+
+            <Color x:Key="TextPrimaryColor">#E4000000</Color>
+            <Color x:Key="TextTertiaryColor">#72000000</Color>
+            <Color x:Key="TextQuaternaryColor">#5C000000</Color>
+
+            <Color x:Key="ControlBackgroundColor">#FFFFFF</Color>
+            <Color x:Key="ControlHoverBackgroundColor">#F6F6F6</Color>
+            <Color x:Key="ControlBorderColor">#0F000000</Color>
+            <Color x:Key="InputBackgroundColor">#FFFFFF</Color>
+
+            <!-- 45% black against a 6% outline: this is what stops a white field from
+                 disappearing into a white card. -->
+            <Color x:Key="InputLineColor">#72000000</Color>
+
+            <Color x:Key="AccentColor">#005FB8</Color>
+            <Color x:Key="AccentHoverColor">#1A6FC0</Color>
+            <Color x:Key="AccentBaseColor">#0078D4</Color>
+            <Color x:Key="OnAccentColor">#FFFFFF</Color>
+
+            <Color x:Key="ScrollThumbColor">#59000000</Color>
+
+            <!-- ═══ Roles ═══ -->
+
+            <!-- Surfaces, back to front. Content and Layer are both white here; the divider
+                 and the card outline carry the separation instead. -->
             <SolidColorBrush x:Key="SurfaceNav"                     Color="#F3F3F3" />
             <SolidColorBrush x:Key="SurfaceContent"                 Color="#FFFFFF" />
-            <SolidColorBrush x:Key="SurfaceLayer"                   Color="#FFFFFF" />
+            <SolidColorBrush x:Key="SurfaceLayer"                   Color="{StaticResource SurfaceLayerColor}" />
             <SolidColorBrush x:Key="SurfaceLayerAlt"                Color="#F9F9F9" />
 
             <!-- Text, loudest to quietest -->
-            <SolidColorBrush x:Key="TextPrimary"                    Color="#E4000000" />
+            <SolidColorBrush x:Key="TextPrimary"                    Color="{StaticResource TextPrimaryColor}" />
             <SolidColorBrush x:Key="TextSecondary"                  Color="#9B000000" />
-            <SolidColorBrush x:Key="TextTertiary"                   Color="#72000000" />
-            <SolidColorBrush x:Key="TextQuaternary"                 Color="#5C000000" />
+            <SolidColorBrush x:Key="TextTertiary"                   Color="{StaticResource TextTertiaryColor}" />
+            <SolidColorBrush x:Key="TextQuaternary"                 Color="{StaticResource TextQuaternaryColor}" />
 
             <!-- Interaction fills -->
             <SolidColorBrush x:Key="SubtleHoverBackground"          Color="#0A000000" />
             <SolidColorBrush x:Key="SubtlePressBackground"          Color="#06000000" />
             <SolidColorBrush x:Key="SubtleSelectedBackground"       Color="#14000000" />
 
-            <!-- Controls and lines -->
-            <SolidColorBrush x:Key="InputBackground"                Color="#FFFFFF" />
-            <SolidColorBrush x:Key="ControlBorderBrush"             Color="#0F000000" />
+            <!-- Lines -->
+            <SolidColorBrush x:Key="ControlBorderBrush"             Color="{StaticResource ControlBorderColor}" />
             <SolidColorBrush x:Key="DividerBrush"                   Color="#0F000000" />
 
-            <!-- Status. The foregrounds darken for contrast on white; the background
-                 tints keep the vivid hue, which is what reads as a tint over white. -->
-            <SolidColorBrush x:Key="StatusWarningForeground"        Color="#8A6D00" />
-            <SolidColorBrush x:Key="StatusWarningBackground"        Color="#33F2C94C" />
-            <SolidColorBrush x:Key="StatusErrorForeground"          Color="#B3261E" />
-            <SolidColorBrush x:Key="StatusErrorBackground"          Color="#33FF8A8A" />
+            <!-- Accent tuned for text on a normal surface -->
+            <SolidColorBrush x:Key="AccentTextBrush"                Color="#003E92" />
+
+            <!-- Status. The foregrounds darken for contrast on white; the background tints
+                 keep the hue, which is what reads as a tint over white. -->
+            <SolidColorBrush x:Key="StatusWarningForeground"        Color="#9D5D00" />
+            <SolidColorBrush x:Key="StatusWarningBackground"        Color="#1F9D5D00" />
+            <SolidColorBrush x:Key="StatusErrorForeground"          Color="#C42B1C" />
+            <SolidColorBrush x:Key="StatusErrorBackground"          Color="#1FC42B1C" />
 
             <!-- User list: status-prefix glyph colours -->
-            <SolidColorBrush x:Key="ModeOpForeground"               Color="#8A6D00" />
-            <SolidColorBrush x:Key="ModeHalfOpForeground"           Color="#1D6F8A" />
-            <SolidColorBrush x:Key="ModeVoiceForeground"            Color="#2E7D32" />
-            <SolidColorBrush x:Key="ModeRegularForeground"          Color="#5C000000" />
+            <SolidColorBrush x:Key="ModeOpForeground"               Color="{StaticResource HueAmber}" />
+            <SolidColorBrush x:Key="ModeHalfOpForeground"           Color="{StaticResource HueCyan}" />
+            <SolidColorBrush x:Key="ModeVoiceForeground"            Color="{StaticResource HueGreen}" />
+            <SolidColorBrush x:Key="ModeRegularForeground"          Color="{StaticResource TextQuaternaryColor}" />
 
             <!-- Nick colours -->
-            <SolidColorBrush x:Key="NickPalette0"                   Color="#0F5FA6" />
-            <SolidColorBrush x:Key="NickPalette1"                   Color="#0E7A66" />
-            <SolidColorBrush x:Key="NickPalette2"                   Color="#2E7D32" />
-            <SolidColorBrush x:Key="NickPalette3"                   Color="#8A6D00" />
-            <SolidColorBrush x:Key="NickPalette4"                   Color="#A65200" />
-            <SolidColorBrush x:Key="NickPalette5"                   Color="#B03A6E" />
-            <SolidColorBrush x:Key="NickPalette6"                   Color="#5B3FBB" />
-            <SolidColorBrush x:Key="NickPalette7"                   Color="#B3261E" />
-            <SolidColorBrush x:Key="NickPalette8"                   Color="#1D6F8A" />
-            <SolidColorBrush x:Key="NickPalette9"                   Color="#5C7A16" />
+            <SolidColorBrush x:Key="NickPalette0"                   Color="{StaticResource HueBlue}" />
+            <SolidColorBrush x:Key="NickPalette1"                   Color="{StaticResource HueTeal}" />
+            <SolidColorBrush x:Key="NickPalette2"                   Color="{StaticResource HueGreen}" />
+            <SolidColorBrush x:Key="NickPalette3"                   Color="{StaticResource HueAmber}" />
+            <SolidColorBrush x:Key="NickPalette4"                   Color="{StaticResource HueOrange}" />
+            <SolidColorBrush x:Key="NickPalette5"                   Color="{StaticResource HuePink}" />
+            <SolidColorBrush x:Key="NickPalette6"                   Color="{StaticResource HueViolet}" />
+            <SolidColorBrush x:Key="NickPalette7"                   Color="{StaticResource HueRose}" />
+            <SolidColorBrush x:Key="NickPalette8"                   Color="{StaticResource HueCyan}" />
+            <SolidColorBrush x:Key="NickPalette9"                   Color="{StaticResource HueLime}" />
+
+            <!-- ═══ Fluent control wiring ═══ -->
+
+            <SolidColorBrush x:Key="TextControlBackground"                    Color="{StaticResource InputBackgroundColor}" />
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver"         Color="{StaticResource ControlHoverBackgroundColor}" />
+            <SolidColorBrush x:Key="TextControlBackgroundFocused"             Color="{StaticResource InputBackgroundColor}" />
+            <SolidColorBrush x:Key="TextControlBorderBrush"                   Color="{StaticResource InputLineColor}" />
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver"        Color="{StaticResource InputLineColor}" />
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused"            Color="{StaticResource AccentColor}" />
+            <SolidColorBrush x:Key="TextControlForeground"                    Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="TextControlForegroundPointerOver"         Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="TextControlForegroundFocused"             Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="TextControlPlaceholderForeground"         Color="{StaticResource TextTertiaryColor}" />
+            <SolidColorBrush x:Key="TextControlSelectionHighlightColor"       Color="{StaticResource AccentBaseColor}" />
+
+            <SolidColorBrush x:Key="ButtonBackground"                         Color="{StaticResource ControlBackgroundColor}" />
+            <SolidColorBrush x:Key="ButtonBackgroundPointerOver"              Color="{StaticResource ControlHoverBackgroundColor}" />
+            <SolidColorBrush x:Key="ButtonBackgroundPressed"                  Color="{StaticResource ControlBackgroundColor}" />
+            <SolidColorBrush x:Key="ButtonBorderBrush"                        Color="{StaticResource ControlBorderColor}" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPointerOver"             Color="{StaticResource ControlBorderColor}" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPressed"                 Color="{StaticResource ControlBorderColor}" />
+            <SolidColorBrush x:Key="ButtonForeground"                         Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="ButtonForegroundPointerOver"              Color="{StaticResource TextPrimaryColor}" />
+            <SolidColorBrush x:Key="ButtonForegroundPressed"                  Color="{StaticResource TextPrimaryColor}" />
+
+            <SolidColorBrush x:Key="AccentButtonBackground"                   Color="{StaticResource AccentColor}" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver"        Color="{StaticResource AccentHoverColor}" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed"            Color="{StaticResource AccentBaseColor}" />
+            <SolidColorBrush x:Key="AccentButtonForeground"                   Color="{StaticResource OnAccentColor}" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver"        Color="{StaticResource OnAccentColor}" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed"            Color="{StaticResource OnAccentColor}" />
+
+            <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked"       Color="{StaticResource AccentColor}" />
+            <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="{StaticResource AccentHoverColor}" />
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked"      Color="{StaticResource OnAccentColor}" />
+            <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked"   Color="{StaticResource InputLineColor}" />
+
+            <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver"            Color="{StaticResource ScrollThumbColor}" />
+
+            <SolidColorBrush x:Key="MenuFlyoutPresenterBackground"            Color="{StaticResource SurfaceLayerColor}" />
+            <SolidColorBrush x:Key="MenuFlyoutPresenterBorderBrush"           Color="{StaticResource SurfaceStrokeColor}" />
+            <SolidColorBrush x:Key="FlyoutPresenterBackground"                Color="{StaticResource SurfaceLayerColor}" />
+            <SolidColorBrush x:Key="FlyoutBorderThemeBrush"                   Color="{StaticResource SurfaceStrokeColor}" />
         </ResourceDictionary>
 
     </ResourceDictionary.ThemeDictionaries>

@@ -25,4 +25,4 @@ the pointer skips them) and `Focusable` (so keyboard navigation does too).
 
 ## Sidebar
 
-The fixed-width navigation column on the left edge of `MainWindow`, listing servers and their channels. Clicking an entry sets `SelectedPanel` and swaps the main content area. Themed via the `Sidebar*` dynamic resources (`SidebarBackground`, `SidebarForeground`, `SidebarNavTheme`, etc.).
+The fixed-width navigation column on the left edge of `MainWindow`, listing servers and their channels. Clicking an entry sets `SelectedPanel` and swaps the main content area. It draws on `SurfaceNav` and its rows use the `SidebarNavTheme` control theme defined in `MainWindow.axaml`.

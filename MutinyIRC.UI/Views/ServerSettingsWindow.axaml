@@ -153,50 +153,34 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="URL"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Row="0" Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding SelectedNetwork.SelectedServer.Url}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding SelectedNetwork.SelectedServer.Url}"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Description"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Row="1" Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding SelectedNetwork.SelectedServer.Description}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding SelectedNetwork.SelectedServer.Description}"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Ports"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Row="2" Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding SelectedNetwork.SelectedServer.Ports}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Row="2" Grid.Column="1"
+                                 Text="{Binding SelectedNetwork.SelectedServer.Ports}"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Nick"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Row="3" Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding SelectedNetwork.SelectedServer.Nick}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Row="3" Grid.Column="1"
+                                 Text="{Binding SelectedNetwork.SelectedServer.Nick}"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
 
                         <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
                                   Content="Use SSL"
@@ -273,27 +257,19 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Name"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Row="0" Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding SelectedNetwork.SelectedChannel.Name}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding SelectedNetwork.SelectedChannel.Name}"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Key"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Row="1" Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding SelectedNetwork.SelectedChannel.Key}"
-                                     PasswordChar="•"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding SelectedNetwork.SelectedChannel.Key}"
+                                 PasswordChar="•"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
 
                         <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                   Content="Auto-join"

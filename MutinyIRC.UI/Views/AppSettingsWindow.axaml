@@ -52,38 +52,26 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Primary nick"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Row="0" Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding FirstNick}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding FirstNick}"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Secondary nick"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Row="1" Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding SecondNick}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding SecondNick}"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Tertiary nick"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Row="2" Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding ThirdNick}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Row="2" Grid.Column="1"
+                                 Text="{Binding ThirdNick}"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
                     </Grid>
                 </StackPanel>
 
@@ -113,14 +101,10 @@
                         <TextBlock Grid.Column="0" Text="Timestamp format"
                                    FontSize="12" VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"/>
-                        <Border Grid.Column="1"
-                                Background="{DynamicResource InputBackground}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="1" CornerRadius="4" Padding="4,0">
-                            <TextBox Text="{Binding LoggerTimestampFormat}"
-                                     BorderThickness="0" Background="Transparent" FontSize="13"
-                                     VerticalContentAlignment="Center"/>
-                        </Border>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding LoggerTimestampFormat}"
+                                 FontSize="13"
+                                 VerticalContentAlignment="Center"/>
                     </Grid>
                 </StackPanel>
 

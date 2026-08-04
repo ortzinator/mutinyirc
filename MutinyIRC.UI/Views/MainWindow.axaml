@@ -41,14 +41,17 @@
                     </Border>
                 </ControlTemplate>
             </Setter>
+            <!-- Order matters: the last matching setter wins, so selected outranks hover and
+                 press outranks both. Listing press before active would make the selected item
+                 the one nav item that gives no feedback when you click it. -->
             <Style Selector="^:pointerover /template/ Border#PART_Border">
                 <Setter Property="Background" Value="{DynamicResource SubtleHoverBackground}"/>
             </Style>
-            <Style Selector="^:pressed /template/ Border#PART_Border">
-                <Setter Property="Background" Value="{DynamicResource SubtlePressBackground}"/>
-            </Style>
             <Style Selector="^.active /template/ Border#PART_Border">
                 <Setter Property="Background" Value="{DynamicResource SubtleSelectedBackground}"/>
+            </Style>
+            <Style Selector="^:pressed /template/ Border#PART_Border">
+                <Setter Property="Background" Value="{DynamicResource SubtlePressBackground}"/>
             </Style>
             <Style Selector="^:pointerover">
                 <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>

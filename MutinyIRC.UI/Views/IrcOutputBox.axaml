@@ -7,13 +7,18 @@
              x:Name="root">
 
     <DockPanel>
+        <!-- Jump-to-bottom strip. It only has one surface step to work with in light mode,
+             where content and layer are both white, so the accent text is what makes it
+             read as something you can click. -->
         <Border DockPanel.Dock="Bottom"
                 IsVisible="{Binding ElementName=root, Path=Scrolled}"
                 Background="{DynamicResource SurfaceLayerAlt}"
+                BorderBrush="{DynamicResource DividerBrush}"
+                BorderThickness="0,1,0,0"
                 Cursor="Hand"
                 PointerPressed="ScrollIndicator_PointerPressed">
             <TextBlock HorizontalAlignment="Center"
-                       Foreground="{DynamicResource TextSecondary}"
+                       Foreground="{DynamicResource AccentTextBrush}"
                        FontSize="8">▼ ▼</TextBlock>
         </Border>
         <ScrollViewer x:Name="scrollViewer" Background="{DynamicResource SurfaceContent}">
