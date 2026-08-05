@@ -12,10 +12,11 @@ namespace MutinyIRC.UI.Tests.Views;
 
 /// <summary>
 /// Verifies the user-list right-click context menu in ChannelView. Every menu item binds to one
-/// <c>UserCommand</c> and passes its IRC verb as the parameter, while the target user comes from the
-/// ListBox's two-way <c>SelectedItem</c> binding. These tests guard both halves: that selecting a row
-/// populates <c>SelectedUser</c>, and that each item carries the exact verb it is supposed to run —
-/// the strings most likely to break with a typo (e.g. <c>/mode +o</c>, <c>/ban -k</c>).
+/// <c>UserCommand</c> and passes its IRC verb as the parameter, so these tests guard that each item
+/// carries the exact verb it is supposed to run — the strings most likely to break with a typo
+/// (e.g. <c>/mode +o</c>, <c>/ban -k</c>). How the menu's target user is arrived at is covered
+/// elsewhere: the <c>SelectedItem</c> binding in <see cref="UserListSelectedUserTests" />, and the
+/// projection onto <c>SelectedUser</c> in <c>ChannelViewModelTests</c>.
 /// </summary>
 [TestFixture]
 public class UserListContextMenuTests
@@ -62,15 +63,6 @@ public class UserListContextMenuTests
 
     private static MenuItem ItemNamed(ContextMenu menu, string header) =>
         menu.GetLogicalDescendants().OfType<MenuItem>().First(m => (string?)m.Header == header);
-
-    [AvaloniaTest]
-    public void SelectingRow_PopulatesSelectedUser()
-    {
-        var (stub, _, user) = OpenMenuForSelectedUser();
-
-        Assert.That(stub.SelectedUser, Is.SameAs(user),
-            "ListBox SelectedItem must flow into the view model's SelectedUser");
-    }
 
     [AvaloniaTest]
     public void EveryMenuItem_BindsUserCommandAndCarriesItsVerb(

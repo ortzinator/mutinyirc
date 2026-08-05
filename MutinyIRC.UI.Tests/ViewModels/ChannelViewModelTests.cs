@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FakeItEasy;
 using FlamingIRC;
 using NUnit.Framework;
@@ -124,5 +125,50 @@ public class ChannelViewModelTests
 
         Assert.That(closeRequested, Is.False,
             "Dispose must detach the subscription so a disposed panel stops reacting.");
+    }
+
+    // ── Selection ──
+    // The user list is one flat list of IUserListRow, so its selection can be a heading as well as
+    // a user. SelectedRow holds whichever; SelectedUser projects it with a type test. The projection
+    // is what stops a heading from reaching the context menu's Kick and Ban, so it is pinned here
+    // against the real view model rather than through a view test's stub DataContext.
+
+    [Test]
+    public void SelectedRow_OnAUser_FlowsIntoSelectedUser()
+    {
+        var user = new UserViewModel(_alice);
+
+        _vm.SelectedRow = user;
+
+        Assert.That(_vm.SelectedUser, Is.SameAs(user));
+    }
+
+    [Test]
+    public void SelectedRow_MovingFromAUserToAHeading_LeavesSelectedUserNull()
+    {
+        var user = new UserViewModel(_alice);
+        _vm.SelectedRow = user;
+        // Read it here as well as after. The regression this guards against is SelectedUser holding
+        // on to a value, so the test has to observe the populated state before moving off it.
+        Assert.That(_vm.SelectedUser, Is.SameAs(user), "Baseline: a user row selects normally");
+
+        _vm.SelectedRow = new UserGroupHeaderViewModel("Operators", 1);
+
+        Assert.That(_vm.SelectedUser, Is.Null,
+            "SelectedUser must not keep pointing at alice once the selection has moved off her row " +
+            "— the right-click menu would then kick or ban a user the list no longer has selected.");
+    }
+
+    [Test]
+    public void SelectedRow_MovingToAHeading_RaisesSelectedUserChanged()
+    {
+        _vm.SelectedRow = new UserViewModel(_alice);
+
+        var changed = new List<string?>();
+        _vm.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+        _vm.SelectedRow = new UserGroupHeaderViewModel("Operators", 1);
+
+        Assert.That(changed, Does.Contain(nameof(ChannelViewModel.SelectedUser)),
+            "SelectedUser is derived from SelectedRow, so it must announce its own change.");
     }
 }

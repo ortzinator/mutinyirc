@@ -21,9 +21,10 @@ sole member `IsSelectable` is the only thing the item container binds to — the
 per-type `DataTemplate`. One flat list rather than nested collections is what lets a single
 `ListBox` own selection and the right-click menu across the whole list; headings stay inert by
 reporting `IsSelectable == false`, which `ChannelView.axaml` binds to both `IsHitTestVisible` (so
-the pointer skips them) and `Focusable` (so keyboard navigation does too). `ListBox.SelectedItem` is
-still typed `object`, so `ChannelView` clears any heading that reaches it back out — otherwise the
-`UserViewModel?`-typed `SelectedUser` would quietly hold on to whoever was selected before.
+the pointer skips them) and `Focusable` (so keyboard navigation does too). The list binds its
+selection to `SelectedRow`, typed `IUserListRow?` so it can hold either kind; `SelectedUser` is
+derived from it with a type test, which is what keeps a heading from ever reaching the context
+menu's Kick and Ban.
 
 ## Sidebar
 

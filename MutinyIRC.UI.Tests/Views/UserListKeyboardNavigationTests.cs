@@ -16,9 +16,10 @@ namespace MutinyIRC.UI.Tests.Views;
 /// The user list is one flat ListBox holding group headers as well as users, so keyboard
 /// navigation could walk onto a heading. It doesn't: headers report
 /// <see cref="IUserListRow.IsSelectable" /> false, ChannelView binds <c>Focusable</c> to that, and
-/// Avalonia's own selection movement steps over anything non-focusable. That behaviour is
-/// load-bearing — <c>SelectedUser</c> is typed <c>UserViewModel?</c> and cannot hold a header — but
-/// it is entirely implicit in a XAML setter, so these tests pin it.
+/// Avalonia's own selection movement steps over anything non-focusable. That behaviour is what keeps
+/// a heading from ever looking selected, and it is entirely implicit in a XAML setter, so these
+/// tests pin it. <see cref="UserListSelectedUserTests" /> covers the other half: that the selection
+/// binding carries a heading intact if one ever does reach it.
 /// </summary>
 [TestFixture]
 public class UserListKeyboardNavigationTests
@@ -79,8 +80,8 @@ public class UserListKeyboardNavigationTests
             "Arrow-down from @op2 must land on plain1, not on the MEMBERS heading between them");
         Assert.That(selections, Has.None.InstanceOf<UserGroupHeaderViewModel>(),
             "A heading must never become the selection, even in passing");
-        Assert.That(stub.SelectedUser?.Nick, Is.EqualTo("plain1"),
-            "The walk must leave SelectedUser populated, not nulled by the header guard");
+        Assert.That((stub.SelectedRow as UserViewModel)?.Nick, Is.EqualTo("plain1"),
+            "The walk must land on a user row, not a heading");
     }
 
     [AvaloniaTest]
@@ -93,7 +94,7 @@ public class UserListKeyboardNavigationTests
 
         Assert.That((listBox.SelectedItem as UserViewModel)?.Nick, Is.EqualTo("op1"),
             "Home must reach the first user, not the OPERATORS heading that precedes it");
-        Assert.That(stub.SelectedUser?.Nick, Is.EqualTo("op1"));
+        Assert.That((stub.SelectedRow as UserViewModel)?.Nick, Is.EqualTo("op1"));
     }
 
     [AvaloniaTest]

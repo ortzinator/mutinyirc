@@ -228,12 +228,27 @@ public class ChannelViewModel : IrcViewModel
     // first). Each menu item binds to this one command and passes its IRC verb as the parameter,
     // routing through the same dispatcher as typed commands so behaviour stays identical.
 
-    private UserViewModel? _selectedUser;
-    public UserViewModel? SelectedUser
+    /// <summary>
+    /// The user list's selected row. Typed as the row rather than the user because the list holds
+    /// headings too: a <c>UserViewModel</c>-typed property bound to <c>SelectedItem</c> would fail
+    /// the write on a heading without complaining and leave the previous user in place.
+    /// </summary>
+    private IUserListRow? _selectedRow;
+    public IUserListRow? SelectedRow
     {
-        get => _selectedUser;
-        set => SetProperty(ref _selectedUser, value);
+        get => _selectedRow;
+        set
+        {
+            if (SetProperty(ref _selectedRow, value))
+                OnPropertyChanged(nameof(SelectedUser));
+        }
     }
+
+    /// <summary>
+    /// The selected row when it is a user, null when it is a heading or nothing. Derived rather than
+    /// stored, so it can never lag behind the selection — the context menu's Kick and Ban read it.
+    /// </summary>
+    public UserViewModel? SelectedUser => _selectedRow as UserViewModel;
 
     private RelayCommand<string>? _userCommand;
     public System.Windows.Input.ICommand UserCommand => _userCommand ??= new RelayCommand<string>(RunUserCommand);

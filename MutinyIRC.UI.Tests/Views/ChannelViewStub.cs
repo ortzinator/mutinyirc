@@ -24,11 +24,17 @@ internal sealed class ChannelViewStub : ObservableObject
     public string UserFilter { get; set; } = string.Empty;
     public string UserFilterWatermark => $"Filter {UserList.Count} members";
 
-    private UserViewModel? _selectedUser;
-    public UserViewModel? SelectedUser
+    /// <summary>
+    /// What the ListBox's SelectedItem binds to. Deliberately the only selection member here: the
+    /// real view model also projects a <c>SelectedUser</c> off this, but that projection is
+    /// production logic and is tested against <c>ChannelViewModel</c> itself. Copying it here would
+    /// let a view test assert green against the copy while the real one was broken.
+    /// </summary>
+    private IUserListRow? _selectedRow;
+    public IUserListRow? SelectedRow
     {
-        get => _selectedUser;
-        set => SetProperty(ref _selectedUser, value);
+        get => _selectedRow;
+        set => SetProperty(ref _selectedRow, value);
     }
 
     public string? LastInvokedVerb { get; private set; }

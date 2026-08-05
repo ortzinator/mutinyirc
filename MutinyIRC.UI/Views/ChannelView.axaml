@@ -112,7 +112,7 @@
                     <!-- Roster -->
                     <ListBox x:Name="userBox"
                              ItemsSource="{Binding UserRows}"
-                             SelectedItem="{Binding SelectedUser}"
+                             SelectedItem="{Binding SelectedRow}"
                              Background="Transparent"
                              BorderThickness="0"
                              Padding="8,0,8,12">
