@@ -4,7 +4,12 @@ using MutinyIRC.Common;
 
 namespace MutinyIRC.UI;
 
-public class NetworkSettings : IEquatable<NetworkSettings>
+/// <remarks>
+/// A network is identified by its entry points, not by its name, and the server can change the
+/// name on any connect. Thus this type keeps reference identity: one instance is one network.
+/// To find the network for a host, use <see cref="IrcSettingsManager.GetNetwork(Server)"/>.
+/// </remarks>
+public class NetworkSettings
 {
     public NetworkSettings(string name)
     {
@@ -39,11 +44,6 @@ public class NetworkSettings : IEquatable<NetworkSettings>
         var server = new ServerSettings();
         AddServer(server);
         return server;
-    }
-
-    public bool Equals(NetworkSettings? other)
-    {
-        return other != null && other.Name == Name;
     }
 
     public override string ToString() => Name;

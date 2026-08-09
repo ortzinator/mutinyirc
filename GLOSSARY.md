@@ -36,8 +36,10 @@ for it.
 
 A network is identified by its set of entry points, not by its name. The name is whatever the server
 reports in the `NETWORK` token of its `005` reply (`Connection.ServerProperties["Network"]`), so it can
-change on any connect and two networks may briefly carry the same one. `NetworkSettings.Equals` compares
-names only, which contradicts this.
+change on any connect and two networks may briefly carry the same one. `NetworkSettings` therefore has no
+value equality: one instance is one network, and you find a network by entry point with
+`IrcSettingsManager.GetNetwork(Server)`. The name is only how a host that reports a known name finds the
+network it belongs to — see `NetworkSettingsList.GetOrAddNetwork`.
 
 No runtime type represents a network yet. A `Server` panel stands in for one, and `ServerViewModel.DoRegister`
 writes the network back to settings as a side effect of registering.

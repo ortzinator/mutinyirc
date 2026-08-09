@@ -20,10 +20,9 @@ See `GLOSSARY.md` for the definitions of network, connection, and entry point.
 channels are already saved against the network rather than the host, so the config and the runtime graph
 contradicted each other, and nothing could survive a reconnect.
 
-**Identify a network by its name.** The obvious reading, and what `NetworkSettings.Equals` does today.
-Rejected because the server owns the name: connect to a network you saved as "Libera Chat", let the server
-report `Libera`, and it becomes indistinguishable from a network you already had. Identity that a remote
-party can change is not identity.
+**Identify a network by its name.** The obvious reading. Rejected because the server owns the name:
+connect to a network you saved as "Libera Chat", let the server report `Libera`, and it becomes
+indistinguishable from a network you already had. Identity that a remote party can change is not identity.
 
 **Let a network hold several connections at once.** Today's accidental behaviour — two hosts of one network
 give two connections that autojoin the same channel list. Rejected because it makes "the channels of a
@@ -38,6 +37,11 @@ matching an existing network donates its entry point to that network rather than
 A hostname belongs to at most one network. This is now definitional, which is what lets
 `IrcSettingsManager.GetNetwork(Server)` scan every network's hosts and stop at the first URL match.
 
-`NetworkSettings.Equals` compares names and contradicts this decision. `MutinyIRC.Common.Server` models a
-connection, not an entry point or a network, and its name is the source of the confusion this decision
-resolves.
+"Identified by its entry points" describes lookup, not `Equals`. A `NetworkSettings` instance *is* a
+network, so it keeps reference identity: `IrcSettingsManager.RemoveNetwork` deletes the network you hand
+it, and `NetworkSettingsList.GetOrAddNetwork` merges by reported name at the one point where merging is
+what the model asks for. Set equality over entry points would instead make every network with no entry
+point equal to every other, which is exactly the state a network is in at the moment it is minted.
+
+`MutinyIRC.Common.Server` models a connection, not an entry point or a network, and its name is the source
+of the confusion this decision resolves.

@@ -39,17 +39,11 @@ public sealed class IrcSettingsManager
         }
     }
 
-    public NetworkSettings? AddNetwork(string networkName) => Networks.AddNetwork(networkName);
+    public NetworkSettings GetOrAddNetwork(string networkName) => Networks.GetOrAddNetwork(networkName);
 
     public bool RemoveNetwork(NetworkSettings network) => Networks.Remove(network);
 
-    public NetworkSettings? GetNetwork(string name)
-    {
-        foreach (NetworkSettings network in Networks)
-            if (network.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                return network;
-        return null;
-    }
+    public NetworkSettings? GetNetwork(string name) => Networks.GetNetwork(name);
 
     public void Save()
     {

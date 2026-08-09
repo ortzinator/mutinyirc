@@ -244,18 +244,18 @@ public class ServerViewModel : IrcViewModel
 
         if (networkSettings == null)
         {
-            NetworkSettings? tempNet;
+            NetworkSettings tempNet;
             if (network == string.Empty)
             {
-                tempNet = IrcSettingsManager.Instance.AddNetwork(_server.Url);
+                tempNet = IrcSettingsManager.Instance.GetOrAddNetwork(_server.Url);
                 network = "Network";
             }
             else
             {
-                tempNet = IrcSettingsManager.Instance.AddNetwork(network);
+                tempNet = IrcSettingsManager.Instance.GetOrAddNetwork(network);
             }
 
-            tempNet?.AddServer(new ServerSettings(_server.Url, "Random", _server.Port.ToString(),
+            tempNet.AddServer(new ServerSettings(_server.Url, "Random", _server.Port.ToString(),
                     _server.Connection.ConnectionData.Ssl)
             { AutoConnect = true });
         }
