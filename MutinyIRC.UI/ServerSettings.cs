@@ -33,7 +33,8 @@ public class ServerSettings : IEquatable<ServerSettings>
             var list = PortList;
             if (list == null || list.Length == 0)
                 throw new InvalidOperationException("No ports configured.");
-            return list[new Random().Next(0, list.Length - 1)];
+            // The upper bound is exclusive, so it is the length, not the last index.
+            return list[new Random().Next(0, list.Length)];
         }
     }
 

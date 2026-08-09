@@ -26,8 +26,11 @@ public class NetworkSettings
 
     public ServerSettings GetRandomServer()
     {
-        var rand = new Random();
-        return Servers[rand.Next(Servers.Count - 1)];
+        if (Servers.Count == 0)
+            throw new InvalidOperationException("No entry points configured.");
+
+        // The upper bound is exclusive, so it is the count, not the last index.
+        return Servers[new Random().Next(Servers.Count)];
     }
 
     public void AddServer(ServerSettings server)
