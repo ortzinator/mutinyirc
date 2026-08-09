@@ -8,9 +8,53 @@ The `nick!user@host` pattern a channel ban (mode `+b`) matches against; any comp
 wildcard, so `*!*@dsl.example.net` bans a whole host. `Channel.ResolveBanMask` turns a plain nick
 into one of these by looking the user up in the channel's `UserList`, defaulting to `*!*@host`.
 
+## Connection
+
+One live socket to one [entry point](#entry-point), plus the session state that rides on it: registration,
+the nick you actually got, and the channels you are in. Modeled by `MutinyIRC.Common.Server`, whose name
+predates the network model and does not mean the same thing as `ServerSettings`. A connection is a
+replaceable part inside a [network](#network), not something you name or save: when one drops and the
+network dials a different entry point, the network, its channels, and their panels stay. `ServerManager`
+holds the live ones — and still calls a `Server` parameter `ntw` in `Remove`, a fossil of the same drift.
+
+## Entry point
+
+One host you may dial to reach a [network](#network): a hostname, a set of candidate ports, and a TLS flag.
+Saved as `ServerSettings`; `NetworkSettings.GetRandomServer` and `ServerSettings.RandomPort` pick between
+the alternatives, because the entry points of a network are interchangeable. A hostname belongs to at most
+one network. That is what makes `IrcSettingsManager.GetNetwork(Server)` able to scan every network's hosts
+for a URL match and stop at the first hit. "Server" in the settings window means entry point; "server" in
+`MutinyIRC.Common` means connection.
+
+## Network
+
+The thing you connect to — "Libera", not `irc.libera.chat`. A network owns its entry points, its channels
+(which is why the autojoin list hangs off `NetworkSettings` and not off a host), and at most one live
+[connection](#connection) at a time. Saved as `NetworkSettings`; `IrcSettingsManager` holds them all. Every
+connection belongs to exactly one network, so dialing a host that no saved network lists mints a network
+for it.
+
+A network is identified by its set of entry points, not by its name. The name is whatever the server
+reports in the `NETWORK` token of its `005` reply (`Connection.ServerProperties["Network"]`), so it can
+change on any connect and two networks may briefly carry the same one. `NetworkSettings.Equals` compares
+names only, which contradicts this.
+
+No runtime type represents a network yet. A `Server` panel stands in for one, and `ServerViewModel.DoRegister`
+writes the network back to settings as a side effect of registering.
+
 ## Panel
 
-The content view for a single server or channel — what fills the main area when an entry is clicked in the sidebar. Modeled in code as `IrcViewModel` (base class), with `ServerViewModel` and `ChannelViewModel` as the concrete kinds. `MainViewModel` owns the `Panels` collection and tracks `SelectedPanel`.
+The content view for one place you can read and talk — what fills the main area when an entry is clicked in
+the [sidebar](#sidebar). Modeled as `IrcViewModel`, with three concrete kinds: `ServerViewModel` (the
+console for a [connection](#connection)), `ChannelViewModel`, and `PrivateMessageViewModel`. What makes a
+panel a panel is what `IrcViewModel` supplies to all three: a `ChatLines` collection, an `OwningServer`,
+`CompletionCandidates` for Tab completion in the input box, and `IsSelected` and `HasUnread` for how the
+sidebar draws its entry.
+
+`MainViewModel` owns `Panels`, a flat collection of every open panel, and tracks `SelectedPanel`. The
+sidebar does not bind to that collection: it binds to `MainViewModel.Servers` and nests each server's
+`Channels` and `PrivateMessages` under it, so a channel or private-message panel is held in two places at
+once — flat for selection, nested for display.
 
 ## Row list (user list)
 
@@ -28,4 +72,12 @@ menu's Kick and Ban.
 
 ## Sidebar
 
-The fixed-width navigation column on the left edge of `MainWindow`, listing servers and their channels. Clicking an entry sets `SelectedPanel` and swaps the main content area. It draws on `SurfaceNav` and its rows use the `SidebarNavTheme` control theme defined in `MainWindow.axaml`.
+The navigation column down the left edge of `MainWindow`: a 48px strip at the top that the platform treats
+as the window's title bar and that holds the settings button, and under it the tree of servers, each with
+its channels and its private messages nested beneath. Clicking any entry runs `SelectPanelCommand`, which
+sets `SelectedPanel` and swaps the main content area; a private-message row also carries a close button
+that fades in on hover.
+
+The column starts at 220px and you may drag it between 150 and 500 with the `GridSplitter` that sits in the
+next grid column. It draws on `SurfaceNav`, and its rows use the `SidebarNavTheme` control theme defined in
+`MainWindow.axaml`.
