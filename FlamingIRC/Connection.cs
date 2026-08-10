@@ -76,6 +76,9 @@ public class Connection : TcpTextClient, IConnection
         _parsers = new ArrayList();
         _sender = new Sender(this);
         Listener = new Listener();
+        // Connect() replaces this per session. Creating it here too means a '005' arriving on a
+        // Connection that has not dialled yet is recorded rather than throwing in OnReply.
+        ServerProperties = new ServerProperties();
         RegisterDelegates();
         _timeLastSent = DateTime.Now;
         EnableCtcp = enableCtcp;
@@ -242,7 +245,9 @@ public class Connection : TcpTextClient, IConnection
     /// A read-only collection of string key/value pairs representing IRC server proprties.
     /// </summary>
     /// <value>
-    /// This connection's ServerProperties object is null if it has not been created.
+    /// Never null. Empty until the server sends its '005' reply, and replaced with a fresh
+    /// empty set on every <see cref="Connect()"/> so one session cannot read the last one's
+    /// properties.
     /// </value>
     public ServerProperties ServerProperties { get; private set; }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 
 namespace FlamingIRC;
 
@@ -8,25 +9,24 @@ namespace FlamingIRC;
 /// </summary>
 /// <remarks>See the server_properties.pdf file for a list of comon properties.</remarks>
 /// <example><code>
-/// //This will only be non null if the connection has already received
-/// //a '005' reply and that such a reply is actually sent by the server.
-/// //This will happen right after registration.
+/// //A Connection always has one. It is empty until the server sends a '005' reply,
+/// //which it does right after registration, and a server need not send one at all.
 /// //Instances are only retrieved from a Connection and not instantiated directly.
 /// ServerProperties properties = connection.ServerProperties;
-/// //It should always be tested for null
-/// if( properties != null ) {
+/// //An absent property reads as an empty string, so no null test is needed.
 /// Console.Writeline("NICKLEN is" + properties["NICKLEN"] );
-/// }
 /// //Only a handful of properties will ever be available.
 /// </code></example>
 public sealed class ServerProperties
 {
+    // The server sends every token uppercase, but callers ask for them in the case they read
+    // best ("Network"). Comparison is ordinal because these are protocol tokens, not prose.
     private readonly Hashtable properties;
 
     /// <summary>
     /// Instances should only be created by the Connection class.
     /// </summary>
-    internal ServerProperties() => properties = new Hashtable();
+    internal ServerProperties() => properties = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Read-only indexer for the various server
@@ -49,10 +49,10 @@ public sealed class ServerProperties
     }
 
     /// <summary>
-    /// Add a property retrieved from the IRC
-    /// server.
+    /// Add a property retrieved from the IRC server. A server may split its properties over
+    /// several '005' replies and repeat a token, so a later value replaces an earlier one.
     /// </summary>
-    internal void SetProperty(string key, string propertyValue) => properties.Add(key, propertyValue);
+    internal void SetProperty(string key, string propertyValue) => properties[key] = propertyValue;
 
     /// <summary>
     /// Get a read-only enumeration of all the elements
