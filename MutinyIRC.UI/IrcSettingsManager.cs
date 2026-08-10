@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MutinyIRC.Common;
@@ -41,10 +42,6 @@ public sealed class IrcSettingsManager
 
     public NetworkSettings GetOrAddNetwork(string networkName) => Networks.GetOrAddNetwork(networkName);
 
-    public bool RemoveNetwork(NetworkSettings network) => Networks.Remove(network);
-
-    public NetworkSettings? GetNetwork(string name) => Networks.GetNetwork(name);
-
     public void Save()
     {
         try
@@ -78,13 +75,13 @@ public sealed class IrcSettingsManager
                 return;
             }
 
-            Networks = new NetworkSettingsList();
+            // Network is [JsonIgnore], so the back-reference every host-to-network lookup relies
+            // on has to be rebuilt after deserializing.
             foreach (var network in networks)
-            {
                 foreach (var server in network.Servers)
                     server.Network = network;
-                Networks.Add(network);
-            }
+
+            Networks.ReplaceAll(networks);
         }
         catch (Exception ex)
         {
@@ -96,11 +93,10 @@ public sealed class IrcSettingsManager
 
     private void LoadDefaults()
     {
-        Networks = new NetworkSettingsList();
         var net = new NetworkSettings("Libera");
         net.AddServer(new ServerSettings("irc.libera.chat", "Libera", "6667", false));
         net.AddChannel(new ChannelSettings("#MutinyIRC", true));
-        Networks.Add(net);
+        Networks.ReplaceAll(new[] { net });
     }
 
     public List<ServerSettings> GetAutoConnectServers()
@@ -113,14 +109,11 @@ public sealed class IrcSettingsManager
         return tmp;
     }
 
-    public NetworkSettings? GetNetwork(Server server)
-    {
-        foreach (NetworkSettings networkSettings in Networks)
-            foreach (ServerSettings serverSettings in networkSettings.Servers)
-                if (server.Url == serverSettings.Url)
-                    return networkSettings;
-        return null;
-    }
+    /// <summary>
+    /// Finds the saved network a connection belongs to. A hostname belongs to at most one
+    /// network, so the first entry point that matches settles it.
+    /// </summary>
+    public NetworkSettings? GetNetwork(Server server) => GetServer(server)?.Network;
 
     public void DisableAutoConnect(Server server)
     {
@@ -129,12 +122,8 @@ public sealed class IrcSettingsManager
             settings.AutoConnect = false;
     }
 
-    private ServerSettings? GetServer(Server server)
-    {
-        foreach (NetworkSettings networkSettings in Networks)
-            foreach (ServerSettings serverSettings in networkSettings.Servers)
-                if (server.Url == serverSettings.Url)
-                    return serverSettings;
-        return null;
-    }
+    private ServerSettings? GetServer(Server server) =>
+        Networks.SelectMany(network => network.Servers)
+                .FirstOrDefault(entryPoint =>
+                    entryPoint.Url.Equals(server.Url, StringComparison.OrdinalIgnoreCase));
 }

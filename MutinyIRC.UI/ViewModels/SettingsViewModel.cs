@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -46,9 +47,9 @@ public partial class SettingsViewModel : ObservableObject
 
     public void Save()
     {
-        IrcSettingsManager.Instance.Networks.Clear();
-        foreach (var vm in Networks)
-            IrcSettingsManager.Instance.Networks.Add(vm.ToModel());
+        // One swap rather than a clear-then-refill, so the settings are never momentarily empty
+        // and ReplaceAll gets to hold the one-network-per-hostname rule over the whole set.
+        IrcSettingsManager.Instance.Networks.ReplaceAll(Networks.Select(vm => vm.ToModel()));
         IrcSettingsManager.Instance.Save();
     }
 }

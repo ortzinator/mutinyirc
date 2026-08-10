@@ -34,14 +34,21 @@ Every connection belongs to exactly one network, so dialing a host that no saved
 Lookup is by entry point and merging is by reported name: an ad-hoc network whose server reports a name
 matching an existing network donates its entry point to that network rather than standing alone.
 
-A hostname belongs to at most one network. This is now definitional, which is what lets
-`IrcSettingsManager.GetNetwork(Server)` scan every network's hosts and stop at the first URL match.
+A hostname belongs to at most one network. This is what lets `IrcSettingsManager.GetNetwork(Server)` stop
+at the first host that matches. `NetworkSettingsList` enforces it rather than assuming it: it exposes no
+general `Add`, and `ReplaceAll` — the only way to fill it, used by both the loader and the settings
+window — drops a host a earlier network already claims. A duplicate host was unreachable anyway, so
+dropping it makes the saved state agree with what lookup does.
 
 "Identified by its entry points" describes lookup, not `Equals`. A `NetworkSettings` instance *is* a
-network, so it keeps reference identity: `IrcSettingsManager.RemoveNetwork` deletes the network you hand
-it, and `NetworkSettingsList.GetOrAddNetwork` merges by reported name at the one point where merging is
-what the model asks for. Set equality over entry points would instead make every network with no entry
-point equal to every other, which is exactly the state a network is in at the moment it is minted.
+network, so it keeps reference identity: `NetworkSettingsList.Remove` deletes the network you hand it
+rather than one that merely shares its name, and `GetOrAddNetwork` merges by reported name at the one
+point where merging is what the model asks for. Set equality over entry points would instead make every
+network with no entry point equal to every other, which is exactly the state a network is in at the
+moment it is minted.
+
+`ServerViewModel.ResolveNetwork` is where the two rules meet: entry point first, reported name as the
+fallback that mints or merges.
 
 `MutinyIRC.Common.Server` models a connection, not an entry point or a network, and its name is the source
 of the confusion this decision resolves.

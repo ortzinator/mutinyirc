@@ -11,18 +11,27 @@ namespace MutinyIRC.UI;
 /// </remarks>
 public class NetworkSettings
 {
-    public NetworkSettings(string name)
-    {
-        Name = name;
-        Servers = new List<ServerSettings>();
-        Channels = new List<ChannelSettings>();
-    }
+    public NetworkSettings(string name) => Name = name;
 
     public NetworkSettings() : this("") { }
 
     public string Name { get; set; }
-    public List<ServerSettings> Servers { get; set; }
-    public List<ChannelSettings> Channels { get; set; }
+
+    // A servers.json with "Servers": null would otherwise overwrite the list with null and make
+    // every reader null-check it. Absent means empty, so say that once, here.
+    private List<ServerSettings> _servers = new();
+    public List<ServerSettings> Servers
+    {
+        get => _servers;
+        set => _servers = value ?? new List<ServerSettings>();
+    }
+
+    private List<ChannelSettings> _channels = new();
+    public List<ChannelSettings> Channels
+    {
+        get => _channels;
+        set => _channels = value ?? new List<ChannelSettings>();
+    }
 
     public ServerSettings GetRandomServer()
     {

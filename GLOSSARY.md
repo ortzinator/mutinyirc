@@ -42,7 +42,8 @@ value equality: one instance is one network, and you find a network by entry poi
 network it belongs to — see `NetworkSettingsList.GetOrAddNetwork`.
 
 No runtime type represents a network yet. A `Server` panel stands in for one, and `ServerViewModel.DoRegister`
-writes the network back to settings as a side effect of registering.
+writes the network back to settings as a side effect of registering, resolving it through
+`ServerViewModel.ResolveNetwork`.
 
 ## Panel
 

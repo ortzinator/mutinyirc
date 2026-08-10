@@ -237,49 +237,26 @@ public class ServerViewModel : IrcViewModel
         AddIncoming(new ChatItemViewModel(DateTime.Now, message));
     }
 
+    /// <summary>
+    /// Files this connection under the network it belongs to, then joins that network's autojoin
+    /// channels. Runs on every registration, so it also picks up a network the server has renamed
+    /// and an entry point we reached for the first time.
+    /// </summary>
     private void DoRegister()
     {
-        string network = _server.Connection.ServerProperties["Network"];
-        NetworkSettings? networkSettings = IrcSettingsManager.Instance.GetNetwork(_server);
+        NetworkSettings network = ResolveNetwork();
 
-        if (networkSettings == null)
-        {
-            NetworkSettings tempNet;
-            if (network == string.Empty)
-            {
-                tempNet = IrcSettingsManager.Instance.GetOrAddNetwork(_server.Url);
-                network = "Network";
-            }
-            else
-            {
-                tempNet = IrcSettingsManager.Instance.GetOrAddNetwork(network);
-            }
-
-            tempNet.AddServer(new ServerSettings(_server.Url, "Random", _server.Port.ToString(),
-                    _server.Connection.ConnectionData.Ssl)
-            { AutoConnect = true });
-        }
-        else
-        {
-            if (network == string.Empty)
-                network = networkSettings.Name;
-            else
-                networkSettings.Name = network;
-
-            ServerSettings? nServer = networkSettings.GetServer(_server.Url);
-            if (nServer == null)
-            {
-                networkSettings.AddServer(new ServerSettings(_server.Url, "Random", _server.Port.ToString(),
-                    _server.Connection.ConnectionData.Ssl)
-                { AutoConnect = true });
-            }
-        }
+        // AddServer keys on the URL and ignores a host the network already lists, so this both
+        // donates a new entry point and leaves a known one alone.
+        network.AddServer(new ServerSettings(_server.Url, "Random", _server.Port.ToString(),
+            _server.Connection.ConnectionData.Ssl)
+        { AutoConnect = true });
 
         Name = ServerStrings.ServerFormTitleBar.With(
-                _server.UserNick,
-                network,
-                _server.Url,
-                _server.Port);
+            _server.UserNick,
+            network.Name,
+            _server.Url,
+            _server.Port);
 
         if (_nickRetryFailed)
             AddMessage(ServerStrings.RandomNickMessage);
@@ -287,12 +264,35 @@ public class ServerViewModel : IrcViewModel
         _nickRetryAttempt = 0;
         _nickRetryFailed = false;
 
-        if (networkSettings == null || networkSettings.Channels == null) return;
-        foreach (ChannelSettings channel in networkSettings.Channels)
+        foreach (ChannelSettings channel in network.Channels)
         {
             if (channel.AutoJoin)
                 _server.JoinChannel(channel.Name, channel.Key ?? string.Empty);
         }
+    }
+
+    /// <summary>
+    /// Finds the saved network this connection belongs to, minting one if it belongs to none.
+    /// </summary>
+    /// <remarks>
+    /// The entry point identifies the network, so a saved host wins outright. Otherwise the name
+    /// the server reports is the only link we have, and a host that reports a known name joins
+    /// that network instead of standing up a duplicate. A server that reports no name leaves the
+    /// host as the sole thing to name the network after.
+    /// </remarks>
+    private NetworkSettings ResolveNetwork()
+    {
+        string reportedName = _server.Connection.ServerProperties["Network"];
+
+        NetworkSettings network = IrcSettingsManager.Instance.GetNetwork(_server)
+            ?? IrcSettingsManager.Instance.GetOrAddNetwork(
+                   reportedName == string.Empty ? _server.Url : reportedName);
+
+        // The server owns the name and may change it on any connect.
+        if (reportedName != string.Empty)
+            network.Name = reportedName;
+
+        return network;
     }
 
     private void Server_WhoisReceived(object? sender, Common.DataEventArgs<WhoisInfo> e)

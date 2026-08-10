@@ -17,7 +17,7 @@ public class NetworkSettingsListTests
     private static NetworkSettingsList BuildList(params NetworkSettings[] networks)
     {
         var list = new NetworkSettingsList();
-        list.AddRange(networks);
+        list.ReplaceAll(networks);
         return list;
     }
 
@@ -163,5 +163,62 @@ public class NetworkSettingsListTests
         var list = BuildList(first, second);
 
         Assert.That(list.GetNetwork("Libera"), Is.SameAs(first));
+    }
+
+    // ── ReplaceAll: one hostname belongs to one network ──────────────────────
+
+    [Test]
+    public void ReplaceAll_SwapsTheWholeSet()
+    {
+        var list = BuildList(BuildNetwork("Libera", "irc.libera.chat"));
+
+        list.ReplaceAll(new[] { BuildNetwork("OFTC", "irc.oftc.net") });
+
+        Assert.That(list.Select(n => n.Name), Is.EqualTo(new[] { "OFTC" }));
+    }
+
+    [Test]
+    public void ReplaceAll_HostClaimedTwice_KeepsItOnTheFirstNetwork()
+    {
+        // A URL lookup stops at the first network that lists the host, so the second claim was
+        // already unreachable. Saving it would leave settings that disagree with lookup.
+        var first = BuildNetwork("Libera", "irc.libera.chat");
+        var second = BuildNetwork("Mirror", "irc.libera.chat", "eu.libera.chat");
+        var list = new NetworkSettingsList();
+
+        list.ReplaceAll(new[] { first, second });
+
+        Assert.That(first.Servers.Select(s => s.Url), Is.EqualTo(new[] { "irc.libera.chat" }));
+        Assert.That(second.Servers.Select(s => s.Url), Is.EqualTo(new[] { "eu.libera.chat" }),
+            "The duplicate entry point must be dropped from the later network, not the network itself");
+    }
+
+    [Test]
+    public void ReplaceAll_HostClaimedTwice_KeepsBothNetworks()
+    {
+        var list = new NetworkSettingsList();
+
+        list.ReplaceAll(new[]
+        {
+            BuildNetwork("Libera", "irc.libera.chat"),
+            BuildNetwork("Mirror", "irc.libera.chat")
+        });
+
+        Assert.That(list.Count, Is.EqualTo(2),
+            "Dropping a duplicate host must not delete the network that held it, along with its channels");
+    }
+
+    [Test]
+    public void ReplaceAll_HostInAnotherCase_CountsAsTheSameHost()
+    {
+        var list = new NetworkSettingsList();
+
+        list.ReplaceAll(new[]
+        {
+            BuildNetwork("Libera", "irc.libera.chat"),
+            BuildNetwork("Mirror", "IRC.Libera.Chat")
+        });
+
+        Assert.That(list[1].Servers, Is.Empty);
     }
 }

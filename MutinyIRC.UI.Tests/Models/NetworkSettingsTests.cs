@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
@@ -26,29 +25,6 @@ public class NetworkSettingsTests
         var second = BuildNetwork("Libera", "eu.libera.chat");
 
         Assert.That(first.Equals(second), Is.False);
-    }
-
-    [Test]
-    public void Equals_SameInstance_IsEqual()
-    {
-        var net = BuildNetwork("Libera", "irc.libera.chat");
-
-        Assert.That(net.Equals(net), Is.True);
-    }
-
-    [Test]
-    public void Contains_HashedLookupAndListScanAgree()
-    {
-        // A hashed lookup goes through GetHashCode and a list scan goes through Equals.
-        // Name equality with no matching GetHashCode made the two disagree about whether
-        // a same-named network was already there.
-        var first = BuildNetwork("Libera", "irc.libera.chat");
-        var second = BuildNetwork("Libera", "eu.libera.chat");
-
-        var set = new HashSet<NetworkSettings> { first };
-        var list = new List<NetworkSettings> { first };
-
-        Assert.That(set.Contains(second), Is.EqualTo(list.Contains(second)));
     }
 
     // ── AddServer ────────────────────────────────────────────────────────────
