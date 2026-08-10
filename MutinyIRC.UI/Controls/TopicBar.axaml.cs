@@ -2,16 +2,16 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using global::Avalonia;
-using global::Avalonia.Animation;
-using global::Avalonia.Animation.Easings;
-using global::Avalonia.Controls;
-using global::Avalonia.Input;
-using global::Avalonia.Interactivity;
-using global::Avalonia.Layout;
-using global::Avalonia.Styling;
-using global::Avalonia.Threading;
-using global::Avalonia.VisualTree;
+using Avalonia;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Styling;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 
 namespace MutinyIRC.UI.Controls;
 /// <summary>
@@ -160,12 +160,12 @@ public partial class TopicBar : UserControl
                 new KeyFrame
                 {
                     Cue = new Cue(0d),
-                    Setters = { new Setter(Layoutable.HeightProperty, from) },
+                    Setters = { new Setter(HeightProperty, from) },
                 },
                 new KeyFrame
                 {
                     Cue = new Cue(1d),
-                    Setters = { new Setter(Layoutable.HeightProperty, to) },
+                    Setters = { new Setter(HeightProperty, to) },
                 },
             },
         };

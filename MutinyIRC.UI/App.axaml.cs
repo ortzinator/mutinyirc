@@ -1,6 +1,6 @@
-﻿using global::Avalonia;
-using global::Avalonia.Controls.ApplicationLifetimes;
-using global::Avalonia.Markup.Xaml;
+﻿using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Markup.Xaml;
 using MutinyIRC.Common;
 using MutinyIRC.UI.ViewModels;
 using MutinyIRC.UI.Views;

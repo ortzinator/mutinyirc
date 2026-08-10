@@ -1,8 +1,8 @@
 ﻿using System.Collections.Specialized;
-using global::Avalonia;
-using global::Avalonia.Controls;
-using global::Avalonia.Input;
-using global::Avalonia.Threading;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
 
 namespace MutinyIRC.UI.Views;
 

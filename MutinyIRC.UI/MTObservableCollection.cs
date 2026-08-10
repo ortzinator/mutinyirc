@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using global::Avalonia.Threading;
+using Avalonia.Threading;
 
 namespace MutinyIRC.UI;
 

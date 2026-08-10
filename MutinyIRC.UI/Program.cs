@@ -1,4 +1,4 @@
-﻿using global::Avalonia;
+﻿using Avalonia;
 using System;
 using System.Diagnostics;
 

@@ -2,6 +2,7 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
 using Avalonia.LogicalTree;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using FlamingIRC;
 using NUnit.Framework;
@@ -46,17 +47,17 @@ public class UserListContextMenuTests
         var view = new ChannelView { DataContext = stub };
         var window = new Window { Content = view, Width = 600, Height = 400 };
         window.Show();
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         var listBox = view.GetVisualDescendants().OfType<ListBox>().First();
         listBox.SelectedItem = user;
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         var menu = listBox.ContextMenu;
         Assert.That(menu, Is.Not.Null, "User list should carry a ContextMenu");
 
         menu!.Open(listBox);
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         return (stub, menu, user);
     }

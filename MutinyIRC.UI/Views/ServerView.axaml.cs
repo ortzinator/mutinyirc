@@ -1,4 +1,4 @@
-﻿using global::Avalonia.Controls;
+﻿using Avalonia.Controls;
 
 namespace MutinyIRC.UI.Views;
 

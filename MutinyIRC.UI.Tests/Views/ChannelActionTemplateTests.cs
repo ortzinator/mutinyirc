@@ -6,6 +6,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Data;
 using Avalonia.Headless.NUnit;
 using Avalonia.Media;
+using Avalonia.Threading;
 using NUnit.Framework;
 using MutinyIRC.UI.Converters;
 using MutinyIRC.UI.ViewModels;
@@ -106,7 +107,7 @@ public class ChannelActionTemplateTests
 
         var window = new Window { Content = tb, Width = 400, Height = 100 };
         window.Show();
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         return (nick, tb);
     }

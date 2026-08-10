@@ -37,7 +37,7 @@ public class PrivateMessageViewModel : IrcViewModel
 
     public PrivateMessageViewModel(PrivateMessageSession session, PluginManager pluginManager)
     {
-        if (global::Avalonia.Controls.Design.IsDesignMode)
+        if (Avalonia.Controls.Design.IsDesignMode)
             return;
 
         _session = session;

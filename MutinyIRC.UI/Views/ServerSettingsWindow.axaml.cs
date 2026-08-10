@@ -1,7 +1,7 @@
-﻿using global::Avalonia.Controls;
-using global::Avalonia.Interactivity;
-using global::Avalonia.Threading;
-using global::Avalonia.VisualTree;
+﻿using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using System.Linq;
 using MutinyIRC.UI.ViewModels;
 
@@ -15,7 +15,7 @@ public partial class ServerSettingsWindow : Window
         DataContext = new SettingsViewModel();
 
         networksListBox.AddHandler(
-            TextBox.LostFocusEvent,
+            LostFocusEvent,
             (object? _, RoutedEventArgs e) =>
             {
                 if (e.Source is TextBox tb && tb.DataContext is NetworkSettingsViewModel netVm && netVm.IsEditing)

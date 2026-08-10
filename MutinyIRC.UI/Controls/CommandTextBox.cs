@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using global::Avalonia.Controls;
-using global::Avalonia.Input;
+using Avalonia.Controls;
+using Avalonia.Input;
 using MutinyIRC.UI.ViewModels;
 
 namespace MutinyIRC.UI.Controls;

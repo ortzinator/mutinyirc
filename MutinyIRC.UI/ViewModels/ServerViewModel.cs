@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
-using global::Avalonia.Controls;
 
 using System;
 using FlamingIRC;
@@ -40,7 +39,7 @@ public class ServerViewModel : IrcViewModel
 
     public ServerViewModel(Server newServer, PluginManager pluginManager)
     {
-        if (global::Avalonia.Controls.Design.IsDesignMode)
+        if (Avalonia.Controls.Design.IsDesignMode)
             return;
 
         _pluginManager = pluginManager;
@@ -105,7 +104,7 @@ public class ServerViewModel : IrcViewModel
 
     public ServerViewModel()
     {
-        if (global::Avalonia.Controls.Design.IsDesignMode)
+        if (Avalonia.Controls.Design.IsDesignMode)
         {
             ChatLines.Add(new ChatItemViewModel(DateTime.Now, "Foo"));
             ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, "Message", "Ortzinator"));

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using MutinyIRC.Common;
 using MutinyIRC.UI.Controls;
 using MutinyIRC.UI.ViewModels;
@@ -35,7 +36,7 @@ internal static class CommandTextBoxHarness
         window.Content = box;
         window.Show();
         box.DataContext = vm ?? new StubViewModel();
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
         return (box, window);
     }
 

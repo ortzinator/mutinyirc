@@ -1,8 +1,8 @@
-﻿using global::Avalonia;
-using global::Avalonia.Controls;
-using global::Avalonia.Input;
-using global::Avalonia.Interactivity;
-using global::Avalonia.VisualTree;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 
 namespace MutinyIRC.UI.Views;
 

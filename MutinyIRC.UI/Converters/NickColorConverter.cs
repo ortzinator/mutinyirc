@@ -1,8 +1,8 @@
 using System;
 using System.Globalization;
-using global::Avalonia;
-using global::Avalonia.Data.Converters;
-using global::Avalonia.Media;
+using Avalonia;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
 
 namespace MutinyIRC.UI.Converters;
 

@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
+using Avalonia.Threading;
 using NUnit.Framework;
 using MutinyIRC.UI.ViewModels;
 using MutinyIRC.UI.Views;
@@ -65,7 +66,7 @@ public class IrcOutputBoxTests
         box.DataContext = new ChannelViewModelStub(items);
 
         // Give the binding a chance to resolve.
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         var subscribedField = typeof(IrcOutputBox).GetField(
             "_subscribedCollection",
@@ -94,13 +95,13 @@ public class IrcOutputBoxTests
         var items = new ObservableCollection<ChatItemViewModel>();
         box.DataContext = new ChannelViewModelStub(items);
 
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         // Add a handful of items while still pinned.
         for (int i = 0; i < 5; i++)
             items.Add(new ChatItemViewModel(DateTime.Now, $"line {i}"));
 
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         // The control is pinned so Scrolled should remain false (we're at the bottom).
         Assert.That(box.Scrolled, Is.False,
@@ -120,10 +121,10 @@ public class IrcOutputBoxTests
 
         var items = new ObservableCollection<ChatItemViewModel>();
         box.DataContext = new ChannelViewModelStub(items);
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         Assert.DoesNotThrow(() => box.ScrollToBottom());
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         Assert.That(box.Scrolled, Is.False);
     }
@@ -139,11 +140,11 @@ public class IrcOutputBoxTests
         var box = new IrcOutputBox();
         window.Content = box;
         window.Show();
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         // Ensure Scrolled is false (default state)
         box.Scrolled = false;
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         // The scroll indicator is the first child of the DockPanel (a Border)
         var dockPanel = (DockPanel)box.Content!;
@@ -163,10 +164,10 @@ public class IrcOutputBoxTests
         var box = new IrcOutputBox();
         window.Content = box;
         window.Show();
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         box.Scrolled = true;
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         var dockPanel = (DockPanel)box.Content!;
         var indicator = (Border)dockPanel.Children[0];
@@ -185,13 +186,13 @@ public class IrcOutputBoxTests
         var box = new IrcOutputBox();
         window.Content = box;
         window.Show();
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         box.Scrolled = true;
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         box.Scrolled = false;
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         var dockPanel = (DockPanel)box.Content!;
         var indicator = (Border)dockPanel.Children[0];

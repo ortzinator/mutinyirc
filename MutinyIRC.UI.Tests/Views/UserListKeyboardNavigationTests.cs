@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.NUnit;
 using Avalonia.Input;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using FlamingIRC;
 using NUnit.Framework;
@@ -39,7 +40,7 @@ public class UserListKeyboardNavigationTests
         var view = new ChannelView { DataContext = stub };
         var window = new Window { Content = view, Width = 600, Height = 400 };
         window.Show();
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
 
         var listBox = view.GetVisualDescendants().OfType<ListBox>().First();
         return (stub, listBox, window);
@@ -55,13 +56,13 @@ public class UserListKeyboardNavigationTests
         var container = listBox.ContainerFromIndex(index) as ListBoxItem;
         Assert.That(container, Is.Not.Null, $"Row {index} should have a realised container");
         container!.Focus();
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
     }
 
     private static void Press(Window window, PhysicalKey key)
     {
         window.KeyPressQwerty(key, RawInputModifiers.None);
-        global::Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Dispatcher.UIThread.RunJobs();
     }
 
     [AvaloniaTest]
