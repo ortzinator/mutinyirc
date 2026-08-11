@@ -49,10 +49,14 @@ public sealed class Channel : MessageContext
     /// null key, and a server that hides the key gives an empty one: the channel is keyed
     /// whenever this is not null.
     /// </summary>
+    /// <remarks>
+    /// Written only from the mode changes and the mode reply the server sends, so that what
+    /// every <see cref="KeyChanged"/> listener sees is what the server reported.
+    /// </remarks>
     public string Key
     {
         get => _key;
-        set
+        internal set
         {
             if (_key == value)
                 return;
@@ -286,53 +290,69 @@ public sealed class Channel : MessageContext
     }
 
     /// <summary>
-    /// Applies channel op/halfop/voice mode changes to the affected users' prefixes
-    /// without re-fetching the whole NAMES list, and tracks the channel key.
+    /// Applies channel mode changes: the key, and the op/halfop/voice prefixes of the
+    /// affected users, which saves re-fetching the whole NAMES list.
     /// </summary>
     public void ApplyModeChanges(ChannelModeInfo[] modes)
     {
+        bool touchedUsers = false;
+
         foreach (ChannelModeInfo mode in modes)
         {
             if (mode.Mode == ChannelMode.Password)
-            {
                 // A -k carries the key that is going away, so only an add can set one.
                 Key = mode.Action == ModeAction.Add ? mode.Parameter : null;
-                continue;
-            }
-
-            char symbol = mode.Mode switch
-            {
-                ChannelMode.ChannelOperator => '@',
-                ChannelMode.HalfChannelOperator => '%',
-                ChannelMode.Voice => '+',
-                _ => '\0'
-            };
-
-            if (symbol == '\0' || string.IsNullOrEmpty(mode.Parameter))
-                continue;
-
-            User u = Users.GetUser(mode.Parameter);
-            if (u == null)
-                continue;
-
-            if (mode.Action == ModeAction.Add)
-                u.AddStatus(symbol);
             else
-                u.RemoveStatus(symbol);
+                touchedUsers |= ApplyStatusMode(mode);
         }
 
-        Users.Refresh();
+        // A mode line that names no member, such as a key or a ban, leaves the user list as
+        // it was, so it needs no refresh.
+        if (touchedUsers)
+            Users.Refresh();
+    }
+
+    /// <summary>
+    /// Applies one op/halfop/voice mode to the member it names. Returns true when a member's
+    /// prefix changed, and false for every other mode and for a member we do not know.
+    /// </summary>
+    private bool ApplyStatusMode(ChannelModeInfo mode)
+    {
+        char symbol = mode.Mode switch
+        {
+            ChannelMode.ChannelOperator => '@',
+            ChannelMode.HalfChannelOperator => '%',
+            ChannelMode.Voice => '+',
+            _ => '\0'
+        };
+
+        if (symbol == '\0' || string.IsNullOrEmpty(mode.Parameter))
+            return false;
+
+        User u = Users.GetUser(mode.Parameter);
+        if (u == null)
+            return false;
+
+        if (mode.Action == ModeAction.Add)
+            u.AddStatus(symbol);
+        else
+            u.RemoveStatus(symbol);
+
+        return true;
     }
 
     /// <summary>
     /// Applies the full set of modes the server reports for the channel, as opposed to a
     /// change to them. Every mode the reply leaves out is off, so the key clears unless the
-    /// reply names it.
+    /// reply names it. The key is written once, so a reply that repeats the key the channel
+    /// already has announces nothing.
     /// </summary>
     public void ApplyModeSnapshot(ChannelModeInfo[] modes)
     {
-        Key = null;
         ApplyModeChanges(modes);
+
+        if (!Array.Exists(modes, m => m.Mode == ChannelMode.Password))
+            Key = null;
     }
 
     public void Part(string message)

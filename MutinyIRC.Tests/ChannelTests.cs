@@ -489,6 +489,50 @@ public class ChannelTests
     }
 
     [Test]
+    public void ApplyModeSnapshot_RepeatingTheKeyItHas_DoesNotFireKeyChanged()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Add, "hunter2") });
+        int fired = 0;
+        channel.KeyChanged += (_, _) => fired++;
+
+        // A bare /mode on a keyed channel replies with the key the channel already has. A
+        // snapshot must not clear the key on its way to re-storing it: a listener that saw
+        // the transient null would report the key as removed and then restored.
+        channel.ApplyModeSnapshot(new[] { KeyMode(ModeAction.Add, "hunter2") });
+
+        Assert.AreEqual(0, fired, "Re-reporting the key it already has is not a change");
+    }
+
+    [Test]
+    public void ApplyModeSnapshot_ChangingTheKey_FiresKeyChangedOnceWithTheNewKey()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Add, "hunter2") });
+        var announced = new List<string>();
+        channel.KeyChanged += (_, e) => announced.Add(e.Data);
+
+        channel.ApplyModeSnapshot(new[] { KeyMode(ModeAction.Add, "letmein") });
+
+        CollectionAssert.AreEqual(new[] { "letmein" }, announced,
+            "A new key must be announced once, with no null in between");
+    }
+
+    [Test]
+    public void ApplyModeChanges_KeyOnly_DoesNotRefreshTheUserList()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+        int refreshes = 0;
+        channel.Users.Updated += (_, _) => refreshes++;
+
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Add, "hunter2") });
+
+        Assert.AreEqual(0, refreshes,
+            "A mode line that names no member leaves the user list as it was");
+    }
+
+    [Test]
     public void PendingNames_InterleavedWithAnotherChannel_EachChannelGetsOnlyItsOwnMembers()
     {
         var chanA = CreateChannelWithConnection();

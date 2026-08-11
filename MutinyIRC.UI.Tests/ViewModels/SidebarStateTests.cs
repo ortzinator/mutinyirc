@@ -228,6 +228,21 @@ public class SidebarStateTests
         Assert.That(vm.ChannelName, Is.EqualTo(bare));
     }
 
+    /// <summary>
+    /// Sets or clears the channel's key the way the server does. The key is not writable from
+    /// outside MutinyIRC.Common, so a +k / -k mode change is how a test states one.
+    /// </summary>
+    private static void SetKey(Channel channel, string? key) =>
+        channel.ApplyModeChanges(new[]
+        {
+            new ChannelModeInfo
+            {
+                Action = key == null ? ModeAction.Remove : ModeAction.Add,
+                Mode = ChannelMode.Password,
+                Parameter = key ?? string.Empty
+            }
+        });
+
     [Test]
     public void ChannelPanel_FollowsTheChannelKey()
     {
@@ -237,10 +252,10 @@ public class SidebarStateTests
 
         Assert.That(vm.IsKeyed, Is.False, "Precondition: no key yet");
 
-        channel.Key = "hunter2";
+        SetKey(channel, "hunter2");
         Assert.That(vm.IsKeyed, Is.True, "A keyed channel is marked with a padlock");
 
-        channel.Key = null;
+        SetKey(channel, null);
         Assert.That(vm.IsKeyed, Is.False);
     }
 
@@ -248,7 +263,8 @@ public class SidebarStateTests
     public void ChannelPanel_OpenedOnAnAlreadyKeyedChannel_IsKeyedFromTheStart()
     {
         Server server = FakeServer();
-        var channel = new Channel(server, "#mutiny") { Key = "hunter2" };
+        var channel = new Channel(server, "#mutiny");
+        SetKey(channel, "hunter2");
 
         using var vm = new ChannelViewModel(channel, new PluginManager());
 
