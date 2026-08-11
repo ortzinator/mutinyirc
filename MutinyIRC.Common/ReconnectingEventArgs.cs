@@ -17,9 +17,10 @@ public class ReconnectingEventArgs : EventArgs
     public TimeSpan Delay { get; private set; }
 
     /// <summary>
-    /// Which try this is, counted from 1, since the connection last registered. It continues to
-    /// climb after the backoff delay reaches its cap, so it stays a true count of the tries made
-    /// and not a copy of the backoff step.
+    /// Which try this is in the current run, counted from 1. A registration, a user-initiated
+    /// disconnect or a <see cref="Server"/> teardown ends the run and the next one starts at 1
+    /// again. It continues to climb after the backoff delay reaches its cap, so it stays a
+    /// true count of the tries made.
     /// </summary>
     public int Attempt { get; private set; }
 }

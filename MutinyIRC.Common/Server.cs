@@ -15,12 +15,11 @@ public class Server : MessageContext, IDisposable
 
     // Automatic-reconnect policy. After a failed attempt or a non-user-initiated drop, the
     // next reconnect is scheduled with exponential backoff: ReconnectBaseDelay doubled per
-    // consecutive attempt, capped at ReconnectMaxDelay. Both counters reset on a successful
-    // registration; the timer is cancelled on a user-initiated disconnect or Dispose so it
-    // never revives a connection the user has quit.
-    //
-    // _reconnectAttempt is the backoff step and stops climbing at the cap, so it is not a
-    // count of the tries made. _reconnectTry is that count, for hosts that show one.
+    // consecutive attempt, capped at ReconnectMaxDelay. _reconnectAttempt counts the tries in
+    // the current run and doubles as the backoff exponent, because the cap is applied to the
+    // delay and not to the count. A registration, a user-initiated disconnect or a Dispose
+    // ends the run: CancelReconnect clears the count and the timer, so no run can revive a
+    // connection the user has quit, and the next run starts again at attempt 1.
     //
     // The drop/fail/registered events arrive on FlamingIRC's socket-IO threads while
     // Disconnect/Dispose run on the UI thread, so every read or write of the reconnect state
@@ -31,7 +30,6 @@ public class Server : MessageContext, IDisposable
     private static readonly TimeSpan ReconnectMaxDelay = TimeSpan.FromMinutes(5);
     private readonly object _reconnectGate = new object();
     private int _reconnectAttempt;
-    private int _reconnectTry;
     private Timer _reconnectTimer;
 
     /// <summary>
@@ -515,10 +513,10 @@ public class Server : MessageContext, IDisposable
 
     /// <summary>
     /// Schedules the next automatic reconnect with exponential backoff and announces it via
-    /// <see cref="Reconnecting"/>. The delay is ReconnectBaseDelay * 2^attempt clamped to
-    /// ReconnectMaxDelay; the backoff step stops climbing once the cap is reached so it can
-    /// never run away, while the announced attempt number keeps counting the tries made. Any
-    /// pending reconnect is cancelled first so only one is in flight.
+    /// <see cref="Reconnecting"/>. The delay is ReconnectBaseDelay * 2^(attempt-1) clamped to
+    /// ReconnectMaxDelay, so the attempt number stays a true count of the tries in this run
+    /// while the delay stops growing at the cap. Any pending reconnect is cancelled first so
+    /// only one is in flight.
     /// </summary>
     private void ScheduleReconnect()
     {
@@ -530,12 +528,12 @@ public class Server : MessageContext, IDisposable
             if (_disposed)
                 return;
 
+            // Math.Pow saturates at double.PositiveInfinity rather than overflowing, so the
+            // count needs no ceiling of its own: Math.Min holds the delay at the cap.
+            attempt = ++_reconnectAttempt;
             delay = TimeSpan.FromSeconds(Math.Min(
-                ReconnectBaseDelay.TotalSeconds * Math.Pow(2, _reconnectAttempt),
+                ReconnectBaseDelay.TotalSeconds * Math.Pow(2, attempt - 1),
                 ReconnectMaxDelay.TotalSeconds));
-            if (delay < ReconnectMaxDelay)
-                _reconnectAttempt++;
-            attempt = ++_reconnectTry;
 
             _reconnectTimer?.Dispose();
             Timer timer = null;
@@ -558,7 +556,9 @@ public class Server : MessageContext, IDisposable
     }
 
     /// <summary>
-    /// Cancels any pending automatic reconnect. Safe to call when none is scheduled.
+    /// Ends the current run of reconnect attempts: cancels the pending attempt, if there is
+    /// one, and clears the count, so a later drop starts again at ReconnectBaseDelay and
+    /// attempt 1. Safe to call when no reconnect is scheduled.
     /// </summary>
     private void CancelReconnect()
     {
@@ -566,6 +566,7 @@ public class Server : MessageContext, IDisposable
         {
             _reconnectTimer?.Dispose();
             _reconnectTimer = null;
+            _reconnectAttempt = 0;
         }
     }
 
@@ -700,13 +701,9 @@ public class Server : MessageContext, IDisposable
 
     private void Listener_OnRegistered(object sender, EventArgs e)
     {
-        // Back online: clear the backoff so the next drop retries from ReconnectBaseDelay,
-        // and start the try count again so a later drop reads "retry 1".
-        lock (_reconnectGate)
-        {
-            _reconnectAttempt = 0;
-            _reconnectTry = 0;
-        }
+        // Back online: the run of tries is over, so drop the count and the spent one-shot
+        // timer together. A later drop then reads "attempt 1" and waits ReconnectBaseDelay.
+        CancelReconnect();
         Registered?.Invoke(this, e);
     }
 
@@ -891,6 +888,11 @@ public class Server : MessageContext, IDisposable
 
     public void ChangeServer(ConnectionArgs args)
     {
+        // The user has taken over, so end any reconnect run first. Disconnect below does this
+        // too, but it only runs when the link is up, and a run in flight means it is not: the
+        // pending timer would otherwise dial the new host on the old backoff schedule.
+        CancelReconnect();
+
         if (IsConnected)
         {
             Disconnect();

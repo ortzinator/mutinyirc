@@ -11,8 +11,9 @@ namespace MutinyIRC.Tests;
 /// Pins the Server's automatic-reconnect policy: after a non-user-initiated drop it schedules
 /// a reconnect and announces the delay and the attempt number via
 /// <see cref="Server.Reconnecting"/>. The delay follows exponential backoff (doubling from a 4s
-/// base, capped at 5 minutes); the attempt number counts the tries and so keeps climbing past
-/// that cap. Both restart once a registration succeeds. The <c>Reconnecting</c> event fires
+/// base, capped at 5 minutes); the attempt number counts the tries in the run and so keeps
+/// climbing past that cap. A registration or a change of server ends the run, and the next one
+/// starts again at attempt 1 and the base delay. The <c>Reconnecting</c> event fires
 /// synchronously inside the drop handler — before the timer that actually reconnects — so the
 /// announced values can be asserted without waiting on the clock.
 ///
@@ -128,6 +129,28 @@ public class ServerReconnectTests
 
         CollectionAssert.AreEqual(new[] { 1, 2, 1 }, attempts,
             "A successful registration ends the run of tries, so the next drop starts over at 1.");
+    }
+
+    [Test]
+    public void ChangingServer_RestartsTheAttemptCount()
+    {
+        var conn = OfflineConnection();
+        using var server = new Server(conn);
+
+        conn.Disconnect(DisconnectReason.SocketError); // 1
+        conn.Disconnect(DisconnectReason.SocketError); // 2
+
+        // A run is in flight, so the link is down and ChangeServer's own Disconnect is skipped.
+        server.ChangeServer("test", "irc.other.com", false);
+
+        var delays = CaptureReconnectDelays(server);
+        var attempts = CaptureReconnectAttempts(server);
+        ((Connection)server.Connection).Disconnect(DisconnectReason.SocketError);
+
+        CollectionAssert.AreEqual(new[] { 1 }, attempts,
+            "Changing server ends the run, so the new connection's first drop is attempt 1.");
+        CollectionAssert.AreEqual(new[] { 4d }, delays,
+            "The new connection must also wait the base delay, not the old run's backoff.");
     }
 
     [Test]
