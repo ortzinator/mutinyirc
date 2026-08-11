@@ -153,4 +153,24 @@
   <data name="ConnectionLost" xml:space="preserve">
     <value>--Disconnected: {0}</value>
   </data>
+  <data name="StatusConnected" xml:space="preserve">
+    <value>Connected</value>
+    <comment>Sidebar connection state for a registered connection.</comment>
+  </data>
+  <data name="StatusConnectedSecure" xml:space="preserve">
+    <value>Connected · TLS</value>
+    <comment>Sidebar connection state for a registered connection over TLS.</comment>
+  </data>
+  <data name="StatusConnecting" xml:space="preserve">
+    <value>Connecting…</value>
+    <comment>Sidebar connection state while a connection attempt is in flight.</comment>
+  </data>
+  <data name="StatusReconnecting" xml:space="preserve">
+    <value>Reconnecting · retry {0}</value>
+    <comment>Sidebar connection state while waiting to reconnect. {0} is the attempt number.</comment>
+  </data>
+  <data name="StatusDisconnected" xml:space="preserve">
+    <value>Disconnected</value>
+    <comment>Sidebar connection state for a connection that is down.</comment>
+  </data>
 </root>

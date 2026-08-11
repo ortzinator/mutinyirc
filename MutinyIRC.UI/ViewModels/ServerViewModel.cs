@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 using System;
@@ -33,6 +36,60 @@ public class ServerViewModel : IrcViewModel
         private set => SetProperty(ref _isAway, value);
     }
 
+    private string _networkName = string.Empty;
+    /// <summary>
+    /// The network this connection belongs to, as the network switcher names it. Until the
+    /// connection registers, the only name we have for it is the host we dialled.
+    /// </summary>
+    public string NetworkName
+    {
+        get => _networkName;
+        private set => SetProperty(ref _networkName, value);
+    }
+
+    private string _host = string.Empty;
+    /// <summary>
+    /// The host this connection was dialled on. The console row is labelled with it, because
+    /// the switcher above already carries the network name.
+    /// </summary>
+    public string Host
+    {
+        get => _host;
+        private set => SetProperty(ref _host, value);
+    }
+
+    private bool _isShown;
+    /// <summary>
+    /// Whether the sidebar is showing this connection's panels. Only one connection is shown at
+    /// a time; <see cref="MainViewModel.ShownServer"/> owns which.
+    /// </summary>
+    public bool IsShown
+    {
+        get => _isShown;
+        internal set => SetProperty(ref _isShown, value);
+    }
+
+    private string _connectionStatus = string.Empty;
+    /// <summary>
+    /// One short line on where the connection stands, for the network switcher: connected
+    /// (noting TLS), connecting, waiting to reconnect, or down.
+    /// </summary>
+    public string ConnectionStatus
+    {
+        get => _connectionStatus;
+        private set => SetProperty(ref _connectionStatus, value);
+    }
+
+    /// <summary>
+    /// Whether anything on this connection has unread activity — the server window itself or
+    /// any of its channel and private-message panels. The switcher marks a connection you are
+    /// not looking at with this.
+    /// </summary>
+    public bool HasUnreadAnywhere =>
+        HasUnread
+        || Channels.Any(c => c.HasUnread)
+        || PrivateMessages.Any(p => p.HasUnread);
+
     // The away message last shown for each nick, so messaging an away user repeatedly doesn't
     // re-print their away text. A changed message shows again; cleared when the connection drops.
     private readonly Dictionary<string, string> _shownAwayReplies = new(StringComparer.OrdinalIgnoreCase);
@@ -45,6 +102,15 @@ public class ServerViewModel : IrcViewModel
         _pluginManager = pluginManager;
         _server = newServer;
         Name = _server.Url;
+        Host = _server.Url;
+        NetworkName = _server.Url;
+        ConnectionStatus = _server.IsConnected ? ConnectedStatus() : ServerStrings.StatusDisconnected;
+
+        // The unread mark on the switcher covers the whole connection, so it has to follow
+        // every panel this connection owns, including ones opened later.
+        Channels.CollectionChanged += UnreadSources_CollectionChanged;
+        PrivateMessages.CollectionChanged += UnreadSources_CollectionChanged;
+
         _server.Registered += Server_Registered;
         _server.ConnectFailed += Server_ConnectFailed;
         _server.Reconnecting += Server_Reconnecting;
@@ -62,6 +128,37 @@ public class ServerViewModel : IrcViewModel
         _server.NoticeSent += Server_NoticeSent;
         _server.WentAway += Server_WentAway;
         _server.CameBack += Server_CameBack;
+    }
+
+    private string ConnectedStatus() =>
+        _server.Connection.ConnectionData.Ssl
+            ? ServerStrings.StatusConnectedSecure
+            : ServerStrings.StatusConnected;
+
+    // A panel's unread flag is one of the parts HasUnreadAnywhere is made of, so the aggregate
+    // has to be re-announced whenever one of them changes, whenever the set of panels changes,
+    // and whenever this server window's own flag changes (handled in OnPropertyChanged).
+    private void UnreadSources_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        foreach (INotifyPropertyChanged panel in e.OldItems ?? (IList)Array.Empty<object>())
+            panel.PropertyChanged -= Panel_PropertyChanged;
+        foreach (INotifyPropertyChanged panel in e.NewItems ?? (IList)Array.Empty<object>())
+            panel.PropertyChanged += Panel_PropertyChanged;
+
+        OnPropertyChanged(nameof(HasUnreadAnywhere));
+    }
+
+    private void Panel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(HasUnread))
+            OnPropertyChanged(nameof(HasUnreadAnywhere));
+    }
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.PropertyName == nameof(HasUnread))
+            OnPropertyChanged(nameof(HasUnreadAnywhere));
     }
 
     private void Server_WentAway(object? sender, EventArgs e) => IsAway = true;
@@ -112,6 +209,9 @@ public class ServerViewModel : IrcViewModel
             ChatLines.Add(new IrcErrorViewModel(DateTime.Now, "Something bad happened", "14859"));
             ChatLines.Add(new PrivateNoticeViewModel(DateTime.Now, "A notice for you", "aUser"));
             Name = "irc.foo.com";
+            Host = "irc.foo.com";
+            NetworkName = "FooNet";
+            ConnectionStatus = ServerStrings.StatusConnectedSecure;
         }
     }
 
@@ -158,24 +258,29 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_ConnectCancelled(object? sender, EventArgs e)
     {
+        ConnectionStatus = ServerStrings.StatusDisconnected;
         AddMessage(ServerStrings.Disconnected);
     }
 
     private void Server_ConnectionLost(object? sender, DisconnectEventArgs e)
     {
         ResetAwayState();
+        // A reconnect is usually scheduled straight after this, and overwrites the status.
+        ConnectionStatus = ServerStrings.StatusDisconnected;
         AddMessage(ServerStrings.ConnectionLost.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
     }
 
-    // The Server owns the reconnect timer and backoff; we just render the announced delay.
+    // The Server owns the reconnect timer and backoff; we just render what it announces.
     private void Server_Reconnecting(object? sender, ReconnectingEventArgs e)
     {
+        ConnectionStatus = ServerStrings.StatusReconnecting.With(e.Attempt);
         AddMessage(ServerStrings.AttemptingReconnect.With((int)e.Delay.TotalSeconds));
     }
 
     private void Server_Disconnected(object? sender, EventArgs e)
     {
         ResetAwayState();
+        ConnectionStatus = ServerStrings.StatusDisconnected;
         AddMessage(ServerStrings.Disconnected);
     }
 
@@ -189,6 +294,7 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_Connecting(object? sender, CancelEventArgs e)
     {
+        ConnectionStatus = ServerStrings.StatusConnecting;
         AddMessage(ServerStrings.ConnectingMessage.With(_server.Url, _server.Port));
     }
 
@@ -256,6 +362,8 @@ public class ServerViewModel : IrcViewModel
             network.Name,
             _server.Url,
             _server.Port);
+        NetworkName = network.Name;
+        ConnectionStatus = ConnectedStatus();
 
         if (_nickRetryFailed)
             AddMessage(ServerStrings.RandomNickMessage);
@@ -339,6 +447,13 @@ public class ServerViewModel : IrcViewModel
     {
         if (_server == null)
             return;
+
+        Channels.CollectionChanged -= UnreadSources_CollectionChanged;
+        PrivateMessages.CollectionChanged -= UnreadSources_CollectionChanged;
+        foreach (ChannelViewModel channel in Channels)
+            channel.PropertyChanged -= Panel_PropertyChanged;
+        foreach (PrivateMessageViewModel pm in PrivateMessages)
+            pm.PropertyChanged -= Panel_PropertyChanged;
 
         // Detach every handler wired in the constructor so the Server (which outlives this VM)
         // doesn't keep it alive. Keep this list in sync with the constructor's subscriptions.

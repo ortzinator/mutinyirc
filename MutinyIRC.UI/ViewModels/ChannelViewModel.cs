@@ -20,7 +20,31 @@ public class ChannelViewModel : IrcViewModel
 
     public PluginManager PluginManager => _pluginManager;
 
-    public string ChannelName => base.Name.TrimStart('#', '&', '+', '!');
+    private const string ChannelPrefixes = "#&+!";
+
+    public string ChannelName => base.Name.TrimStart(ChannelPrefixes.ToCharArray());
+
+    /// <summary>
+    /// The prefix character the channel's name starts with, which says what kind of channel it
+    /// is: "#" for an ordinary one, "&amp;" for a server-local one, and so on. Empty for a name
+    /// with no prefix. The sidebar draws it in place of the icon, so a "&amp;" channel does not
+    /// pose as a "#" one.
+    /// </summary>
+    public string Prefix =>
+        base.Name.Length > 0 && ChannelPrefixes.Contains(base.Name[0])
+            ? base.Name[..1]
+            : string.Empty;
+
+    private bool _isKeyed;
+    /// <summary>
+    /// Whether the channel needs a key to enter (+k). The sidebar marks such a channel with a
+    /// padlock.
+    /// </summary>
+    public bool IsKeyed
+    {
+        get => _isKeyed;
+        private set => SetProperty(ref _isKeyed, value);
+    }
 
     private string _topic = string.Empty;
     public string Topic
@@ -98,6 +122,10 @@ public class ChannelViewModel : IrcViewModel
         _channel = channel;
         _channel.Users.Updated += NickList_Updated;
         base.Name = channel.Name;
+        // The key usually arrives with the mode reply that follows the join, after this panel
+        // exists, so take what the channel has now and follow it from there.
+        IsKeyed = _channel.Key != null;
+        _channel.KeyChanged += Channel_KeyChanged;
 
         _channel.OnMessage += Channel_OnMessage;
         _channel.OnAction += Channel_OnAction;
@@ -180,6 +208,11 @@ public class ChannelViewModel : IrcViewModel
     private void Channel_OnJoin(object? sender, UserEventArgs e)
     {
         AddMessage(ChannelStrings.Joined.With(e.User.Nick, e.User.HostMask));
+    }
+
+    private void Channel_KeyChanged(object? sender, Common.DataEventArgs<string> e)
+    {
+        IsKeyed = e.Data != null;
     }
 
     private void Channel_TopicReceived(object? sender, Common.DataEventArgs<string> e)
@@ -273,6 +306,7 @@ public class ChannelViewModel : IrcViewModel
         _channel.OnMessage -= Channel_OnMessage;
         _channel.OnAction -= Channel_OnAction;
         _channel.TopicReceived -= Channel_TopicReceived;
+        _channel.KeyChanged -= Channel_KeyChanged;
         _channel.OnJoin -= Channel_OnJoin;
         _channel.UserParted -= Channel_UserParted;
         _channel.OtherUserParted -= Channel_OtherUserParted;

@@ -35,6 +35,11 @@
         internal static string RandomNickMessage => ResourceManager.GetString("RandomNickMessage", resourceCulture);
         internal static string ServerErrorMessage => ResourceManager.GetString("ServerErrorMessage", resourceCulture);
         internal static string ServerFormTitleBar => ResourceManager.GetString("ServerFormTitleBar", resourceCulture);
+        internal static string StatusConnected => ResourceManager.GetString("StatusConnected", resourceCulture);
+        internal static string StatusConnectedSecure => ResourceManager.GetString("StatusConnectedSecure", resourceCulture);
+        internal static string StatusConnecting => ResourceManager.GetString("StatusConnecting", resourceCulture);
+        internal static string StatusDisconnected => ResourceManager.GetString("StatusDisconnected", resourceCulture);
+        internal static string StatusReconnecting => ResourceManager.GetString("StatusReconnecting", resourceCulture);
         internal static string WarnDisconnect => ResourceManager.GetString("WarnDisconnect", resourceCulture);
     }
 }

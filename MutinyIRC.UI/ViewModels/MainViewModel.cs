@@ -3,6 +3,7 @@ using Ninject.Parameters;
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
@@ -19,6 +20,10 @@ public class MainViewModel : ViewModelBase
     private readonly PluginManager _pluginManager;
     private readonly Dictionary<Server, ServerViewModel> _serverMap = new();
 
+    // The panel each connection was last showing, so switching back to a connection returns you
+    // to where you left it rather than to its console every time.
+    private readonly Dictionary<ServerViewModel, IrcViewModel> _lastViewed = new();
+
     public MTObservableCollection<IrcViewModel> Panels { get; protected set; }
     public MTObservableCollection<ServerViewModel> Servers { get; }
 
@@ -29,19 +34,100 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _selectedPanel, value);
     }
 
+    private ServerViewModel? _shownServer;
+    /// <summary>
+    /// The connection the sidebar lists panels for. The sidebar shows one connection at a time,
+    /// and every other connection lives behind the network switcher. Always the connection the
+    /// selected panel belongs to.
+    /// </summary>
+    public ServerViewModel? ShownServer
+    {
+        get => _shownServer;
+        private set
+        {
+            ServerViewModel? previous = _shownServer;
+            if (!SetProperty(ref _shownServer, value))
+                return;
+
+            // The switcher's list marks the shown connection, so each panel carries the flag.
+            if (previous != null) previous.IsShown = false;
+            if (value != null) value.IsShown = true;
+
+            OnPropertyChanged(nameof(HasUnreadElsewhere));
+        }
+    }
+
+    /// <summary>
+    /// Whether a connection the sidebar is not showing has unread activity. The switcher marks
+    /// itself with this, because that activity is otherwise out of sight.
+    /// </summary>
+    public bool HasUnreadElsewhere =>
+        Servers.Any(s => s != ShownServer && s.HasUnreadAnywhere);
+
     private RelayCommand<IrcViewModel?>? _selectPanelCommand;
     public System.Windows.Input.ICommand SelectPanelCommand =>
         _selectPanelCommand ??= new RelayCommand<IrcViewModel?>(SelectPanel);
 
+    private RelayCommand<ServerViewModel?>? _showServerCommand;
+    public System.Windows.Input.ICommand ShowServerCommand =>
+        _showServerCommand ??= new RelayCommand<ServerViewModel?>(ShowServer);
+
+    /// <summary>
+    /// Switches the sidebar to <paramref name="server"/> and returns to the panel that
+    /// connection was last showing, or to its console on a first visit.
+    /// </summary>
+    private void ShowServer(ServerViewModel? server)
+    {
+        if (server == null)
+            return;
+
+        IrcViewModel target = _lastViewed.TryGetValue(server, out IrcViewModel? last)
+                              && Panels.Contains(last)
+            ? last
+            : server;
+
+        SelectPanel(target);
+    }
+
     /// <summary>
     /// Makes <paramref name="panel"/> the active panel, deselecting whichever panel was
-    /// previously selected. Passing null clears the selection.
+    /// previously selected. Passing null clears the selection. The sidebar follows: it shows
+    /// the connection this panel belongs to, and remembers the panel as that connection's last.
     /// </summary>
     private void SelectPanel(IrcViewModel? panel)
     {
         if (_selectedPanel != null) _selectedPanel.IsSelected = false;
         SelectedPanel = panel;
-        if (panel != null) panel.IsSelected = true;
+        if (panel == null)
+        {
+            // Nothing left to look at means no connection to show either.
+            ShownServer = null;
+            return;
+        }
+
+        panel.IsSelected = true;
+
+        ServerViewModel? owner = OwnerOf(panel);
+        if (owner == null) return;
+
+        _lastViewed[owner] = panel;
+        ShownServer = owner;
+    }
+
+    /// <summary>
+    /// The server panel of the connection <paramref name="panel"/> belongs to. A server panel
+    /// owns itself; a panel on a connection we have no view model for has no owner.
+    /// </summary>
+    private ServerViewModel? OwnerOf(IrcViewModel panel)
+    {
+        if (panel is ServerViewModel server)
+            return server;
+
+        Server? owningServer = panel.OwningServer;
+        if (owningServer == null)
+            return null;
+
+        return _serverMap.TryGetValue(owningServer, out ServerViewModel? vm) ? vm : null;
     }
 
     public MainViewModel(PluginManager pluginManager)
@@ -180,13 +266,21 @@ public class MainViewModel : ViewModelBase
 
         SelectNextAfterClosing(chan);
 
+        // Closing the panel leaves the channel. Without this you stay joined to a channel with
+        // no window: the messages keep arriving and you never see them. A part the server
+        // already told us about (a self-part, a kick, a dropped connection) has nothing to send.
+        Channel channel = chan.Channel;
+        if (channel.Joined && channel.Server.IsConnected)
+            channel.Part();
+
         chan.Dispose();
     }
 
     /// <summary>
-    /// When the panel being closed is the selected one, deselects it and selects the
-    /// first remaining panel (if any). Call after the panel has been removed from
-    /// <see cref="Panels"/> so the replacement is picked from what's left.
+    /// When the panel being closed is the selected one, deselects it and selects the console of
+    /// the same connection, so closing a panel keeps you where you were. Falls back to the first
+    /// remaining panel when that connection has gone too. Call after the panel has been removed
+    /// from <see cref="Panels"/> so the replacement is picked from what's left.
     /// </summary>
     private void SelectNextAfterClosing(IrcViewModel closed)
     {
@@ -194,9 +288,13 @@ public class MainViewModel : ViewModelBase
             return;
 
         closed.IsSelected = false;
-        var next = Panels.Count > 0 ? Panels[0] : null;
-        SelectedPanel = next;
-        if (next != null) next.IsSelected = true;
+
+        ServerViewModel? owner = OwnerOf(closed);
+        IrcViewModel? next = owner != null && Panels.Contains(owner)
+            ? owner
+            : Panels.Count > 0 ? Panels[0] : null;
+
+        SelectPanel(next);
     }
 
     private void LoadSettings()
@@ -228,12 +326,17 @@ public class MainViewModel : ViewModelBase
         server.PrivateMessageSessionAdded += Server_PrivateMessageSessionAdded;
         server.PrivateNotice += Server_PrivateNotice;
         server.AwayReplyReceived += Server_AwayReplyReceived;
+        vm.PropertyChanged += ServerPanel_PropertyChanged;
 
-        if (SelectedPanel == null)
-        {
-            SelectedPanel = vm;
-            vm.IsSelected = true;
-        }
+        // A new connection takes over the sidebar and opens on its console, which is where its
+        // connect and MOTD lines land.
+        SelectPanel(vm);
+    }
+
+    private void ServerPanel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ServerViewModel.HasUnreadAnywhere))
+            OnPropertyChanged(nameof(HasUnreadElsewhere));
     }
 
     /// <summary>
@@ -266,6 +369,7 @@ public class MainViewModel : ViewModelBase
         // every Server for the process lifetime and the finalizer would never run.
         foreach (ServerViewModel serverVm in Servers.ToList())
         {
+            serverVm.PropertyChanged -= ServerPanel_PropertyChanged;
             if (serverVm.OwningServer != null)
                 DetachServer(serverVm.OwningServer);
 
