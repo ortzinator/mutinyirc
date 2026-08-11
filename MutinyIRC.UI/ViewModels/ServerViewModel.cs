@@ -168,9 +168,9 @@ public class ServerViewModel : IrcViewModel
     }
 
     // The Server owns the reconnect timer and backoff; we just render the announced delay.
-    private void Server_Reconnecting(object? sender, Common.DataEventArgs<TimeSpan> e)
+    private void Server_Reconnecting(object? sender, ReconnectingEventArgs e)
     {
-        AddMessage(ServerStrings.AttemptingReconnect.With((int)e.Data.TotalSeconds));
+        AddMessage(ServerStrings.AttemptingReconnect.With((int)e.Delay.TotalSeconds));
     }
 
     private void Server_Disconnected(object? sender, EventArgs e)
