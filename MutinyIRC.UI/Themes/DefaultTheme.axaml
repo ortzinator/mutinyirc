@@ -86,10 +86,11 @@
             <SolidColorBrush x:Key="ControlBorderBrush"             Color="{StaticResource ControlBorderColor}" />
             <SolidColorBrush x:Key="DividerBrush"                   Color="#15FFFFFF" />
 
-            <!-- Accent tuned for text on a normal surface. The accent fills themselves have
-                 no brush of their own: only Fluent's controls use them, straight from
-                 AccentColor. Add one here the day a view needs to paint accent directly. -->
+            <!-- Accent tuned for text on a normal surface, and the accent as a fill. The fill
+                 is what the sidebar paints its selection pill and its unread dot with; Fluent's
+                 own controls take the accent straight from AccentColor and never read this. -->
             <SolidColorBrush x:Key="AccentTextBrush"                Color="#99EBFF" />
+            <SolidColorBrush x:Key="AccentFillBrush"                Color="{StaticResource AccentColor}" />
 
             <!-- Status. The foregrounds are the reference's warn and danger tokens; the
                  backgrounds are translucent tints of the same hue, so a notice or error
@@ -235,8 +236,9 @@
             <SolidColorBrush x:Key="ControlBorderBrush"             Color="{StaticResource ControlBorderColor}" />
             <SolidColorBrush x:Key="DividerBrush"                   Color="#0F000000" />
 
-            <!-- Accent tuned for text on a normal surface -->
+            <!-- Accent tuned for text on a normal surface, and the accent as a fill -->
             <SolidColorBrush x:Key="AccentTextBrush"                Color="#003E92" />
+            <SolidColorBrush x:Key="AccentFillBrush"                Color="{StaticResource AccentColor}" />
 
             <!-- Status. The foregrounds darken for contrast on white; the background tints
                  keep the hue, which is what reads as a tint over white. -->

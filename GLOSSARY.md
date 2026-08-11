@@ -55,9 +55,9 @@ panel a panel is what `IrcViewModel` supplies to all three: a `ChatLines` collec
 sidebar draws its entry.
 
 `MainViewModel` owns `Panels`, a flat collection of every open panel, and tracks `SelectedPanel`. The
-sidebar does not bind to that collection: it binds to `MainViewModel.Servers` and nests each server's
-`Channels` and `PrivateMessages` under it, so a channel or private-message panel is held in two places at
-once — flat for selection, nested for display.
+sidebar does not bind to that collection: it binds to the [shown connection](#shown-connection) and lists
+that connection's `Channels` and `PrivateMessages`, so a channel or private-message panel is held in two
+places at once — flat for selection, per-connection for display.
 
 ## Row list (user list)
 
@@ -73,14 +73,26 @@ selection to `SelectedRow`, typed `IUserListRow?` so it can hold either kind; `S
 derived from it with a type test, which is what keeps a heading from ever reaching the context
 menu's Kick and Ban.
 
+## Shown connection
+
+The one [connection](#connection) whose panels the [sidebar](#sidebar) lists: `MainViewModel.ShownServer`,
+mirrored on each panel as `ServerViewModel.IsShown`. It is always the connection the selected panel belongs
+to, so selecting anything switches it, and `ShowServerCommand` switches it directly — returning to the panel
+that connection was last showing, or to its console on a first visit. Every other connection lives behind
+the **network switcher**, the button at the top of the sidebar that names the shown connection's
+[network](#network), reports its `ConnectionStatus`, and drops down the rest.
+`MainViewModel.HasUnreadElsewhere` is what marks that button when a connection you cannot see has unread
+activity.
+
 ## Sidebar
 
 The navigation column down the left edge of `MainWindow`: a 48px strip at the top that the platform treats
-as the window's title bar and that holds the settings button, and under it the tree of servers, each with
-its channels and its private messages nested beneath. Clicking any entry runs `SelectPanelCommand`, which
-sets `SelectedPanel` and swaps the main content area; a private-message row also carries a close button
-that fades in on hover.
+as the window's title bar and that holds the settings button, the [network switcher](#shown-connection)
+under it, and then the panel list for the [shown connection](#shown-connection) — its console pinned at the
+top, then its channels and its private messages under their group headings. Clicking any row runs
+`SelectPanelCommand`, which sets `SelectedPanel` and swaps the main content area; channel and
+private-message rows also carry a close button that fades in on hover, and closing a channel parts it.
 
 The column starts at 220px and you may drag it between 150 and 500 with the `GridSplitter` that sits in the
 next grid column. It draws on `SurfaceNav`, and its rows use the `SidebarNavTheme` control theme defined in
-`MainWindow.axaml`.
+`MainWindow.axaml` — which is also where the accent pill on the selected row comes from.
