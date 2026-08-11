@@ -1,5 +1,7 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
 using Assert = NUnit.Framework.Legacy.ClassicAssert;
+using CollectionAssert = NUnit.Framework.Legacy.CollectionAssert;
 using MutinyIRC.Common;
 using FakeItEasy;
 using FlamingIRC;
@@ -378,6 +380,112 @@ public class ChannelTests
 
         Assert.AreEqual('\0', channel.Users.GetUser("Bob").Prefix,
             "A ban mode must not alter any member's op/voice prefix");
+    }
+
+    private static ChannelModeInfo KeyMode(ModeAction action, string key) =>
+        new ChannelModeInfo { Action = action, Mode = ChannelMode.Password, Parameter = key };
+
+    [Test]
+    public void ApplyModeChanges_AddKey_StoresIt()
+    {
+        var channel = CreateChannelWithConnection();
+
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Add, "hunter2") });
+
+        Assert.AreEqual("hunter2", channel.Key);
+    }
+
+    [Test]
+    public void ApplyModeChanges_RemoveKey_ClearsIt()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Add, "hunter2") });
+
+        // A -k names the key that is going away, so the parameter is still populated.
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Remove, "hunter2") });
+
+        Assert.IsNull(channel.Key, "-k must clear the key rather than store the departing one");
+    }
+
+    [Test]
+    public void ApplyModeChanges_KeyChange_FiresKeyChangedWithTheNewKey()
+    {
+        var channel = CreateChannelWithConnection();
+        var announced = new List<string>();
+        channel.KeyChanged += (_, e) => announced.Add(e.Data);
+
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Add, "hunter2") });
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Remove, "hunter2") });
+
+        CollectionAssert.AreEqual(new[] { "hunter2", null }, announced,
+            "Setting and clearing the key must each announce the resulting key");
+    }
+
+    [Test]
+    public void ApplyModeChanges_SameKeyAgain_DoesNotFireKeyChanged()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Add, "hunter2") });
+        int fired = 0;
+        channel.KeyChanged += (_, _) => fired++;
+
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Add, "hunter2") });
+
+        Assert.AreEqual(0, fired, "Re-reporting the key it already has is not a change");
+    }
+
+    [Test]
+    public void ApplyModeChanges_KeyAlongsideStatusModes_AppliesBoth()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+
+        // MODE #mutiny +ok Bob hunter2
+        channel.ApplyModeChanges(new[]
+        {
+            new ChannelModeInfo
+            {
+                Action = ModeAction.Add,
+                Mode = ChannelMode.ChannelOperator,
+                Parameter = "Bob"
+            },
+            KeyMode(ModeAction.Add, "hunter2")
+        });
+
+        Assert.AreEqual("hunter2", channel.Key);
+        Assert.AreEqual('@', channel.Users.GetUser("Bob").Prefix,
+            "A key in the same MODE line must not stop the op prefix being applied");
+    }
+
+    [Test]
+    public void ApplyModeSnapshot_WithoutAKey_ClearsAStaleOne()
+    {
+        var channel = CreateChannelWithConnection();
+        channel.ApplyModeChanges(new[] { KeyMode(ModeAction.Add, "hunter2") });
+
+        // RPL_CHANNELMODEIS reports every mode the channel has, and reports them all as adds.
+        channel.ApplyModeSnapshot(new[]
+        {
+            new ChannelModeInfo
+            {
+                Action = ModeAction.Add,
+                Mode = ChannelMode.TopicSettable,
+                Parameter = ""
+            }
+        });
+
+        Assert.IsNull(channel.Key,
+            "A mode reply that names no key means the channel has none");
+    }
+
+    [Test]
+    public void ApplyModeSnapshot_WithAKey_StoresIt()
+    {
+        var channel = CreateChannelWithConnection();
+
+        channel.ApplyModeSnapshot(new[] { KeyMode(ModeAction.Add, "hunter2") });
+
+        Assert.AreEqual("hunter2", channel.Key);
     }
 
     [Test]

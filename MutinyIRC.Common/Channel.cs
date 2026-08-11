@@ -24,6 +24,8 @@ public enum ChannelMembership
 /// </summary>
 public sealed class Channel : MessageContext
 {
+    private string _key;
+
     public Channel(Server parent, string name)
     {
         Server = parent;
@@ -41,9 +43,23 @@ public sealed class Channel : MessageContext
     public override Server OwningServer => Server;
 
     /// <summary>
-    /// The key (password) to the channel
+    /// The key (password) to the channel, or null when the channel has none. Tracked from the
+    /// +k and -k mode changes the server sends, and from the mode reply that follows a join.
+    /// A server sends the key itself only to members, so a channel we have not joined keeps a
+    /// null key, and a server that hides the key gives an empty one: the channel is keyed
+    /// whenever this is not null.
     /// </summary>
-    public string Key { get; set; }
+    public string Key
+    {
+        get => _key;
+        set
+        {
+            if (_key == value)
+                return;
+            _key = value;
+            KeyChanged.Fire(this, new DataEventArgs<string>(value));
+        }
+    }
 
     /// <summary>
     /// The user limit of the channel
@@ -92,6 +108,12 @@ public sealed class Channel : MessageContext
     /// The channel's topic was received.
     /// </summary>
     public event EventHandler<DataEventArgs<string>> TopicReceived;
+
+    /// <summary>
+    /// The channel's key was set or cleared. The argument holds the new key, or null when the
+    /// key was removed.
+    /// </summary>
+    public event EventHandler<DataEventArgs<string>> KeyChanged;
 
     /// <summary>
     /// A user joined the channel
@@ -265,12 +287,19 @@ public sealed class Channel : MessageContext
 
     /// <summary>
     /// Applies channel op/halfop/voice mode changes to the affected users' prefixes
-    /// without re-fetching the whole NAMES list.
+    /// without re-fetching the whole NAMES list, and tracks the channel key.
     /// </summary>
     public void ApplyModeChanges(ChannelModeInfo[] modes)
     {
         foreach (ChannelModeInfo mode in modes)
         {
+            if (mode.Mode == ChannelMode.Password)
+            {
+                // A -k carries the key that is going away, so only an add can set one.
+                Key = mode.Action == ModeAction.Add ? mode.Parameter : null;
+                continue;
+            }
+
             char symbol = mode.Mode switch
             {
                 ChannelMode.ChannelOperator => '@',
@@ -293,6 +322,17 @@ public sealed class Channel : MessageContext
         }
 
         Users.Refresh();
+    }
+
+    /// <summary>
+    /// Applies the full set of modes the server reports for the channel, as opposed to a
+    /// change to them. Every mode the reply leaves out is off, so the key clears unless the
+    /// reply names it.
+    /// </summary>
+    public void ApplyModeSnapshot(ChannelModeInfo[] modes)
+    {
+        Key = null;
+        ApplyModeChanges(modes);
     }
 
     public void Part(string message)

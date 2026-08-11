@@ -123,6 +123,7 @@ public class Server : MessageContext, IDisposable
         Connection.Listener.OnRegistered += Listener_OnRegistered;
         Connection.Listener.OnNames += Listener_OnNames;
         Connection.Listener.OnChannelModeChange += Listener_OnChannelModeChange;
+        Connection.Listener.OnChannelModeRequest += Listener_OnChannelModeRequest;
         Connection.Listener.OnUserModeChange += Listener_OnUserModeChange;
         Connection.Listener.OnError += Listener_OnError;
         Connection.Listener.OnAction += Listener_OnAction;
@@ -304,6 +305,7 @@ public class Server : MessageContext, IDisposable
         Connection.Listener.OnRegistered -= Listener_OnRegistered;
         Connection.Listener.OnNames -= Listener_OnNames;
         Connection.Listener.OnChannelModeChange -= Listener_OnChannelModeChange;
+        Connection.Listener.OnChannelModeRequest -= Listener_OnChannelModeRequest;
         Connection.Listener.OnUserModeChange -= Listener_OnUserModeChange;
         Connection.Listener.OnError -= Listener_OnError;
         Connection.Listener.OnAction -= Listener_OnAction;
@@ -668,6 +670,8 @@ public class Server : MessageContext, IDisposable
             chan.Membership = ChannelMembership.Joined;
             JoinSelf.Fire(this, new DataEventArgs<Channel>(chan));
             Connection.Sender.Names(channel);
+            // The JOIN itself says nothing about the channel's modes, so ask for them.
+            Connection.Sender.RequestChannelModes(channel);
         }
         else
         {
@@ -714,6 +718,14 @@ public class Server : MessageContext, IDisposable
         ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, chan, modes, raw));
 
         chan.ApplyModeChanges(modes);
+    }
+
+    // The reply to the MODE request sent on join. It reports every mode the channel has, so
+    // the channel takes it as a snapshot and not as a change.
+    private void Listener_OnChannelModeRequest(string channel, ChannelModeInfo[] modes)
+    {
+        if (Channels.TryGetValue(channel, out Channel chan))
+            chan.ApplyModeSnapshot(modes);
     }
 
     private void Listener_OnError(object sender, ErrorMessageEventArgs a)
