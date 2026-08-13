@@ -1,6 +1,9 @@
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Headless.NUnit;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using FakeItEasy;
@@ -41,11 +44,15 @@ public class SidebarViewTests
         return server;
     }
 
-    /// <summary>Shows the window over a live MainViewModel and lets its bindings settle.</summary>
+    /// <summary>
+    /// Shows a bare <see cref="SidebarView"/> over a live MainViewModel and lets its bindings
+    /// settle. The sidebar is hosted on its own rather than inside a MainWindow: it reaches no
+    /// further than itself, and nothing the content area draws can be mistaken for part of it.
+    /// </summary>
     private static (Window window, MainViewModel vm) ShowSidebar()
     {
         var vm = CompositionRoot.Resolve<MainViewModel>();
-        var window = new MainWindow { DataContext = vm };
+        var window = new Window { Content = new SidebarView(), DataContext = vm };
         window.Show();
         Dispatcher.UIThread.RunJobs();
         return (window, vm);
@@ -56,13 +63,17 @@ public class SidebarViewTests
             .First(t => t.Classes.Contains("groupHeading") && t.Text == text);
 
     /// <summary>
-    /// The row button a panel is drawn on. A row shares its DataContext with the close button
-    /// beside it, so the pill — which only the nav theme has — is what tells them apart.
+    /// The row button a panel is drawn on. The close button inside the row inherits the row's
+    /// DataContext, so the row is the one of the two that no template owns.
     /// </summary>
     private static Button RowFor(Window window, object panel) =>
         window.GetVisualDescendants().OfType<Button>()
-            .First(b => ReferenceEquals(b.DataContext, panel)
-                        && b.GetVisualDescendants().OfType<Border>().Any(x => x.Name == "PART_Pill"));
+            .Single(b => ReferenceEquals(b.DataContext, panel) && b.TemplatedParent is null);
+
+    /// <summary>The close button folded into a row's template.</summary>
+    private static Button CloseButtonOf(Window window, object panel) =>
+        RowFor(window, panel).GetVisualDescendants().OfType<Button>()
+            .Single(b => b.Name == "PART_Close");
 
     [AvaloniaTest]
     public void Switcher_NamesTheShownConnectionAndItsState()
@@ -78,6 +89,46 @@ public class SidebarViewTests
             "Before it registers, the host is the only name the switcher has for the network");
         Assert.That(texts, Does.Contain("Connected"),
             "The switcher's second line is the connection's state");
+    }
+
+    [AvaloniaTest]
+    public void SwitcherRow_ShowsThatConnectionAndClosesTheFlyout()
+    {
+        var (window, vm) = ShowSidebar();
+        vm.CreateServerPanel(FakeServer("irc.a.com"));
+        vm.CreateServerPanel(FakeServer("irc.b.com"));
+        ServerViewModel first = vm.Servers.First();
+        vm.ShowServerCommand.Execute(vm.Servers.Last());
+        Dispatcher.UIThread.RunJobs();
+
+        Button switcher = window.GetVisualDescendants().OfType<Button>()
+            .Single(b => b.Name == "NetworkSwitcherButton");
+        var flyout = (Flyout)switcher.Flyout!;
+        flyout.ShowAt(switcher);
+        Dispatcher.UIThread.RunJobs();
+
+        Button row = ((Control)flyout.Content!).GetVisualDescendants().OfType<Button>()
+            .First(b => ReferenceEquals(b.DataContext, first));
+        row.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(vm.ShownServer, Is.SameAs(first),
+            "Closing the flyout clears the row's DataContext, so the click has to read the "
+            + "connection before it hides");
+        Assert.That(flyout.IsOpen, Is.False, "The row that has been chosen closes the switcher");
+    }
+
+    [AvaloniaTest]
+    public void PanelHeadings_AreAbsentWhileThereIsNoConnection()
+    {
+        var (window, _) = ShowSidebar();
+
+        var shown = window.GetVisualDescendants().OfType<TextBlock>()
+            .Where(t => t.Classes.Contains("groupHeading") && t.IsEffectivelyVisible)
+            .Select(t => t.Text).ToList();
+
+        Assert.That(shown, Is.Empty,
+            "With no connection there are no panels, so a heading has nothing to head");
     }
 
     [AvaloniaTest]
@@ -143,6 +194,50 @@ public class SidebarViewTests
     private static Border PillOf(Window window, object panel) =>
         RowFor(window, panel).GetVisualDescendants().OfType<Border>()
             .First(b => b.Name == "PART_Pill");
+
+    [AvaloniaTest]
+    public void CloseButton_BelongsToTheRowThePointerIsOnAndSaysWhatClosingCosts()
+    {
+        var (window, vm) = ShowSidebar();
+        Server server = FakeServer();
+        vm.CreateServerPanel(server);
+        server.Connection.Listener.Parse(":me!u@h JOIN #test");
+        server.Connection.Listener.Parse(":bob!u@h PRIVMSG me :hello");
+        Dispatcher.UIThread.RunJobs();
+
+        ChannelViewModel channel = vm.Panels.OfType<ChannelViewModel>().Single();
+        PrivateMessageViewModel dm = vm.Panels.OfType<PrivateMessageViewModel>().Single();
+        ServerViewModel console = vm.Servers.Single();
+
+        Button close = CloseButtonOf(window, channel);
+        Assert.That(close.IsEffectivelyVisible, Is.False,
+            "A row nobody points at shows no close button, and so cannot be closed by a stray "
+            + "click on the space one would occupy");
+
+        Hover(window, RowFor(window, channel));
+        Assert.That(close.IsEffectivelyVisible, Is.True);
+        Assert.That(close.Command, Is.SameAs(channel.CloseCommand),
+            "The close button is part of the row, so it closes that row's panel");
+        Assert.That(ToolTip.GetTip(close), Is.EqualTo("Leave and close"),
+            "Closing a channel panel parts the channel, and the row says so");
+
+        Assert.That(ToolTip.GetTip(CloseButtonOf(window, dm)), Is.EqualTo("Close"),
+            "Closing a direct message costs nothing, so it does not warn");
+
+        Hover(window, RowFor(window, console));
+        Assert.That(CloseButtonOf(window, console).IsEffectivelyVisible, Is.False,
+            "The console is the connection itself: it closes with the connection, not on its own");
+    }
+
+    /// <summary>Puts the pointer on the middle of a control.</summary>
+    private static void Hover(Window window, Control control)
+    {
+        Point centre = control
+            .TranslatePoint(new Point(control.Bounds.Width / 2, control.Bounds.Height / 2), window)!
+            .Value;
+        window.MouseMove(centre);
+        Dispatcher.UIThread.RunJobs();
+    }
 
     [AvaloniaTest]
     public void ChannelRow_ShowsThePadlockOnlyWhileTheChannelIsKeyed()

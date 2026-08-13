@@ -86,13 +86,21 @@ activity.
 
 ## Sidebar
 
-The navigation column down the left edge of `MainWindow`: a 48px strip at the top that the platform treats
-as the window's title bar and that holds the settings button, the [network switcher](#shown-connection)
-under it, and then the panel list for the [shown connection](#shown-connection) — its console pinned at the
-top, then its channels and its private messages under their group headings. Clicking any row runs
-`SelectPanelCommand`, which sets `SelectedPanel` and swaps the main content area; channel and
-private-message rows also carry a close button that fades in on hover, and closing a channel parts it.
+`SidebarView`, the navigation column down the left edge of `MainWindow`: a 48px strip at the top that the
+platform treats as the window's title bar and that holds the settings button, the
+[network switcher](#shown-connection) under it, and then the panel list for the
+[shown connection](#shown-connection) — its console pinned at the top, then its channels and its private
+messages under their group headings. Clicking any row runs `SelectPanelCommand`, which sets `SelectedPanel`
+and swaps the main content area.
 
 The column starts at 220px and you may drag it between 150 and 500 with the `GridSplitter` that sits in the
-next grid column. It draws on `SurfaceNav`, and its rows use the `SidebarNavTheme` control theme defined in
-`MainWindow.axaml` — which is also where the accent pill on the selected row comes from.
+next grid column. It draws on `SurfaceNav`.
+
+## Sidebar nav row
+
+Every clickable row in the [sidebar](#sidebar) is one `Button` wearing the `SidebarNavTheme` control theme
+(`Themes/SidebarNavTheme.axaml`). The theme's template owns the parts a row may show: `PART_Pill`, the accent
+bar that marks the selected row, and `PART_Close`, the close button that appears while the pointer is on the
+row. A row opts into the close button with the `closable` class, which also reserves the room for it; a row
+without the class never shows one. `PART_Close` runs the panel's `CloseCommand` and names its cost through
+`CloseTooltip`, so closing a channel says it parts the channel.

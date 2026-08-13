@@ -24,6 +24,9 @@ public class ChannelViewModel : IrcViewModel
 
     public string ChannelName => base.Name.TrimStart(ChannelPrefixes.ToCharArray());
 
+    /// <summary>Closing a channel panel also parts the channel.</summary>
+    public override string CloseTooltip => "Leave and close";
+
     /// <summary>
     /// The prefix character the channel's name starts with, which says what kind of channel it
     /// is: "#" for an ordinary one, "&amp;" for a server-local one, and so on. Empty for a name
