@@ -149,16 +149,15 @@ public class MainViewModel : ViewModelBase
     {
         LoadSettings();
 
-        List<ServerSettings> servers = IrcSettingsManager.Instance.GetAutoConnectServers();
+        List<NetworkSettings> networks = IrcSettingsManager.Instance.GetAutoConnectNetworks();
 
-        foreach (ServerSettings server in servers)
+        // One network gives one connection, which dials that network's entry points in order
+        // until one answers.
+        foreach (NetworkSettings network in networks)
         {
-            if (server.Nick == null)
-                server.Nick = AppSettings.Instance.FirstNick;
-
             // Create fires ServerManager.ServerAdded synchronously, so CreateServerPanel has
             // already wired this server's JoinSelf handler by the time Connect() runs.
-            Server newServer = ServerManager.Instance.Create(new ConnectionArgs(server.Nick, server.Url, server.Ssl));
+            Server newServer = ServerManager.Instance.Create(network.ToConnectionCandidates());
             newServer.Connect();
         }
 

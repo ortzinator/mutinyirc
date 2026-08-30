@@ -1,4 +1,4 @@
-using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using FakeItEasy;
@@ -35,12 +35,14 @@ public class ServerViewModelRegistrationTests
 
     /// <summary>
     /// Swaps a fresh <see cref="IrcSettingsManager"/> into the singleton field so no test reads or
-    /// writes the user's real servers.json. The constructor is private and the field is static, so
-    /// reflection is the only way in without adding a production seam that only tests would use.
+    /// writes the user's real servers.json. The manager is pointed at a file of this fixture's own,
+    /// so even a Save cannot reach it; the singleton field is static, so reflection is still the
+    /// only way to put the manager where <c>ServerViewModel</c> looks for it.
     /// </summary>
     private static IrcSettingsManager UseEmptySettings()
     {
-        var manager = (IrcSettingsManager)Activator.CreateInstance(typeof(IrcSettingsManager), nonPublic: true)!;
+        var manager = new IrcSettingsManager(
+            Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".json"));
         SingletonField.SetValue(null, manager);
         return manager;
     }
@@ -76,7 +78,7 @@ public class ServerViewModelRegistrationTests
     private static NetworkSettings SaveLibera(IrcSettingsManager manager)
     {
         NetworkSettings libera = manager.GetOrAddNetwork("Libera");
-        libera.AddServer(new ServerSettings("irc.libera.chat", "Random", "6667", false));
+        libera.AddServer(new ServerSettings("irc.libera.chat", 6667, false));
         libera.AddChannel(new ChannelSettings("#MutinyIRC", true));
         return libera;
     }

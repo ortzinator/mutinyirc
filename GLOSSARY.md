@@ -19,12 +19,21 @@ holds the live ones — and still calls a `Server` parameter `ntw` in `Remove`, 
 
 ## Entry point
 
-One host you may dial to reach a [network](#network): a hostname, a set of candidate ports, and a TLS flag.
-Saved as `ServerSettings`; `NetworkSettings.GetRandomServer` and `ServerSettings.RandomPort` pick between
-the alternatives, because the entry points of a network are interchangeable. A hostname belongs to at most
-one network. That is what makes `IrcSettingsManager.GetNetwork(Server)` able to scan every network's hosts
-for a URL match and stop at the first hit. "Server" in the settings window means entry point; "server" in
-`MutinyIRC.Common` means connection.
+One host you may dial to reach a [network](#network): a hostname, the one port to dial it on, and a TLS
+flag. Saved as `ServerSettings`. Its place in `NetworkSettings.Servers` is its place in the
+[failover order](#failover-order), so the entry points of a network are ranked rather than
+interchangeable. A hostname belongs to at most one network. That is what makes
+`IrcSettingsManager.GetNetwork(Server)` able to scan every network's hosts for a URL match and stop at the
+first hit. "Server" in the settings window means entry point; "server" in `MutinyIRC.Common` means
+connection.
+
+## Failover order
+
+The order a [network](#network) dials its [entry points](#entry-point) in — top to bottom until one
+answers. It is simply the order of `NetworkSettings.Servers`, which the Networks dialog lets you rearrange.
+`NetworkSettings.ToConnectionCandidates` turns it into the list a `Server` walks: a failed dial steps to
+the next host at once, and only a pass that runs off the end starts a round of the reconnect backoff. Thus
+"retry N" in the sidebar counts passes over the hosts, not hosts.
 
 ## Network
 

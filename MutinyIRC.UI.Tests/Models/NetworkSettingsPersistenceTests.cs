@@ -25,7 +25,7 @@ public class NetworkSettingsPersistenceTests
     private static NetworkSettingsList BuildSavedList()
     {
         var libera = new NetworkSettings("Libera");
-        libera.AddServer(new ServerSettings("irc.libera.chat", "Libera", "6667", false));
+        libera.AddServer(new ServerSettings("irc.libera.chat", 6667, false));
         libera.AddChannel(new ChannelSettings("#MutinyIRC", true));
 
         var list = new NetworkSettingsList();
@@ -55,6 +55,96 @@ public class NetworkSettingsPersistenceTests
         Assert.That(loaded[0].Servers.Select(s => s.Url), Is.EqualTo(new[] { "irc.libera.chat" }));
         Assert.That(loaded[0].Channels.Select(c => c.Name), Is.EqualTo(new[] { "#MutinyIRC" }));
         Assert.That(loaded[0].Channels[0].AutoJoin, Is.True);
+    }
+
+    // ── The shape written before a network owned the port, nick and autoconnect ──
+
+    /// <summary>
+    /// A servers.json as it was written when every entry point carried its own port list, its
+    /// own nick and its own autoconnect flag.
+    /// </summary>
+    private const string LegacyJson = """
+        [{
+          "Name": "Libera",
+          "Servers": [
+            { "Url": "irc.libera.chat", "Description": "Libera", "Ports": "6697,6667",
+              "Ssl": true, "AutoConnect": false, "Nick": "sparkplug" },
+            { "Url": "eu.libera.chat", "Description": "", "Ports": "6667",
+              "Ssl": false, "AutoConnect": true, "Nick": null }
+          ],
+          "Channels": [ { "Name": "#MutinyIRC", "AutoJoin": true, "Key": "", "Description": "" } ]
+        }]
+        """;
+
+    private static NetworkSettings LoadLegacy()
+    {
+        List<NetworkSettings> loaded =
+            JsonSerializer.Deserialize<List<NetworkSettings>>(LegacyJson, Options)!;
+        IrcSettingsManager.FoldLegacyEntryPointFields(loaded);
+        return loaded[0];
+    }
+
+    [Test]
+    public void LegacyPortsString_BecomesTheFirstPort()
+    {
+        NetworkSettings network = LoadLegacy();
+
+        Assert.That(network.Servers.Select(s => s.Port), Is.EqualTo(new[] { 6697, 6667 }));
+    }
+
+    [Test]
+    public void LegacyAutoConnect_FoldsUpOntoTheNetwork()
+    {
+        // A network dials if any host it listed used to, because one network is now one
+        // connection rather than one connection per flagged host.
+        Assert.That(LoadLegacy().AutoConnect, Is.True);
+    }
+
+    [Test]
+    public void LegacyNick_FoldsUpOntoTheNetwork()
+    {
+        Assert.That(LoadLegacy().Nick, Is.EqualTo("sparkplug"));
+    }
+
+    [Test]
+    public void LegacyFields_AreNotWrittenBackOut()
+    {
+        // The fold is one-way: the next save must drop the fields it read, or the file
+        // keeps two answers to the same question.
+        NetworkSettings network = LoadLegacy();
+        var list = new NetworkSettingsList();
+        list.ReplaceAll(new[] { network });
+
+        string json = JsonSerializer.Serialize(list, Options);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(json, Does.Not.Contain("\"Ports\""),
+                "the old port list has to leave the file, or it holds a second answer");
+            Assert.That(json, Does.Contain("\"Port\": 6697"));
+            Assert.That(json, Does.Contain("\"AutoConnect\": true"),
+                "the network keeps the flag it was handed");
+            Assert.That(json, Does.Not.Contain("\"AutoConnect\": false"),
+                "the entry point no longer carries one");
+        });
+    }
+
+    [Test]
+    public void LegacyFile_RoundTripsIntoTheNewShapeUnchanged()
+    {
+        NetworkSettings folded = LoadLegacy();
+        var list = new NetworkSettingsList();
+        list.ReplaceAll(new[] { folded });
+
+        List<NetworkSettings> reloaded = RoundTrip(list);
+        IrcSettingsManager.FoldLegacyEntryPointFields(reloaded);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(reloaded[0].Servers.Select(s => s.Port), Is.EqualTo(new[] { 6697, 6667 }));
+            Assert.That(reloaded[0].AutoConnect, Is.True);
+            Assert.That(reloaded[0].Nick, Is.EqualTo("sparkplug"));
+        });
     }
 
     [Test]

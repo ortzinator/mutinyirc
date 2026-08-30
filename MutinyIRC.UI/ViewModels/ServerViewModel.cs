@@ -219,8 +219,11 @@ public class ServerViewModel : IrcViewModel
     {
         var nwSettings = IrcSettingsManager.Instance.GetNetwork(_server);
         var chan = nwSettings?.GetChannel(e.Channel.Name);
+
+        // Membership of the network's channel list is the autojoin flag now, so leaving a
+        // channel takes it off the list rather than leaving a chip that does nothing.
         if (chan != null)
-            chan.AutoJoin = false;
+            nwSettings!.RemoveChannel(chan);
     }
 
     private void Server_NickError(object? sender, NickErrorEventArgs e)
@@ -230,7 +233,7 @@ public class ServerViewModel : IrcViewModel
         switch (_nickRetryAttempt)
         {
             case 0:
-                newNick = AppSettings.Instance.SecondNick;
+                newNick = AlternateNick();
                 DisplayNickTakenMessage(e.BadNick, newNick);
                 _server.Connection.Sender.Register(newNick);
                 _nickRetryAttempt = 1;
@@ -249,6 +252,19 @@ public class ServerViewModel : IrcViewModel
             string nick = "MutinyIRC" + Random.Shared.Next(1000, 10000);
             _server.Connection.Sender.Register(nick);
         }
+    }
+
+    /// <summary>
+    /// The nick to try when the first one is taken: the network's own alternate where it names
+    /// one, and the app-wide second nick where it does not. Identity belongs to the network, so
+    /// the network answers first.
+    /// </summary>
+    private string AlternateNick()
+    {
+        string? networkNick = IrcSettingsManager.Instance.GetNetwork(_server)?.AlternateNick;
+        return string.IsNullOrWhiteSpace(networkNick)
+            ? AppSettings.Instance.SecondNick
+            : networkNick;
     }
 
     private void DisplayNickTakenMessage(string nick, string newNick)
@@ -353,9 +369,12 @@ public class ServerViewModel : IrcViewModel
 
         // AddServer keys on the URL and ignores a host the network already lists, so this both
         // donates a new entry point and leaves a known one alone.
-        network.AddServer(new ServerSettings(_server.Url, "Random", _server.Port.ToString(),
-            _server.Connection.ConnectionData.Ssl)
-        { AutoConnect = true });
+        network.AddServer(new ServerSettings(_server.Url, _server.Port,
+            _server.Connection.ConnectionData.Ssl));
+
+        // Connecting to a network is what marks it worth dialling at startup. The flag sits on
+        // the network, so reaching it through any of its hosts sets it once.
+        network.AutoConnect = true;
 
         Name = ServerStrings.ServerFormTitleBar.With(
             _server.UserNick,

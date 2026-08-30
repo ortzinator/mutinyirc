@@ -1,98 +1,66 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Text.Json.Serialization;
 
 namespace MutinyIRC.UI;
 
+/// <summary>
+/// One saved entry point: a host, the port to dial it on, and whether that port speaks TLS. Its
+/// position in <see cref="NetworkSettings.Servers"/> is its place in the failover order.
+/// </summary>
 public class ServerSettings : IEquatable<ServerSettings>
 {
-    public ServerSettings(string url, string description, string ports, bool ssl)
+    public const int DefaultPort = 6667;
+
+    public ServerSettings(string url, int port, bool ssl)
     {
         Url = url;
-        Description = description;
-        Ports = ports;
+        Port = port;
         Ssl = ssl;
-        AutoConnect = true;
     }
 
     public ServerSettings() { }
 
     public string Url { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Ports { get; set; } = string.Empty;
+    public int Port { get; set; } = DefaultPort;
     public bool Ssl { get; set; }
+
+    /// <summary>
+    /// Read from disk only, so a file written before the network owned these flags can be folded
+    /// up. <see cref="IrcSettingsManager.Load"/> moves the value onto the network, and the
+    /// serializer is told to skip the default, so it leaves the file on the next save.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool AutoConnect { get; set; }
+
+    /// <inheritdoc cref="AutoConnect"/>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Nick { get; set; }
+
+    /// <summary>
+    /// The port as it was written before one entry point meant one port: a comma-and-range list
+    /// of interchangeable candidates. Read from disk only. <see cref="IrcSettingsManager.Load"/>
+    /// takes its first value as <see cref="Port"/>.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Ports { get; set; }
+
     [JsonIgnore]
     public NetworkSettings? Network { get; set; }
 
-    public int RandomPort
+    /// <summary>
+    /// Reads the first port out of a legacy <see cref="Ports"/> string. Only the first ever
+    /// mattered: nothing but the random picker read the rest, and nothing read the picker.
+    /// Returns <see cref="DefaultPort"/> for anything that does not parse.
+    /// </summary>
+    public static int FirstPortOf(string? ports)
     {
-        get
-        {
-            var list = PortList;
-            if (list == null || list.Length == 0)
-                throw new InvalidOperationException("No ports configured.");
-            // The upper bound is exclusive, so it is the length, not the last index.
-            return list[new Random().Next(0, list.Length)];
-        }
-    }
+        if (string.IsNullOrWhiteSpace(ports))
+            return DefaultPort;
 
-    private int[]? PortList => PortsStringToArray(Ports);
-
-    private static int[]? PortsStringToArray(string ports)
-    {
-        if (ports == string.Empty)
-            return null;
-
-        string[] portListChunk = ports.Split(',');
-        var portList = new List<int>(portListChunk.Length);
-
-        foreach (string chunk in portListChunk)
-        {
-            if (chunk.Contains("-"))
-            {
-                string[] rangeParts = chunk.Split('-');
-                if (rangeParts.Length != 2)
-                    throw new FormatException();
-
-                int beginRange;
-                int endRange;
-
-                try
-                {
-                    beginRange = Int32.Parse(rangeParts[0]);
-                    endRange = Int32.Parse(rangeParts[1]);
-                }
-                catch (Exception)
-                {
-                    throw new FormatException();
-                }
-
-                if (endRange <= beginRange)
-                    throw new FormatException();
-
-                while (beginRange <= endRange && !portList.Contains(beginRange))
-                    portList.Add(beginRange++);
-            }
-            else
-            {
-                int tempNum;
-                try
-                {
-                    tempNum = Int32.Parse(chunk);
-                }
-                catch (Exception)
-                {
-                    throw new FormatException();
-                }
-
-                if (!portList.Contains(tempNum))
-                    portList.Add(tempNum);
-            }
-        }
-
-        return portList.ToArray();
+        string first = ports.Split(',')[0].Split('-')[0].Trim();
+        return int.TryParse(first, out int port) && port > 0 && port <= 65535
+            ? port
+            : DefaultPort;
     }
 
     public bool Equals(ServerSettings? server) => server != null && server.Url == Url;

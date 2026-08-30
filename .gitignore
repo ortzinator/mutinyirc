@@ -69,4 +69,6 @@ CLAUDE.md
 screenshot.png
 
 # Design comps this palette was taken from. Kept locally, not in the repo.
-design/
+# Anchored to the repo root: unanchored, it also swallowed docs/design and
+# MutinyIRC.UI/ViewModels/Design, which do belong in the repo.
+/design/

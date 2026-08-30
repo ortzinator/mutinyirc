@@ -10,7 +10,7 @@ public class NetworkSettingsTests
     {
         var net = new NetworkSettings(name);
         foreach (string host in hosts)
-            net.AddServer(new ServerSettings(host, "Random", "6667", false));
+            net.AddServer(new ServerSettings(host, 6667, false));
         return net;
     }
 
@@ -34,7 +34,7 @@ public class NetworkSettingsTests
     {
         var net = BuildNetwork("Libera", "irc.libera.chat");
 
-        net.AddServer(new ServerSettings("irc.libera.chat", "Random", "7000", true));
+        net.AddServer(new ServerSettings("irc.libera.chat", 7000, true));
 
         Assert.That(net.Servers.Count, Is.EqualTo(1));
     }
@@ -66,39 +66,116 @@ public class NetworkSettingsTests
             Is.EqualTo(new[] { "irc.libera.chat" }));
     }
 
-    // ── GetRandomServer ──────────────────────────────────────────────────────
+    // ── MoveServer: the failover order ───────────────────────────────────────
 
     [Test]
-    public void GetRandomServer_OverManyDraws_ReachesEveryEntryPoint()
+    public void MoveServer_Later_SwapsWithTheOneBelow()
     {
-        // The entry points of a network are interchangeable, so each one must be
-        // reachable. An exclusive upper bound made the last one unreachable.
-        // 300 draws over 3 entry points: a miss is about 1 in 10^52.
-        var net = BuildNetwork("Libera", "irc.libera.chat", "eu.libera.chat", "us.libera.chat");
+        var net = BuildNetwork("Libera", "a", "b", "c");
 
-        var seen = Enumerable.Range(0, 300)
-            .Select(_ => net.GetRandomServer().Url)
-            .Distinct();
-
-        Assert.That(seen, Is.EquivalentTo(new[]
-        {
-            "irc.libera.chat", "eu.libera.chat", "us.libera.chat"
-        }));
+        Assert.That(net.MoveServer(net.Servers[0], 1), Is.True);
+        Assert.That(net.Servers.Select(s => s.Url), Is.EqualTo(new[] { "b", "a", "c" }));
     }
 
     [Test]
-    public void GetRandomServer_OneEntryPoint_ReturnsIt()
+    public void MoveServer_Earlier_SwapsWithTheOneAbove()
+    {
+        var net = BuildNetwork("Libera", "a", "b", "c");
+
+        Assert.That(net.MoveServer(net.Servers[2], -1), Is.True);
+        Assert.That(net.Servers.Select(s => s.Url), Is.EqualTo(new[] { "a", "c", "b" }));
+    }
+
+    [Test]
+    public void MoveServer_OffTheTop_ChangesNothing()
+    {
+        var net = BuildNetwork("Libera", "a", "b");
+
+        Assert.That(net.MoveServer(net.Servers[0], -1), Is.False);
+        Assert.That(net.Servers.Select(s => s.Url), Is.EqualTo(new[] { "a", "b" }));
+    }
+
+    [Test]
+    public void MoveServer_OffTheBottom_ChangesNothing()
+    {
+        var net = BuildNetwork("Libera", "a", "b");
+
+        Assert.That(net.MoveServer(net.Servers[1], 1), Is.False);
+        Assert.That(net.Servers.Select(s => s.Url), Is.EqualTo(new[] { "a", "b" }));
+    }
+
+    [Test]
+    public void MoveServer_AHostThisNetworkDoesNotList_ChangesNothing()
+    {
+        var net = BuildNetwork("Libera", "a");
+
+        Assert.That(net.MoveServer(new ServerSettings("elsewhere", 6667, false), 1), Is.False);
+    }
+
+    // ── ToConnectionCandidates ───────────────────────────────────────────────
+
+    [Test]
+    public void ToConnectionCandidates_KeepsTheSavedPort()
+    {
+        // ConnectionArgs' constructor hardcodes 6667, so a port set only there is
+        // dropped at dial time. This is the bug the migration fixes.
+        var net = new NetworkSettings("Libera");
+        net.AddServer(new ServerSettings("irc.libera.chat", 6697, true));
+
+        var candidates = net.ToConnectionCandidates();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(candidates[0].Port, Is.EqualTo(6697));
+            Assert.That(candidates[0].Ssl, Is.True);
+            Assert.That(candidates[0].Hostname, Is.EqualTo("irc.libera.chat"));
+        });
+    }
+
+    [Test]
+    public void ToConnectionCandidates_KeepsTheFailoverOrder()
+    {
+        var net = BuildNetwork("Libera", "first", "second", "third");
+
+        Assert.That(net.ToConnectionCandidates().Select(c => c.Hostname),
+            Is.EqualTo(new[] { "first", "second", "third" }));
+    }
+
+    [Test]
+    public void ToConnectionCandidates_UsesTheNetworkNick()
+    {
+        var net = BuildNetwork("Libera", "irc.libera.chat");
+        net.Nick = "sparkplug";
+
+        Assert.That(net.ToConnectionCandidates()[0].Nick, Is.EqualTo("sparkplug"));
+    }
+
+    [Test]
+    public void ToConnectionCandidates_NoNetworkNick_FallsBackToTheAppNick()
     {
         var net = BuildNetwork("Libera", "irc.libera.chat");
 
-        Assert.That(net.GetRandomServer(), Is.SameAs(net.Servers[0]));
+        Assert.That(net.ToConnectionCandidates()[0].Nick,
+            Is.EqualTo(AppSettings.Instance.FirstNick));
     }
 
     [Test]
-    public void GetRandomServer_NoEntryPoints_ThrowsInvalidOperation()
+    public void ToConnectionCandidates_NoEntryPoints_IsEmpty()
     {
-        var net = new NetworkSettings("Libera");
+        Assert.That(new NetworkSettings("Libera").ToConnectionCandidates(), Is.Empty);
+    }
 
-        Assert.That(() => net.GetRandomServer(), Throws.InvalidOperationException);
+    // ── Channels ─────────────────────────────────────────────────────────────
+
+    [Test]
+    public void RemoveChannel_DropsIt()
+    {
+        // Membership of the list is the autojoin flag, so parting a channel takes it
+        // off the list rather than clearing a flag on it.
+        var net = new NetworkSettings("Libera");
+        net.AddChannel(new Common.ChannelSettings("#mutinyirc", true));
+
+        Assert.That(net.RemoveChannel(net.Channels[0]), Is.True);
+        Assert.That(net.Channels, Is.Empty);
     }
 }

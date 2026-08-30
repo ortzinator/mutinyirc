@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using FakeItEasy;
 using FlamingIRC;
@@ -26,10 +25,11 @@ public class ServerViewModelStatusTests
     [SetUp]
     public void Setup()
     {
-        // Registration files the connection under a network, so give it settings of its own
-        // instead of the user's real servers.json.
-        SettingsSingleton.SetValue(null,
-            Activator.CreateInstance(typeof(IrcSettingsManager), nonPublic: true)!);
+        // Registration files the connection under a network, so give it settings of its own,
+        // over a file of this fixture's own, instead of the user's real servers.json.
+        SettingsSingleton.SetValue(null, new IrcSettingsManager(
+            System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+                                   System.IO.Path.GetRandomFileName() + ".json")));
     }
 
     [TearDown]

@@ -1,16 +1,23 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ic="using:FluentIcons.Avalonia"
         xmlns:vm="clr-namespace:MutinyIRC.UI.ViewModels"
+        xmlns:design="clr-namespace:MutinyIRC.UI.ViewModels.Design"
         x:Class="MutinyIRC.UI.Views.ServerSettingsWindow"
-        Title="Servers"
-        Width="940" Height="560"
+        Title="Networks"
+        Width="800" Height="640"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource SurfaceContent}">
 
+    <Design.DataContext>
+        <design:DesignSettingsViewModel/>
+    </Design.DataContext>
+
     <Window.Resources>
         <ControlTheme x:Key="SettingsListBoxItemTheme" TargetType="ListBoxItem">
-            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Height" Value="34"/>
             <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Template">
                 <ControlTemplate>
@@ -18,7 +25,8 @@
                             CornerRadius="{TemplateBinding CornerRadius}"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
             </Setter>
@@ -31,73 +39,146 @@
         </ControlTheme>
     </Window.Resources>
 
+    <Window.Styles>
+        <!-- The rail's + / - strip: two flat cells that fill the width, not framed buttons. -->
+        <Style Selector="Button.railAction">
+            <Setter Property="Height" Value="34"/>
+            <!-- Fill the half of the strip the button sits in, so its glyph centres over that
+                 half rather than hugging the left edge of a button sized to its content. -->
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceLayerAlt}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.railAction:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SubtleHoverBackground}"/>
+        </Style>
+
+        <!-- The reorder arrows and the row's remove cross. All three stay quiet until you are
+             on the row, which is what keeps a table of hosts readable. -->
+        <Style Selector="Button.rowAction">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiary}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.rowAction:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SubtleHoverBackground}"/>
+        </Style>
+        <Style Selector="Border.serverRow Button.rowReveal">
+            <Setter Property="Opacity" Value="0"/>
+        </Style>
+        <Style Selector="Border.serverRow:pointerover Button.rowReveal">
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+
+        <!-- The first entry point is the one dialled first, so its number carries the accent. -->
+        <Style Selector="TextBlock.order">
+            <Setter Property="Foreground" Value="{DynamicResource TextQuaternary}"/>
+        </Style>
+        <Style Selector="TextBlock.order.first">
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <Style Selector="TextBlock.sectionLabel">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+        </Style>
+
+        <!-- An input that sits inside a row or a chip, rather than framing itself. The stock
+             focus look draws its own fill and outline, which breaks the shape it sits in; the
+             caret is what says where you are typing. -->
+        <Style Selector="TextBox.inline">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="TextBox.inline /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource SurfaceCard}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+        </Style>
+    </Window.Styles>
+
     <DockPanel>
 
         <!-- Header -->
-        <Border DockPanel.Dock="Top"
-                Height="48"
-                Background="{DynamicResource SurfaceLayer}"
-                BorderBrush="{DynamicResource DividerBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="16,0">
-            <TextBlock Text="Servers"
-                       FontWeight="SemiBold" FontSize="15"
-                       VerticalAlignment="Center"/>
-        </Border>
-
-        <!-- Footer: OK / Cancel -->
-        <Border DockPanel.Dock="Bottom"
-                Background="{DynamicResource SurfaceLayerAlt}"
-                BorderBrush="{DynamicResource DividerBrush}"
-                BorderThickness="0,1,0,0"
-                Padding="12,8">
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        Spacing="6">
-                <Button Content="Save" Width="80" Classes="accent" IsDefault="True" Click="OkButton_Click" />
-                <Button Content="Cancel" Width="80" IsCancel="True" Click="CancelButton_Click" />
+        <Border DockPanel.Dock="Top" Padding="24,22,24,14">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Networks" FontSize="20" FontWeight="SemiBold"/>
+                <TextBlock Text="Servers Mutiny connects to, and the identity it uses on each."
+                           FontSize="13"
+                           Foreground="{DynamicResource TextSecondary}"/>
             </StackPanel>
         </Border>
 
-        <!-- Main content -->
-        <Grid ColumnDefinitions="200,*,*" Margin="12" ColumnSpacing="12">
+        <!-- Footer: Save / Cancel -->
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource SurfaceLayerAlt}"
+                BorderBrush="{DynamicResource ControlBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="24,14">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="Save" Width="88" Classes="accent" IsDefault="True" Click="OkButton_Click"/>
+                <Button Content="Cancel" Width="88" IsCancel="True" Click="CancelButton_Click"/>
+            </StackPanel>
+        </Border>
 
-            <!-- Networks column -->
-            <DockPanel Grid.Column="0">
+        <Grid ColumnDefinitions="228,*" ColumnSpacing="20" Margin="24,0,24,16">
 
-                <TextBlock DockPanel.Dock="Top"
-                           Text="NETWORKS"
-                           FontSize="11" FontWeight="SemiBold"
-                           Foreground="{DynamicResource TextTertiary}"
-                           Margin="0,0,0,6"/>
+            <!-- The network rail -->
+            <Border Grid.Column="0"
+                    Background="{DynamicResource SurfaceLayerAlt}"
+                    BorderBrush="{DynamicResource ControlBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    ClipToBounds="True">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,*"
+                          Background="{DynamicResource DividerBrush}">
+                        <Button Grid.Column="0" Classes="railAction"
+                                Margin="0,1,0,0"
+                                ToolTip.Tip="Add a network"
+                                Command="{Binding AddNetworkCommand}">
+                            <ic:SymbolIcon Symbol="Add" FontSize="14"/>
+                        </Button>
+                        <Button Grid.Column="1" Classes="railAction"
+                                Margin="1,1,0,0"
+                                ToolTip.Tip="Remove the selected network"
+                                Command="{Binding RemoveNetworkCommand}">
+                            <ic:SymbolIcon Symbol="Subtract" FontSize="14"/>
+                        </Button>
+                    </Grid>
 
-                <StackPanel DockPanel.Dock="Bottom"
-                            Orientation="Horizontal"
-                            Spacing="4"
-                            Margin="0,6,0,0">
-                    <Button Content="+ Add"
-                            Command="{Binding AddNetworkCommand}"
-                            Padding="10,5" FontSize="12"/>
-                    <Button Content="Edit"
-                            IsEnabled="{Binding SelectedNetwork, Converter={x:Static ObjectConverters.IsNotNull}}"
-                            Click="EditNetworkButton_Click"
-                            Padding="10,5" FontSize="12"/>
-                    <Button Content="Remove"
-                            Command="{Binding RemoveNetworkCommand}"
-                            Padding="10,5" FontSize="12"/>
-                </StackPanel>
-
-                <Border Background="{DynamicResource SurfaceLayer}"
-                        BorderBrush="{DynamicResource ControlBorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="6">
                     <ListBox x:Name="networksListBox"
                              ItemsSource="{Binding Networks}"
                              SelectedItem="{Binding SelectedNetwork}"
                              ItemContainerTheme="{StaticResource SettingsListBoxItemTheme}"
                              Background="Transparent"
                              BorderThickness="0"
-                             Padding="4">
+                             Padding="4"
+                             ToolTip.Tip="Double-click a network to rename it"
+                             DoubleTapped="NetworksListBox_DoubleTapped">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:NetworkSettingsViewModel}">
                                 <Grid>
@@ -120,198 +201,305 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </Border>
-            </DockPanel>
+                </DockPanel>
+            </Border>
 
-            <!-- Servers column -->
-            <DockPanel Grid.Column="1"
-                       IsEnabled="{Binding SelectedNetwork, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <!-- The selected network -->
+            <ScrollViewer Grid.Column="1"
+                          HorizontalScrollBarVisibility="Disabled"
+                          IsEnabled="{Binding SelectedNetwork, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <StackPanel Spacing="8" Margin="0,0,10,0" DataContext="{Binding SelectedNetwork}">
 
-                <TextBlock DockPanel.Dock="Top"
-                           FontSize="11" FontWeight="SemiBold"
-                           Foreground="{DynamicResource TextTertiary}"
-                           Margin="0,0,0,6">
-                    <Run Text="SERVERS"/>
-                    <Run Text=" — "/>
-                    <Run Text="{Binding SelectedNetwork.Name}"/>
-                </TextBlock>
+                    <!-- Entry points, in failover order -->
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="sectionLabel" Text="Servers"/>
+                            <TextBlock Text="Tried top to bottom until one answers"
+                                       FontSize="11"
+                                       VerticalAlignment="Bottom"
+                                       Foreground="{DynamicResource TextQuaternary}"/>
+                        </StackPanel>
 
-                <!-- Server detail form -->
-                <Border DockPanel.Dock="Bottom"
-                        Background="{DynamicResource SurfaceLayer}"
-                        BorderBrush="{DynamicResource ControlBorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="6"
-                        Padding="12"
-                        Margin="0,6,0,0"
-                        IsVisible="{Binding SelectedNetwork.SelectedServer, Converter={x:Static ObjectConverters.IsNotNull}}">
-                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
-                          ColumnDefinitions="80,*"
-                          RowSpacing="6"
-                          ColumnSpacing="8">
+                        <Border Classes="card" ClipToBounds="True">
+                            <StackPanel>
+                                <ItemsControl ItemsSource="{Binding Servers}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:ServerSettingsViewModel}">
+                                            <Border Classes="serverRow"
+                                                    Height="36"
+                                                    Padding="4,0,6,0"
+                                                    BorderBrush="{DynamicResource DividerBrush}"
+                                                    BorderThickness="0,0,0,1"
+                                                    Background="Transparent">
+                                                <Grid ColumnDefinitions="16,20,*,Auto,Auto,22"
+                                                      VerticalAlignment="Center">
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="URL"
-                                   FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextTertiary}"/>
-                        <TextBox Grid.Row="0" Grid.Column="1"
-                                 Text="{Binding SelectedNetwork.SelectedServer.Url}"
-                                 FontSize="13"
-                                 VerticalContentAlignment="Center"/>
+                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                        <Button Classes="rowAction rowReveal"
+                                                                Width="16" Height="15"
+                                                                ToolTip.Tip="Try this server earlier"
+                                                                Command="{Binding $parent[ItemsControl].DataContext.MoveServerUpCommand}"
+                                                                CommandParameter="{Binding}">
+                                                            <ic:SymbolIcon Symbol="ChevronUp" FontSize="9"/>
+                                                        </Button>
+                                                        <Button Classes="rowAction rowReveal"
+                                                                Width="16" Height="15"
+                                                                ToolTip.Tip="Try this server later"
+                                                                Command="{Binding $parent[ItemsControl].DataContext.MoveServerDownCommand}"
+                                                                CommandParameter="{Binding}">
+                                                            <ic:SymbolIcon Symbol="ChevronDown" FontSize="9"/>
+                                                        </Button>
+                                                    </StackPanel>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Description"
-                                   FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextTertiary}"/>
-                        <TextBox Grid.Row="1" Grid.Column="1"
-                                 Text="{Binding SelectedNetwork.SelectedServer.Description}"
-                                 FontSize="13"
-                                 VerticalContentAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1"
+                                                               Classes="order"
+                                                               Classes.first="{Binding IsFirst}"
+                                                               Text="{Binding Order}"
+                                                               FontSize="11"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Ports"
-                                   FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextTertiary}"/>
-                        <TextBox Grid.Row="2" Grid.Column="1"
-                                 Text="{Binding SelectedNetwork.SelectedServer.Ports}"
-                                 FontSize="13"
-                                 VerticalContentAlignment="Center"/>
+                                                    <TextBlock Grid.Column="2"
+                                                               Text="{Binding Url}"
+                                                               FontSize="13"
+                                                               Margin="6,0,10,0"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               VerticalAlignment="Center"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Nick"
-                                   FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextTertiary}"/>
-                        <TextBox Grid.Row="3" Grid.Column="1"
-                                 Text="{Binding SelectedNetwork.SelectedServer.Nick}"
-                                 FontSize="13"
-                                 VerticalContentAlignment="Center"/>
+                                                    <TextBlock Grid.Column="3"
+                                                               Text="{Binding Port}"
+                                                               FontSize="12.5"
+                                                               Margin="0,0,10,0"
+                                                               Foreground="{DynamicResource TextTertiary}"
+                                                               VerticalAlignment="Center"/>
 
-                        <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
-                                  Content="Use SSL"
-                                  IsChecked="{Binding SelectedNetwork.SelectedServer.Ssl}"
-                                  FontSize="13"/>
+                                                    <Border Grid.Column="4"
+                                                            CornerRadius="3"
+                                                            Padding="6,1"
+                                                            Margin="0,0,4,0"
+                                                            VerticalAlignment="Center"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1">
+                                                        <Panel>
+                                                            <TextBlock Text="TLS" FontSize="10.5"
+                                                                       IsVisible="{Binding Ssl}"
+                                                                       Foreground="{DynamicResource StatusSuccessForeground}"/>
+                                                            <TextBlock Text="plain" FontSize="10.5"
+                                                                       IsVisible="{Binding !Ssl}"
+                                                                       Foreground="{DynamicResource TextQuaternary}"/>
+                                                        </Panel>
+                                                    </Border>
 
-                        <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-                                  Content="Auto-connect"
-                                  IsChecked="{Binding SelectedNetwork.SelectedServer.AutoConnect}"
-                                  FontSize="13"/>
+                                                    <Button Grid.Column="5"
+                                                            Classes="rowAction rowReveal"
+                                                            Width="22" Height="22"
+                                                            VerticalAlignment="Center"
+                                                            ToolTip.Tip="Remove this server"
+                                                            Command="{Binding $parent[ItemsControl].DataContext.RemoveServerCommand}"
+                                                            CommandParameter="{Binding}">
+                                                        <ic:SymbolIcon Symbol="Dismiss" FontSize="10"/>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Border Height="36"
+                                        Padding="10,0,8,0"
+                                        Background="{DynamicResource SurfaceLayerAlt}"
+                                        BorderBrush="{DynamicResource DividerBrush}"
+                                        BorderThickness="0,1,0,0">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox Grid.Column="0"
+                                                 x:Name="newServerBox"
+                                                 Classes="inline"
+                                                 Text="{Binding NewServerText}"
+                                                 Watermark="add server — host:port"
+                                                 FontSize="12.5"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 Padding="0"
+                                                 VerticalAlignment="Center"
+                                                 VerticalContentAlignment="Center">
+                                            <TextBox.KeyBindings>
+                                                <KeyBinding Gesture="Enter" Command="{Binding AddServerCommand}"/>
+                                            </TextBox.KeyBindings>
+                                        </TextBox>
+                                        <Button Grid.Column="1"
+                                                x:Name="addServerButton"
+                                                Content="Add"
+                                                Classes="accent"
+                                                FontSize="12"
+                                                Padding="10,3"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding AddServerCommand}"/>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Connection settings. Every switch here is drawn and disabled: the
+                         settings behind them are not wired up yet, and the tooltip on each
+                         card says so. -->
+                    <Border Classes="card" Padding="14,10"
+                            ToolTip.Tip="Not wired up yet — Mutiny always verifies the certificate chain it is given.">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Verify TLS certificates" FontSize="13"/>
+                                <TextBlock Text="Refuses to connect if the server's certificate looks wrong"
+                                           FontSize="11.5"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextTertiary}"/>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" x:Name="verifyTlsToggle"
+                                          IsChecked="True" IsEnabled="False"
+                                          OnContent="" OffContent=""
+                                          VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Classes="card" Padding="14,10"
+                            ToolTip.Tip="Not wired up yet — FlamingIRC has no capability negotiation.">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="SASL authentication" FontSize="13"/>
+                                <TextBlock Text="Sends your password when connecting, to log you in"
+                                           FontSize="11.5"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextTertiary}"/>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" x:Name="saslToggle"
+                                          IsChecked="False" IsEnabled="False"
+                                          OnContent="" OffContent=""
+                                          VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Classes="card" Padding="14,10"
+                            ToolTip.Tip="Not wired up yet — connecting to a network still turns this on by itself.">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Connect on startup" FontSize="13"/>
+                                <TextBlock Text="Dials this network when Mutiny opens"
+                                           FontSize="11.5"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextTertiary}"/>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" x:Name="autoConnectToggle"
+                                          IsChecked="{Binding AutoConnect}" IsEnabled="False"
+                                          OnContent="" OffContent=""
+                                          VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Identity on this network -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,2,0,0">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Classes="fieldLabel" Text="Nickname"/>
+                            <TextBox Text="{Binding Nick}" FontSize="13" Height="32"
+                                     Watermark="{Binding NickWatermark}"
+                                     VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Classes="fieldLabel" Text="Alternate"/>
+                            <TextBox Text="{Binding AlternateNick}" FontSize="13" Height="32"
+                                     Watermark="{Binding AlternateNickWatermark}"
+                                     VerticalContentAlignment="Center"/>
+                        </StackPanel>
                     </Grid>
-                </Border>
 
-                <!-- Add / Remove Server buttons -->
-                <StackPanel DockPanel.Dock="Bottom"
-                            Orientation="Horizontal"
-                            Spacing="4"
-                            Margin="0,6,0,0">
-                    <Button Content="+ Add Server"
-                            Command="{Binding SelectedNetwork.AddServerCommand}"
-                            Padding="10,5" FontSize="12"/>
-                    <Button Content="Remove Server"
-                            Command="{Binding SelectedNetwork.RemoveServerCommand}"
-                            Padding="10,5" FontSize="12"/>
+                    <!-- Autojoin. Being on this list is what makes a channel autojoin. -->
+                    <StackPanel Spacing="6" Margin="0,4,0,0">
+                        <TextBlock Classes="sectionLabel" Text="Autojoin on connect"/>
+                        <WrapPanel>
+                            <ItemsControl ItemsSource="{Binding Channels}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:ChannelSettingsViewModel}">
+                                        <Border Height="26"
+                                                Margin="0,0,6,6"
+                                                Padding="10,0,4,0"
+                                                CornerRadius="13"
+                                                Background="{DynamicResource ButtonBackground}"
+                                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                BorderThickness="1">
+                                            <StackPanel Orientation="Horizontal" Spacing="5"
+                                                        VerticalAlignment="Center">
+                                                <ic:SymbolIcon Symbol="LockClosed" FontSize="11"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource TextTertiary}"
+                                                               ToolTip.Tip="Joined with a key"
+                                                               IsVisible="{Binding IsKeyed}"/>
+                                                <TextBlock Text="{Binding Name}" FontSize="12.5"
+                                                           VerticalAlignment="Center"/>
+                                                <Button Classes="rowAction"
+                                                        Width="18" Height="18"
+                                                        VerticalAlignment="Center"
+                                                        ToolTip.Tip="Stop joining this channel"
+                                                        Command="{Binding $parent[ItemsControl].DataContext.RemoveChannelCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <ic:SymbolIcon Symbol="Dismiss" FontSize="9"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Panel Height="26" Margin="0,0,0,6"
+                                   IsVisible="{Binding !IsAddingChannel}">
+                                <Rectangle RadiusX="13" RadiusY="13"
+                                           StrokeThickness="1"
+                                           StrokeDashArray="3,2"
+                                           Stroke="{DynamicResource ControlBorderBrush}"/>
+                                <Button x:Name="addChannelButton"
+                                        Content="+ Add channel"
+                                        FontSize="12.5"
+                                        Padding="10,0"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        CornerRadius="13"
+                                        Foreground="{DynamicResource TextTertiary}"
+                                        VerticalContentAlignment="Center"
+                                        Command="{Binding BeginAddChannelCommand}"
+                                        Click="AddChannelButton_Click"/>
+                            </Panel>
+
+                            <Border Height="26" Margin="0,0,0,6"
+                                    Padding="10,0"
+                                    CornerRadius="13"
+                                    Background="{DynamicResource ButtonBackground}"
+                                    BorderBrush="{DynamicResource ControlBorderBrush}"
+                                    BorderThickness="1"
+                                    IsVisible="{Binding IsAddingChannel}">
+                                <TextBox x:Name="newChannelBox"
+                                         Classes="inline"
+                                         Text="{Binding NewChannelText}"
+                                         Watermark="#channel key"
+                                         FontSize="12.5"
+                                         Width="150"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Padding="0"
+                                         VerticalAlignment="Center"
+                                         VerticalContentAlignment="Center">
+                                    <TextBox.KeyBindings>
+                                        <KeyBinding Gesture="Enter" Command="{Binding AddChannelCommand}"/>
+                                        <KeyBinding Gesture="Escape" Command="{Binding CancelAddChannelCommand}"/>
+                                    </TextBox.KeyBindings>
+                                </TextBox>
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+
                 </StackPanel>
-
-                <!-- Servers list -->
-                <Border Background="{DynamicResource SurfaceLayer}"
-                        BorderBrush="{DynamicResource ControlBorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="6">
-                    <ListBox ItemsSource="{Binding SelectedNetwork.Servers}"
-                             SelectedItem="{Binding SelectedNetwork.SelectedServer}"
-                             ItemContainerTheme="{StaticResource SettingsListBoxItemTheme}"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             Padding="4">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:ServerSettingsViewModel}">
-                                <TextBlock Text="{Binding Url}" FontSize="13" TextTrimming="CharacterEllipsis"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Border>
-            </DockPanel>
-
-            <!-- Channels column -->
-            <DockPanel Grid.Column="2"
-                       IsEnabled="{Binding SelectedNetwork, Converter={x:Static ObjectConverters.IsNotNull}}">
-
-                <TextBlock DockPanel.Dock="Top"
-                           FontSize="11" FontWeight="SemiBold"
-                           Foreground="{DynamicResource TextTertiary}"
-                           Margin="0,0,0,6">
-                    <Run Text="CHANNELS"/>
-                    <Run Text=" — "/>
-                    <Run Text="{Binding SelectedNetwork.Name}"/>
-                </TextBlock>
-
-                <!-- Channel detail form -->
-                <Border DockPanel.Dock="Bottom"
-                        Background="{DynamicResource SurfaceLayer}"
-                        BorderBrush="{DynamicResource ControlBorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="6"
-                        Padding="12"
-                        Margin="0,6,0,0"
-                        IsVisible="{Binding SelectedNetwork.SelectedChannel, Converter={x:Static ObjectConverters.IsNotNull}}">
-                    <Grid RowDefinitions="Auto,Auto,Auto"
-                          ColumnDefinitions="80,*"
-                          RowSpacing="6"
-                          ColumnSpacing="8">
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Name"
-                                   FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextTertiary}"/>
-                        <TextBox Grid.Row="0" Grid.Column="1"
-                                 Text="{Binding SelectedNetwork.SelectedChannel.Name}"
-                                 FontSize="13"
-                                 VerticalContentAlignment="Center"/>
-
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Key"
-                                   FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextTertiary}"/>
-                        <TextBox Grid.Row="1" Grid.Column="1"
-                                 Text="{Binding SelectedNetwork.SelectedChannel.Key}"
-                                 PasswordChar="•"
-                                 FontSize="13"
-                                 VerticalContentAlignment="Center"/>
-
-                        <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                                  Content="Auto-join"
-                                  IsChecked="{Binding SelectedNetwork.SelectedChannel.AutoJoin}"
-                                  FontSize="13"/>
-                    </Grid>
-                </Border>
-
-                <!-- Add / Remove Channel buttons -->
-                <StackPanel DockPanel.Dock="Bottom"
-                            Orientation="Horizontal"
-                            Spacing="4"
-                            Margin="0,6,0,0">
-                    <Button Content="+ Add Channel"
-                            Command="{Binding SelectedNetwork.AddChannelCommand}"
-                            Padding="10,5" FontSize="12"/>
-                    <Button Content="Remove Channel"
-                            Command="{Binding SelectedNetwork.RemoveChannelCommand}"
-                            Padding="10,5" FontSize="12"/>
-                </StackPanel>
-
-                <!-- Channels list -->
-                <Border Background="{DynamicResource SurfaceLayer}"
-                        BorderBrush="{DynamicResource ControlBorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="6">
-                    <ListBox ItemsSource="{Binding SelectedNetwork.Channels}"
-                             SelectedItem="{Binding SelectedNetwork.SelectedChannel}"
-                             ItemContainerTheme="{StaticResource SettingsListBoxItemTheme}"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             Padding="4">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:ChannelSettingsViewModel}">
-                                <TextBlock Text="{Binding Name}" FontSize="13" TextTrimming="CharacterEllipsis"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Border>
-            </DockPanel>
-
+            </ScrollViewer>
         </Grid>
     </DockPanel>
-
 </Window>

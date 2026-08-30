@@ -32,6 +32,18 @@ public class Server : MessageContext, IDisposable
     private int _reconnectAttempt;
     private Timer _reconnectTimer;
 
+    // The entry points of this connection's network, in the order the user put them, and the
+    // one the current Connection was built from. A failed dial steps to the next entry point
+    // at once; only a pass that runs off the end starts a backoff round. Thus one backoff
+    // round is one full pass over the hosts, and "retry N" still counts passes.
+    //
+    // _candidateIndex always names the entry point the live Connection came from, so a drop
+    // retries the host you were on before the walk moves off it. The list is guarded by
+    // _reconnectGate for the same reason the reconnect state is: the dial events arrive on
+    // FlamingIRC's socket-IO threads.
+    private readonly List<ConnectionArgs> _candidates = new List<ConnectionArgs>();
+    private int _candidateIndex;
+
     /// <summary>
     /// Nicknames whose PRIVMSGs bypass the PM tab UI and surface in the server
     /// window instead (NickServ, ChanServ, etc). Hosts seed this per connection
@@ -45,7 +57,25 @@ public class Server : MessageContext, IDisposable
 
     public Server(ConnectionArgs settings)
     {
+        _candidates.Add(settings);
         SetupConnection(settings);
+        HookEvents();
+    }
+
+    /// <summary>
+    /// Creates a connection that dials <paramref name="candidates"/> in order, moving to the
+    /// next entry point when one fails to answer. A list of one behaves exactly as
+    /// <see cref="Server(ConnectionArgs)"/>.
+    /// </summary>
+    public Server(IReadOnlyList<ConnectionArgs> candidates)
+    {
+        ArgumentNullException.ThrowIfNull(candidates);
+        if (candidates.Count == 0)
+            throw new ArgumentException("A connection needs at least one entry point.",
+                                        nameof(candidates));
+
+        _candidates.AddRange(candidates);
+        SetupConnection(_candidates[0]);
         HookEvents();
     }
 
@@ -105,9 +135,15 @@ public class Server : MessageContext, IDisposable
             throw new ArgumentNullException("ConnectionArgs.Nick");
         }
 
-        var conn = new Connection(args, true, false) { HandleNickTaken = false };
-        Connection = conn;
+        Connection = CreateConnection(args);
     }
+
+    /// <summary>
+    /// Mints the connection for one entry point. This is the only place a connection is built,
+    /// so overriding it is how a test walks the entry points without opening a socket.
+    /// </summary>
+    protected virtual IConnection CreateConnection(ConnectionArgs args) =>
+        new Connection(args, true, false) { HandleNickTaken = false };
 
     public void HookEvents()
     {
@@ -634,7 +670,63 @@ public class Server : MessageContext, IDisposable
     private void Connection_ConnectFailed(object sender, ConnectFailedEventArgs e)
     {
         ConnectFailed.Fire(this, e);
-        ScheduleReconnect();
+        AdvanceOrReconnect();
+    }
+
+    /// <summary>
+    /// Answers a host that did not respond. If another entry point is left in this pass, the
+    /// connection moves to it and dials at once — a host that is down is not a reason to wait.
+    /// A pass that runs off the end returns to the first entry point and starts a backoff round,
+    /// so the delay grows once per full pass rather than once per host.
+    /// </summary>
+    private void AdvanceOrReconnect()
+    {
+        bool hasNext;
+        int next;
+
+        lock (_reconnectGate)
+        {
+            if (_disposed)
+                return;
+
+            next = _candidateIndex + 1;
+            hasNext = next < _candidates.Count;
+            _candidateIndex = hasNext ? next : 0;
+        }
+
+        // With one entry point, or none, the connection already points where it must, and
+        // rebuilding it would only throw away the socket the reconnect timer is going to use.
+        if (_candidates.Count > 1)
+            UseCandidate(_candidateIndex);
+
+        if (hasNext)
+            Connect();
+        else
+            ScheduleReconnect();
+    }
+
+    /// <summary>
+    /// Rebuilds the connection against the entry point at <paramref name="index"/>, keeping the
+    /// nick in use. Unlike <see cref="ChangeServer(ConnectionArgs)"/> this leaves the reconnect
+    /// run alone, because moving along the walk is part of a run and not the user taking over.
+    /// </summary>
+    private void UseCandidate(int index)
+    {
+        ConnectionArgs args;
+        lock (_reconnectGate)
+        {
+            args = _candidates[index];
+        }
+
+        args.Nick ??= Connection.ConnectionData.Nick;
+
+        UnhookEvents();
+        SetupConnection(args);
+        HookEvents();
+
+        // No _serverChangeTime here. The once-a-second guard in Connect holds back a user
+        // clicking through servers; the walk is already paced by the failure that moved it on,
+        // and a delay per host would make a network of five hosts slow to give up.
     }
 
     private void Listener_OnPublic(object sender, UserChannelMessageEventArgs ea)
@@ -899,6 +991,15 @@ public class Server : MessageContext, IDisposable
         }
 
         args.Nick ??= Connection.ConnectionData.Nick;
+
+        // The user named a host, so it is the only entry point now. Leaving the old network's
+        // hosts in the list would have a failed dial fail over to a network you have left.
+        lock (_reconnectGate)
+        {
+            _candidates.Clear();
+            _candidates.Add(args);
+            _candidateIndex = 0;
+        }
 
         UnhookEvents();
         SetupConnection(args);

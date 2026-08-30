@@ -1,4 +1,3 @@
-using System.Linq;
 using NUnit.Framework;
 
 namespace MutinyIRC.UI.Tests.Models;
@@ -6,50 +5,72 @@ namespace MutinyIRC.UI.Tests.Models;
 [TestFixture]
 public class ServerSettingsTests
 {
-    private static ServerSettings WithPorts(string ports) =>
-        new("irc.libera.chat", "Libera", ports, false);
-
-    // ── RandomPort ───────────────────────────────────────────────────────────
+    // ── Port ─────────────────────────────────────────────────────────────────
 
     [Test]
-    public void RandomPort_OverManyDraws_ReachesEveryPort()
+    public void Port_ByDefault_IsTheStandardIrcPort()
     {
-        // Every configured port must be reachable. An exclusive upper bound made the
-        // last one unreachable. 300 draws over 3 ports: a miss is about 1 in 10^52.
-        var server = WithPorts("6667,6668,7000");
-
-        var seen = Enumerable.Range(0, 300)
-            .Select(_ => server.RandomPort)
-            .Distinct();
-
-        Assert.That(seen, Is.EquivalentTo(new[] { 6667, 6668, 7000 }));
+        // A file that names no port, and a network you add by hand, both land here.
+        Assert.That(new ServerSettings().Port, Is.EqualTo(6667));
     }
 
     [Test]
-    public void RandomPort_OverManyDraws_ReachesEveryPortInARange()
+    public void Constructor_KeepsThePortYouPass()
     {
-        var server = WithPorts("6667-6669");
+        var entryPoint = new ServerSettings("irc.libera.chat", 6697, true);
 
-        var seen = Enumerable.Range(0, 300)
-            .Select(_ => server.RandomPort)
-            .Distinct();
+        Assert.Multiple(() =>
+        {
+            Assert.That(entryPoint.Port, Is.EqualTo(6697));
+            Assert.That(entryPoint.Ssl, Is.True);
+        });
+    }
 
-        Assert.That(seen, Is.EquivalentTo(new[] { 6667, 6668, 6669 }));
+    // ── FirstPortOf: the legacy "ports" string ───────────────────────────────
+
+    [Test]
+    public void FirstPortOf_OnePort_ReturnsIt()
+    {
+        Assert.That(ServerSettings.FirstPortOf("7000"), Is.EqualTo(7000));
     }
 
     [Test]
-    public void RandomPort_OnePort_ReturnsIt()
+    public void FirstPortOf_AList_TakesTheFirst()
     {
-        var server = WithPorts("6667");
-
-        Assert.That(server.RandomPort, Is.EqualTo(6667));
+        // Only the first ever mattered: nothing but the random picker read the rest,
+        // and nothing read the picker.
+        Assert.That(ServerSettings.FirstPortOf("6697,6667,7000"), Is.EqualTo(6697));
     }
 
     [Test]
-    public void RandomPort_NoPorts_ThrowsInvalidOperation()
+    public void FirstPortOf_ARange_TakesItsStart()
     {
-        var server = WithPorts(string.Empty);
+        Assert.That(ServerSettings.FirstPortOf("6660-6669"), Is.EqualTo(6660));
+    }
 
-        Assert.That(() => server.RandomPort, Throws.InvalidOperationException);
+    [TestCase("")]
+    [TestCase("   ")]
+    [TestCase(null)]
+    [TestCase("not a port")]
+    [TestCase("0")]
+    [TestCase("99999")]
+    public void FirstPortOf_NothingUsable_FallsBackToTheStandardPort(string? ports)
+    {
+        // A file we cannot read a port out of must still load, on the port that has
+        // always been the default.
+        Assert.That(ServerSettings.FirstPortOf(ports), Is.EqualTo(6667));
+    }
+
+    // ── Identity ─────────────────────────────────────────────────────────────
+
+    [Test]
+    public void Equals_SameUrlDifferentPort_IsEqual()
+    {
+        // The host identifies an entry point, which is what makes AddServer ignore a
+        // host the network already lists.
+        var plain = new ServerSettings("irc.libera.chat", 6667, false);
+        var secure = new ServerSettings("irc.libera.chat", 6697, true);
+
+        Assert.That(plain.Equals(secure), Is.True);
     }
 }

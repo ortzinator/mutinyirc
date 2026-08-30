@@ -26,7 +26,19 @@ public class ServerManager
 
     public Server Create(ConnectionArgs args)
     {
-        var newServer = new Server(args);
+        return Add(new Server(args));
+    }
+
+    /// <summary>
+    /// Creates a connection that dials <paramref name="candidates"/> in order until one answers.
+    /// </summary>
+    public Server Create(IReadOnlyList<ConnectionArgs> candidates)
+    {
+        return Add(new Server(candidates));
+    }
+
+    private Server Add(Server newServer)
+    {
         ServerList.Add(newServer);
 
         ServerAdded.Fire(this, new ServerEventArgs(newServer));

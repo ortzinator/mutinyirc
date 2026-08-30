@@ -12,7 +12,7 @@ namespace MutinyIRC.UI;
 public sealed class IrcSettingsManager
 {
     private static IrcSettingsManager? instance;
-    private static readonly string SettingsPath = Path.Combine(
+    private static readonly string DefaultSettingsPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
         "MutinyIRC", "servers.json");
 
@@ -22,10 +22,20 @@ public sealed class IrcSettingsManager
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
     };
 
+    // The file this manager reads and writes. It belongs to the instance, not to the type, so
+    // a manager built for a test cannot reach the user's real servers.json however it is used.
+    private readonly string _settingsPath;
+
     public NetworkSettingsList Networks { get; private set; }
 
-    private IrcSettingsManager()
+    /// <summary>
+    /// Builds an empty manager over <paramref name="settingsPath"/>, having read nothing from
+    /// disk. Internal rather than private so a test can hand one to a view model instead of
+    /// letting it reach the singleton, and can point it at a file of its own.
+    /// </summary>
+    internal IrcSettingsManager(string settingsPath)
     {
+        _settingsPath = settingsPath;
         Networks = new NetworkSettingsList();
     }
 
@@ -34,7 +44,7 @@ public sealed class IrcSettingsManager
         get
         {
             if (instance != null) return instance;
-            instance = new IrcSettingsManager();
+            instance = new IrcSettingsManager(DefaultSettingsPath);
             instance.Load();
             return instance;
         }
@@ -46,9 +56,9 @@ public sealed class IrcSettingsManager
     {
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(_settingsPath)!);
             string json = JsonSerializer.Serialize(Networks, JsonOptions);
-            File.WriteAllText(SettingsPath, json);
+            File.WriteAllText(_settingsPath, json);
         }
         catch (Exception ex)
         {
@@ -61,13 +71,13 @@ public sealed class IrcSettingsManager
     {
         try
         {
-            if (!File.Exists(SettingsPath))
+            if (!File.Exists(_settingsPath))
             {
                 LoadDefaults();
                 return;
             }
 
-            string json = File.ReadAllText(SettingsPath);
+            string json = File.ReadAllText(_settingsPath);
             var networks = JsonSerializer.Deserialize<List<NetworkSettings>>(json, JsonOptions);
             if (networks == null)
             {
@@ -81,6 +91,7 @@ public sealed class IrcSettingsManager
                 foreach (var server in network.Servers)
                     server.Network = network;
 
+            FoldLegacyEntryPointFields(networks);
             Networks.ReplaceAll(networks);
         }
         catch (Exception ex)
@@ -91,21 +102,51 @@ public sealed class IrcSettingsManager
         }
     }
 
+    /// <summary>
+    /// Moves the fields that used to sit on an entry point up onto its network. A file written
+    /// before one entry point meant one port, one nick and one connection still loads: the port
+    /// takes the first of the old candidate list, the network autoconnects if any of its hosts
+    /// did, and the first host that named a nick names it for the network. Nothing writes these
+    /// legacy fields again, so the next save drops them.
+    /// </summary>
+    internal static void FoldLegacyEntryPointFields(IEnumerable<NetworkSettings> networks)
+    {
+        foreach (NetworkSettings network in networks)
+        {
+            foreach (ServerSettings entryPoint in network.Servers)
+            {
+                if (entryPoint.Ports != null)
+                    entryPoint.Port = ServerSettings.FirstPortOf(entryPoint.Ports);
+                entryPoint.Ports = null;
+
+                network.AutoConnect |= entryPoint.AutoConnect;
+                entryPoint.AutoConnect = false;
+
+                if (string.IsNullOrWhiteSpace(network.Nick))
+                    network.Nick = entryPoint.Nick;
+                entryPoint.Nick = null;
+            }
+        }
+    }
+
     private void LoadDefaults()
     {
-        var net = new NetworkSettings("Libera");
-        net.AddServer(new ServerSettings("irc.libera.chat", "Libera", "6667", false));
+        var net = new NetworkSettings("Libera") { AutoConnect = true };
+        net.AddServer(new ServerSettings("irc.libera.chat", ServerSettings.DefaultPort, false));
         net.AddChannel(new ChannelSettings("#MutinyIRC", true));
         Networks.ReplaceAll(new[] { net });
     }
 
-    public List<ServerSettings> GetAutoConnectServers()
+    /// <summary>
+    /// The networks to dial at startup. One network gives one connection, so this returns
+    /// networks and not a flat scan of every entry point.
+    /// </summary>
+    public List<NetworkSettings> GetAutoConnectNetworks()
     {
-        var tmp = new List<ServerSettings>();
+        var tmp = new List<NetworkSettings>();
         foreach (var network in Networks)
-            foreach (var server in network.Servers)
-                if (server.AutoConnect)
-                    tmp.Add(server);
+            if (network.AutoConnect && network.Servers.Count > 0)
+                tmp.Add(network);
         return tmp;
     }
 
@@ -115,11 +156,12 @@ public sealed class IrcSettingsManager
     /// </summary>
     public NetworkSettings? GetNetwork(Server server) => GetServer(server)?.Network;
 
+    /// <summary>Stops the network this connection belongs to being dialled at startup.</summary>
     public void DisableAutoConnect(Server server)
     {
-        var settings = GetServer(server);
-        if (settings != null)
-            settings.AutoConnect = false;
+        var network = GetNetwork(server);
+        if (network != null)
+            network.AutoConnect = false;
     }
 
     private ServerSettings? GetServer(Server server) =>

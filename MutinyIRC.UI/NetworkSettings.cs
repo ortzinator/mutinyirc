@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using FlamingIRC;
 using MutinyIRC.Common;
 
 namespace MutinyIRC.UI;
@@ -17,9 +18,26 @@ public class NetworkSettings
 
     public string Name { get; set; }
 
+    /// <summary>
+    /// The nick to register with on this network, or null to use <see cref="AppSettings.FirstNick"/>.
+    /// Identity belongs to the network and not to the host, so failing over to another entry point
+    /// cannot change who you are.
+    /// </summary>
+    public string? Nick { get; set; }
+
+    /// <summary>The nick to try when <see cref="Nick"/> is taken, or null for
+    /// <see cref="AppSettings.SecondNick"/>.</summary>
+    public string? AlternateNick { get; set; }
+
+    /// <summary>Whether to dial this network at startup. One network gives one connection, so the
+    /// flag belongs here and not on each entry point.</summary>
+    public bool AutoConnect { get; set; }
+
     // A servers.json with "Servers": null would otherwise overwrite the list with null and make
     // every reader null-check it. Absent means empty, so say that once, here.
     private List<ServerSettings> _servers = new();
+
+    /// <summary>The entry points, in the order they are dialled.</summary>
     public List<ServerSettings> Servers
     {
         get => _servers;
@@ -31,15 +49,6 @@ public class NetworkSettings
     {
         get => _channels;
         set => _channels = value ?? new List<ChannelSettings>();
-    }
-
-    public ServerSettings GetRandomServer()
-    {
-        if (Servers.Count == 0)
-            throw new InvalidOperationException("No entry points configured.");
-
-        // The upper bound is exclusive, so it is the count, not the last index.
-        return Servers[new Random().Next(Servers.Count)];
     }
 
     public void AddServer(ServerSettings server)
@@ -56,6 +65,50 @@ public class NetworkSettings
         var server = new ServerSettings();
         AddServer(server);
         return server;
+    }
+
+    /// <summary>
+    /// Moves an entry point <paramref name="delta"/> places along the failover order. A move that
+    /// would leave the list does nothing, so the caller does not have to check the ends.
+    /// </summary>
+    public bool MoveServer(ServerSettings server, int delta)
+    {
+        int from = Servers.IndexOf(server);
+        if (from < 0)
+            return false;
+
+        int to = from + delta;
+        if (to < 0 || to >= Servers.Count)
+            return false;
+
+        Servers.RemoveAt(from);
+        Servers.Insert(to, server);
+        return true;
+    }
+
+    /// <summary>
+    /// Builds the dial candidates for this network, one per entry point, in failover order.
+    /// </summary>
+    /// <remarks>
+    /// The port is written after the constructor because
+    /// <see cref="ConnectionArgs(string, string, bool)"/> hardcodes 6667. Without this the saved
+    /// port is dropped, and a TLS entry point on 6697 dials 6667.
+    /// </remarks>
+    public IReadOnlyList<ConnectionArgs> ToConnectionCandidates()
+    {
+        string nick = string.IsNullOrWhiteSpace(Nick) ? AppSettings.Instance.FirstNick : Nick;
+
+        var candidates = new List<ConnectionArgs>(Servers.Count);
+        foreach (ServerSettings entryPoint in Servers)
+        {
+            var args = new ConnectionArgs(nick, entryPoint.Url, entryPoint.Ssl)
+            {
+                Port = entryPoint.Port,
+            };
+            candidates.Add(args);
+        }
+
+        return candidates;
     }
 
     public override string ToString() => Name;
@@ -85,6 +138,8 @@ public class NetworkSettings
 
         Channels.Add(channel);
     }
+
+    public bool RemoveChannel(ChannelSettings channel) => Channels.Remove(channel);
 
     public ChannelSettings? GetChannel(string name)
     {

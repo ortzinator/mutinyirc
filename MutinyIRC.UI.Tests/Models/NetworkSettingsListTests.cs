@@ -10,7 +10,7 @@ public class NetworkSettingsListTests
     {
         var net = new NetworkSettings(name);
         foreach (string host in hosts)
-            net.AddServer(new ServerSettings(host, "Random", "6667", false));
+            net.AddServer(new ServerSettings(host, 6667, false));
         return net;
     }
 
@@ -120,7 +120,7 @@ public class NetworkSettingsListTests
         var list = BuildList(libera);
 
         list.GetOrAddNetwork("Libera")
-            .AddServer(new ServerSettings("eu.libera.chat", "Random", "6667", false));
+            .AddServer(new ServerSettings("eu.libera.chat", 6667, false));
 
         Assert.That(libera.Servers.Select(s => s.Url),
             Is.EqualTo(new[] { "irc.libera.chat", "eu.libera.chat" }));

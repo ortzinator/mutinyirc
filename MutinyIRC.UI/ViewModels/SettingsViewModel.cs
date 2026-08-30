@@ -8,17 +8,25 @@ namespace MutinyIRC.UI.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
+    private readonly IrcSettingsManager _settings;
+
     [ObservableProperty] private NetworkSettingsViewModel? _selectedNetwork;
 
     public ObservableCollection<NetworkSettingsViewModel> Networks { get; } = new();
 
-    public SettingsViewModel()
+    public SettingsViewModel() : this(IrcSettingsManager.Instance) { }
+
+    /// <summary>
+    /// Edits the networks of <paramref name="settings"/>. Taking the manager rather than reaching
+    /// the singleton is what lets a test run this view model without touching the user's
+    /// servers.json.
+    /// </summary>
+    public SettingsViewModel(IrcSettingsManager settings)
     {
-        foreach (var network in IrcSettingsManager.Instance.Networks)
+        _settings = settings;
+        foreach (var network in _settings.Networks)
             Networks.Add(new NetworkSettingsViewModel(network));
         SelectedNetwork = Networks.Count > 0 ? Networks[0] : null;
-        if (SelectedNetwork is not null && SelectedNetwork.Servers.Count > 0)
-            SelectedNetwork.SelectedServer = SelectedNetwork.Servers[0];
     }
 
     [RelayCommand]
@@ -49,7 +57,7 @@ public partial class SettingsViewModel : ObservableObject
     {
         // One swap rather than a clear-then-refill, so the settings are never momentarily empty
         // and ReplaceAll gets to hold the one-network-per-hostname rule over the whole set.
-        IrcSettingsManager.Instance.Networks.ReplaceAll(Networks.Select(vm => vm.ToModel()));
-        IrcSettingsManager.Instance.Save();
+        _settings.Networks.ReplaceAll(Networks.Select(vm => vm.ToModel()));
+        _settings.Save();
     }
 }
