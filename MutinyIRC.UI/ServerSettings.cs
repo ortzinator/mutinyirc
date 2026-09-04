@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json.Serialization;
+using MutinyIRC.Common;
 
 namespace MutinyIRC.UI;
 
@@ -9,7 +10,11 @@ namespace MutinyIRC.UI;
 /// </summary>
 public class ServerSettings : IEquatable<ServerSettings>
 {
-    public const int DefaultPort = 6667;
+    /// <summary>
+    /// The serialization default for <see cref="Port"/>, and the fallback for a legacy
+    /// <see cref="Ports"/> string. Aliases <see cref="IrcPorts.DefaultPlainPort"/>.
+    /// </summary>
+    public const int DefaultPort = IrcPorts.DefaultPlainPort;
 
     public ServerSettings(string url, int port, bool ssl)
     {

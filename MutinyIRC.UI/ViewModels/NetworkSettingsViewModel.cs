@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MutinyIRC.Common;
 
 namespace MutinyIRC.UI.ViewModels;
 
@@ -14,9 +15,9 @@ public partial class NetworkSettingsViewModel : ObservableObject
 
     /// <summary>
     /// The port to assume when the user names only a host. TLS is the sensible default for a
-    /// network you are adding today.
+    /// network you are adding today. Aliases <see cref="IrcPorts.DefaultTlsPort"/>.
     /// </summary>
-    public const int DefaultNewServerPort = 6697;
+    public const int DefaultNewServerPort = IrcPorts.DefaultTlsPort;
 
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private string _nick = string.Empty;
@@ -82,8 +83,8 @@ public partial class NetworkSettingsViewModel : ObservableObject
     /// that does not parse, which is what leaves the Add button disabled.
     /// </summary>
     /// <remarks>
-    /// The port decides TLS: the two ports that historically mean plaintext stay plaintext, and
-    /// everything else is assumed to be TLS. Ports 6667 and 6665 come from the mockup.
+    /// The port decides TLS through <see cref="IrcPorts.IsTlsPort"/>: the two ports that
+    /// historically mean plaintext stay plaintext, and everything else is assumed to be TLS.
     /// </remarks>
     public static ServerSettingsViewModel? ParseServer(string? text)
     {
@@ -105,7 +106,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
         {
             Url = match.Groups[1].Value,
             Port = port,
-            Ssl = port != 6667 && port != 6665,
+            Ssl = IrcPorts.IsTlsPort(port),
         };
     }
 
