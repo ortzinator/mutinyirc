@@ -156,7 +156,7 @@ public class CommandTextBoxHistoryTests
     }
 
     [AvaloniaTest]
-    public void Submit_OfEditedRecalledEntry_ReplacesTheOriginal()
+    public void Submit_OfEditedNewestEntry_KeepsTheOriginal()
     {
         var (box, _) = Host();
         Submit(box, "foo");
@@ -167,11 +167,60 @@ public class CommandTextBoxHistoryTests
         box.CaretIndex = 4;
         PressKey(box, Key.Enter);
 
-        // The original "foo" is gone; only the edited "food" remains.
+        // The edit is a new command, so the history is [foo, food].
         PressKey(box, Key.Up);
         Assert.That(box.Text, Is.EqualTo("food"));
         PressKey(box, Key.Up);
-        Assert.That(box.Text, Is.EqualTo("food"), "there should be only one history entry");
+        Assert.That(box.Text, Is.EqualTo("foo"), "editing a recalled entry must not delete the original");
+    }
+
+    [AvaloniaTest]
+    public void Submit_OfEntryEditedToMatchAnother_DoesNotDuplicateIt()
+    {
+        var (box, _) = Host();
+        Submit(box, "foo");
+        Submit(box, "bar");
+
+        // Recall "bar" and edit it into a copy of "foo".
+        PressKey(box, Key.Up);
+        box.Text = "foo";
+        box.CaretIndex = 3;
+        PressKey(box, Key.Enter);
+
+        // "foo" moves to the newest slot and "bar" stays: [bar, foo], not [foo, foo].
+        PressKey(box, Key.Up);
+        Assert.That(box.Text, Is.EqualTo("foo"));
+        PressKey(box, Key.Up);
+        Assert.That(box.Text, Is.EqualTo("bar"), "the history must hold each command only once");
+        PressKey(box, Key.Up);
+        Assert.That(box.Text, Is.EqualTo("bar"), "there should be only two history entries");
+    }
+
+    [AvaloniaTest]
+    public void Submit_OfEditedOlderEntry_KeepsTheOriginal()
+    {
+        var (box, _) = Host();
+        Submit(box, "one");
+        Submit(box, "two");
+        Submit(box, "three");
+
+        // Recall the oldest entry, edit it, and submit the edited text.
+        PressKey(box, Key.Up);   // three
+        PressKey(box, Key.Up);   // two
+        PressKey(box, Key.Up);   // one
+        box.Text = "one more";
+        box.CaretIndex = box.Text.Length;
+        PressKey(box, Key.Enter);
+
+        // The edit is a new command. The history must keep every earlier entry.
+        PressKey(box, Key.Up);
+        Assert.That(box.Text, Is.EqualTo("one more"), "the edited command should be the newest entry");
+        PressKey(box, Key.Up);
+        Assert.That(box.Text, Is.EqualTo("three"));
+        PressKey(box, Key.Up);
+        Assert.That(box.Text, Is.EqualTo("two"));
+        PressKey(box, Key.Up);
+        Assert.That(box.Text, Is.EqualTo("one"), "editing a recalled entry must not delete the original");
     }
 
     [AvaloniaTest]

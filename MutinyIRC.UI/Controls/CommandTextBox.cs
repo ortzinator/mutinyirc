@@ -38,9 +38,7 @@ public class CommandTextBox : TextBox
         var text = Text;
         if (!string.IsNullOrWhiteSpace(text))
         {
-            if (_historyIndex != _cmdHistory.Count)
-                _cmdHistory.RemoveAt(_historyIndex);
-            _cmdHistory.Add(text);
+            AddToHistory(text);
 
             var vm = DataContext as IrcViewModel;
             vm?.ExecuteCommand.Execute(text);
@@ -49,6 +47,16 @@ public class CommandTextBox : TextBox
             Clear();
             _historyIndex = _cmdHistory.Count;
         }
+    }
+
+    /// <summary>
+    /// Adds <paramref name="text"/> as the newest history entry and removes all earlier entries
+    /// with the same text. An edited entry is a new command, so the entry it came from stays.
+    /// </summary>
+    private void AddToHistory(string text)
+    {
+        _cmdHistory.RemoveAll(entry => entry == text);
+        _cmdHistory.Add(text);
     }
 
     private void HandleKeyDown(object? sender, KeyEventArgs e)
@@ -79,7 +87,7 @@ public class CommandTextBox : TextBox
                 var text = Text;
                 if (_historyIndex == _cmdHistory.Count && !string.IsNullOrWhiteSpace(text))
                 {
-                    _cmdHistory.Add(text);
+                    AddToHistory(text);
                     _historyIndex = _cmdHistory.Count;
                     Clear();
                     e.Handled = true;
