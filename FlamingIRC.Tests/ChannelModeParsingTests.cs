@@ -98,6 +98,20 @@ public class ChannelModeParsingTests
     }
 
     [Test]
+    public void StandaloneListener_RecordsThe005()
+    {
+        // A caller can use a Listener without a Connection. It must still read CHANMODES.
+        var listener = new Listener();
+        listener.OnChannelModeChange += (who, channel, modes, raw) => _modes = modes;
+
+        listener.Parse($":irc.fake.com 005 me {Libera} :are supported by this server");
+        listener.Parse(":Op!~op@op.example MODE #ortzirc +qo *!*@spammer.example SomeNick");
+
+        Assert.AreEqual("*!*@spammer.example", _modes[0].Parameter);
+        Assert.AreEqual("SomeNick", _modes[1].Parameter);
+    }
+
+    [Test]
     public void ChannelModeReply_UsesTheServerModes()
     {
         // The '324' reply to a MODE query goes through the same parser as a MODE change.

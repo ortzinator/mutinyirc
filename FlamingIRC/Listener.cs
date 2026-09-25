@@ -242,6 +242,7 @@ public class Listener
     private readonly char[] Separator = { ' ' };
     private readonly Regex channelPattern;
     private readonly Regex _replyRegex;
+    private readonly Regex _propertiesRegex;
 
     /// <summary>
     /// Table to hold WhoIsInfos while they are being created. The key is the
@@ -257,14 +258,19 @@ public class Listener
     {
         channelPattern = new Regex("([#!+&]\\w+)", RegexOptions.Compiled | RegexOptions.Singleline);
         _replyRegex = new Regex("^:([^\\s]*) ([\\d]{3}) ([^\\s]*) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
+        _propertiesRegex = new Regex("([A-Z]+)=([^\\s]+)", RegexOptions.Compiled | RegexOptions.Singleline);
     }
 
     /// <summary>
-    /// The '005' properties of the server that sends the messages. The mode parser reads
-    /// CHANMODES and PREFIX from them. <see cref="Connection"/> fills them and replaces them
-    /// on each connect.
+    /// The '005' (ISUPPORT) properties of the server that sends the messages. The Listener
+    /// records each '005' reply here, and its mode parser reads CHANMODES and PREFIX from them.
     /// </summary>
-    internal ServerProperties ServerProperties { get; set; } = new ServerProperties();
+    internal ServerProperties ServerProperties { get; private set; } = new ServerProperties();
+
+    /// <summary>
+    /// Forget the properties of the last server. Call this before a new session starts.
+    /// </summary>
+    internal void ResetServerProperties() => ServerProperties = new ServerProperties();
 
     /// <summary>
     /// Parses and handles raw server messages
@@ -674,6 +680,11 @@ public class Listener
                     UserMode[] modes = Rfc2812Util.UserModesToArray(chars);
                     OnUserModeRequest?.Invoke(modes);
                 }
+                break;
+            case ReplyCode.RPL_BOUNCE:
+                foreach (Match match in _propertiesRegex.Matches(CondenseStrings(tokens, 3)))
+                    ServerProperties.SetProperty(match.Groups[1].Value, match.Groups[2].Value);
+                HandleDefaultReply(code, tokens);
                 break;
             case ReplyCode.RPL_CHANNELMODEIS:
                 try

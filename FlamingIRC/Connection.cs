@@ -28,7 +28,6 @@ using System.Diagnostics;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Timers;
 
@@ -42,7 +41,6 @@ public class Connection : TcpTextClient, IConnection
 {
     private readonly System.Timers.Timer _activityTimer;
     private readonly ArrayList _parsers;
-    private readonly Regex _propertiesRegex;
     private ConnectionArgs _connectionArgs;
     private bool _ctcpEnabled;
     private CtcpListener _ctcpListener;
@@ -63,7 +61,6 @@ public class Connection : TcpTextClient, IConnection
     /// <param name="enableDcc">True if this Connection should support DCC.</param>
     public Connection(ConnectionArgs args, bool enableCtcp, bool enableDcc)
     {
-        _propertiesRegex = new Regex("([A-Z]+)=([^\\s]+)", RegexOptions.Compiled | RegexOptions.Singleline);
         Registered = false;
         HandleNickTaken = true;
         _connectionArgs = args;
@@ -240,10 +237,6 @@ public class Connection : TcpTextClient, IConnection
     /// empty set on every <see cref="Connect()"/> so one session cannot read the last one's
     /// properties.
     /// </value>
-    /// <remarks>
-    /// The <see cref="Listener"/> keeps this set, because its mode parser reads CHANMODES and
-    /// PREFIX from it.
-    /// </remarks>
     public ServerProperties ServerProperties => Listener.ServerProperties;
 
     public string Nick
@@ -399,24 +392,12 @@ public class Connection : TcpTextClient, IConnection
         }
     }
 
-    /// <summary>
-    /// Record the name=value tokens of each '005' (ISUPPORT) reply in <see cref="ServerProperties" />.
-    /// </summary>
-    private void OnReply(object sender, ReplyEventArgs a)
-    {
-        if (a.ReplyCode != ReplyCode.RPL_BOUNCE) return;
-
-        foreach (Match match in _propertiesRegex.Matches(a.Message))
-            ServerProperties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
-    }
-
     private void RegisterDelegates()
     {
         Listener.OnPing += KeepAlive;
         Listener.OnAnything += UpdateLastTime;
         Listener.OnNick += MyNickChanged;
         Listener.OnNickError += OnNickError;
-        Listener.OnReply += OnReply;
         Listener.OnRegistered += OnRegistered;
     }
 
@@ -429,7 +410,7 @@ public class Connection : TcpTextClient, IConnection
         {
             if (Connected)
                 throw new Exception("Connection with IRC server already opened.");
-            Listener.ServerProperties = new ServerProperties();
+            Listener.ResetServerProperties();
             // Reset the idle clock: this Connection object is reused across reconnects, so a
             // timestamp left over from the dropped link must not be read as fresh silence and
             // trip an immediate ping timeout before any traffic has had a chance to arrive.

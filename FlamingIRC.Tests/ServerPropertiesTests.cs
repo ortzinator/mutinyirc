@@ -11,7 +11,7 @@ public class ServerPropertiesTests
     [SetUp]
     public void SetupTest() => _connection = new Connection(new ConnectionArgs(), false, false);
 
-    // The 005 reply carries the ISUPPORT tokens. Connection reads them off this line.
+    // The 005 reply carries the ISUPPORT tokens. The Listener reads them off this line.
     private void Receive005(string tokens) =>
         _connection.Listener.Parse($":irc.fake.com 005 me {tokens} :are supported by this server");
 
