@@ -260,6 +260,13 @@ public class Listener
     }
 
     /// <summary>
+    /// The '005' properties of the server that sends the messages. The mode parser reads
+    /// CHANMODES and PREFIX from them. <see cref="Connection"/> fills them and replaces them
+    /// on each connect.
+    /// </summary>
+    internal ServerProperties ServerProperties { get; set; } = new ServerProperties();
+
+    /// <summary>
     /// Parses and handles raw server messages
     /// </summary>
     /// <param name="message">The raw message from the server</param>
@@ -369,7 +376,7 @@ public class Listener
             User who = Rfc2812Util.UserFromString(ircMessage.From);
             try
             {
-                ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(ircMessage.Tokens, 3);
+                ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(ircMessage.Tokens, 3, ChannelModeSyntax.FromServerProperties(ServerProperties));
                 string raw = CondenseStrings(ircMessage.Tokens, 3);
                 OnChannelModeChange(who, ircMessage.Target, modes, raw);
             }
@@ -671,7 +678,7 @@ public class Listener
             case ReplyCode.RPL_CHANNELMODEIS:
                 try
                 {
-                    ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 4);
+                    ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 4, ChannelModeSyntax.FromServerProperties(ServerProperties));
                     OnChannelModeRequest?.Invoke(tokens[3], modes);
                 }
                 catch (Exception)

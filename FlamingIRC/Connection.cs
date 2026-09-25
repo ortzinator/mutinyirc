@@ -76,9 +76,6 @@ public class Connection : TcpTextClient, IConnection
         _parsers = new ArrayList();
         _sender = new Sender(this);
         Listener = new Listener();
-        // Connect() replaces this per session. Creating it here too means a '005' arriving on a
-        // Connection that has not dialled yet is recorded rather than throwing in OnReply.
-        ServerProperties = new ServerProperties();
         RegisterDelegates();
         _timeLastSent = DateTime.Now;
         EnableCtcp = enableCtcp;
@@ -249,7 +246,11 @@ public class Connection : TcpTextClient, IConnection
     /// empty set on every <see cref="Connect()"/> so one session cannot read the last one's
     /// properties.
     /// </value>
-    public ServerProperties ServerProperties { get; private set; }
+    /// <remarks>
+    /// The <see cref="Listener"/> keeps this set, because its mode parser reads CHANMODES and
+    /// PREFIX from it.
+    /// </remarks>
+    public ServerProperties ServerProperties => Listener.ServerProperties;
 
     public string Nick
     {
@@ -462,7 +463,7 @@ public class Connection : TcpTextClient, IConnection
         {
             if (Connected)
                 throw new Exception("Connection with IRC server already opened.");
-            ServerProperties = new ServerProperties();
+            Listener.ServerProperties = new ServerProperties();
             // Reset the idle clock: this Connection object is reused across reconnects, so a
             // timestamp left over from the dropped link must not be read as fresh silence and
             // trip an immediate ping timeout before any traffic has had a chance to arrive.

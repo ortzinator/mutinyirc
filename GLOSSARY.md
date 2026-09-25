@@ -8,6 +8,14 @@ The `nick!user@host` pattern a channel ban (mode `+b`) matches against; any comp
 wildcard, so `*!*@dsl.example.net` bans a whole host. `Channel.ResolveBanMask` turns a plain nick
 into one of these by looking the user up in the channel's `UserList`, defaulting to `*!*@host`.
 
+## Channel mode syntax
+
+Which channel modes take a parameter on one server, and when. The server announces this in the
+CHANMODES and PREFIX tokens of its `005` (ISUPPORT) reply, so the same letter can differ between
+networks: `+q` takes a mask on Libera and a nick on Unreal. `FlamingIRC.ChannelModeSyntax` reads these
+tokens from the `ServerProperties` that `Listener` holds, and `ChannelModeInfo.ParseModes` uses the
+result to give each parameter to its mode. Before the `005` arrives, the RFC 2812 modes apply.
+
 ## Connection
 
 One live socket to one [entry point](#entry-point), plus the session state that rides on it: registration,

@@ -52,7 +52,7 @@ public sealed class ChannelModeInfo
 
     public override string ToString() => $"Action={Action} Mode={Mode} Parameter={Parameter}";
 
-    internal static ChannelModeInfo[] ParseModes(string[] tokens, int start)
+    internal static ChannelModeInfo[] ParseModes(string[] tokens, int start, ChannelModeSyntax syntax)
     {
         //This nice piece of code was contributed by Klemen Šavs.
         //25 October 2003
@@ -83,28 +83,9 @@ public sealed class ChannelModeInfo
                 }
                 else if (j < tokens[i].Length)
                 {
-                    switch (tokens[i][j])
-                    {
-                        case 'o':
-                        case 'h':
-                        case 'v':
-                        case 'b':
-                        case 'e':
-                        case 'I':
-                        case 'k':
-                        case 'O':
-                            modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
-                            modeInfo.Parameter = tokens[parmIndex++];
-                            break;
-                        case 'l':
-                            modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
-                            modeInfo.Parameter = modeInfo.Action == ModeAction.Add ? tokens[parmIndex++] : "";
-                            break;
-                        default:
-                            modeInfo.Mode = Rfc2812Util.CharToChannelMode(tokens[i][j]);
-                            modeInfo.Parameter = "";
-                            break;
-                    }
+                    char mode = tokens[i][j];
+                    modeInfo.Mode = Rfc2812Util.CharToChannelMode(mode);
+                    modeInfo.Parameter = syntax.TakesParameter(mode, modeInfo.Action) ? tokens[parmIndex++] : "";
 
                 }
                 modeInfoArray.Add(modeInfo.MemberwiseClone());
