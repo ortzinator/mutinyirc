@@ -56,12 +56,6 @@ public class Connection : TcpTextClient, IConnection
     private static readonly TimeSpan KeepAliveInterval = TimeSpan.FromSeconds(30);
 
     /// <summary>
-    /// Used for internal test purposes only.
-    /// </summary>
-    internal Connection(ConnectionArgs args)
-        : this(args, true, true) { }
-
-    /// <summary>
     /// Prepare a connection to an IRC server but do not open it. This sets the text Encoding to Default.
     /// </summary>
     /// <param name="args">The set of information need to connect to an IRC server</param>
@@ -258,8 +252,6 @@ public class Connection : TcpTextClient, IConnection
         set => _connectionArgs.Nick = value ?? throw new ArgumentNullException();
     }
 
-    internal ConnectionArgs ConnectionArgs => _connectionArgs;
-
     /// <summary>
     /// Receive all the messages, unparsed, sent by the IRC server. This is typically only
     /// required for debugging purposes.
@@ -408,40 +400,14 @@ public class Connection : TcpTextClient, IConnection
     }
 
     /// <summary>
-    /// Listen for the 005 info messages sent during registration so that the maximum lengths of
-    /// certain items (Nick, Away, Topic) can be determined dynamically.
+    /// Record the name=value tokens of each '005' (ISUPPORT) reply in <see cref="ServerProperties" />.
     /// </summary>
     private void OnReply(object sender, ReplyEventArgs a)
     {
         if (a.ReplyCode != ReplyCode.RPL_BOUNCE) return;
 
-        //Populate properties from name/value matches
-        MatchCollection matches = _propertiesRegex.Matches(a.Message);
-        if (matches.Count > 0)
-        {
-            foreach (Match match in matches)
-                ServerProperties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
-        }
-        //Extract ones we are interested in
-        ExtractProperties();
-    }
-
-    private void ExtractProperties()
-    {
-        //For the moment the only one we care about is NickLen
-        //In fact we don't cae about any but keep here as an example
-        /*
-        if( properties.ContainsKey("NICKLEN") )
-        {
-            try
-            {
-                maxNickLength = int.Parse( properties[ "NICKLEN" ] );
-            }
-            catch( Exception e )
-            {
-            }
-        }
-        */
+        foreach (Match match in _propertiesRegex.Matches(a.Message))
+            ServerProperties.SetProperty(match.Groups[1].ToString(), match.Groups[2].ToString());
     }
 
     private void RegisterDelegates()

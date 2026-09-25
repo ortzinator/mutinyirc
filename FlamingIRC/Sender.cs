@@ -1411,7 +1411,7 @@ public class Sender : CommandBuilder, ISender
     {
         Connection.Nick = newNick;
         Nick(Connection.Nick);
-        User(Connection.ConnectionArgs);
+        User(Connection.ConnectionData);
     }
     /// <summary>
     /// Send an arbitrary text message to the IRC server.
