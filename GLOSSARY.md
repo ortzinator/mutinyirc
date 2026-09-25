@@ -10,11 +10,14 @@ into one of these by looking the user up in the channel's `UserList`, defaulting
 
 ## Channel mode syntax
 
-Which channel modes take a parameter on one server, and when. The server announces this in the
-CHANMODES and PREFIX tokens of its `005` (ISUPPORT) reply, so the same letter can differ between
-networks: `+q` takes a mask on Libera and a nick on Unreal. `FlamingIRC.ChannelModeSyntax` reads these
-tokens from the `ServerProperties` that `Listener` records, and `ChannelModeInfo.ParseModes` uses the
-result to give each parameter to its mode. Before the `005` arrives, the RFC 2812 modes apply.
+Which channel modes take a parameter on one server, and when, and which status symbol each
+status mode gives. The server announces this in the CHANMODES and PREFIX tokens of its `005`
+(ISUPPORT) reply, so the same letter can differ between networks: `+q` takes a mask on Libera
+(the quiet list) and a nick on Unreal (owner, `~`). `FlamingIRC.ChannelModeSyntax` reads these
+tokens from the `ServerProperties` that `Listener` records. `ChannelModeInfo.ParseModes` uses the
+result to give each parameter to its mode and to set `ChannelModeInfo.PrefixSymbol`, which
+`Channel.ApplyModeChanges` applies to the user list. Before the `005` arrives, the RFC 2812
+modes apply.
 
 ## Connection
 

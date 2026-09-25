@@ -49,6 +49,13 @@ public sealed class ChannelModeInfo
     /// </summary>
     public string Parameter { get; set; }
 
+    /// <summary>
+    /// The status symbol that this mode gives the user in <see cref="Parameter"/>, for example
+    /// '@' for op or '~' for owner. The server's PREFIX token sets the symbols, because the
+    /// same mode letter can mean a different status on a different network. '\0' for a mode
+    /// that gives no status.
+    /// </summary>
+    public char PrefixSymbol { get; set; }
 
     public override string ToString() => $"Action={Action} Mode={Mode} Parameter={Parameter}";
 
@@ -86,6 +93,7 @@ public sealed class ChannelModeInfo
                     char mode = tokens[i][j];
                     modeInfo.Mode = Rfc2812Util.CharToChannelMode(mode);
                     modeInfo.Parameter = syntax.TakesParameter(mode, modeInfo.Action) ? tokens[parmIndex++] : "";
+                    modeInfo.PrefixSymbol = syntax.PrefixSymbol(mode);
 
                 }
                 modeInfoArray.Add(modeInfo.MemberwiseClone());

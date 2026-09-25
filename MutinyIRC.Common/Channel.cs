@@ -290,8 +290,8 @@ public sealed class Channel : MessageContext
     }
 
     /// <summary>
-    /// Applies channel mode changes: the key, and the op/halfop/voice prefixes of the
-    /// affected users, which saves re-fetching the whole NAMES list.
+    /// Applies channel mode changes: the key, and the status prefixes of the affected users,
+    /// which saves re-fetching the whole NAMES list.
     /// </summary>
     public void ApplyModeChanges(ChannelModeInfo[] modes)
     {
@@ -313,20 +313,17 @@ public sealed class Channel : MessageContext
     }
 
     /// <summary>
-    /// Applies one op/halfop/voice mode to the member it names. Returns true when a member's
-    /// prefix changed, and false for every other mode and for a member we do not know.
+    /// Applies one status mode, such as op or voice, to the member it names. The server's
+    /// PREFIX token gives the symbol, so owner and admin modes work on the networks that have
+    /// them. Returns true when a member's prefix changed, and false for every other mode and
+    /// for a member we do not know.
     /// </summary>
     private bool ApplyStatusMode(ChannelModeInfo mode)
     {
-        char symbol = mode.Mode switch
-        {
-            ChannelMode.ChannelOperator => '@',
-            ChannelMode.HalfChannelOperator => '%',
-            ChannelMode.Voice => '+',
-            _ => '\0'
-        };
-
-        if (symbol == '\0' || string.IsNullOrEmpty(mode.Parameter))
+        // A mode that gives no status has the symbol '\0', which is not valid. A symbol that
+        // User cannot rank is also not valid, and we ignore it.
+        char symbol = mode.PrefixSymbol;
+        if (!UserModeValidator.IsValid(symbol) || string.IsNullOrEmpty(mode.Parameter))
             return false;
 
         User u = Users.GetUser(mode.Parameter);

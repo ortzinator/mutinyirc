@@ -1,8 +1,9 @@
 namespace FlamingIRC;
 
 /// <summary>
-/// Tells which channel modes take a parameter on one server. The server announces this in the
-/// CHANMODES and PREFIX tokens of its '005' (ISUPPORT) reply.
+/// Tells which channel modes take a parameter on one server, and which status symbol each
+/// prefix mode gives. The server announces this in the CHANMODES and PREFIX tokens of its '005'
+/// (ISUPPORT) reply.
 /// </summary>
 /// <remarks>
 /// A mode parser that uses the wrong list gives each parameter to the wrong mode. For example,
@@ -11,23 +12,30 @@ namespace FlamingIRC;
 /// </remarks>
 internal sealed class ChannelModeSyntax
 {
-    // The RFC 2811/2812 modes. Use them before the server sends '005', and for each token that
-    // the server does not send. The CHANMODES default has the form that a server sends. The
-    // PREFIX default holds only the mode letters, because the parser does not read the symbols.
-    private const string DefaultPrefixModes = "Oohv";
-    private const string DefaultChanModes = "beI,k,l,imnpst";
+    // The RFC 2811/2812 modes, in the form that a server sends them. Use them before the server
+    // sends '005', and for each token that the server does not send. 'O' (channel creator)
+    // takes a nick but gives no status symbol, so it is in group B and not in PREFIX.
+    private const string DefaultPrefix = "(ohv)@%+";
+    private const string DefaultChanModes = "beI,kO,l,imnpst";
 
-    // Modes that take a parameter when they are set and when they are unset: the PREFIX modes,
-    // and the CHANMODES groups A (lists) and B.
+    // The PREFIX modes, and at the same index, the status symbol that each one gives.
+    private readonly string _prefixModes;
+    private readonly string _prefixSymbols;
+
+    // Modes other than PREFIX modes that take a parameter when they are set and when they are
+    // unset: the CHANMODES groups A (lists) and B.
     private readonly string _alwaysModes;
 
     // Modes that take a parameter only when they are set: the CHANMODES group C.
     private readonly string _setOnlyModes;
 
-    private ChannelModeSyntax(string alwaysModes, string setOnlyModes)
+    private ChannelModeSyntax(string prefix, string[] chanModeGroups)
     {
-        _alwaysModes = alwaysModes;
-        _setOnlyModes = setOnlyModes;
+        int close = prefix.IndexOf(')');
+        _prefixModes = prefix[1..close];
+        _prefixSymbols = prefix[(close + 1)..];
+        _alwaysModes = Group(chanModeGroups, 0) + Group(chanModeGroups, 1);
+        _setOnlyModes = Group(chanModeGroups, 2);
     }
 
     /// <summary>
@@ -40,23 +48,32 @@ internal sealed class ChannelModeSyntax
     /// </remarks>
     internal static ChannelModeSyntax FromServerProperties(ServerProperties properties)
     {
-        string prefixModes = PrefixModes(properties["PREFIX"]) ?? DefaultPrefixModes;
-
+        string prefix = properties["PREFIX"];
         string chanModes = properties["CHANMODES"];
-        string[] groups = (chanModes.Length > 0 ? chanModes : DefaultChanModes).Split(',');
 
-        return new(prefixModes + Group(groups, 0) + Group(groups, 1), Group(groups, 2));
+        return new(IsWellFormedPrefix(prefix) ? prefix : DefaultPrefix,
+                   (chanModes.Length > 0 ? chanModes : DefaultChanModes).Split(','));
     }
 
     internal bool TakesParameter(char mode, ModeAction action) =>
-        _alwaysModes.Contains(mode) || (action == ModeAction.Add && _setOnlyModes.Contains(mode));
+        _prefixModes.Contains(mode) || _alwaysModes.Contains(mode) ||
+        (action == ModeAction.Add && _setOnlyModes.Contains(mode));
 
-    // PREFIX has the form "(ohv)@%+". Return the mode letters in the parentheses, or null if
-    // the token has a different form.
-    private static string PrefixModes(string prefix)
+    /// <summary>
+    /// The status symbol that a PREFIX mode gives, for example '@' for 'o'. '\0' for a mode
+    /// that is not in PREFIX.
+    /// </summary>
+    internal char PrefixSymbol(char mode)
+    {
+        int index = _prefixModes.IndexOf(mode);
+        return index < 0 ? '\0' : _prefixSymbols[index];
+    }
+
+    // PREFIX has the form "(ohv)@%+", with one symbol for each mode letter.
+    private static bool IsWellFormedPrefix(string prefix)
     {
         int close = prefix.IndexOf(')');
-        return prefix.StartsWith('(') && close > 0 ? prefix[1..close] : null;
+        return prefix.StartsWith('(') && close > 0 && prefix.Length - close - 1 == close - 1;
     }
 
     private static string Group(string[] groups, int index) => index < groups.Length ? groups[index] : "";

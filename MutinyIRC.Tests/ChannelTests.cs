@@ -243,15 +243,7 @@ public class ChannelTests
         var channel = CreateChannelWithConnection();
         channel.UserJoin(MakeUser("Bob"));
 
-        channel.ApplyModeChanges(new[]
-        {
-            new ChannelModeInfo
-            {
-                Action = ModeAction.Add,
-                Mode = ChannelMode.ChannelOperator,
-                Parameter = "Bob"
-            }
-        });
+        channel.ApplyModeChanges(new[] { StatusMode(ModeAction.Add, ChannelMode.ChannelOperator, '@', "Bob") });
 
         Assert.AreEqual('@', channel.Users.GetUser("Bob").Prefix);
     }
@@ -262,17 +254,37 @@ public class ChannelTests
         var channel = CreateChannelWithConnection();
         channel.UserJoin(MakeUser("Bob"));
 
-        channel.ApplyModeChanges(new[]
-        {
-            new ChannelModeInfo
-            {
-                Action = ModeAction.Add,
-                Mode = ChannelMode.Voice,
-                Parameter = "Bob"
-            }
-        });
+        channel.ApplyModeChanges(new[] { StatusMode(ModeAction.Add, ChannelMode.Voice, '+', "Bob") });
 
         Assert.AreEqual('+', channel.Users.GetUser("Bob").Prefix);
+    }
+
+    [Test]
+    public void ApplyModeChanges_OwnerFromPrefixToken_SetsTildePrefix()
+    {
+        // On Unreal, PREFIX=(qaohv)~&@%+ makes 'q' the owner mode. The letter maps to
+        // ChannelMode.Quiet, so only the symbol from PREFIX tells the channel what it means.
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+
+        channel.ApplyModeChanges(new[] { StatusMode(ModeAction.Add, ChannelMode.Quiet, '~', "Bob") });
+
+        Assert.AreEqual('~', channel.Users.GetUser("Bob").Prefix);
+    }
+
+    [Test]
+    public void ApplyModeChanges_SymbolUserCannotRank_IsIgnored()
+    {
+        // A server can announce a status symbol that User does not know. The mode must not
+        // throw out of the Listener's event.
+        var channel = CreateChannelWithConnection();
+        channel.UserJoin(MakeUser("Bob"));
+
+        Assert.DoesNotThrow(() => channel.ApplyModeChanges(new[]
+        {
+            StatusMode(ModeAction.Add, ChannelMode.ChannelCreator, '!', "Bob")
+        }));
+        Assert.AreEqual('\0', channel.Users.GetUser("Bob").Prefix);
     }
 
     [Test]
@@ -283,15 +295,7 @@ public class ChannelTests
         bob.Prefix = '@';
         channel.UserJoin(bob);
 
-        channel.ApplyModeChanges(new[]
-        {
-            new ChannelModeInfo
-            {
-                Action = ModeAction.Remove,
-                Mode = ChannelMode.ChannelOperator,
-                Parameter = "Bob"
-            }
-        });
+        channel.ApplyModeChanges(new[] { StatusMode(ModeAction.Remove, ChannelMode.ChannelOperator, '@', "Bob") });
 
         Assert.AreEqual('\0', channel.Users.GetUser("Bob").Prefix);
     }
@@ -303,12 +307,7 @@ public class ChannelTests
 
         Assert.DoesNotThrow(() => channel.ApplyModeChanges(new[]
         {
-            new ChannelModeInfo
-            {
-                Action = ModeAction.Add,
-                Mode = ChannelMode.ChannelOperator,
-                Parameter = "Nobody"
-            }
+            StatusMode(ModeAction.Add, ChannelMode.ChannelOperator, '@', "Nobody")
         }));
     }
 
@@ -320,15 +319,7 @@ public class ChannelTests
         bob.Prefix = '@';
         channel.UserJoin(bob);
 
-        channel.ApplyModeChanges(new[]
-        {
-            new ChannelModeInfo
-            {
-                Action = ModeAction.Add,
-                Mode = ChannelMode.Voice,
-                Parameter = "Bob"
-            }
-        });
+        channel.ApplyModeChanges(new[] { StatusMode(ModeAction.Add, ChannelMode.Voice, '+', "Bob") });
 
         User result = channel.Users.GetUser("Bob");
         Assert.AreEqual('@', result.Prefix,
@@ -343,20 +334,9 @@ public class ChannelTests
         User bob = MakeUser("Bob");
         bob.Prefix = '@';
         channel.UserJoin(bob);
-        channel.ApplyModeChanges(new[]
-        {
-            new ChannelModeInfo { Action = ModeAction.Add, Mode = ChannelMode.Voice, Parameter = "Bob" }
-        });
+        channel.ApplyModeChanges(new[] { StatusMode(ModeAction.Add, ChannelMode.Voice, '+', "Bob") });
 
-        channel.ApplyModeChanges(new[]
-        {
-            new ChannelModeInfo
-            {
-                Action = ModeAction.Remove,
-                Mode = ChannelMode.ChannelOperator,
-                Parameter = "Bob"
-            }
-        });
+        channel.ApplyModeChanges(new[] { StatusMode(ModeAction.Remove, ChannelMode.ChannelOperator, '@', "Bob") });
 
         Assert.AreEqual('+', channel.Users.GetUser("Bob").Prefix,
             "Removing op from an op+voiced user must fall back to the voice prefix");
@@ -381,6 +361,10 @@ public class ChannelTests
         Assert.AreEqual('\0', channel.Users.GetUser("Bob").Prefix,
             "A ban mode must not alter any member's op/voice prefix");
     }
+
+    // The parser gives a status mode the symbol from the server's PREFIX token.
+    private static ChannelModeInfo StatusMode(ModeAction action, ChannelMode mode, char symbol, string nick) =>
+        new ChannelModeInfo { Action = action, Mode = mode, PrefixSymbol = symbol, Parameter = nick };
 
     private static ChannelModeInfo KeyMode(ModeAction action, string key) =>
         new ChannelModeInfo { Action = action, Mode = ChannelMode.Password, Parameter = key };
@@ -443,12 +427,7 @@ public class ChannelTests
         // MODE #mutiny +ok Bob hunter2
         channel.ApplyModeChanges(new[]
         {
-            new ChannelModeInfo
-            {
-                Action = ModeAction.Add,
-                Mode = ChannelMode.ChannelOperator,
-                Parameter = "Bob"
-            },
+            StatusMode(ModeAction.Add, ChannelMode.ChannelOperator, '@', "Bob"),
             KeyMode(ModeAction.Add, "hunter2")
         });
 

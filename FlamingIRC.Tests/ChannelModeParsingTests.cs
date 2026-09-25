@@ -41,8 +41,10 @@ public class ChannelModeParsingTests
         Assert.AreEqual(2, _modes.Length);
         Assert.AreEqual(ChannelMode.Quiet, _modes[0].Mode);
         Assert.AreEqual("*!*@spammer.example", _modes[0].Parameter);
+        Assert.AreEqual('\0', _modes[0].PrefixSymbol, "The quiet list gives no status");
         Assert.AreEqual(ChannelMode.ChannelOperator, _modes[1].Mode);
         Assert.AreEqual("SomeNick", _modes[1].Parameter);
+        Assert.AreEqual('@', _modes[1].PrefixSymbol);
     }
 
     [Test]
@@ -61,17 +63,32 @@ public class ChannelModeParsingTests
     }
 
     [Test]
-    public void PrefixMode_FromPrefixToken_TakesANick()
+    public void PrefixMode_FromPrefixToken_TakesANickAndItsSymbol()
     {
         // On servers with an owner prefix, 'q' is a status mode and takes a nick. It is in
-        // PREFIX, not in CHANMODES.
+        // PREFIX, not in CHANMODES, and PREFIX gives it the '~' symbol.
         Receive005("CHANMODES=beI,k,l,imnpst PREFIX=(qaohv)~&@%+");
 
         ReceiveMode("+qv Owner Voiced");
 
         Assert.AreEqual(2, _modes.Length);
         Assert.AreEqual("Owner", _modes[0].Parameter);
+        Assert.AreEqual('~', _modes[0].PrefixSymbol);
         Assert.AreEqual("Voiced", _modes[1].Parameter);
+        Assert.AreEqual('+', _modes[1].PrefixSymbol);
+    }
+
+    [Test]
+    public void MalformedPrefix_UsesTheDefault()
+    {
+        // The symbol count does not match the mode count, so the parser cannot pair them.
+        Receive005("CHANMODES=beI,k,l,imnpst PREFIX=(qov)@+");
+
+        ReceiveMode("+qo SomeNick");
+
+        Assert.AreEqual("", _modes[0].Parameter);
+        Assert.AreEqual("SomeNick", _modes[1].Parameter);
+        Assert.AreEqual('@', _modes[1].PrefixSymbol);
     }
 
     [Test]
@@ -89,12 +106,15 @@ public class ChannelModeParsingTests
     [Test]
     public void BeforeAny005_UsesTheRfc2812Modes()
     {
-        ReceiveMode("+klo secret 10 SomeNick");
+        ReceiveMode("+kloO secret 10 SomeNick Creator");
 
-        Assert.AreEqual(3, _modes.Length);
+        Assert.AreEqual(4, _modes.Length);
         Assert.AreEqual("secret", _modes[0].Parameter);
         Assert.AreEqual("10", _modes[1].Parameter);
         Assert.AreEqual("SomeNick", _modes[2].Parameter);
+        Assert.AreEqual('@', _modes[2].PrefixSymbol);
+        Assert.AreEqual("Creator", _modes[3].Parameter);
+        Assert.AreEqual('\0', _modes[3].PrefixSymbol, "The channel creator mode gives no status");
     }
 
     [Test]
