@@ -98,6 +98,52 @@ public class ConnectionTests
         Assert.IsFalse(lost, "a keep-alive tick on a disconnected link must not raise ConnectionLost");
     }
 
+    private const string Welcome = ":irc.test 001 me :Welcome to the Internet Relay Network";
+
+    [Test]
+    public void Registered_AfterWelcome_IsTrue()
+    {
+        _connection.Listener.Parse(Welcome);
+
+        Assert.IsTrue(_connection.Registered, "RPL_WELCOME completes registration");
+    }
+
+    [Test]
+    public void Registered_AfterDisconnect_IsFalse()
+    {
+        _connection.Listener.Parse(Welcome);
+
+        _connection.Disconnect(DisconnectReason.RemoteHostClosedConnection);
+
+        Assert.IsFalse(_connection.Registered, "registration belongs to one session and must end with it");
+    }
+
+    [Test]
+    public void Registered_AfterReconnectAndSecondWelcome_IsTrueAgain()
+    {
+        // Server reuses one Connection across reconnects to the same host, so the second
+        // session's 001 must set the flag again.
+        _connection.Listener.Parse(Welcome);
+        _connection.Disconnect(DisconnectReason.RemoteHostClosedConnection);
+
+        _connection.Listener.Parse(Welcome);
+
+        Assert.IsTrue(_connection.Registered, "a reused Connection must register again on the next session's 001");
+    }
+
+    [Test]
+    public void Registered_IsFalseWhenConnectionLostRaised()
+    {
+        // Reconnect logic runs inside ConnectionLost, so it must already see the session as ended.
+        _connection.Listener.Parse(Welcome);
+        bool? registeredDuringLost = null;
+        _connection.ConnectionLost += (_, _) => registeredDuringLost = _connection.Registered;
+
+        _connection.Disconnect(DisconnectReason.RemoteHostClosedConnection);
+
+        Assert.AreEqual(false, registeredDuringLost, "ConnectionLost handlers must see Registered already cleared");
+    }
+
     [Test]
     public void PingTimeout_SetBelowKeepAliveInterval_Throws()
     {

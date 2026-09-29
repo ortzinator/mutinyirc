@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -136,6 +138,53 @@ public class ServerViewModelRegistrationTests
 
         Assert.That(manager.Networks.Select(n => n.Name), Is.EqualTo(new[] { "irc.example.net" }));
         Assert.That(manager.Networks[0].Servers.Select(s => s.Url), Is.EqualTo(new[] { "irc.example.net" }));
+    }
+
+    /// <summary>
+    /// Hands nick collisions to the view model, as <c>Server.CreateConnection</c> does in the
+    /// app, and collects the NICK commands the connection tries to send.
+    /// </summary>
+    private List<string> CaptureNickCommands()
+    {
+        _server.Connection.HandleNickTaken = false;
+        var sent = new List<string>();
+        ((Connection)_server.Connection).RawMessageSent += (_, e) =>
+        {
+            if (e.Data.StartsWith("NICK ", StringComparison.Ordinal))
+                sent.Add(e.Data);
+        };
+        return sent;
+    }
+
+    private const string NickInUse = ":irc.fake.com 433 me taken :Nickname is already in use";
+
+    [Test]
+    public void NickInUse_BeforeRegistration_RetriesWithAnotherNick()
+    {
+        UseEmptySettings();
+        Dial("irc.example.net");
+        List<string> sent = CaptureNickCommands();
+
+        _server.Connection.Listener.Parse(NickInUse);
+
+        Assert.That(sent, Has.Count.EqualTo(1),
+            "A nick collision during registration must make the client try another nick");
+    }
+
+    [Test]
+    public void NickInUse_AfterRegistration_KeepsTheCurrentNick()
+    {
+        // After registration a 433 answers the user's own /nick. The user still holds the old
+        // nick, so the client must not pick a new one for them.
+        UseEmptySettings();
+        Dial("irc.example.net");
+        Register(string.Empty);
+        List<string> sent = CaptureNickCommands();
+
+        _server.Connection.Listener.Parse(NickInUse);
+
+        Assert.That(sent, Is.Empty,
+            "A nick collision after registration must not rename the user");
     }
 
     [Test]

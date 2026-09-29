@@ -92,10 +92,13 @@ public class Connection : TcpTextClient, IConnection
         => TextEncoding = textEncoding;
 
     /// <summary>
-    /// A read-only property indicating whether the connection has been opened with the IRC
-    /// server and the socket has been successfully registered.
+    /// A read-only property indicating whether the current session has registered with the IRC
+    /// server.
     /// </summary>
-    /// <value>True if the socket is connected and registered.</value>
+    /// <value>
+    /// True from the server's RPL_WELCOME until the connection closes. Every disconnect sets it
+    /// to false, so a reused Connection registers again on the next session.
+    /// </value>
     public bool Registered { get; private set; }
 
     /// <summary>
@@ -372,11 +375,7 @@ public class Connection : TcpTextClient, IConnection
             _connectionArgs.Nick = e.NewNick;
     }
 
-    private void OnRegistered(object sender, EventArgs e)
-    {
-        Registered = true;
-        Listener.OnRegistered -= OnRegistered;
-    }
+    private void OnRegistered(object sender, EventArgs e) => Registered = true;
 
     /// <summary>
     ///
@@ -525,6 +524,10 @@ public class Connection : TcpTextClient, IConnection
 
     protected override void OnDisconnect(DisconnectReason reason, int? socketErrorCode)
     {
+        // Registration belongs to one session. Clear it before ConnectionLost, so reconnect
+        // logic in the handlers already sees the session as ended.
+        Registered = false;
+
         if (ConnectionLost == null) return;
 
         if (socketErrorCode == null)
