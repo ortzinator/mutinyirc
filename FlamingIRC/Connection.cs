@@ -25,8 +25,6 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Timers;
@@ -516,11 +514,6 @@ public class Connection : TcpTextClient, IConnection
         _sender.RegisterConnection(_connectionArgs);
         Connected = true;
     }
-
-    protected override bool OnCertificateValidatecateFailed(X509Certificate certificate,
-                                                            X509Chain chain,
-                                                            SslPolicyErrors errors)
-        => throw new NotImplementedException();
 
     protected override void OnDisconnect(DisconnectReason reason, int? socketErrorCode)
     {

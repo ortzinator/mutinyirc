@@ -101,11 +101,31 @@ public abstract class TcpTextClient
     {
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
             $"[{Thread.CurrentThread.Name}] TcpTextClient::Disconnect() reason={reason}");
+        ResetSocket();
+        Connected = false;
+        OnDisconnect(reason, null);
+    }
+
+    /// <summary>
+    /// Close the socket and put a new socket in its place. A socket cannot
+    /// connect again after it was connected or after a connect failed, so every path that ends
+    /// an attempt calls this before the next Connect.
+    /// </summary>
+    private void ResetSocket()
+    {
         try { _socket.Shutdown(SocketShutdown.Both); } catch (SocketException) { }
         _socket.Close();
         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+    }
+
+    /// <summary>
+    /// End a connect attempt that did not succeed and tell the subclass why.
+    /// </summary>
+    private void FailConnect(ConnectError error, int? socketErrorCode)
+    {
+        ResetSocket();
         Connected = false;
-        OnDisconnect(reason, null);
+        OnConnectFailed(error, socketErrorCode);
     }
 
     /// <summary>
@@ -146,26 +166,36 @@ public abstract class TcpTextClient
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() SocketException={e.SocketErrorCode}");
-            OnConnectFailed(ConnectError.SocketError, e.ErrorCode);
+            FailConnect(ConnectError.SocketError, e.ErrorCode);
         }
         catch (Exception e)
         {
+            // Do not throw again. This method is an async callback, so an exception that
+            // leaves it ends the process. ConnectFailed tells the caller about the failure.
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() exception={e.Message}");
-            OnConnectFailed(ConnectError.SocketError, null);
-            throw;
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() exception={e}");
+            FailConnect(ConnectError.SocketError, null);
         }
     }
 
     private bool OnCertificateValidate(object sender, X509Certificate certificate, X509Chain chain,
                                        SslPolicyErrors errors)
     {
-        if (errors != SslPolicyErrors.None)
-        {
-            return OnCertificateValidatecateFailed(certificate, chain, errors);
-        }
+        if (errors == SslPolicyErrors.None)
+            return true;
 
-        return true;
+        try
+        {
+            return OnCertificateValidationFailed(certificate, chain, errors);
+        }
+        catch (Exception e)
+        {
+            // An exception from the override counts as a rejection. SslStream calls this on a
+            // thread-pool thread, where an exception would end the process.
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnCertificateValidate() exception={e}");
+            return false;
+        }
     }
 
     private void OnAuthenticate(IAsyncResult res)
@@ -173,19 +203,34 @@ public abstract class TcpTextClient
         try
         {
             _sslStream.EndAuthenticateAsClient(res);
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() SSL authenticated to {_serverName}");
-            OnConnect();
-            WaitForData();
         }
         catch (AuthenticationException e)
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() SSL authentication failed={e.Message}");
-            _socket.Shutdown(SocketShutdown.Both);
-            Connected = false;
-            OnConnectFailed(ConnectError.AuthenticationFailed, null);
+            FailConnect(ConnectError.AuthenticationFailed, null);
+            return;
         }
+        catch (IOException e)
+        {
+            // The server closed or reset the connection during the handshake.
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() handshake IO failure={e.Message}");
+            FailConnect(ConnectError.SocketError, (e.InnerException as SocketException)?.ErrorCode);
+            return;
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() handshake failure={e}");
+            FailConnect(ConnectError.Other, null);
+            return;
+        }
+
+        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+            $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() SSL authenticated to {_serverName}");
+        OnConnect();
+        WaitForData();
     }
 
     private void WaitForData()
@@ -272,8 +317,20 @@ public abstract class TcpTextClient
 
     protected abstract void OnConnect();
 
-    protected abstract bool OnCertificateValidatecateFailed(X509Certificate certificate, X509Chain chain,
-                                                            SslPolicyErrors errors);
+    /// <summary>
+    /// Decide whether to accept a server certificate that failed validation, for example a
+    /// self-signed, expired, or wrong-host certificate.
+    /// </summary>
+    /// <remarks>
+    /// The default rejects the certificate, and the connect fails with
+    /// <see cref="ConnectError.AuthenticationFailed" />. Override this to trust a certificate,
+    /// for example by comparing its fingerprint with one the user accepted. An exception from
+    /// the override counts as a rejection.
+    /// </remarks>
+    /// <returns>True to accept the certificate, false to reject it.</returns>
+    protected virtual bool OnCertificateValidationFailed(X509Certificate certificate, X509Chain chain,
+                                                         SslPolicyErrors errors)
+        => false;
 
     protected abstract void OnDisconnect(DisconnectReason reason, int? socketErrorCode);
 
