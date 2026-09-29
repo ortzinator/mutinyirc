@@ -333,7 +333,11 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_ConnectFailed(object? sender, ConnectFailedEventArgs e)
     {
-        AddMessage(ServerStrings.ConnectionFailedMessage.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
+        // A rejected certificate has no socket error code, so the socket wording would say "0".
+        if (e.Reason == ConnectError.AuthenticationFailed)
+            AddMessage(ServerStrings.CertificateRejectedMessage);
+        else
+            AddMessage(ServerStrings.ConnectionFailedMessage.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
     }
 
     private void Server_Registered(object? sender, EventArgs e)

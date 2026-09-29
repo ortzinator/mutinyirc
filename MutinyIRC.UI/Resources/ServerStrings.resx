@@ -124,6 +124,10 @@
     <value>Connecting to {0} ({1})...</value>
     <comment>Displayed to user in a server window when trying to connect.</comment>
   </data>
+  <data name="CertificateRejectedMessage" xml:space="preserve">
+    <value>Could not connect: the server's TLS certificate is not trusted.</value>
+    <comment>Displayed to the user when a TLS connection fails because the server's certificate did not pass validation (self-signed, expired, or issued for another host).</comment>
+  </data>
   <data name="ConnectionFailedMessage" xml:space="preserve">
     <value>Could not connect: ({0})</value>
     <comment>Displayed to the user when a connection attempt is not successful.</comment>

@@ -1,8 +1,11 @@
+using System.Linq;
 using System.Reflection;
+using Avalonia.Headless.NUnit;
 using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Common;
 using MutinyIRC.PluginFramework;
+using MutinyIRC.UI.Resources;
 using MutinyIRC.UI.ViewModels;
 using NUnit.Framework;
 
@@ -148,5 +151,41 @@ public class ServerViewModelStatusTests
 
         Assert.That(_vm.ConnectionStatus, Is.EqualTo("Disconnected"),
             "A quit the user asked for ends the connection; nothing is going to reconnect it");
+    }
+
+    /// <summary>
+    /// Raises ConnectFailed the way the transport does, through the protected
+    /// <c>OnConnectFailed</c> of a real <see cref="Connection"/>. A faked Connection would
+    /// intercept that virtual call, and no socket is needed to reach it.
+    /// </summary>
+    private void DialAndFail(ConnectError reason, int? socketErrorCode)
+    {
+        var conn = new Connection(new ConnectionArgs("me", "irc.fake.com", true), false, false);
+        _server = new Server(conn);
+        _vm = new ServerViewModel(_server, new PluginManager());
+
+        typeof(Connection)
+            .GetMethod("OnConnectFailed", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .Invoke(conn, new object?[] { reason, socketErrorCode });
+    }
+
+    [AvaloniaTest]
+    public void CertificateRejected_TellsTheUserTheCertificateIsNotTrusted()
+    {
+        DialAndFail(ConnectError.AuthenticationFailed, null);
+
+        Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Contain(ServerStrings.CertificateRejectedMessage),
+            "A rejected certificate must say so, not report socket error 0");
+    }
+
+    [AvaloniaTest]
+    public void SocketFailure_StillReportsTheSocketError()
+    {
+        DialAndFail(ConnectError.SocketError, 10061);
+
+        Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Not.Contain(ServerStrings.CertificateRejectedMessage),
+            "Only a certificate rejection may use the certificate wording");
+        Assert.That(_vm.ChatLines.Select(l => l.Message),
+            Does.Contain(ServerStrings.ConnectionFailedMessage.With(SocketErrorTranslator.GetMessage(10061))));
     }
 }

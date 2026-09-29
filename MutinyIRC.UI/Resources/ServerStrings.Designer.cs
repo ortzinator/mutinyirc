@@ -26,6 +26,7 @@
         }
 
         internal static string AttemptingReconnect => ResourceManager.GetString("AttemptingReconnect", resourceCulture);
+        internal static string CertificateRejectedMessage => ResourceManager.GetString("CertificateRejectedMessage", resourceCulture);
         internal static string ConnectingMessage => ResourceManager.GetString("ConnectingMessage", resourceCulture);
         internal static string ConnectionFailedMessage => ResourceManager.GetString("ConnectionFailedMessage", resourceCulture);
         internal static string ConnectionLost => ResourceManager.GetString("ConnectionLost", resourceCulture);
