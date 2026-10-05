@@ -112,7 +112,7 @@ public abstract class TcpTextClient
     /// <summary>
     /// True from just before <see cref="OnConnect()" /> until the session ends.
     /// </summary>
-    public bool Connected => Volatile.Read(ref _session) is { Stream: not null };
+    public bool Connected => Volatile.Read(ref _session) is { IsOpen: true };
 
     /// <summary>
     /// Start a session: connect to the server, and do the TLS handshake if
@@ -122,11 +122,10 @@ public abstract class TcpTextClient
     /// <exception cref="InvalidOperationException">A session or a connect attempt is live.</exception>
     protected void Connect(string server, int port, bool ssl)
     {
-        var session = new Session(new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp),
-            TextEncoding);
+        var session = new Session(TextEncoding);
         if (Interlocked.CompareExchange(ref _session, session, null) != null)
         {
-            session.Socket.Dispose();
+            session.Close();
             throw new InvalidOperationException("A session or a connect attempt is live.");
         }
 
@@ -167,15 +166,13 @@ public abstract class TcpTextClient
     public void Send(string message)
     {
         Session session = Volatile.Read(ref _session);
-        if (session?.Stream is not { } stream)
+        if (session is not { IsOpen: true })
             throw new InvalidOperationException("The client is not connected.");
 
         message += "\r\n";
-        byte[] buffer = TextEncoding.GetBytes(message);
         try
         {
-            lock (session.WriteLock)
-                stream.Write(buffer);
+            session.Write(TextEncoding.GetBytes(message));
         }
         catch (Exception e) when (IsIoFailure(e))
         {
@@ -199,27 +196,18 @@ public abstract class TcpTextClient
     /// </remarks>
     private async void RunSession(Session session, string server, int port, bool ssl)
     {
-        Stream stream;
-        try
+        if (await session.OpenAsync(server, port, ssl, OnCertificateValidate).ConfigureAwait(false) is { } failure)
         {
-            stream = await OpenStream(session, server, port, ssl).ConfigureAwait(false);
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::RunSession() connect failed={e}");
-            (ConnectError error, int? socketErrorCode) = ClassifyConnectFailure(session, e);
             if (TryEnd(session))
-                OnConnectFailed(error, socketErrorCode);
+                OnConnectFailed(failure.Error, failure.SocketErrorCode);
             return;
         }
 
-        session.Stream = stream;
         // A Disconnect during the handshake ended this session, so do not report it as connected.
-        // TryEnd can run before the stream is set, so release the stream here too.
+        // That Disconnect can close the session before its stream opens, so close it again here.
         if (Volatile.Read(ref _session) != session)
         {
-            stream.Dispose();
+            session.Close();
             return;
         }
 
@@ -229,45 +217,14 @@ public abstract class TcpTextClient
         await ReadLines(session).ConfigureAwait(false);
     }
 
-    private async Task<Stream> OpenStream(Session session, string server, int port, bool ssl)
-    {
-        await session.Socket.ConnectAsync(server, port).ConfigureAwait(false);
-        var network = new NetworkStream(session.Socket);
-        if (!ssl)
-            return network;
-
-        var tls = new SslStream(network, false,
-            (_, certificate, chain, errors) => OnCertificateValidate(session, certificate, chain, errors));
-        await tls.AuthenticateAsClientAsync(server).ConfigureAwait(false);
-        return tls;
-    }
-
-    private static (ConnectError, int?) ClassifyConnectFailure(Session session, Exception e) => e switch
-    {
-        SocketException socketError => (ConnectError.SocketError, socketError.ErrorCode),
-        // SslStream reports a rejected certificate and other handshake failures with the same
-        // exception type, so the session records which one it was.
-        AuthenticationException => (session.CertificateRejected
-            ? ConnectError.CertificateRejected
-            : ConnectError.AuthenticationFailed, null),
-        // The server reset the connection during the handshake.
-        IOException { InnerException: SocketException socketError } =>
-            (ConnectError.SocketError, socketError.ErrorCode),
-        // This includes an IOException with no socket error, for example when the server closes
-        // the connection during the handshake.
-        _ => (ConnectError.Other, null)
-    };
-
-    private bool OnCertificateValidate(Session session, X509Certificate certificate, X509Chain chain,
-                                       SslPolicyErrors errors)
+    private bool OnCertificateValidate(X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
     {
         if (errors == SslPolicyErrors.None)
             return true;
 
-        bool accepted;
         try
         {
-            accepted = OnCertificateValidationFailed(certificate, chain, errors);
+            return OnCertificateValidationFailed(certificate, chain, errors);
         }
         catch (Exception e)
         {
@@ -275,21 +232,21 @@ public abstract class TcpTextClient
             // thread-pool thread, where an exception would end the process.
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::OnCertificateValidate() exception={e}");
-            accepted = false;
+            return false;
         }
-
-        session.CertificateRejected = !accepted;
-        return accepted;
     }
 
+    /// <summary>
+    /// Give each line of the session to <see cref="OnReceiveLine" /> until the session ends.
+    /// </summary>
     private async Task ReadLines(Session session)
     {
         while (true)
         {
-            int count;
+            string line;
             try
             {
-                count = await session.Stream.ReadAsync(session.Bytes).ConfigureAwait(false);
+                line = await session.ReadLineAsync().ConfigureAwait(false);
             }
             catch (Exception e) when (IsIoFailure(e))
             {
@@ -299,7 +256,7 @@ public abstract class TcpTextClient
                 return;
             }
 
-            if (count == 0)
+            if (line == null)
             {
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
                     $"[{Thread.CurrentThread.Name}] TcpTextClient::ReadLines() remote host closed connection");
@@ -307,35 +264,7 @@ public abstract class TcpTextClient
                 return;
             }
 
-            DispatchLines(session, count);
-        }
-    }
-
-    /// <summary>
-    /// Decode the bytes that a read put in the session buffer, and give each complete line to
-    /// <see cref="OnReceiveLine" />. The session keeps a part line, and the decoder keeps a part
-    /// character, until the next read.
-    /// </summary>
-    private void DispatchLines(Session session, int count)
-    {
-        int length = session.Decoder.GetChars(session.Bytes, 0, count, session.Chars, 0);
-        for (var i = 0; i < length; i++)
-        {
-            char item = session.Chars[i];
-            switch (item)
-            {
-                case '\r':
-                    continue;
-
-                case '\n':
-                    OnReceiveLine(session.Line.ToString());
-                    session.Line.Clear();
-                    break;
-
-                default:
-                    session.Line.Append(item);
-                    break;
-            }
+            OnReceiveLine(line);
         }
     }
 
@@ -343,13 +272,9 @@ public abstract class TcpTextClient
         e is IOException or SocketException or ObjectDisposedException;
 
     /// <summary>
-    /// End <paramref name="session" />, close its socket, and release its stream. Every path
-    /// that ends a session or a connect attempt calls this.
+    /// End <paramref name="session" /> and close it. Every path that ends a session or a
+    /// connect attempt calls this.
     /// </summary>
-    /// <remarks>
-    /// The socket closes first. A <see cref="Send" /> that waits on a full send buffer then
-    /// fails at once, and the stream does not release under a write that is in progress.
-    /// </remarks>
     /// <returns>
     /// True if this call ended the session. False if the session ended before, so the caller
     /// must not report the end again.
@@ -359,18 +284,7 @@ public abstract class TcpTextClient
         if (Interlocked.CompareExchange(ref _session, null, session) != session)
             return false;
 
-        try
-        {
-            session.Socket.Shutdown(SocketShutdown.Both);
-        }
-        catch (SocketException)
-        {
-            // Shutdown fails if the socket did not connect or the server reset it. In both
-            // cases there is nothing to shut down, and Close below releases the socket.
-        }
-        session.Socket.Close();
-        // The TLS stream holds a native security context that only Dispose releases.
-        session.Stream?.Dispose();
+        session.Close();
         return true;
     }
 
@@ -428,26 +342,166 @@ public abstract class TcpTextClient
     protected abstract void OnReceiveLine(string line);
 
     /// <summary>
-    /// One connect attempt and the connection that follows it. Each session has its own socket
-    /// and buffers, so nothing from an ended session can get into the next one.
+    /// Why a connect attempt failed, in the form <see cref="OnConnectFailed" /> reports it.
     /// </summary>
-    private sealed class Session(Socket socket, Encoding encoding)
+    private readonly record struct ConnectFailure(ConnectError Error, int? SocketErrorCode)
     {
-        public readonly Socket Socket = socket;
-        public readonly byte[] Bytes = new byte[BufferLength];
-        public readonly char[] Chars = new char[encoding.GetMaxCharCount(BufferLength)];
-        public readonly Decoder Decoder = encoding.GetDecoder();
-        public readonly StringBuilder Line = new();
+        /// <param name="e">The exception from the connect or the TLS handshake.</param>
+        /// <param name="certificateRejected">
+        /// True if the certificate check rejected the server certificate. SslStream reports a
+        /// rejected certificate and other handshake failures with the same exception type, so
+        /// the exception alone cannot tell them apart.
+        /// </param>
+        public static ConnectFailure From(Exception e, bool certificateRejected) => e switch
+        {
+            SocketException socketError => new(ConnectError.SocketError, socketError.ErrorCode),
+            AuthenticationException => new(certificateRejected
+                ? ConnectError.CertificateRejected
+                : ConnectError.AuthenticationFailed, null),
+            // The server reset the connection during the handshake.
+            IOException { InnerException: SocketException socketError } =>
+                new(ConnectError.SocketError, socketError.ErrorCode),
+            // This includes an IOException with no socket error, for example when the server
+            // closes the connection during the handshake.
+            _ => new(ConnectError.Other, null)
+        };
+    }
 
-        /// <summary>Lets only one <see cref="TcpTextClient.Send" /> write at a time.</summary>
-        public readonly object WriteLock = new();
+    /// <summary>
+    /// One connect attempt and the connection that follows it: a socket, its stream, and the
+    /// line reader on that stream. Each session has its own socket and buffers, so nothing from
+    /// an ended session can get into the next one.
+    /// </summary>
+    /// <remarks>
+    /// The session does not decide when it ends, and it does not call the hooks. The owner
+    /// calls <see cref="Close" />, and reports the end.
+    /// </remarks>
+    private sealed class Session(Encoding encoding)
+    {
+        private readonly Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private readonly byte[] _bytes = new byte[BufferLength];
+        private readonly char[] _chars = new char[encoding.GetMaxCharCount(BufferLength)];
+        private readonly Decoder _decoder = encoding.GetDecoder();
+        private readonly StringBuilder _line = new();
+        private readonly object _writeLock = new();
+        private int _charIndex;
+        private int _charCount;
 
         /// <summary>
-        /// The network or TLS stream, or null until the connect and the handshake complete. A
-        /// session with a stream is live.
+        /// The network or TLS stream, or null until the connect and the handshake complete.
         /// </summary>
-        public volatile Stream Stream;
+        private volatile Stream _stream;
 
-        public bool CertificateRejected;
+        /// <summary>
+        /// True when the connect and the handshake completed. It stays true after
+        /// <see cref="Close" />, so the owner must also check that the session is current.
+        /// </summary>
+        public bool IsOpen => _stream != null;
+
+        /// <summary>
+        /// Connect to the server, and do the TLS handshake if <paramref name="ssl" /> is true.
+        /// </summary>
+        /// <param name="validate">Decides whether to accept the server certificate.</param>
+        /// <returns>Null if the session is open, or why the connect failed.</returns>
+        public async Task<ConnectFailure?> OpenAsync(string server, int port, bool ssl,
+                                                     Func<X509Certificate, X509Chain, SslPolicyErrors, bool> validate)
+        {
+            var certificateRejected = false;
+            Stream stream = null;
+            try
+            {
+                await _socket.ConnectAsync(server, port).ConfigureAwait(false);
+                stream = new NetworkStream(_socket);
+                if (ssl)
+                {
+                    var tls = new SslStream(stream, false, (_, certificate, chain, errors) =>
+                    {
+                        bool accepted = validate(certificate, chain, errors);
+                        certificateRejected = !accepted;
+                        return accepted;
+                    });
+                    stream = tls;
+                    await tls.AuthenticateAsClientAsync(server).ConfigureAwait(false);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                    $"[{Thread.CurrentThread.Name}] TcpTextClient::Session.OpenAsync() connect failed={e}");
+                stream?.Dispose();
+                return ConnectFailure.From(e, certificateRejected);
+            }
+
+            _stream = stream;
+            return null;
+        }
+
+        /// <summary>
+        /// Read the next complete line, without its line end.
+        /// </summary>
+        /// <remarks>
+        /// A "\r" is dropped wherever it occurs. A part line stays in the session until the
+        /// rest of it arrives, and a part line at the end of the stream is lost.
+        /// </remarks>
+        /// <returns>The line, or null if the server closed the connection.</returns>
+        public async Task<string> ReadLineAsync()
+        {
+            while (true)
+            {
+                while (_charIndex < _charCount)
+                {
+                    char item = _chars[_charIndex++];
+                    if (item == '\n')
+                    {
+                        var line = _line.ToString();
+                        _line.Clear();
+                        return line;
+                    }
+
+                    if (item != '\r')
+                        _line.Append(item);
+                }
+
+                int count = await _stream.ReadAsync(_bytes).ConfigureAwait(false);
+                if (count == 0)
+                    return null;
+
+                _charIndex = 0;
+                _charCount = _decoder.GetChars(_bytes, 0, count, _chars, 0);
+            }
+        }
+
+        /// <summary>
+        /// Write <paramref name="bytes" /> to the stream. Only one write runs at a time.
+        /// </summary>
+        public void Write(byte[] bytes)
+        {
+            lock (_writeLock)
+                _stream.Write(bytes);
+        }
+
+        /// <summary>
+        /// Close the socket and release the stream. A second call does nothing more.
+        /// </summary>
+        /// <remarks>
+        /// The socket closes first. A <see cref="Write" /> that waits on a full send buffer
+        /// then fails at once, and the stream does not release under a write that is in
+        /// progress.
+        /// </remarks>
+        public void Close()
+        {
+            try
+            {
+                _socket.Shutdown(SocketShutdown.Both);
+            }
+            catch (Exception e) when (e is SocketException or ObjectDisposedException)
+            {
+                // Shutdown fails if the socket did not connect, the server reset it, or it is
+                // closed already. In each case there is nothing to shut down.
+            }
+            _socket.Close();
+            // The TLS stream holds a native security context that only Dispose releases.
+            _stream?.Dispose();
+        }
     }
 }

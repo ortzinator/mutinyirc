@@ -96,8 +96,9 @@ menu's Kick and Ban.
 ## Session (FlamingIRC)
 
 One connect attempt and the transport that follows it, from `TcpTextClient.Connect` until the
-attempt fails or the link ends. `TcpTextClient.Session` holds the socket, the stream, and the read
-buffers of one session, so nothing from an ended session can get into the next one. Every path that
+attempt fails or the link ends. `TcpTextClient.Session` owns the socket, the stream, and the read
+buffers of one session, and does its I/O: open, read a line, write, close. Thus nothing from an
+ended session can get into the next one. The session does not decide when it ends. Every path that
 ends a session goes through `TcpTextClient.TryEnd`, which only the first caller wins. Thus a live
 session reports its end (`OnDisconnect`, and so `Connection.ConnectionLost`) or its failure
 (`OnConnectFailed`) one time only. A [connection](#connection) object in MutinyIRC lives through
