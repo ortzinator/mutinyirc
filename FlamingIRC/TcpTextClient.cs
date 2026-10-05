@@ -112,7 +112,7 @@ public abstract class TcpTextClient
     /// <summary>
     /// True from just before <see cref="OnConnect()" /> until the session ends.
     /// </summary>
-    public bool Connected => Volatile.Read(ref _session) is { Live: true };
+    public bool Connected => Volatile.Read(ref _session) is { Stream: not null };
 
     /// <summary>
     /// Start a session: connect to the server, and do the TLS handshake if
@@ -167,7 +167,7 @@ public abstract class TcpTextClient
     public void Send(string message)
     {
         Session session = Volatile.Read(ref _session);
-        if (session is not { Live: true })
+        if (session?.Stream is not { } stream)
             throw new InvalidOperationException("The client is not connected.");
 
         message += "\r\n";
@@ -175,7 +175,7 @@ public abstract class TcpTextClient
         try
         {
             lock (session.WriteLock)
-                session.Stream.Write(buffer);
+                stream.Write(buffer);
         }
         catch (Exception e) when (IsIoFailure(e))
         {
@@ -215,10 +215,13 @@ public abstract class TcpTextClient
         }
 
         session.Stream = stream;
-        session.Live = true;
         // A Disconnect during the handshake ended this session, so do not report it as connected.
+        // TryEnd can run before the stream is set, so release the stream here too.
         if (Volatile.Read(ref _session) != session)
+        {
+            stream.Dispose();
             return;
+        }
 
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
             $"[{Thread.CurrentThread.Name}] TcpTextClient::RunSession() connected to {server}, tls={ssl}");
@@ -340,9 +343,13 @@ public abstract class TcpTextClient
         e is IOException or SocketException or ObjectDisposedException;
 
     /// <summary>
-    /// End <paramref name="session" /> and close its socket. Every path that ends a session or
-    /// a connect attempt calls this.
+    /// End <paramref name="session" />, close its socket, and release its stream. Every path
+    /// that ends a session or a connect attempt calls this.
     /// </summary>
+    /// <remarks>
+    /// The socket closes first. A <see cref="Send" /> that waits on a full send buffer then
+    /// fails at once, and the stream does not release under a write that is in progress.
+    /// </remarks>
     /// <returns>
     /// True if this call ended the session. False if the session ended before, so the caller
     /// must not report the end again.
@@ -352,7 +359,6 @@ public abstract class TcpTextClient
         if (Interlocked.CompareExchange(ref _session, null, session) != session)
             return false;
 
-        session.Live = false;
         try
         {
             session.Socket.Shutdown(SocketShutdown.Both);
@@ -363,6 +369,8 @@ public abstract class TcpTextClient
             // cases there is nothing to shut down, and Close below releases the socket.
         }
         session.Socket.Close();
+        // The TLS stream holds a native security context that only Dispose releases.
+        session.Stream?.Dispose();
         return true;
     }
 
@@ -434,11 +442,11 @@ public abstract class TcpTextClient
         /// <summary>Lets only one <see cref="TcpTextClient.Send" /> write at a time.</summary>
         public readonly object WriteLock = new();
 
-        /// <summary>The network or TLS stream. Set before <see cref="Live" /> becomes true.</summary>
-        public Stream Stream;
-
-        /// <summary>True from just before <see cref="TcpTextClient.OnConnect()" /> until the session ends.</summary>
-        public volatile bool Live;
+        /// <summary>
+        /// The network or TLS stream, or null until the connect and the handshake complete. A
+        /// session with a stream is live.
+        /// </summary>
+        public volatile Stream Stream;
 
         public bool CertificateRejected;
     }
