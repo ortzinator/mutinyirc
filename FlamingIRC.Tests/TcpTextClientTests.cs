@@ -192,9 +192,28 @@ public class TcpTextClientTests
         ServerProperties before = connection.ServerProperties;
 
         Assert.Throws<InvalidOperationException>(connection.Connect);
+        Assert.That(connection.TryConnect(), Is.False);
         Assert.That(connection.ServerProperties, Is.SameAs(before),
             "A refused Connect must not reset the state of the live attempt");
         connection.Disconnect(DisconnectReason.UserInitiated);
+    }
+
+    [Test]
+    public void ConnectionDisconnect_DuringAConnectAttempt_StopsTheAttempt()
+    {
+        _serve = (_, _, stop) => HoldOpen(stop);
+        var connection = new Connection(new ConnectionArgs("tester", "127.0.0.1", true) { Port = _port }, false, false);
+        var lost = new BlockingCollection<DisconnectReason>();
+        connection.ConnectionLost += (_, e) => lost.Add(e.Reason);
+        connection.Connect(); // The handshake never completes, so the attempt stays live.
+
+        connection.Disconnect("bye");
+
+        Assert.That(lost.TryTake(out DisconnectReason reason), Is.True,
+            "A Disconnect that stops an attempt must report it before it returns");
+        Assert.That(reason, Is.EqualTo(DisconnectReason.UserInitiated));
+        Assert.That(connection.TryConnect(), Is.True, "The stopped attempt must leave the connection idle");
+        connection.Disconnect("bye");
     }
 
     [Test]

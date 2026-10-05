@@ -404,12 +404,26 @@ public class Connection : TcpTextClient, IConnection
     /// <exception cref="InvalidOperationException">A session or a connect attempt is live.</exception>
     public void Connect()
     {
+        if (!TryConnect())
+            throw new InvalidOperationException("A session or a connect attempt is live.");
+    }
+
+    /// <summary>
+    /// Connect to the IRC server, as <see cref="Connect()" /> does, if no session and no
+    /// connect attempt is live.
+    /// </summary>
+    /// <returns>
+    /// True if this call started a connect attempt. False if a session or a connect attempt
+    /// was live. In that case, nothing changed.
+    /// </returns>
+    public bool TryConnect()
+    {
         lock (this)
         {
-            // Check before the resets below, so a refused Connect changes nothing. Connected is
+            // Check before the resets below, so a refused connect changes nothing. Connected is
             // not sufficient, because it is false during a connect attempt.
             if (!IsIdle)
-                throw new InvalidOperationException("A session or a connect attempt is live.");
+                return false;
             Listener.ResetServerProperties();
             // Reset the idle clock: this Connection object is reused across reconnects, so a
             // timestamp left over from the dropped link must not be read as fresh silence and
@@ -420,6 +434,7 @@ public class Connection : TcpTextClient, IConnection
                               $"[{Thread.CurrentThread.Name}] Connection::Connect()");
 
             Connect(_connectionArgs.Hostname, _connectionArgs.Port, _connectionArgs.Ssl);
+            return true;
         }
     }
 
@@ -469,21 +484,25 @@ public class Connection : TcpTextClient, IConnection
     }
 
     /// <summary>
-    /// Sends a 'Quit' message to the server, and closes the connection.
+    /// Sends a 'Quit' message to the server, and closes the connection. If a connect attempt
+    /// is live, this stops it.
     /// </summary>
     /// <remarks>
     /// The state of the connection will remain the same even after a disconnect, so the
-    /// connection can be reopened. All the event handlers will remain registered.
+    /// connection can be reopened. All the event handlers will remain registered. If the
+    /// connection is idle, this does nothing.
     /// </remarks>
     /// <param name="reason">A message displayed to other IRC users upon disconnect.</param>
     public void Disconnect(string reason)
     {
         lock (this)
         {
-            if (!Connected)
+            if (IsIdle)
                 return;
 
-            _sender.Quit(reason);
+            // A connect attempt has no session to quit, so send the QUIT only when connected.
+            if (Connected)
+                _sender.Quit(reason);
             Disconnect(DisconnectReason.UserInitiated);
             _activityTimer.Stop();
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
