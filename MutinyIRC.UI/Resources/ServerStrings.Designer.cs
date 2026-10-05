@@ -31,6 +31,9 @@
         internal static string ConnectionFailedMessage => ResourceManager.GetString("ConnectionFailedMessage", resourceCulture);
         internal static string ConnectionFailedUnknownMessage => ResourceManager.GetString("ConnectionFailedUnknownMessage", resourceCulture);
         internal static string ConnectionLost => ResourceManager.GetString("ConnectionLost", resourceCulture);
+        internal static string ConnectionLostPingTimeout => ResourceManager.GetString("ConnectionLostPingTimeout", resourceCulture);
+        internal static string ConnectionLostServerClosed => ResourceManager.GetString("ConnectionLostServerClosed", resourceCulture);
+        internal static string ConnectionLostUnknownMessage => ResourceManager.GetString("ConnectionLostUnknownMessage", resourceCulture);
         internal static string Disconnected => ResourceManager.GetString("Disconnected", resourceCulture);
         internal static string DisconnectSocketError => ResourceManager.GetString("DisconnectSocketError", resourceCulture);
         internal static string NickTakenMessage => ResourceManager.GetString("NickTakenMessage", resourceCulture);

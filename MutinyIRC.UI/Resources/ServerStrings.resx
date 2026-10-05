@@ -164,6 +164,19 @@
   </data>
   <data name="ConnectionLost" xml:space="preserve">
     <value>--Disconnected: {0}</value>
+    <comment>Displayed to the user when a socket error ends the connection. {0} describes the socket error.</comment>
+  </data>
+  <data name="ConnectionLostServerClosed" xml:space="preserve">
+    <value>--Disconnected: the server closed the connection.</value>
+    <comment>Displayed to the user when the server closes the connection.</comment>
+  </data>
+  <data name="ConnectionLostPingTimeout" xml:space="preserve">
+    <value>--Disconnected: the server stopped responding.</value>
+    <comment>Displayed to the user when the client ends the connection because the server did not answer a keep-alive ping in time.</comment>
+  </data>
+  <data name="ConnectionLostUnknownMessage" xml:space="preserve">
+    <value>--Disconnected: the connection was lost.</value>
+    <comment>Displayed to the user when the connection ends for a reason that has no socket error code and no other wording.</comment>
   </data>
   <data name="StatusConnected" xml:space="preserve">
     <value>Connected</value>

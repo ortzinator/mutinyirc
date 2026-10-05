@@ -212,4 +212,56 @@ public class ServerViewModelStatusTests
         Assert.That(_vm.ChatLines.Select(l => l.Message),
             Does.Contain(ServerStrings.ConnectionFailedMessage.With(SocketErrorTranslator.GetMessage(10061))));
     }
+
+    /// <summary>
+    /// Raises ConnectionLost with <paramref name="loss" /> from a faked <see cref="IConnection" />.
+    /// </summary>
+    private void DialAndLose(DisconnectEventArgs loss)
+    {
+        var conn = A.Fake<IConnection>();
+        // A real Listener: Server attaches to its events, and a fake's default is null.
+        A.CallTo(() => conn.Listener).Returns(new Listener());
+        A.CallTo(() => conn.ConnectionData).Returns(new ConnectionArgs("me", "irc.fake.com", false));
+        _server = new Server(conn);
+        _vm = new ServerViewModel(_server, new PluginManager());
+
+        conn.ConnectionLost += Raise.With(conn, loss);
+    }
+
+    [AvaloniaTest]
+    [TestCase(DisconnectReason.RemoteHostClosedConnection)]
+    [TestCase(DisconnectReason.PingTimeout)]
+    [TestCase(DisconnectReason.Other)]
+    public void LossWithNoSocketCode_DoesNotReportSocketErrorZero(DisconnectReason reason)
+    {
+        DialAndLose(new DisconnectEventArgs(reason));
+
+        Assert.That(_vm.ChatLines.Select(l => l.Message), Has.None.Contains("Socket error code"),
+            "Only a SocketError has a socket error code to show");
+    }
+
+    [AvaloniaTest]
+    public void ServerClose_SaysTheServerClosedTheConnection()
+    {
+        DialAndLose(new DisconnectEventArgs(DisconnectReason.RemoteHostClosedConnection));
+
+        Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Contain(ServerStrings.ConnectionLostServerClosed));
+    }
+
+    [AvaloniaTest]
+    public void PingTimeout_SaysTheServerStoppedResponding()
+    {
+        DialAndLose(new DisconnectEventArgs(DisconnectReason.PingTimeout));
+
+        Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Contain(ServerStrings.ConnectionLostPingTimeout));
+    }
+
+    [AvaloniaTest]
+    public void SocketLoss_StillReportsTheSocketError()
+    {
+        DialAndLose(new DisconnectEventArgs(DisconnectReason.SocketError, 10054));
+
+        Assert.That(_vm.ChatLines.Select(l => l.Message),
+            Does.Contain(ServerStrings.ConnectionLost.With(SocketErrorTranslator.GetMessage(10054))));
+    }
 }

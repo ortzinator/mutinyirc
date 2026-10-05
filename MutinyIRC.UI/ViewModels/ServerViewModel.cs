@@ -283,7 +283,18 @@ public class ServerViewModel : IrcViewModel
         ResetAwayState();
         // A reconnect is usually scheduled straight after this, and overwrites the status.
         ConnectionStatus = ServerStrings.StatusDisconnected;
-        AddMessage(ServerStrings.ConnectionLost.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
+        // Only SocketError has a socket error code. Every other reason needs its own wording,
+        // or the socket wording says "0".
+        AddMessage(e.Reason switch
+        {
+            DisconnectReason.SocketError =>
+                ServerStrings.ConnectionLost.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)),
+            DisconnectReason.RemoteHostClosedConnection => ServerStrings.ConnectionLostServerClosed,
+            DisconnectReason.PingTimeout => ServerStrings.ConnectionLostPingTimeout,
+            // DisconnectReason.Other, and any value that a newer FlamingIRC adds. Server reports
+            // UserInitiated as Disconnected, not here.
+            _ => ServerStrings.ConnectionLostUnknownMessage,
+        });
     }
 
     // The Server owns the reconnect timer and backoff; we just render what it announces.
