@@ -510,9 +510,6 @@ public class Connection : TcpTextClient, IConnection
 
     protected override void OnConnect()
     {
-        // Set Connected first. If the registration send fails, the session ends before this
-        // method returns, and that end must leave Connected false.
-        Connected = true;
         ConnectionEstablished.Fire(this, new EventArgs());
         _sender.RegisterConnection(_connectionArgs);
     }

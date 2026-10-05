@@ -93,6 +93,16 @@ selection to `SelectedRow`, typed `IUserListRow?` so it can hold either kind; `S
 derived from it with a type test, which is what keeps a heading from ever reaching the context
 menu's Kick and Ban.
 
+## Session (FlamingIRC)
+
+One connect attempt and the transport that follows it, from `TcpTextClient.Connect` until the
+attempt fails or the link ends. `TcpTextClient.Session` holds the socket, the stream, and the read
+buffers of one session, so nothing from an ended session can get into the next one. Every path that
+ends a session goes through `TcpTextClient.TryEnd`, which only the first caller wins. Thus a live
+session reports its end (`OnDisconnect`, and so `Connection.ConnectionLost`) or its failure
+(`OnConnectFailed`) one time only. A [connection](#connection) object in MutinyIRC lives through
+many sessions, because each reconnect starts a new one on the same `Connection`.
+
 ## Shown connection
 
 The one [connection](#connection) whose panels the [sidebar](#sidebar) lists: `MainViewModel.ShownServer`,

@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -23,7 +24,7 @@ public class SessionTeardownTests
 
     /// <summary>
     /// True: read the registration, then close, so the client reads end of stream.
-    /// False: close at once with the registration unread, so the client's send is reset.
+    /// False: reset the connection at once, so the client's next send or read fails.
     /// </summary>
     private bool _readBeforeClose;
 
@@ -53,6 +54,10 @@ public class SessionTeardownTests
                 {
                     if (_readBeforeClose)
                         await ReadUntilUser(client.GetStream());
+                    else
+                        // A zero linger time makes the close send RST, not FIN. The client then
+                        // always sees a socket error, whether its send or its read comes first.
+                        client.LingerState = new LingerOption(true, 0);
                 }
             });
         }
@@ -109,15 +114,16 @@ public class SessionTeardownTests
     {
         // Registration sends several lines. Each one after the first finds the session ended,
         // and must not report the loss again.
+        _readBeforeClose = false;
         Connection connection = NewConnection();
         var losses = 0;
-        connection.ConnectionLost += (_, _) => losses++;
+        connection.ConnectionLost += (_, _) => Interlocked.Increment(ref losses);
 
         Task<DisconnectReason> lost = NextConnectionLost(connection);
         connection.Connect();
         await lost.WaitAsync(Wait);
         await Task.Delay(200);
 
-        Assert.That(losses, Is.EqualTo(1));
+        Assert.That(Volatile.Read(ref losses), Is.EqualTo(1));
     }
 }

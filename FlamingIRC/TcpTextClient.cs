@@ -33,6 +33,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace FlamingIRC;
 
@@ -78,169 +79,167 @@ public enum DisconnectReason
 public abstract class TcpTextClient
 {
     private const int BufferLength = 512;
-    private readonly byte[] _byteBuffer;
-    private Socket _socket;
-    private readonly StringBuilder _textBuffer;
-    private string _serverName;
-    private SslStream _sslStream;
-    private Stream _stream;
-    private bool _usesSsl;
 
     /// <summary>
-    /// True when the certificate check of the current handshake rejected the server
-    /// certificate. SslStream reports a rejection and other handshake failures with the same
-    /// exception type, so <see cref="OnAuthenticate" /> uses this to tell them apart.
+    /// The current session, or null when the client is idle. Only <see cref="Connect" /> sets
+    /// it, and only <see cref="TryEnd" /> clears it.
     /// </summary>
-    private bool _certificateRejected;
+    private Session _session;
 
     protected TcpTextClient()
     {
-        _byteBuffer = new byte[BufferLength];
-        _textBuffer = new StringBuilder();
         TextEncoding = Encoding.UTF8;
-        _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     }
 
     public Encoding TextEncoding { get; protected set; }
 
-    public bool Connected { get; protected set; }
+    /// <summary>
+    /// True from just before <see cref="OnConnect()" /> until the session ends.
+    /// </summary>
+    public bool Connected => Volatile.Read(ref _session) is { Live: true };
 
     /// <summary>
-    /// Create a new connection to the server. Will call OnConnected or OnDisconnected depending
-    /// on connection attempt outcome.
+    /// Start a session: connect to the server, and do the TLS handshake if
+    /// <paramref name="ssl" /> is true. The result comes later, through
+    /// <see cref="OnConnect()" /> or <see cref="OnConnectFailed" />.
     /// </summary>
-    /// <param name="server">A <see cref="string" /></param>
-    /// <param name="port">A <see cref="int" /></param>
-    /// <param name="ssl">A <see cref="bool" /></param>
+    /// <exception cref="InvalidOperationException">A session or a connect attempt is live.</exception>
     protected void Connect(string server, int port, bool ssl)
     {
-        _usesSsl = ssl;
-        _serverName = server;
-        _certificateRejected = false;
-        _socket.BeginConnect(server, port, OnConnect, null);
+        var session = new Session(new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp),
+            TextEncoding);
+        if (Interlocked.CompareExchange(ref _session, session, null) != null)
+        {
+            session.Socket.Dispose();
+            throw new InvalidOperationException("A session or a connect attempt is live.");
+        }
+
+        Task.Run(() => RunSession(session, server, port, ssl));
     }
 
     /// <summary>
-    /// Close the connection to the server.
+    /// End the current session or connect attempt.
     /// </summary>
     /// <remarks>
-    /// The client need not be actually connected. This method will also "give up" an attept to
-    /// connect or revert to a disconnected state after an error.
+    /// The client need not be connected. If it is idle, this still calls
+    /// <see cref="OnDisconnect" />. If a session is live, this calls <see cref="OnDisconnect" />
+    /// only if no other path ended the session first.
     /// </remarks>
     public void Disconnect(DisconnectReason reason)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-            $"[{Thread.CurrentThread.Name}] TcpTextClient::Disconnect() reason={reason}");
-        EndSession();
-        OnDisconnect(reason, null);
-    }
-
-    /// <summary>
-    /// End the current session or connect attempt. Every path that ends one calls this.
-    /// </summary>
-    /// <remarks>
-    /// A socket cannot connect again after it was connected or after a connect failed, so this
-    /// puts a new socket in its place. It also clears <see cref="_stream" />. An I/O callback
-    /// compares its stream with <see cref="_stream" />, so a callback from an ended session
-    /// cannot end the session that comes after it.
-    /// </remarks>
-    private void EndSession()
-    {
-        _stream = null;
-        try { _socket.Shutdown(SocketShutdown.Both); } catch (SocketException) { }
-        _socket.Close();
-        _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        Connected = false;
-    }
-
-    /// <summary>
-    /// End a connect attempt that did not succeed and tell the subclass why.
-    /// </summary>
-    private void FailConnect(ConnectError error, int? socketErrorCode)
-    {
-        EndSession();
-        OnConnectFailed(error, socketErrorCode);
-    }
-
-    /// <summary>
-    /// End a live session because its stream failed. Do nothing if the stream belongs to a
-    /// session that already ended.
-    /// </summary>
-    private void LoseSession(Stream stream, DisconnectReason reason)
-    {
-        if (stream != _stream)
+        if (Volatile.Read(ref _session) is { } session)
+        {
+            Lose(session, reason);
             return;
-        Disconnect(reason);
+        }
+
+        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+            $"[{Thread.CurrentThread.Name}] TcpTextClient::Disconnect() idle, reason={reason}");
+        OnDisconnect(reason, null);
     }
 
     /// <summary>
     /// Sends a string message to the server.
     /// </summary>
+    /// <remarks>
+    /// If the write fails, the session ends and <see cref="OnDisconnect" /> tells why. The write
+    /// is synchronous, so a QUIT is in the socket before a <see cref="Disconnect" /> that
+    /// follows it closes the socket.
+    /// </remarks>
     /// <param name="message">A <see cref="string" /></param>
     /// <exception cref="InvalidOperationException">The client is not connected.</exception>
     public void Send(string message)
     {
-        Stream stream = _stream ?? throw new InvalidOperationException("The client is not connected.");
+        Session session = Volatile.Read(ref _session);
+        if (session is not { Live: true })
+            throw new InvalidOperationException("The client is not connected.");
+
         message += "\r\n";
         byte[] buffer = TextEncoding.GetBytes(message);
-        stream.BeginWrite(buffer, 0, buffer.Length, OnSend, stream);
+        try
+        {
+            lock (session.WriteLock)
+                session.Stream.Write(buffer);
+        }
+        catch (Exception e) when (IsIoFailure(e))
+        {
+            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::Send() exception={e.Message}");
+            Lose(session, DisconnectReason.SocketError);
+            return;
+        }
+
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
             $"[{Thread.CurrentThread.Name}] TcpTextClient::Send() {message.TrimEnd()}");
     }
 
-    private void OnConnect(IAsyncResult res)
+    /// <summary>
+    /// Run one session from the connect to the end.
+    /// </summary>
+    /// <remarks>
+    /// An I/O failure ends the session through <see cref="TryEnd" />. An exception from subclass
+    /// code or an event handler is not an I/O failure, and this method does not catch it. This
+    /// method is async void and runs on the thread pool, so that exception ends the process.
+    /// </remarks>
+    private async void RunSession(Session session, string server, int port, bool ssl)
     {
+        Stream stream;
         try
         {
-            _socket.EndConnect(res);
-            _stream = new NetworkStream(_socket);
-
-            if (_usesSsl)
-            {
-                _sslStream = new SslStream(_stream, false, OnCertificateValidate);
-                // Set _stream first. The handshake can complete before BeginAuthenticateAsClient
-                // returns, and OnAuthenticate then reads from _stream.
-                _stream = _sslStream;
-                _sslStream.BeginAuthenticateAsClient(_serverName, OnAuthenticate, null);
-                return;
-            }
-        }
-        catch (SocketException e)
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() SocketException={e.SocketErrorCode}");
-            FailConnect(ConnectError.SocketError, e.ErrorCode);
-            return;
+            stream = await OpenStream(session, server, port, ssl).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            // Do not throw again. This method is an async callback, so an exception that
-            // leaves it ends the process. ConnectFailed tells the caller about the failure.
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() exception={e}");
-            FailConnect(ConnectError.Other, null);
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::RunSession() connect failed={e}");
+            (ConnectError error, int? socketErrorCode) = ClassifyConnectFailure(session, e);
+            if (TryEnd(session))
+                OnConnectFailed(error, socketErrorCode);
             return;
         }
 
-        CompleteConnect();
-    }
+        session.Stream = stream;
+        session.Live = true;
+        // A Disconnect during the handshake ended this session, so do not report it as connected.
+        if (Volatile.Read(ref _session) != session)
+            return;
 
-    /// <summary>
-    /// The transport is ready: tell the subclass, then start to read.
-    /// </summary>
-    /// <remarks>
-    /// Call this outside the connect error handling. When this runs, the connect succeeded, so
-    /// an exception from the subclass or its event handlers is not a connect failure.
-    /// </remarks>
-    private void CompleteConnect()
-    {
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-            $"[{Thread.CurrentThread.Name}] TcpTextClient::CompleteConnect() connected to {_serverName}, tls={_usesSsl}");
+            $"[{Thread.CurrentThread.Name}] TcpTextClient::RunSession() connected to {server}, tls={ssl}");
         OnConnect();
-        WaitForData();
+        await ReadLines(session).ConfigureAwait(false);
     }
 
-    private bool OnCertificateValidate(object sender, X509Certificate certificate, X509Chain chain,
+    private async Task<Stream> OpenStream(Session session, string server, int port, bool ssl)
+    {
+        await session.Socket.ConnectAsync(server, port).ConfigureAwait(false);
+        var network = new NetworkStream(session.Socket);
+        if (!ssl)
+            return network;
+
+        var tls = new SslStream(network, false,
+            (_, certificate, chain, errors) => OnCertificateValidate(session, certificate, chain, errors));
+        await tls.AuthenticateAsClientAsync(server).ConfigureAwait(false);
+        return tls;
+    }
+
+    private static (ConnectError, int?) ClassifyConnectFailure(Session session, Exception e) => e switch
+    {
+        SocketException socketError => (ConnectError.SocketError, socketError.ErrorCode),
+        // SslStream reports a rejected certificate and other handshake failures with the same
+        // exception type, so the session records which one it was.
+        AuthenticationException => (session.CertificateRejected
+            ? ConnectError.CertificateRejected
+            : ConnectError.AuthenticationFailed, null),
+        // The server reset the connection during the handshake.
+        IOException { InnerException: SocketException socketError } =>
+            (ConnectError.SocketError, socketError.ErrorCode),
+        // This includes an IOException with no socket error, for example when the server closes
+        // the connection during the handshake.
+        _ => (ConnectError.Other, null)
+    };
+
+    private bool OnCertificateValidate(Session session, X509Certificate certificate, X509Chain chain,
                                        SslPolicyErrors errors)
     {
         if (errors == SslPolicyErrors.None)
@@ -260,130 +259,108 @@ public abstract class TcpTextClient
             accepted = false;
         }
 
-        _certificateRejected = !accepted;
+        session.CertificateRejected = !accepted;
         return accepted;
     }
 
-    private void OnAuthenticate(IAsyncResult res)
+    private async Task ReadLines(Session session)
     {
-        try
+        while (true)
         {
-            _sslStream.EndAuthenticateAsClient(res);
-        }
-        catch (AuthenticationException e)
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() SSL authentication failed={e.Message}");
-            FailConnect(_certificateRejected ? ConnectError.CertificateRejected : ConnectError.AuthenticationFailed,
-                null);
-            return;
-        }
-        catch (IOException e) when (e.InnerException is SocketException socketError)
-        {
-            // The server reset the connection during the handshake.
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() handshake socket failure={e.Message}");
-            FailConnect(ConnectError.SocketError, socketError.ErrorCode);
-            return;
-        }
-        catch (Exception e)
-        {
-            // This includes an IOException with no socket error, for example when the server
-            // closes the connection during the handshake.
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() handshake failure={e}");
-            FailConnect(ConnectError.Other, null);
-            return;
-        }
-
-        CompleteConnect();
-    }
-
-    // The I/O callbacks below do not throw for an I/O failure. They run on thread-pool threads,
-    // where an exception ends the process. A failure ends the session, and ConnectionLost tells
-    // the caller. An exception from subclass code or an event handler is not an I/O failure,
-    // and it is not caught.
-
-    private void WaitForData()
-    {
-        // The session can end while OnConnect runs, for example when the registration send fails.
-        Stream stream = _stream;
-        if (stream == null)
-            return;
-
-        try
-        {
-            stream.BeginRead(_byteBuffer, 0, BufferLength, OnDataReceived, stream);
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::WaitForData() exception={e.Message}");
-            LoseSession(stream, DisconnectReason.SocketError);
-        }
-    }
-
-    private void OnDataReceived(IAsyncResult res)
-    {
-        var stream = (Stream)res.AsyncState;
-        if (stream != _stream)
-            return;
-
-        try
-        {
-            int bytes = stream.EndRead(res);
-
-            if (bytes == 0)
+            int count;
+            try
             {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                    $"[{Thread.CurrentThread.Name}] TcpTextClient::OnDataReceived() remote host closed connection");
-                LoseSession(stream, DisconnectReason.RemoteHostClosedConnection);
+                count = await session.Stream.ReadAsync(session.Bytes).ConfigureAwait(false);
+            }
+            catch (Exception e) when (IsIoFailure(e))
+            {
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
+                    $"[{Thread.CurrentThread.Name}] TcpTextClient::ReadLines() exception={e.Message}");
+                Lose(session, DisconnectReason.SocketError);
                 return;
             }
 
-            string text =
-                TextEncoding.GetString((bytes == BufferLength) ? _byteBuffer : _byteBuffer.Slice(0, bytes));
-            foreach (char item in text)
+            if (count == 0)
             {
-                switch (item)
-                {
-                    case '\r':
-                        continue;
-
-                    case '\n':
-                        OnReceiveLine(_textBuffer.ToString());
-                        _textBuffer.Clear();
-                        break;
-
-                    default:
-                        _textBuffer.Append(item);
-                        break;
-                }
+                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+                    $"[{Thread.CurrentThread.Name}] TcpTextClient::ReadLines() remote host closed connection");
+                Lose(session, DisconnectReason.RemoteHostClosedConnection);
+                return;
             }
 
-            WaitForData();
-        }
-        catch (Exception e) when (e is IOException or SocketException or ObjectDisposedException)
-        {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnDataReceived() exception={e.Message}");
-            LoseSession(stream, DisconnectReason.SocketError);
+            DispatchLines(session, count);
         }
     }
 
-    private void OnSend(IAsyncResult res)
+    /// <summary>
+    /// Decode the bytes that a read put in the session buffer, and give each complete line to
+    /// <see cref="OnReceiveLine" />. The session keeps a part line, and the decoder keeps a part
+    /// character, until the next read.
+    /// </summary>
+    private void DispatchLines(Session session, int count)
     {
-        var stream = (Stream)res.AsyncState;
+        int length = session.Decoder.GetChars(session.Bytes, 0, count, session.Chars, 0);
+        for (var i = 0; i < length; i++)
+        {
+            char item = session.Chars[i];
+            switch (item)
+            {
+                case '\r':
+                    continue;
+
+                case '\n':
+                    OnReceiveLine(session.Line.ToString());
+                    session.Line.Clear();
+                    break;
+
+                default:
+                    session.Line.Append(item);
+                    break;
+            }
+        }
+    }
+
+    private static bool IsIoFailure(Exception e) =>
+        e is IOException or SocketException or ObjectDisposedException;
+
+    /// <summary>
+    /// End <paramref name="session" /> and close its socket. Every path that ends a session or
+    /// a connect attempt calls this.
+    /// </summary>
+    /// <returns>
+    /// True if this call ended the session. False if the session ended before, so the caller
+    /// must not report the end again.
+    /// </returns>
+    private bool TryEnd(Session session)
+    {
+        if (Interlocked.CompareExchange(ref _session, null, session) != session)
+            return false;
+
+        session.Live = false;
         try
         {
-            stream.EndWrite(res);
+            session.Socket.Shutdown(SocketShutdown.Both);
         }
-        catch (Exception e)
+        catch (SocketException)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnSend() exception={e.Message}");
-            LoseSession(stream, DisconnectReason.SocketError);
+            // Shutdown fails if the socket did not connect or the server reset it. In both
+            // cases there is nothing to shut down, and Close below releases the socket.
         }
+        session.Socket.Close();
+        return true;
+    }
+
+    /// <summary>
+    /// End a session and call <see cref="OnDisconnect" />, if the session did not end before.
+    /// </summary>
+    private void Lose(Session session, DisconnectReason reason)
+    {
+        if (!TryEnd(session))
+            return;
+
+        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+            $"[{Thread.CurrentThread.Name}] TcpTextClient::Lose() reason={reason}");
+        OnDisconnect(reason, null);
     }
 
     protected abstract void OnConnect();
@@ -408,4 +385,28 @@ public abstract class TcpTextClient
     protected abstract void OnConnectFailed(ConnectError error, int? socketErrorCode);
 
     protected abstract void OnReceiveLine(string line);
+
+    /// <summary>
+    /// One connect attempt and the connection that follows it. Each session has its own socket
+    /// and buffers, so nothing from an ended session can get into the next one.
+    /// </summary>
+    private sealed class Session(Socket socket, Encoding encoding)
+    {
+        public readonly Socket Socket = socket;
+        public readonly byte[] Bytes = new byte[BufferLength];
+        public readonly char[] Chars = new char[encoding.GetMaxCharCount(BufferLength)];
+        public readonly Decoder Decoder = encoding.GetDecoder();
+        public readonly StringBuilder Line = new();
+
+        /// <summary>Lets only one <see cref="TcpTextClient.Send" /> write at a time.</summary>
+        public readonly object WriteLock = new();
+
+        /// <summary>The network or TLS stream. Set before <see cref="Live" /> becomes true.</summary>
+        public Stream Stream;
+
+        /// <summary>True from just before <see cref="TcpTextClient.OnConnect()" /> until the session ends.</summary>
+        public volatile bool Live;
+
+        public bool CertificateRejected;
+    }
 }
