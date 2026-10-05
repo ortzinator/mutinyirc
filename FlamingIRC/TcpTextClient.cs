@@ -115,6 +115,12 @@ public abstract class TcpTextClient
     public bool Connected => Volatile.Read(ref _session) is { IsOpen: true };
 
     /// <summary>
+    /// True when no session and no connect attempt is live, so <see cref="Connect" /> can
+    /// start one.
+    /// </summary>
+    protected bool IsIdle => Volatile.Read(ref _session) == null;
+
+    /// <summary>
     /// Start a session: connect to the server, and do the TLS handshake if
     /// <paramref name="ssl" /> is true. The result comes later, through
     /// <see cref="OnConnect()" /> or <see cref="OnConnectFailed" />.

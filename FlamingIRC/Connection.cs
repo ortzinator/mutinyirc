@@ -297,7 +297,7 @@ public class Connection : TcpTextClient, IConnection
         // is dead — before the first Connect(), or during the reconnect backoff window. Gate on
         // Connected, the one flag that stays true only while there's a live socket: a half-open
         // link keeps it set (no FIN/RST arrives) so timeout detection still works, and every
-        // real disconnect clears it so stray ticks can't ping a null stream or raise a second
+        // real disconnect clears it so stray ticks can't ping an ended session or raise a second
         // spurious ConnectionLost.
         if (!Connected)
             return;
@@ -401,12 +401,15 @@ public class Connection : TcpTextClient, IConnection
     /// <summary>
     /// Connect to the IRC server and start listening for messages asynchronously
     /// </summary>
+    /// <exception cref="InvalidOperationException">A session or a connect attempt is live.</exception>
     public void Connect()
     {
         lock (this)
         {
-            if (Connected)
-                throw new Exception("Connection with IRC server already opened.");
+            // Check before the resets below, so a refused Connect changes nothing. Connected is
+            // not sufficient, because it is false during a connect attempt.
+            if (!IsIdle)
+                throw new InvalidOperationException("A session or a connect attempt is live.");
             Listener.ResetServerProperties();
             // Reset the idle clock: this Connection object is reused across reconnects, so a
             // timestamp left over from the dropped link must not be read as fresh silence and

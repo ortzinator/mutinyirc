@@ -184,6 +184,20 @@ public class TcpTextClientTests
     }
 
     [Test]
+    public void ConnectionConnect_WhileAnAttemptIsLive_ThrowsAndChangesNothing()
+    {
+        _serve = (_, _, stop) => HoldOpen(stop);
+        var connection = new Connection(new ConnectionArgs("tester", "127.0.0.1", true) { Port = _port }, false, false);
+        connection.Connect(); // The handshake never completes, so the attempt stays live.
+        ServerProperties before = connection.ServerProperties;
+
+        Assert.Throws<InvalidOperationException>(connection.Connect);
+        Assert.That(connection.ServerProperties, Is.SameAs(before),
+            "A refused Connect must not reset the state of the live attempt");
+        connection.Disconnect(DisconnectReason.UserInitiated);
+    }
+
+    [Test]
     public void OnConnect_SeesConnectedTrue()
     {
         _serve = (_, _, stop) => HoldOpen(stop);
