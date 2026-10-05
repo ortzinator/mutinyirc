@@ -172,10 +172,33 @@ public class ServerViewModelStatusTests
     [AvaloniaTest]
     public void CertificateRejected_TellsTheUserTheCertificateIsNotTrusted()
     {
-        DialAndFail(ConnectError.AuthenticationFailed, null);
+        DialAndFail(ConnectError.CertificateRejected, null);
 
         Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Contain(ServerStrings.CertificateRejectedMessage),
             "A rejected certificate must say so, not report socket error 0");
+    }
+
+    [AvaloniaTest]
+    public void HandshakeFailure_IsNotReportedAsACertificateRejection()
+    {
+        DialAndFail(ConnectError.AuthenticationFailed, null);
+
+        Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Contain(ServerStrings.TlsHandshakeFailedMessage));
+        Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Not.Contain(ServerStrings.CertificateRejectedMessage),
+            "A handshake can fail while the certificate is good, so it must not blame the certificate");
+    }
+
+    [AvaloniaTest]
+    [TestCase(ConnectError.CertificateRejected)]
+    [TestCase(ConnectError.AuthenticationFailed)]
+    [TestCase(ConnectError.ConnectionRefused)]
+    [TestCase(ConnectError.Other)]
+    public void FailureWithNoSocketCode_DoesNotReportSocketErrorZero(ConnectError reason)
+    {
+        DialAndFail(reason, null);
+
+        Assert.That(_vm.ChatLines.Select(l => l.Message), Has.None.Contains("Socket error code"),
+            "Only a SocketError has a socket error code to show");
     }
 
     [AvaloniaTest]

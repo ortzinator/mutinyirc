@@ -132,6 +132,14 @@
     <value>Could not connect: ({0})</value>
     <comment>Displayed to the user when a connection attempt is not successful.</comment>
   </data>
+  <data name="ConnectionFailedUnknownMessage" xml:space="preserve">
+    <value>Could not connect: the connection failed before it was established.</value>
+    <comment>Displayed to the user when a connection attempt fails for a reason that has no socket error code, for example when the server closes the connection during the TLS handshake.</comment>
+  </data>
+  <data name="TlsHandshakeFailedMessage" xml:space="preserve">
+    <value>Could not connect: the TLS handshake with the server failed.</value>
+    <comment>Displayed to the user when a TLS connection fails for a reason other than the server's certificate, for example when the client and the server have no TLS version in common.</comment>
+  </data>
   <data name="Disconnected" xml:space="preserve">
     <value>--Disconnected--</value>
   </data>

@@ -333,11 +333,19 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_ConnectFailed(object? sender, ConnectFailedEventArgs e)
     {
-        // A rejected certificate has no socket error code, so the socket wording would say "0".
-        if (e.Reason == ConnectError.AuthenticationFailed)
-            AddMessage(ServerStrings.CertificateRejectedMessage);
-        else
-            AddMessage(ServerStrings.ConnectionFailedMessage.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)));
+        // Only SocketError has a socket error code. Every other reason needs its own wording,
+        // or the socket wording says "0".
+        AddMessage(e.Reason switch
+        {
+            ConnectError.SocketError =>
+                ServerStrings.ConnectionFailedMessage.With(SocketErrorTranslator.GetMessage(e.SocketErrorCode)),
+            ConnectError.ConnectionRefused =>
+                ServerStrings.ConnectionFailedMessage.With(SocketErrorStrings.ConnectionRefused),
+            ConnectError.CertificateRejected => ServerStrings.CertificateRejectedMessage,
+            ConnectError.AuthenticationFailed => ServerStrings.TlsHandshakeFailedMessage,
+            // ConnectError.Other, and any value that a newer FlamingIRC adds.
+            _ => ServerStrings.ConnectionFailedUnknownMessage,
+        });
     }
 
     private void Server_Registered(object? sender, EventArgs e)

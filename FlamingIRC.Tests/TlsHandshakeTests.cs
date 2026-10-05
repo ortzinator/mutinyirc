@@ -85,7 +85,7 @@ public class TlsHandshakeTests
     }
 
     [Test]
-    public async Task SelfSignedCertificate_FailsConnectWithAuthenticationFailed()
+    public async Task SelfSignedCertificate_FailsConnectWithCertificateRejected()
     {
         var connection = new Connection(Args(), false, false);
         var established = false;
@@ -94,7 +94,7 @@ public class TlsHandshakeTests
         Task<ConnectError> failure = NextConnectFailure(connection);
         connection.Connect();
 
-        Assert.That(await failure.WaitAsync(Wait), Is.EqualTo(ConnectError.AuthenticationFailed),
+        Assert.That(await failure.WaitAsync(Wait), Is.EqualTo(ConnectError.CertificateRejected),
             "An untrusted certificate must fail the connect, not end the process");
         Assert.That(established, Is.False, "An untrusted certificate must not be accepted");
     }
@@ -112,7 +112,7 @@ public class TlsHandshakeTests
         Task<ConnectError> second = NextConnectFailure(connection);
         connection.Connect();
 
-        Assert.That(await second.WaitAsync(Wait), Is.EqualTo(ConnectError.AuthenticationFailed),
+        Assert.That(await second.WaitAsync(Wait), Is.EqualTo(ConnectError.CertificateRejected),
             "A redial must start from a new socket and reach the handshake again");
     }
 
@@ -124,7 +124,7 @@ public class TlsHandshakeTests
         Task<ConnectError> failure = NextConnectFailure(connection);
         connection.Connect();
 
-        Assert.That(await failure.WaitAsync(Wait), Is.EqualTo(ConnectError.AuthenticationFailed),
+        Assert.That(await failure.WaitAsync(Wait), Is.EqualTo(ConnectError.CertificateRejected),
             "An exception from the validation override must count as a rejection");
     }
 

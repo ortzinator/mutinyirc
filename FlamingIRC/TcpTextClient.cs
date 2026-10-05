@@ -36,12 +36,34 @@ using System.Threading;
 
 namespace FlamingIRC;
 
+/// <summary>
+/// Why a connect attempt failed. Only <see cref="SocketError" /> comes with a socket error code.
+/// </summary>
 public enum ConnectError
 {
     ConnectionRefused,
+
+    /// <summary>
+    /// The TLS handshake failed for a reason other than the server certificate, for example
+    /// because the client and the server have no protocol version in common.
+    /// </summary>
     AuthenticationFailed,
+
+    /// <summary>
+    /// A socket operation failed. The failure always has a socket error code.
+    /// </summary>
     SocketError,
-    Other
+
+    /// <summary>
+    /// The connect failed for a reason that has no socket error code and no other value here.
+    /// </summary>
+    Other,
+
+    /// <summary>
+    /// The server certificate did not pass validation, and
+    /// <see cref="TcpTextClient.OnCertificateValidationFailed" /> did not accept it.
+    /// </summary>
+    CertificateRejected
 }
 
 public enum DisconnectReason
@@ -63,6 +85,13 @@ public abstract class TcpTextClient
     private SslStream _sslStream;
     private Stream _stream;
     private bool _usesSsl;
+
+    /// <summary>
+    /// True when the certificate check of the current handshake rejected the server
+    /// certificate. SslStream reports a rejection and other handshake failures with the same
+    /// exception type, so <see cref="OnAuthenticate" /> uses this to tell them apart.
+    /// </summary>
+    private bool _certificateRejected;
 
     protected TcpTextClient()
     {
@@ -87,6 +116,7 @@ public abstract class TcpTextClient
     {
         _usesSsl = ssl;
         _serverName = server;
+        _certificateRejected = false;
         _socket.BeginConnect(server, port, OnConnect, null);
     }
 
@@ -188,7 +218,7 @@ public abstract class TcpTextClient
             // leaves it ends the process. ConnectFailed tells the caller about the failure.
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() exception={e}");
-            FailConnect(ConnectError.SocketError, null);
+            FailConnect(ConnectError.Other, null);
             return;
         }
 
@@ -216,9 +246,10 @@ public abstract class TcpTextClient
         if (errors == SslPolicyErrors.None)
             return true;
 
+        bool accepted;
         try
         {
-            return OnCertificateValidationFailed(certificate, chain, errors);
+            accepted = OnCertificateValidationFailed(certificate, chain, errors);
         }
         catch (Exception e)
         {
@@ -226,8 +257,11 @@ public abstract class TcpTextClient
             // thread-pool thread, where an exception would end the process.
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::OnCertificateValidate() exception={e}");
-            return false;
+            accepted = false;
         }
+
+        _certificateRejected = !accepted;
+        return accepted;
     }
 
     private void OnAuthenticate(IAsyncResult res)
@@ -240,19 +274,22 @@ public abstract class TcpTextClient
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() SSL authentication failed={e.Message}");
-            FailConnect(ConnectError.AuthenticationFailed, null);
+            FailConnect(_certificateRejected ? ConnectError.CertificateRejected : ConnectError.AuthenticationFailed,
+                null);
             return;
         }
-        catch (IOException e)
+        catch (IOException e) when (e.InnerException is SocketException socketError)
         {
-            // The server closed or reset the connection during the handshake.
+            // The server reset the connection during the handshake.
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() handshake IO failure={e.Message}");
-            FailConnect(ConnectError.SocketError, (e.InnerException as SocketException)?.ErrorCode);
+                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() handshake socket failure={e.Message}");
+            FailConnect(ConnectError.SocketError, socketError.ErrorCode);
             return;
         }
         catch (Exception e)
         {
+            // This includes an IOException with no socket error, for example when the server
+            // closes the connection during the handshake.
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() handshake failure={e}");
             FailConnect(ConnectError.Other, null);
@@ -357,7 +394,7 @@ public abstract class TcpTextClient
     /// </summary>
     /// <remarks>
     /// The default rejects the certificate, and the connect fails with
-    /// <see cref="ConnectError.AuthenticationFailed" />. Override this to trust a certificate,
+    /// <see cref="ConnectError.CertificateRejected" />. Override this to trust a certificate,
     /// for example by comparing its fingerprint with one the user accepted. An exception from
     /// the override counts as a rejection.
     /// </remarks>

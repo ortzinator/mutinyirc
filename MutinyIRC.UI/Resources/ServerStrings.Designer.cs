@@ -29,6 +29,7 @@
         internal static string CertificateRejectedMessage => ResourceManager.GetString("CertificateRejectedMessage", resourceCulture);
         internal static string ConnectingMessage => ResourceManager.GetString("ConnectingMessage", resourceCulture);
         internal static string ConnectionFailedMessage => ResourceManager.GetString("ConnectionFailedMessage", resourceCulture);
+        internal static string ConnectionFailedUnknownMessage => ResourceManager.GetString("ConnectionFailedUnknownMessage", resourceCulture);
         internal static string ConnectionLost => ResourceManager.GetString("ConnectionLost", resourceCulture);
         internal static string Disconnected => ResourceManager.GetString("Disconnected", resourceCulture);
         internal static string DisconnectSocketError => ResourceManager.GetString("DisconnectSocketError", resourceCulture);
@@ -41,6 +42,7 @@
         internal static string StatusConnecting => ResourceManager.GetString("StatusConnecting", resourceCulture);
         internal static string StatusDisconnected => ResourceManager.GetString("StatusDisconnected", resourceCulture);
         internal static string StatusReconnecting => ResourceManager.GetString("StatusReconnecting", resourceCulture);
+        internal static string TlsHandshakeFailedMessage => ResourceManager.GetString("TlsHandshakeFailedMessage", resourceCulture);
         internal static string WarnDisconnect => ResourceManager.GetString("WarnDisconnect", resourceCulture);
     }
 }
