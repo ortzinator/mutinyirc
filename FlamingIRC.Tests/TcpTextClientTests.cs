@@ -213,6 +213,26 @@ public class TcpTextClientTests
     }
 
     [Test]
+    public void Reset_ReportsSocketErrorWithItsCode()
+    {
+        _serve = (client, _, _) =>
+        {
+            // A close with no wait time sends RST, so the client's read fails.
+            client.Client.Close(0);
+            return Task.CompletedTask;
+        };
+        var irc = new RecordingClient();
+
+        irc.Dial(_port);
+        Assert.That(Next(irc), Is.EqualTo("connect"));
+
+        string[] parts = Next(irc).Split(':');
+        Assert.That(parts[1], Is.EqualTo(nameof(DisconnectReason.SocketError)));
+        Assert.That(parts, Has.Length.EqualTo(3), "A socket error must come with its code");
+        Assert.That(int.Parse(parts[2]), Is.Not.Zero);
+    }
+
+    [Test]
     public void Send_AfterTheSessionEnded_Throws()
     {
         _serve = (_, _, _) => Task.CompletedTask; // Close at once.
@@ -242,7 +262,7 @@ public class TcpTextClientTests
         }
 
         protected override void OnDisconnect(DisconnectReason reason, int? socketErrorCode) =>
-            Events.Add($"disconnect:{reason}");
+            Events.Add(socketErrorCode is { } code ? $"disconnect:{reason}:{code}" : $"disconnect:{reason}");
 
         protected override void OnConnectFailed(ConnectError error, int? socketErrorCode) =>
             Events.Add($"failed:{error}");

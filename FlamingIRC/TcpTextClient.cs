@@ -67,12 +67,28 @@ public enum ConnectError
     CertificateRejected
 }
 
+/// <summary>
+/// Why a session ended. Only <see cref="SocketError" /> comes with a socket error code.
+/// </summary>
 public enum DisconnectReason
 {
     UserInitiated,
     PingTimeout,
+
+    /// <summary>
+    /// A read or a write failed with a socket error. When the transport ends the session for
+    /// this reason, the failure always has a socket error code.
+    /// </summary>
     SocketError,
+
+    /// <summary>
+    /// The server closed the connection.
+    /// </summary>
     RemoteHostClosedConnection,
+
+    /// <summary>
+    /// The session ended for a reason that has no socket error code and no other value here.
+    /// </summary>
     Other
 }
 
@@ -165,7 +181,7 @@ public abstract class TcpTextClient
         {
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::Send() exception={e.Message}");
-            Lose(session, DisconnectReason.SocketError);
+            LoseToIoFailure(session, e);
             return;
         }
 
@@ -276,7 +292,7 @@ public abstract class TcpTextClient
             {
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                     $"[{Thread.CurrentThread.Name}] TcpTextClient::ReadLines() exception={e.Message}");
-                Lose(session, DisconnectReason.SocketError);
+                LoseToIoFailure(session, e);
                 return;
             }
 
@@ -353,14 +369,31 @@ public abstract class TcpTextClient
     /// <summary>
     /// End a session and call <see cref="OnDisconnect" />, if the session did not end before.
     /// </summary>
-    private void Lose(Session session, DisconnectReason reason)
+    private void Lose(Session session, DisconnectReason reason, int? socketErrorCode = null)
     {
         if (!TryEnd(session))
             return;
 
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-            $"[{Thread.CurrentThread.Name}] TcpTextClient::Lose() reason={reason}");
-        OnDisconnect(reason, null);
+            $"[{Thread.CurrentThread.Name}] TcpTextClient::Lose() reason={reason}, code={socketErrorCode}");
+        OnDisconnect(reason, socketErrorCode);
+    }
+
+    /// <summary>
+    /// End a session because a read or a write failed. A failure with a socket error code ends
+    /// it as <see cref="DisconnectReason.SocketError" /> with that code. Any other failure, for
+    /// example a stream that closed, ends it as <see cref="DisconnectReason.Other" />.
+    /// </summary>
+    private void LoseToIoFailure(Session session, Exception failure)
+    {
+        int? socketErrorCode = failure switch
+        {
+            SocketException socketError => socketError.ErrorCode,
+            IOException { InnerException: SocketException socketError } => socketError.ErrorCode,
+            _ => null
+        };
+        Lose(session, socketErrorCode == null ? DisconnectReason.Other : DisconnectReason.SocketError,
+            socketErrorCode);
     }
 
     protected abstract void OnConnect();
