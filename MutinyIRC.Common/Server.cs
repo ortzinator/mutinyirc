@@ -26,6 +26,9 @@ public class Server : MessageContext, IDisposable
     // below is serialized through _reconnectGate. The timer callback re-checks, under the
     // gate, that it is still the installed timer before reconnecting, so a cancelled or
     // superseded timer that has already begun firing is a no-op.
+    //
+    // _reconnectTimer holds the one pending dial: a scheduled reconnect, or a dial that Connect
+    // holds back after a server change. Both end the same ways.
     private static readonly TimeSpan ReconnectBaseDelay = TimeSpan.FromSeconds(4);
     private static readonly TimeSpan ReconnectMaxDelay = TimeSpan.FromMinutes(5);
     private readonly object _reconnectGate = new object();
@@ -495,14 +498,10 @@ public class Server : MessageContext, IDisposable
         }
 
         // _connection is null for a Server built with the parameterless constructor that
-        // never had a Connection assigned; guard against an NRE.
+        // never had a Connection assigned; guard against an NRE. Disconnect also stops a
+        // connect attempt in flight, which would otherwise connect with nothing to hear it.
         if (_connection != null)
-        {
-            if (_connection.Connected)
-                Disconnect();
-            else
-                UnhookEvents();
-        }
+            Disconnect();
 
         ServerManager.Instance.Remove(this);
     }
@@ -519,20 +518,23 @@ public class Server : MessageContext, IDisposable
             return;
         }
 
-        //Don't attept to connect more often than once a second
-        if (DateTime.Now - _serverChangeTime < TimeSpan.FromSeconds(1))
-        {
-            var th = new Thread(() =>
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(1));
-                Connection.Connect();
-            });
-            th.Start();
-        }
+        // Don't attempt to connect more often than once a second after a server change. The
+        // held-back dial is the pending dial, so a later server change, a Disconnect, or a
+        // Dispose cancels it.
+        TimeSpan wait = _serverChangeTime + TimeSpan.FromSeconds(1) - DateTime.Now;
+        if (wait > TimeSpan.Zero)
+            ScheduleDial(wait, Dial);
         else
-        {
-            Connection.Connect();
-        }
+            Dial();
+    }
+
+    /// <summary>
+    /// Dials the current connection. If a dial is in flight already, that dial continues and
+    /// this does nothing: a second request to connect is not an error.
+    /// </summary>
+    private void Dial()
+    {
+        Connection.TryConnect();
     }
 
     public void Disconnect()
@@ -571,24 +573,40 @@ public class Server : MessageContext, IDisposable
                 ReconnectBaseDelay.TotalSeconds * Math.Pow(2, attempt - 1),
                 ReconnectMaxDelay.TotalSeconds));
 
+            ScheduleDial(delay, Connect);
+        }
+
+        Reconnecting.Fire(this, new ReconnectingEventArgs(delay, attempt));
+    }
+
+    /// <summary>
+    /// Installs <paramref name="dial"/> as the one pending dial, to run after
+    /// <paramref name="delay"/>. It replaces the pending dial, if there is one. Does nothing
+    /// after <see cref="Dispose"/>.
+    /// </summary>
+    private void ScheduleDial(TimeSpan delay, Action dial)
+    {
+        lock (_reconnectGate)
+        {
+            if (_disposed)
+                return;
+
             _reconnectTimer?.Dispose();
             Timer timer = null;
             timer = new Timer(_ =>
             {
                 lock (_reconnectGate)
                 {
-                    // Only the timer still installed as _reconnectTimer may reconnect. A
+                    // Only the timer still installed as _reconnectTimer may dial. A
                     // user-initiated Disconnect or a Dispose nulls it under this same gate, so
                     // it always wins the race against a callback that has already begun firing.
                     if (_disposed || !ReferenceEquals(_reconnectTimer, timer))
                         return;
-                    Connect();
+                    dial();
                 }
             }, null, delay, Timeout.InfiniteTimeSpan);
             _reconnectTimer = timer;
         }
-
-        Reconnecting.Fire(this, new ReconnectingEventArgs(delay, attempt));
     }
 
     /// <summary>
@@ -980,15 +998,11 @@ public class Server : MessageContext, IDisposable
 
     public void ChangeServer(ConnectionArgs args)
     {
-        // The user has taken over, so end any reconnect run first. Disconnect below does this
-        // too, but it only runs when the link is up, and a run in flight means it is not: the
-        // pending timer would otherwise dial the new host on the old backoff schedule.
-        CancelReconnect();
-
-        if (IsConnected)
-        {
-            Disconnect();
-        }
+        // The user has taken over. End the old connection, and stop a connect attempt it has in
+        // flight: that attempt would otherwise connect after its events are unhooked, with
+        // nothing to hear it. Disconnect also ends any reconnect run and cancels a held-back
+        // dial, so the pending timer cannot dial the new host on the old schedule.
+        Disconnect();
 
         args.Nick ??= Connection.ConnectionData.Nick;
 

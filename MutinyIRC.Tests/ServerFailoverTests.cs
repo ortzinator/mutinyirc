@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Common;
@@ -36,8 +37,9 @@ public class ServerFailoverTests
             // throw against a fake's default null.
             A.CallTo(() => conn.Listener).Returns(new Listener());
             A.CallTo(() => conn.ConnectionData).Returns(args);
-            A.CallTo(() => conn.Connect())
-                .Invokes(() => Dialled.Add($"{args.Hostname}:{args.Port}"));
+            A.CallTo(() => conn.TryConnect())
+                .Invokes(() => Dialled.Add($"{args.Hostname}:{args.Port}"))
+                .Returns(true);
 
             Current = conn;
             return conn;
@@ -264,6 +266,48 @@ public class ServerFailoverTests
             Assert.That(_server.Url, Is.EqualTo("chosen.example"));
             Assert.That(_reconnectAttempts, Is.EqualTo(new[] { 1 }));
         });
+    }
+
+    [Test]
+    public void ChangeServer_DuringAConnectAttempt_StopsTheOldAttempt()
+    {
+        // The old connection is not connected yet, but its attempt is in flight. Unhooked and
+        // left alone, it would connect with nothing to hear it.
+        Build(Candidate("a.example", 6667));
+        IConnection old = _server.Current;
+
+        _server.ChangeServer(Candidate("chosen.example", 6667));
+
+        A.CallTo(() => old.Disconnect(A<string>._)).MustHaveHappened();
+    }
+
+    [Test]
+    public async Task TwoServerChangesWithinASecond_DialOnlyTheLastHost()
+    {
+        // Each change holds its dial back for a second. The second change must cancel the
+        // first dial, so the new connection is not dialled twice.
+        Build(Candidate("a.example", 6667));
+
+        _server.ChangeServer(Candidate("first.example", 6667));
+        _server.Connect();
+        _server.ChangeServer(Candidate("second.example", 6667));
+        _server.Connect();
+        await Task.Delay(TimeSpan.FromSeconds(1.5));
+
+        Assert.That(_server.Dialled, Is.EqualTo(new[] { "second.example:6667" }));
+    }
+
+    [Test]
+    public async Task Disconnect_CancelsADialHeldBackAfterAServerChange()
+    {
+        Build(Candidate("a.example", 6667));
+
+        _server.ChangeServer(Candidate("chosen.example", 6667));
+        _server.Connect();
+        _server.Disconnect();
+        await Task.Delay(TimeSpan.FromSeconds(1.5));
+
+        Assert.That(_server.Dialled, Is.Empty);
     }
 
     // ── Guards ───────────────────────────────────────────────────────────────
