@@ -172,13 +172,7 @@ public abstract class TcpTextClient
                 // returns, and OnAuthenticate then reads from _stream.
                 _stream = _sslStream;
                 _sslStream.BeginAuthenticateAsClient(_serverName, OnAuthenticate, null);
-            }
-            else
-            {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                    $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() TCP connected to {_serverName}");
-                OnConnect();
-                WaitForData();
+                return;
             }
         }
         catch (SocketException e)
@@ -186,6 +180,7 @@ public abstract class TcpTextClient
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() SocketException={e.SocketErrorCode}");
             FailConnect(ConnectError.SocketError, e.ErrorCode);
+            return;
         }
         catch (Exception e)
         {
@@ -194,7 +189,25 @@ public abstract class TcpTextClient
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                 $"[{Thread.CurrentThread.Name}] TcpTextClient::OnConnect() exception={e}");
             FailConnect(ConnectError.SocketError, null);
+            return;
         }
+
+        CompleteConnect();
+    }
+
+    /// <summary>
+    /// The transport is ready: tell the subclass, then start to read.
+    /// </summary>
+    /// <remarks>
+    /// Call this outside the connect error handling. When this runs, the connect succeeded, so
+    /// an exception from the subclass or its event handlers is not a connect failure.
+    /// </remarks>
+    private void CompleteConnect()
+    {
+        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
+            $"[{Thread.CurrentThread.Name}] TcpTextClient::CompleteConnect() connected to {_serverName}, tls={_usesSsl}");
+        OnConnect();
+        WaitForData();
     }
 
     private bool OnCertificateValidate(object sender, X509Certificate certificate, X509Chain chain,
@@ -246,14 +259,13 @@ public abstract class TcpTextClient
             return;
         }
 
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-            $"[{Thread.CurrentThread.Name}] TcpTextClient::OnAuthenticate() SSL authenticated to {_serverName}");
-        OnConnect();
-        WaitForData();
+        CompleteConnect();
     }
 
-    // The I/O callbacks below do not throw. They run on thread-pool threads, where an exception
-    // ends the process. A failure ends the session, and ConnectionLost tells the caller.
+    // The I/O callbacks below do not throw for an I/O failure. They run on thread-pool threads,
+    // where an exception ends the process. A failure ends the session, and ConnectionLost tells
+    // the caller. An exception from subclass code or an event handler is not an I/O failure,
+    // and it is not caught.
 
     private void WaitForData()
     {
