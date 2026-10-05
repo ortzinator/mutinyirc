@@ -79,7 +79,7 @@ public class Server : MessageContext, IDisposable
         HookEvents();
     }
 
-    public Server(Connection connection)
+    public Server(IConnection connection)
     {
         Connection = connection;
         HookEvents();

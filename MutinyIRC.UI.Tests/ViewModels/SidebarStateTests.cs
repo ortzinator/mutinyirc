@@ -40,9 +40,7 @@ public class SidebarStateTests
         A.CallTo(() => conn.Sender).Returns(_sender);
         A.CallTo(() => conn.ConnectionData).Returns(new ConnectionArgs(nick, host, ssl));
 
-        var server = new Server { Connection = conn };
-        server.HookEvents();
-        return server;
+        return new Server(conn);
     }
 
     // ── Which connection the sidebar shows ──

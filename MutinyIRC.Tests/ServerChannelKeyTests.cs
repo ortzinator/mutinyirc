@@ -26,8 +26,7 @@ public class ServerChannelKeyTests
         A.CallTo(() => conn.Listener).Returns(new Listener());
         A.CallTo(() => conn.Sender).Returns(_sender);
         A.CallTo(() => conn.ConnectionData).Returns(new ConnectionArgs("test", "irc.fake.com", false));
-        _server = new Server { Connection = conn };
-        _server.HookEvents();
+        _server = new Server(conn);
     }
 
     [TearDown]

@@ -39,9 +39,7 @@ public class SidebarViewTests
         A.CallTo(() => conn.Sender).Returns(A.Fake<ISender>());
         A.CallTo(() => conn.ConnectionData).Returns(new ConnectionArgs("me", host, false));
 
-        var server = new Server { Connection = conn };
-        server.HookEvents();
-        return server;
+        return new Server(conn);
     }
 
     /// <summary>

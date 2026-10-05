@@ -154,46 +154,26 @@ public class ServerViewModelStatusTests
     }
 
     /// <summary>
-    /// A <see cref="Server"/> over a faked <see cref="IConnection"/>, so a test can raise the
-    /// connection's events itself. Server hooks the connection through the interface, so the
-    /// fake reaches the same handlers as a real connection.
+    /// Raises ConnectFailed with <paramref name="failure"/> over a TLS connection. The
+    /// connection is a faked <see cref="IConnection"/>, because only a fake lets the test raise
+    /// the event. A real <see cref="Connection"/> raises it only from the transport.
     /// </summary>
-    private sealed class FakeConnectionServer(ConnectionArgs args) : Server(args)
+    private void DialAndFail(ConnectFailedEventArgs failure)
     {
-        public IConnection FakeConnection { get; private set; } = null!;
-
-        protected override IConnection CreateConnection(ConnectionArgs connectionArgs)
-        {
-            var conn = A.Fake<IConnection>();
-            // A real Listener: Server attaches to its events, and a fake's default is null.
-            A.CallTo(() => conn.Listener).Returns(new Listener());
-            A.CallTo(() => conn.ConnectionData).Returns(connectionArgs);
-
-            FakeConnection = conn;
-            return conn;
-        }
-    }
-
-    /// <summary>
-    /// Raises ConnectFailed as the transport does. A failure with no socket code uses the
-    /// event-args constructor that has no code, as <see cref="Connection"/> does.
-    /// </summary>
-    private void DialAndFail(ConnectError reason, int? socketErrorCode)
-    {
-        var server = new FakeConnectionServer(new ConnectionArgs("me", "irc.fake.com", true));
-        _server = server;
+        var conn = A.Fake<IConnection>();
+        // A real Listener: Server attaches to its events, and a fake's default is null.
+        A.CallTo(() => conn.Listener).Returns(new Listener());
+        A.CallTo(() => conn.ConnectionData).Returns(new ConnectionArgs("me", "irc.fake.com", true));
+        _server = new Server(conn);
         _vm = new ServerViewModel(_server, new PluginManager());
 
-        ConnectFailedEventArgs failure = socketErrorCode == null
-            ? new ConnectFailedEventArgs(reason)
-            : new ConnectFailedEventArgs(reason, socketErrorCode.Value);
-        server.FakeConnection.ConnectFailed += Raise.With(server.FakeConnection, failure);
+        conn.ConnectFailed += Raise.With(conn, failure);
     }
 
     [AvaloniaTest]
     public void CertificateRejected_TellsTheUserTheCertificateIsNotTrusted()
     {
-        DialAndFail(ConnectError.CertificateRejected, null);
+        DialAndFail(new ConnectFailedEventArgs(ConnectError.CertificateRejected));
 
         Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Contain(ServerStrings.CertificateRejectedMessage),
             "A rejected certificate must say so, not report socket error 0");
@@ -202,7 +182,7 @@ public class ServerViewModelStatusTests
     [AvaloniaTest]
     public void HandshakeFailure_IsNotReportedAsACertificateRejection()
     {
-        DialAndFail(ConnectError.AuthenticationFailed, null);
+        DialAndFail(new ConnectFailedEventArgs(ConnectError.AuthenticationFailed));
 
         Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Contain(ServerStrings.TlsHandshakeFailedMessage));
         Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Not.Contain(ServerStrings.CertificateRejectedMessage),
@@ -216,7 +196,7 @@ public class ServerViewModelStatusTests
     [TestCase(ConnectError.Other)]
     public void FailureWithNoSocketCode_DoesNotReportSocketErrorZero(ConnectError reason)
     {
-        DialAndFail(reason, null);
+        DialAndFail(new ConnectFailedEventArgs(reason));
 
         Assert.That(_vm.ChatLines.Select(l => l.Message), Has.None.Contains("Socket error code"),
             "Only a SocketError has a socket error code to show");
@@ -225,7 +205,7 @@ public class ServerViewModelStatusTests
     [AvaloniaTest]
     public void SocketFailure_StillReportsTheSocketError()
     {
-        DialAndFail(ConnectError.SocketError, 10061);
+        DialAndFail(new ConnectFailedEventArgs(ConnectError.SocketError, 10061));
 
         Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Not.Contain(ServerStrings.CertificateRejectedMessage),
             "Only a certificate rejection may use the certificate wording");
