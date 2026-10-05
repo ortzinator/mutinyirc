@@ -154,19 +154,40 @@ public class ServerViewModelStatusTests
     }
 
     /// <summary>
-    /// Raises ConnectFailed the way the transport does, through the protected
-    /// <c>OnConnectFailed</c> of a real <see cref="Connection"/>. A faked Connection would
-    /// intercept that virtual call, and no socket is needed to reach it.
+    /// A <see cref="Server"/> over a faked <see cref="IConnection"/>, so a test can raise the
+    /// connection's events itself. Server hooks the connection through the interface, so the
+    /// fake reaches the same handlers as a real connection.
+    /// </summary>
+    private sealed class FakeConnectionServer(ConnectionArgs args) : Server(args)
+    {
+        public IConnection FakeConnection { get; private set; } = null!;
+
+        protected override IConnection CreateConnection(ConnectionArgs connectionArgs)
+        {
+            var conn = A.Fake<IConnection>();
+            // A real Listener: Server attaches to its events, and a fake's default is null.
+            A.CallTo(() => conn.Listener).Returns(new Listener());
+            A.CallTo(() => conn.ConnectionData).Returns(connectionArgs);
+
+            FakeConnection = conn;
+            return conn;
+        }
+    }
+
+    /// <summary>
+    /// Raises ConnectFailed as the transport does. A failure with no socket code uses the
+    /// event-args constructor that has no code, as <see cref="Connection"/> does.
     /// </summary>
     private void DialAndFail(ConnectError reason, int? socketErrorCode)
     {
-        var conn = new Connection(new ConnectionArgs("me", "irc.fake.com", true), false, false);
-        _server = new Server(conn);
+        var server = new FakeConnectionServer(new ConnectionArgs("me", "irc.fake.com", true));
+        _server = server;
         _vm = new ServerViewModel(_server, new PluginManager());
 
-        typeof(Connection)
-            .GetMethod("OnConnectFailed", BindingFlags.NonPublic | BindingFlags.Instance)!
-            .Invoke(conn, new object?[] { reason, socketErrorCode });
+        ConnectFailedEventArgs failure = socketErrorCode == null
+            ? new ConnectFailedEventArgs(reason)
+            : new ConnectFailedEventArgs(reason, socketErrorCode.Value);
+        server.FakeConnection.ConnectFailed += Raise.With(server.FakeConnection, failure);
     }
 
     [AvaloniaTest]
