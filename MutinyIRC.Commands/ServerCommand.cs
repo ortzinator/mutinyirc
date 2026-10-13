@@ -34,7 +34,7 @@ public class ServerCommand : ICommand
     }
 
     /// <summary>
-    /// Connect to a server in the same window
+    /// Connects the owning server to the given host on the default port.
     /// </summary>
     public CommandResultInfo Execute(MessageContext context, string server)
     {
@@ -42,7 +42,7 @@ public class ServerCommand : ICommand
     }
 
     /// <summary>
-    /// Connect to a server on the given port in the same window.
+    /// Connects the owning server to the given host on the given port.
     /// </summary>
     public CommandResultInfo Execute(MessageContext context, string server, string port)
     {
