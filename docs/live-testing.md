@@ -110,13 +110,11 @@ them into docs or commits.
 
 ### TLS
 
-`/server` always dials plain text. TLS is a property of each entry point (`Ssl` in `servers.json`, applied in
-`NetworkSettings.ToConnectionCandidates`). A TLS test therefore edits the user's real settings file, so ask the user
-first. Then:
+The port decides TLS (`IrcPorts.IsTlsPort`): 6665 and 6667 are plain text, and every other port is TLS. `/server`
+with no port dials 6697. So you can test both modes from the input box, with no change to `servers.json`:
 
-1. Close the app.
-2. Copy `servers.json` to `servers.json.bak`.
-3. In the entry point, set `"Port": 6697, "Ssl": true`.
-4. Run the test. The status reads "Connected · TLS".
-5. Close the app, restore `servers.json` from the backup, and check that the two file hashes match
-   (`Get-FileHash`).
+- `/server irc.libera.chat` dials TLS on 6697. The status reads "Connected · TLS".
+- `/server irc.libera.chat 6667` dials plain text. The status reads "Connected".
+
+`/server` replaces the network's entry points for this session only. On the next start, the app dials what
+`servers.json` holds.

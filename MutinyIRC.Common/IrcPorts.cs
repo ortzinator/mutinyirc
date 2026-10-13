@@ -25,6 +25,15 @@ public static class IrcPorts
     /// </summary>
     public static bool IsTlsPort(int port) => !IsPlainPort(port);
 
+    /// <summary>
+    /// Reads a port that the user typed. Returns false for text that is not a number, and for a
+    /// number outside 1 to 65535.
+    /// </summary>
+    public static bool TryParsePort(string text, out int port)
+    {
+        return int.TryParse(text, out port) && port > 0 && port <= 65535;
+    }
+
     /// <summary>Whether a port is one of the two that historically mean plaintext.</summary>
     public static bool IsPlainPort(int port)
     {

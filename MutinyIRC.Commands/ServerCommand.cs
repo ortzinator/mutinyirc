@@ -1,5 +1,4 @@
-﻿using FlamingIRC;
-using System;
+using FlamingIRC;
 using MutinyIRC.Common;
 using MutinyIRC.PluginFramework;
 
@@ -8,68 +7,77 @@ namespace MutinyIRC.Commands;
 /// <summary>
 /// Creates new connections to IRC servers
 /// </summary>
+/// <remarks>
+/// With no port, the command dials <see cref="IrcPorts.DefaultTlsPort"/>. The port decides TLS
+/// through <see cref="IrcPorts.IsTlsPort"/>, the same rule as the Add Server box in the settings.
+/// </remarks>
 [Plugin("Server", "Connects to an IRC server. Usage: /server [-n] <server> [port]")]
 public class ServerCommand : ICommand
 {
+    private const string Usage = "Usage: /server [-n] <server> [port]";
+
     /// <summary>
-    /// Summary of command with these specific parameters
+    /// Handles switch-prefixed connects (e.g. <c>-n</c> for a new window) on the default port.
     /// </summary>
-    public void Execute(Server context, char[] switches, string server)
+    public CommandResultInfo Execute(Server context, char[] switches, string server)
     {
-        Execute(context, switches, server, "6667");
+        return Connect(context, switches, server, null);
     }
 
     /// <summary>
     /// Handles switch-prefixed connects (e.g. <c>-n</c> for a new window) on the given port.
     /// </summary>
-    public void Execute(Server context, char[] switches, string server, string port)
+    public CommandResultInfo Execute(Server context, char[] switches, string server, string port)
     {
-        foreach (char c in switches)
-        {
-            switch (c)
-            {
-                case 'n': //New window and connect
-                    var args = new ConnectionArgs(context.UserNick, server, false);
-                    try
-                    {
-                        args.Port = int.Parse(port);
-                    }
-                    catch (Exception)
-                    {
-                        args.Port = 6667;
-                    }
-                    var svr = ServerManager.Instance.Create(args);
-                    svr.Connect();
-                    return;
-            }
-        }
+        return Connect(context, switches, server, port);
     }
 
     /// <summary>
     /// Connect to a server in the same window
     /// </summary>
-    public void Execute(Server context, string server)
+    public CommandResultInfo Execute(Server context, string server)
     {
-        context.ChangeServer(context.UserNick, server, false);
-        context.Connect();
+        return Connect(context, new char[0], server, null);
     }
 
     /// <summary>
     /// Connect to a server on the given port in the same window.
     /// </summary>
-    public void Execute(Server context, string server, string port)
+    public CommandResultInfo Execute(Server context, string server, string port)
     {
-        var args = new ConnectionArgs(context.UserNick, server, false);
-        try
+        return Connect(context, new char[0], server, port);
+    }
+
+    private static CommandResultInfo Connect(Server context, char[] switches, string server, string port)
+    {
+        bool newWindow = false;
+        foreach (char c in switches)
         {
-            args.Port = int.Parse(port);
-        }
-        catch (Exception)
-        {
-            args.Port = 6667;
+            if (c == 'n')
+                newWindow = true;
+            else
+                return CommandResultInfo.Fail(Usage);
         }
 
-        context.ChangeServer(args);
-        context.Connect();
+        int portNumber = IrcPorts.DefaultTlsPort;
+        if (port != null && !IrcPorts.TryParsePort(port, out portNumber))
+            return CommandResultInfo.Fail($"{port} is not a valid port. {Usage}");
+
+        var args = new ConnectionArgs(context.UserNick, server, IrcPorts.IsTlsPort(portNumber))
+        {
+            Port = portNumber,
+        };
+
+        if (newWindow)
+        {
+            ServerManager.Instance.Create(args).Connect();
+        }
+        else
+        {
+            context.ChangeServer(args);
+            context.Connect();
+        }
+
+        return CommandResultInfo.Success(null);
     }
 }

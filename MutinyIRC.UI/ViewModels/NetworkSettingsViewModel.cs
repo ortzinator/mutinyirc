@@ -96,10 +96,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
             return null;
 
         int port = DefaultNewServerPort;
-        if (match.Groups[2].Success && !int.TryParse(match.Groups[2].Value, out port))
-            return null;
-
-        if (port <= 0 || port > 65535)
+        if (match.Groups[2].Success && !IrcPorts.TryParsePort(match.Groups[2].Value, out port))
             return null;
 
         return new ServerSettingsViewModel

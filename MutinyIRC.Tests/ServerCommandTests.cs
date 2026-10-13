@@ -3,14 +3,15 @@ using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Commands;
 using MutinyIRC.Common;
+using MutinyIRC.PluginFramework;
 using NUnit.Framework;
 
 namespace MutinyIRC.Tests;
 
 /// <summary>
-/// Covers the nick that <c>/server</c> connects with. The command keeps the nick that the
-/// server in use has now, because the configured nick lives in the UI layer, which commands
-/// cannot reach.
+/// Covers what <c>/server</c> dials. The command keeps the nick that the server in use has now,
+/// because the configured nick lives in the UI layer, which commands cannot reach. The port
+/// decides TLS through <see cref="IrcPorts"/>, and a bare host dials the TLS port.
 /// </summary>
 [TestFixture]
 public class ServerCommandTests
@@ -83,6 +84,73 @@ public class ServerCommandTests
 
             Assert.That(created, Is.Not.Null);
             Assert.That(created.UserNick, Is.EqualTo("Sonja"));
+        }
+        finally
+        {
+            ServerManager.Instance.ServerAdded -= OnAdded;
+            created?.Dispose();
+        }
+    }
+
+    [Test]
+    public void Execute_WithHost_DialsTheTlsPort()
+    {
+        new ServerCommand().Execute(_server, "irc.example.org");
+
+        Assert.That(_server.LastArgs.Port, Is.EqualTo(6697));
+        Assert.That(_server.LastArgs.Ssl, Is.True);
+    }
+
+    [TestCase("6697", true)]
+    [TestCase("7000", true)]
+    [TestCase("6667", false)]
+    [TestCase("6665", false)]
+    public void Execute_WithPort_ThePortDecidesTls(string port, bool tls)
+    {
+        new ServerCommand().Execute(_server, "irc.example.org", port);
+
+        Assert.That(_server.LastArgs.Ssl, Is.EqualTo(tls));
+    }
+
+    [TestCase("abc")]
+    [TestCase("0")]
+    [TestCase("65536")]
+    [TestCase("6697 extra")]
+    public void Execute_WithBadPort_FailsAndKeepsTheServer(string port)
+    {
+        CommandResultInfo result = new ServerCommand().Execute(_server, "irc.example.org", port);
+
+        Assert.That(result.Result, Is.EqualTo(Result.Fail));
+        Assert.That(_server.LastArgs.Hostname, Is.EqualTo("old.example"));
+    }
+
+    [Test]
+    public void Execute_WithUnknownSwitch_Fails()
+    {
+        CommandResultInfo result = new ServerCommand().Execute(_server, new[] { 'x' }, "irc.example.org");
+
+        Assert.That(result.Result, Is.EqualTo(Result.Fail));
+        Assert.That(_server.LastArgs.Hostname, Is.EqualTo("old.example"));
+    }
+
+    [Test]
+    public void Execute_WithNewWindowSwitchAndHost_DialsTheTlsPort()
+    {
+        Server created = null;
+        void OnAdded(object sender, ServerEventArgs e)
+        {
+            created = e.Server;
+            // Cancel the dial, so the new server opens no socket.
+            created.Connecting += (_, c) => c.Cancel = true;
+        }
+        ServerManager.Instance.ServerAdded += OnAdded;
+
+        try
+        {
+            new ServerCommand().Execute(_server, new[] { 'n' }, "irc.example.org");
+
+            Assert.That(created.Port, Is.EqualTo(6697));
+            Assert.That(created.Connection.ConnectionData.Ssl, Is.True);
         }
         finally
         {
