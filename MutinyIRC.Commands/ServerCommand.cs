@@ -1,7 +1,6 @@
 ﻿using FlamingIRC;
 using System;
 using MutinyIRC.Common;
-using System.Configuration;
 using MutinyIRC.PluginFramework;
 
 namespace MutinyIRC.Commands;
@@ -30,7 +29,7 @@ public class ServerCommand : ICommand
             switch (c)
             {
                 case 'n': //New window and connect
-                    var args = new ConnectionArgs(ConfigurationManager.AppSettings["FirstNick"] ?? "MutinyIRC", server, false);
+                    var args = new ConnectionArgs(context.UserNick, server, false);
                     try
                     {
                         args.Port = int.Parse(port);
@@ -51,7 +50,7 @@ public class ServerCommand : ICommand
     /// </summary>
     public void Execute(Server context, string server)
     {
-        context.ChangeServer(ConfigurationManager.AppSettings["FirstNick"] ?? "MutinyIRC", server, false);
+        context.ChangeServer(context.UserNick, server, false);
         context.Connect();
     }
 
@@ -60,7 +59,7 @@ public class ServerCommand : ICommand
     /// </summary>
     public void Execute(Server context, string server, string port)
     {
-        var args = new ConnectionArgs(ConfigurationManager.AppSettings["FirstNick"] ?? "MutinyIRC", server, false);
+        var args = new ConnectionArgs(context.UserNick, server, false);
         try
         {
             args.Port = int.Parse(port);
