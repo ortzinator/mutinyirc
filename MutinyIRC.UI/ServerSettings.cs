@@ -63,7 +63,7 @@ public class ServerSettings : IEquatable<ServerSettings>
             return DefaultPort;
 
         string first = ports.Split(',')[0].Split('-')[0].Trim();
-        return int.TryParse(first, out int port) && port > 0 && port <= 65535
+        return int.TryParse(first, out int port) && IrcPorts.IsValidPort(port)
             ? port
             : DefaultPort;
     }

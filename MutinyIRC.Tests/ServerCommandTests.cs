@@ -126,6 +126,34 @@ public class ServerCommandTests
     }
 
     [Test]
+    public void Execute_WithHostColonPort_DialsThatPort()
+    {
+        new ServerCommand().Execute(_server, "irc.example.org:6667");
+
+        Assert.That(_server.LastArgs.Hostname, Is.EqualTo("irc.example.org"));
+        Assert.That(_server.LastArgs.Port, Is.EqualTo(6667));
+        Assert.That(_server.LastArgs.Ssl, Is.False);
+    }
+
+    [TestCase("irc://irc.example.org")]
+    [TestCase("irc.example.org:6697:6667")]
+    public void Execute_WithBadHost_FailsAndKeepsTheServer(string host)
+    {
+        CommandResultInfo result = new ServerCommand().Execute(_server, host);
+
+        Assert.That(result.Result, Is.EqualTo(Result.Fail));
+        Assert.That(_server.LastArgs.Hostname, Is.EqualTo("old.example"));
+    }
+
+    [Test]
+    public void Execute_WithHostColonPortAndAPort_Fails()
+    {
+        CommandResultInfo result = new ServerCommand().Execute(_server, "irc.example.org:6697", "7000");
+
+        Assert.That(result.Result, Is.EqualTo(Result.Fail));
+    }
+
+    [Test]
     public void Execute_WithUnknownSwitch_Fails()
     {
         CommandResultInfo result = new ServerCommand().Execute(_server, new[] { 'x' }, "irc.example.org");

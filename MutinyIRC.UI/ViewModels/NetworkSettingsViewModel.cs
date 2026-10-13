@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MutinyIRC.Common;
@@ -9,16 +8,6 @@ namespace MutinyIRC.UI.ViewModels;
 
 public partial class NetworkSettingsViewModel : ObservableObject
 {
-    /// <summary>A bare host, or a host and a port. Ported from the mockup's `parseServer()`.</summary>
-    private static readonly Regex HostPattern =
-        new(@"^([A-Za-z0-9.\-_]+)(?::(\d{2,5}))?$", RegexOptions.Compiled);
-
-    /// <summary>
-    /// The port to assume when the user names only a host. TLS is the sensible default for a
-    /// network you are adding today. Aliases <see cref="IrcPorts.DefaultTlsPort"/>.
-    /// </summary>
-    public const int DefaultNewServerPort = IrcPorts.DefaultTlsPort;
-
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private string _nick = string.Empty;
     [ObservableProperty] private string _alternateNick = string.Empty;
@@ -83,27 +72,19 @@ public partial class NetworkSettingsViewModel : ObservableObject
     /// that does not parse, which is what leaves the Add button disabled.
     /// </summary>
     /// <remarks>
-    /// The port decides TLS through <see cref="IrcPorts.IsTlsPort"/>: the two ports that
-    /// historically mean plaintext stay plaintext, and everything else is assumed to be TLS.
+    /// <see cref="EntryPoint.TryParse"/> holds the rules, so this box and <c>/server</c> accept
+    /// the same input.
     /// </remarks>
     public static ServerSettingsViewModel? ParseServer(string? text)
     {
-        if (string.IsNullOrWhiteSpace(text))
-            return null;
-
-        Match match = HostPattern.Match(text.Trim());
-        if (!match.Success)
-            return null;
-
-        int port = DefaultNewServerPort;
-        if (match.Groups[2].Success && !IrcPorts.TryParsePort(match.Groups[2].Value, out port))
+        if (text is null || !EntryPoint.TryParse(text, out EntryPoint entry))
             return null;
 
         return new ServerSettingsViewModel
         {
-            Url = match.Groups[1].Value,
-            Port = port,
-            Ssl = IrcPorts.IsTlsPort(port),
+            Url = entry.Host,
+            Port = entry.Port,
+            Ssl = entry.Ssl,
         };
     }
 

@@ -114,7 +114,7 @@ The port decides TLS (`IrcPorts.IsTlsPort`): 6665 and 6667 are plain text, and e
 with no port dials 6697. So you can test both modes from the input box, with no change to `servers.json`:
 
 - `/server irc.libera.chat` dials TLS on 6697. The status reads "Connected · TLS".
-- `/server irc.libera.chat 6667` dials plain text. The status reads "Connected".
+- `/server irc.libera.chat 6667` (or `/server irc.libera.chat:6667`) dials plain text. The status reads "Connected".
 
 `/server` replaces the network's entry points for this session only. On the next start, the app dials what
 `servers.json` holds.

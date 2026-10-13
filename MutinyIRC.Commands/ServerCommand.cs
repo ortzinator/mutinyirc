@@ -8,9 +8,8 @@ namespace MutinyIRC.Commands;
 /// Creates new connections to IRC servers
 /// </summary>
 /// <remarks>
-/// With no port, the command dials <see cref="IrcPorts.DefaultTlsPort"/>. The port decides TLS
-/// through <see cref="IrcPorts.IsTlsPort"/>, the same rule as the Add Server box in the settings.
-/// From a channel or query window, the command acts on the server that owns the window.
+/// The command reads the server and port through <see cref="EntryPoint.TryParse"/>, so it
+/// accepts <c>host:port</c> as well as a separate port. With no port, it dials the TLS port. From a channel or query window, the command acts on the server that owns the window.
 /// </remarks>
 [Plugin("Server", "Connects to an IRC server. Usage: /server [-n] <server> [port]")]
 public class ServerCommand : ICommand
@@ -60,13 +59,13 @@ public class ServerCommand : ICommand
                 return CommandResultInfo.Fail(Usage);
         }
 
-        int portNumber = IrcPorts.DefaultTlsPort;
-        if (port != null && !IrcPorts.TryParsePort(port, out portNumber))
-            return CommandResultInfo.Fail($"{port} is not a valid port. {Usage}");
+        string text = port == null ? server : $"{server}:{port}";
+        if (!EntryPoint.TryParse(text, out EntryPoint entry))
+            return CommandResultInfo.Fail($"{text} is not a valid server. {Usage}");
 
-        var args = new ConnectionArgs(owner.UserNick, server, IrcPorts.IsTlsPort(portNumber))
+        var args = new ConnectionArgs(owner.UserNick, entry.Host, entry.Ssl)
         {
-            Port = portNumber,
+            Port = entry.Port,
         };
 
         if (newWindow)

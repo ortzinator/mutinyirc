@@ -102,7 +102,7 @@ public class NetworkSettingsViewModelTests
     // ── ParseServer ──────────────────────────────────────────────────────────
 
     [Test]
-    public void ParseServer_BareHost_TakesTheSecureDefaultPort()
+    public void ParseServer_BareHost_MapsTheEntryPoint()
     {
         var parsed = NetworkSettingsViewModel.ParseServer("irc.libera.chat");
 
@@ -115,50 +115,9 @@ public class NetworkSettingsViewModelTests
         });
     }
 
-    [Test]
-    public void ParseServer_HostAndPort_TakesThePort()
-    {
-        var parsed = NetworkSettingsViewModel.ParseServer("irc.oftc.net:7000");
-
-        Assert.That(parsed!.Port, Is.EqualTo(7000));
-    }
-
-    [TestCase(6667)]
-    [TestCase(6665)]
-    public void ParseServer_APlaintextPort_IsNotTls(int port)
-    {
-        // The port is the only thing we know about a host we have never dialled, so the
-        // two ports that historically mean plaintext are what decide.
-        var parsed = NetworkSettingsViewModel.ParseServer($"irc.libera.chat:{port}");
-
-        Assert.That(parsed!.Ssl, Is.False);
-    }
-
-    [Test]
-    public void ParseServer_AnIpAddress_Parses()
-    {
-        var parsed = NetworkSettingsViewModel.ParseServer("127.0.0.1:6698");
-
-        Assert.That(parsed!.Url, Is.EqualTo("127.0.0.1"));
-    }
-
-    [Test]
-    public void ParseServer_TrimsSurroundingSpace()
-    {
-        Assert.That(NetworkSettingsViewModel.ParseServer("  irc.libera.chat  ")!.Url,
-            Is.EqualTo("irc.libera.chat"));
-    }
-
-    [TestCase("")]
-    [TestCase("   ")]
+    // EntryPointTests covers the parse rules. These cover only the mapping onto the view model.
     [TestCase(null)]
     [TestCase("irc libera chat")]
-    [TestCase("irc.libera.chat:")]
-    [TestCase("irc.libera.chat:port")]
-    [TestCase("irc.libera.chat:6")]
-    [TestCase("irc.libera.chat:999999")]
-    [TestCase("irc.libera.chat:6697:6667")]
-    [TestCase("irc://libera.chat")]
     public void ParseServer_Malformed_IsNull(string? text)
     {
         Assert.That(NetworkSettingsViewModel.ParseServer(text), Is.Null);
