@@ -17,6 +17,7 @@ public class ExecuteCommandTests
         _manager = new PluginManager();
         RegisterFixture<TestCommand>("test");
         RegisterFixture<ThrowingCommand>("throws");
+        RegisterFixture<VoidCommand>("void");
     }
 
     private void RegisterFixture<T>(string name) where T : ICommand
@@ -130,6 +131,19 @@ public class ExecuteCommandTests
 
         Assert.That(result.Result, Is.EqualTo(Result.Fail));
         Assert.That(result.Message, Does.Contain("failed with an error"));
+    }
+
+    [Test]
+    public void VoidOverload_RunsOnlyTheMatchingOverload()
+    {
+        // A void overload returns null from Invoke. That null must not read as "no match",
+        // or the dispatcher also runs the shorter overload with the arguments joined.
+        VoidCommand.Calls.Clear();
+
+        var result = _manager.ExecuteCommand(Build("void", new TestMessageContext(), "x", "y"));
+
+        Assert.That(VoidCommand.Calls, Is.EqualTo(new[] { "two:x|y" }));
+        Assert.That(result.Result, Is.EqualTo(Result.Success));
     }
 
     [Test]

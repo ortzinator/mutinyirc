@@ -152,8 +152,8 @@ public sealed class PluginManager
     /// <see cref="MessageContext"/>. The argument list is not mutated.
     /// </param>
     /// <returns>
-    /// The result returned by the dispatched <c>Execute</c> overload;
-    /// <see cref="CommandResultInfo.Fail(string)"/> if the command name is unknown or the dispatched
+    /// The result returned by the dispatched <c>Execute</c> overload, or a success result with no
+    /// message for a <c>void</c> overload; <see cref="CommandResultInfo.Fail(string)"/> if the command name is unknown or the dispatched
     /// overload threw; or <c>null</c> if the command exists but no overload matches the supplied
     /// context type and argument shape.
     /// </returns>
@@ -323,7 +323,14 @@ public sealed class PluginManager
     {
         try
         {
-            return (CommandResultInfo)method.Invoke(instance, args);
+            object result = method.Invoke(instance, args);
+
+            // A void overload returns null. It ran, so report success: null means "no match",
+            // and ExecuteCommand would then also run the next, shorter overload.
+            if (method.ReturnType == typeof(void))
+                return CommandResultInfo.Success(null);
+
+            return (CommandResultInfo)result;
         }
         catch (Exception ex)
         {
