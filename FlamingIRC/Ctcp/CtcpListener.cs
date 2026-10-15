@@ -42,7 +42,7 @@ namespace FlamingIRC;
 /// //Create a Connection object which will support CTCP (second bool param).
 /// Connection connection = new Connection( args, true, false );
 /// //Register a delegate on this CtcpListener.
-/// connection.CtcpListener.OnCtcpRequest += new CtcpRequestEventHandler( MyOnCtcpRequest );
+/// connection.CtcpListener.OnCtcpRequest += MyOnCtcpRequest;
 /// //If the Connection was created without CTCP support then this property will return null.
 /// //However, CTCP can be turned on and off dynamically. To enable it at a later time call:
 /// connection.EnableCtcp = true;
@@ -53,21 +53,21 @@ namespace FlamingIRC;
 public class CtcpListener
 {
     /// <summary>
-    /// Listens for replies to CTCP queries sent by this client.
+    /// A user replied to a CTCP query that this client sent.
     /// </summary>
-    public event CtcpReplyEventHandler OnCtcpReply;
+    public event EventHandler<CtcpReplyEventArgs> OnCtcpReply;
     /// <summary>
-    /// Listens for CTCP requests.
+    /// A user sent a CTCP query to this client.
     /// </summary>
-    public event CtcpRequestEventHandler OnCtcpRequest;
+    public event EventHandler<CtcpRequestEventArgs> OnCtcpRequest;
     /// <summary>
-    /// Listens for a reply to CTCP Ping query sent by this client.
+    /// A user replied to a CTCP PING that this client sent.
     /// </summary>
-    public event CtcpPingReplyEventHandler OnCtcpPingReply;
+    public event EventHandler<CtcpPingEventArgs> OnCtcpPingReply;
     /// <summary>
-    /// Listens for CTCP Ping requests.
+    /// A user sent a CTCP PING to this client.
     /// </summary>
-    public event CtcpPingRequestEventHandler OnCtcpPingRequest;
+    public event EventHandler<CtcpPingEventArgs> OnCtcpPingRequest;
 
     private static readonly Regex ctcpRegex;
     private static readonly string ctcpTypes;
@@ -120,14 +120,16 @@ public class CtcpListener
                 if (connection.CtcpSender.IsMyRequest(ctcpTokens[Text]))
                 {
                     connection.CtcpSender.ReplyReceived(ctcpTokens[Text]);
-                    OnCtcpPingReply?.Invoke(Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]);
+                    OnCtcpPingReply?.Invoke(this, new CtcpPingEventArgs(
+                        Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]));
                 }
                 else
                 {
                     //Ignore PING's with now parameters
                     if (ctcpTokens[Text] != null && ctcpTokens[Text].TrimEnd().Length != 0)
                     {
-                        OnCtcpPingRequest?.Invoke(Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]);
+                        OnCtcpPingRequest?.Invoke(this, new CtcpPingEventArgs(
+                            Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]));
                     }
                 }
             }
@@ -135,11 +137,15 @@ public class CtcpListener
             {
                 if (IsReply(ctcpTokens))
                 {
-                    OnCtcpReply?.Invoke(ctcpTokens[Command].ToUpper(CultureInfo.CurrentCulture), Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]);
+                    OnCtcpReply?.Invoke(this, new CtcpReplyEventArgs(
+                        ctcpTokens[Command].ToUpper(CultureInfo.CurrentCulture),
+                        Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]));
                 }
                 else
                 {
-                    OnCtcpRequest?.Invoke(ctcpTokens[Command].ToUpper(CultureInfo.CurrentCulture), Rfc2812Util.UserFromString(ctcpTokens[Name]));
+                    OnCtcpRequest?.Invoke(this, new CtcpRequestEventArgs(
+                        ctcpTokens[Command].ToUpper(CultureInfo.CurrentCulture),
+                        Rfc2812Util.UserFromString(ctcpTokens[Name])));
                 }
             }
         }

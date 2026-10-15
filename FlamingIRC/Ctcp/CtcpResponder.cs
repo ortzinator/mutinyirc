@@ -58,8 +58,8 @@ public sealed class CtcpResponder
         ClientInfoResponse = "This client supports: UserInfo, Finger, Version, Source, Ping, Time and ClientInfo";
         if (connection.EnableCtcp)
         {
-            connection.CtcpListener.OnCtcpRequest += new CtcpRequestEventHandler(OnCtcpRequest);
-            connection.CtcpListener.OnCtcpPingRequest += new CtcpPingRequestEventHandler(OnCtcpPingRequest);
+            connection.CtcpListener.OnCtcpRequest += OnCtcpRequest;
+            connection.CtcpListener.OnCtcpPingRequest += OnCtcpPingRequest;
         }
     }
 
@@ -136,8 +136,10 @@ public sealed class CtcpResponder
     /// </summary>
     private void UpdateTime() => nextTime = DateTime.Now.ToFileTime() +
         (long)(ResponseDelay * TimeSpan.TicksPerMillisecond);
-    private void OnCtcpRequest(string command, User who)
+    private void OnCtcpRequest(object sender, CtcpRequestEventArgs e)
     {
+        string command = e.Command;
+        User who = e.User;
         if (DateTime.Now.ToFileTime() > nextTime)
         {
             switch (command)
@@ -168,16 +170,16 @@ public sealed class CtcpResponder
             UpdateTime();
         }
     }
-    private void OnCtcpPingRequest(User who, string timestamp)
-        => connection.CtcpSender.CtcpPingReply(who.Nick, timestamp);
+    private void OnCtcpPingRequest(object sender, CtcpPingEventArgs e)
+        => connection.CtcpSender.CtcpPingReply(e.User.Nick, e.Timestamp);
 
     /// <summary>
     /// Stop listening to the CtcpListener.
     /// </summary>
     internal void Disable()
     {
-        connection.CtcpListener.OnCtcpRequest -= new CtcpRequestEventHandler(OnCtcpRequest);
-        connection.CtcpListener.OnCtcpPingRequest -= new CtcpPingRequestEventHandler(OnCtcpPingRequest);
+        connection.CtcpListener.OnCtcpRequest -= OnCtcpRequest;
+        connection.CtcpListener.OnCtcpPingRequest -= OnCtcpPingRequest;
     }
 
 }

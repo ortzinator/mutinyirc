@@ -33,40 +33,6 @@ namespace FlamingIRC;
 public delegate void InviteEventHandler(User user, string channel);
 
 /// <summary>
-/// Someone has replied to a Ctcp request sent by this client.
-/// </summary>
-/// <param name="who">Who sent the reply.</param>
-/// <param name="command">The Ctcp command this replies to."</param>
-/// <param name="reply">The text of the reply.</param>
-/// <see cref="CtcpListener.OnCtcpReply"/>
-public delegate void CtcpReplyEventHandler(string command, User who, string reply);
-
-/// <summary>
-/// Someone has sent a Ctcp request.
-/// </summary>
-/// <param name="who">Who sent the request.</param>
-/// <param name="command">The Ctcp command to send to IRC."</param>
-/// <see cref="CtcpListener.OnCtcpRequest"/>
-public delegate void CtcpRequestEventHandler(string command, User who);
-
-/// <summary>
-/// Someone has replied to a Ctcp ping request sent by this client.
-/// </summary>
-/// <param name="who">Who sent the reply.</param>
-/// <param name="timestamp">The timestamp originally sent in the request."</param>
-/// <see cref="CtcpListener.OnCtcpPingReply"/>
-public delegate void CtcpPingReplyEventHandler(User who, string timestamp);
-
-/// <summary>
-/// Someone has sent a Ctcp Ping request.
-/// </summary>
-/// <param name="who">Who sent the request.</param>
-/// <param name="timestamp">The timestamp which should be sent
-/// back."</param>
-/// <see cref="CtcpListener.OnCtcpPingRequest"/>
-public delegate void CtcpPingRequestEventHandler(User who, string timestamp);
-
-/// <summary>
 /// Someone has requested a DCC chat session.
 /// </summary>
 /// <param name="dccUser">The collection of information about the remote user.</param>
