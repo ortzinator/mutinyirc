@@ -389,7 +389,7 @@ public class Listener
             {
                 ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(ircMessage.Tokens, 3, ChannelModeSyntax.FromServerProperties(ServerProperties));
                 string raw = CondenseStrings(ircMessage.Tokens, 3);
-                OnChannelModeChange(this,
+                OnChannelModeChange?.Invoke(this,
                     new ChannelModeChangeEventArgs(who, ircMessage.Target, modes, raw));
             }
             catch (Exception)
@@ -822,7 +822,7 @@ public class Listener
             int numberOfUsers = tokens.Length - 5;
             string[] users = new string[numberOfUsers];
             Array.Copy(tokens, 5, users, 0, numberOfUsers);
-            OnNames(this, new NamesEventArgs(tokens[4], users, false));
+            OnNames?.Invoke(this, new NamesEventArgs(tokens[4], users, false));
             Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
                 $"[{Thread.CurrentThread.Name}] Listener::ProcessNamesReply() channel={tokens[4]} count={numberOfUsers}");
         }

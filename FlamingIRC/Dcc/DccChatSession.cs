@@ -206,7 +206,7 @@ public sealed class DccChatSession
                     Debug.Indent();
                     Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccChatSession::ReceiveMessages() Session: " + ToString() + " Received: " + message);
                     Debug.Unindent();
-                    OnChatMessageReceived(this, new DccChatMessageEventArgs(this, message));
+                    OnChatMessageReceived?.Invoke(this, new DccChatMessageEventArgs(this, message));
                 }
             }
             receiving = false;

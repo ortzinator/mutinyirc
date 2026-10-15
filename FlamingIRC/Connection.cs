@@ -541,22 +541,18 @@ public class Connection : TcpTextClient, IConnection
         // logic in the handlers already sees the session as ended.
         Registered = false;
 
-        if (ConnectionLost == null) return;
-
         if (socketErrorCode == null)
-            ConnectionLost(this, new DisconnectEventArgs(reason));
+            ConnectionLost?.Invoke(this, new DisconnectEventArgs(reason));
         else
-            ConnectionLost(this, new DisconnectEventArgs(reason, (int)socketErrorCode));
+            ConnectionLost?.Invoke(this, new DisconnectEventArgs(reason, (int)socketErrorCode));
     }
 
     protected override void OnConnectFailed(ConnectError reason, int? socketErrorCode)
     {
-        if (ConnectFailed == null) return;
-
         if (socketErrorCode == null)
-            ConnectFailed(this, new ConnectFailedEventArgs(reason));
+            ConnectFailed?.Invoke(this, new ConnectFailedEventArgs(reason));
         else
-            ConnectFailed(this, new ConnectFailedEventArgs(reason, (int)socketErrorCode));
+            ConnectFailed?.Invoke(this, new ConnectFailedEventArgs(reason, (int)socketErrorCode));
     }
 
     /// <summary>

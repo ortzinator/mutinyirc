@@ -135,7 +135,7 @@ public sealed class DccListener
                     }
                     try
                     {
-                        OnDccChatRequest(this, new DccChatRequestEventArgs(dccUser));
+                        OnDccChatRequest?.Invoke(this, new DccChatRequestEventArgs(dccUser));
                     }
                     catch (ArgumentException ae)
                     {
@@ -167,7 +167,7 @@ public sealed class DccListener
                     }
                     try
                     {
-                        OnDccSendRequest(this, new DccSendRequestEventArgs(
+                        OnDccSendRequest?.Invoke(this, new DccSendRequestEventArgs(
                             dccUser,
                             tokens[FileName],
                             int.Parse(tokens[FileSize], CultureInfo.InvariantCulture),
@@ -190,7 +190,7 @@ public sealed class DccListener
                 {
                     try
                     {
-                        OnDccGetRequest(this, new DccGetRequestEventArgs(
+                        OnDccGetRequest?.Invoke(this, new DccGetRequestEventArgs(
                             new DccUser(
                             connection,
                             Rfc2812Util.ParseUserLine(requestor)),
