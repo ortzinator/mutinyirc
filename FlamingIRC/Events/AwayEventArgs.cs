@@ -2,23 +2,22 @@
 
 namespace FlamingIRC;
 
-public class AwayEventArgs : EventArgs
+/// <summary>
+/// The data for <see cref="Listener.OnAway"/>. This client sent a notice or a private message to
+/// a user who is away.
+/// </summary>
+public sealed class AwayEventArgs : EventArgs
 {
     /// <summary>
     /// The nick of the user who is away.
     /// </summary>
-    public string Nick;
+    public string Nick { get; }
 
     /// <summary>
-    /// An away message, if any, set by the user.
+    /// The away message that the user set. It can be empty.
     /// </summary>
-    public string AwayMessage;
+    public string AwayMessage { get; }
 
-    /// <summary>
-    /// A Notice or Private message was sent to someone whose status is away.
-    /// </summary>
-    /// <param name="nick">The nick of the user who is away.</param>
-    /// <param name="awayMessage">An away message, if any, set by the user.</param>
     public AwayEventArgs(string nick, string awayMessage)
     {
         Nick = nick;

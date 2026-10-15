@@ -758,16 +758,16 @@ public class Server : MessageContext, IDisposable
 
     private void Listener_OnNames(object sender, NamesEventArgs e)
     {
-        OnNames?.Invoke(this, new NamesEventArgs(e.Channel, e.Nicks, e.Last));
+        OnNames?.Invoke(this, new NamesEventArgs(e.Channel, e.Nicks, e.IsLast));
 
         if (!Channels.TryGetValue(e.Channel, out Channel chan))
             return;
 
         chan.AddPendingNames(e.Nicks);
 
-        Trace.WriteLine("Added chunk of " + e.Nicks.Length + " names", "Names");
+        Trace.WriteLine("Added chunk of " + e.Nicks.Count + " names", "Names");
 
-        if (e.Last)
+        if (e.IsLast)
             chan.CommitPendingNames();
     }
 

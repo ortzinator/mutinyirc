@@ -1,31 +1,35 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace FlamingIRC;
 
-public class NamesEventArgs : EventArgs
+/// <summary>
+/// The data for <see cref="Listener.OnNames"/>. The server can send the names of a channel in
+/// more than one reply.
+/// </summary>
+public sealed class NamesEventArgs : EventArgs
 {
     /// <summary>
-    /// The channel the user is on. "@" is used for secret channels, "*" for private channels,
-    /// and "=" for public channels.
+    /// The name of the channel.
     /// </summary>
-    public string Channel;
+    public string Channel { get; }
 
     /// <summary>
-    /// A list of nicks on the channel. If this is the last reply then it will be empty. Nicks
-    /// prefixed with a '@' are channel operators. Nicks prefixed with a '+' have voice
-    /// privileges on a moderated channel, i.e. they are allowed to send public messages.
+    /// The nicks on the channel in this reply. The last reply has no nicks. A '@' before a nick
+    /// shows a channel operator. A '+' before a nick shows a user with voice, who can send
+    /// messages to a moderated channel.
     /// </summary>
-    public string[] Nicks;
+    public IReadOnlyList<string> Nicks { get; }
 
     /// <summary>
-    /// True if this is the last names reply.
+    /// True if this is the last names reply for the channel.
     /// </summary>
-    public bool Last;
+    public bool IsLast { get; }
 
-    public NamesEventArgs(string channel, string[] nicks, bool last)
+    public NamesEventArgs(string channel, IEnumerable<string> nicks, bool isLast)
     {
         Channel = channel;
-        Nicks = nicks;
-        Last = last;
+        Nicks = new List<string>(nicks).AsReadOnly();
+        IsLast = isLast;
     }
 }

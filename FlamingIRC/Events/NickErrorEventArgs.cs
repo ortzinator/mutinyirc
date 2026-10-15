@@ -2,31 +2,26 @@
 
 namespace FlamingIRC;
 
-public class NickErrorEventArgs : EventArgs
+/// <summary>
+/// The data for <see cref="Listener.OnNickError"/>. The server did not accept a nick.
+/// </summary>
+/// <remarks>
+/// <para>This occurs in two conditions. The user is registered with the server and tries to
+/// change nick. Or the user tries to register with the server and the nick is not accepted.</para>
+/// <para>In the second condition, you must complete the registration yourself.</para>
+/// </remarks>
+public sealed class NickErrorEventArgs : EventArgs
 {
     /// <summary>
-    /// The nick which caused the problem.
+    /// The nick that the server did not accept.
     /// </summary>
-    public string BadNick;
+    public string BadNick { get; }
 
     /// <summary>
-    /// A message explaining the error.
+    /// The text from the server that tells why it did not accept the nick.
     /// </summary>
-    public string Reason;
+    public string Reason { get; }
 
-    /// <summary>
-    /// Called when a nick change fails.
-    /// </summary>
-    /// <remarks>
-    /// <para>This method can be called under 2 conditions: It can arise when the user is
-    /// already registered with the IRC server and is trying change his nick. Or when the user
-    /// is trying to register for the first time with the IRC server and it
-    /// fails.</para><para>Note that if the later arises then you will have to manually complete
-    /// the regsitration process.</para>
-    /// </remarks>
-    /// <param name="badNick">The nick which caused the problem.</param>
-    /// <param name="reason">A message explaining the error.</param>
-    /// <seealso cref="Listener.OnNickError"/>
     public NickErrorEventArgs(string badNick, string reason)
     {
         BadNick = badNick;

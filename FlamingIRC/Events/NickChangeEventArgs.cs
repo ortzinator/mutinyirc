@@ -2,21 +2,24 @@
 
 namespace FlamingIRC;
 
-public class NickChangeEventArgs : EventArgs
+/// <summary>
+/// The data for <see cref="Listener.OnNick"/>.
+/// </summary>
+public sealed class NickChangeEventArgs : EventArgs
 {
     /// <summary>
-    /// The user who is changing his nick.
+    /// The user who changed nick. <see cref="User.Nick"/> is the old nick.
     /// </summary>
-    public User User;
+    public User User { get; }
 
     /// <summary>
-    /// The new nickname.
+    /// The new nick.
     /// </summary>
-    public string NewNick;
+    public string NewNick { get; }
 
-    public NickChangeEventArgs(User user, string newNewNick)
+    public NickChangeEventArgs(User user, string newNick)
     {
         User = user;
-        NewNick = newNewNick;
+        NewNick = newNick;
     }
 }

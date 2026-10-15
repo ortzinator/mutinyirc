@@ -106,7 +106,7 @@ public class ListenerTests
         _listener.ProcessNamesReply(msg);
         Assert.AreEqual(new[] { "Ortzinator", "OrtzIRC", "@ChanServ" }, givenArgs.Nicks);
         Assert.AreEqual("#ortzirc", givenArgs.Channel);
-        Assert.AreEqual(false, givenArgs.Last);
+        Assert.AreEqual(false, givenArgs.IsLast);
     }
 
     [Test]

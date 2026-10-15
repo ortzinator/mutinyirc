@@ -422,7 +422,7 @@ public sealed class Channel : MessageContext
     /// <summary>
     /// Buffers a chunk of NAMES nicks for this channel until the full list has been received.
     /// </summary>
-    public void AddPendingNames(string[] nicks)
+    public void AddPendingNames(IEnumerable<string> nicks)
     {
         foreach (string nick in nicks)
         {

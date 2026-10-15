@@ -2,23 +2,22 @@
 
 namespace FlamingIRC;
 
-public class ErrorMessageEventArgs : EventArgs
+/// <summary>
+/// The data for <see cref="Listener.OnError"/>. The IRC server sent an error, or FlamingIRC
+/// found an error.
+/// </summary>
+public sealed class ErrorMessageEventArgs : EventArgs
 {
     /// <summary>
-    /// The RFC 2812 or custom numeric code.
+    /// The RFC 2812 numeric code, or a FlamingIRC code.
     /// </summary>
-    public ReplyCode Code;
+    public ReplyCode Code { get; }
 
     /// <summary>
-    /// The error message text.
+    /// The text of the error.
     /// </summary>
-    public string Message;
+    public string Message { get; }
 
-    /// <summary>
-    /// Error messages from the IRC server.
-    /// </summary>
-    /// <param name="code">The RFC 2812 or custom numeric code.</param>
-    /// <param name="message">The error message text.</param>
     public ErrorMessageEventArgs(ReplyCode code, string message)
     {
         Code = code;

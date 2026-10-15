@@ -2,24 +2,21 @@
 
 namespace FlamingIRC;
 
-public class UserModeChangeEventArgs : EventArgs
+/// <summary>
+/// The data for <see cref="Listener.OnUserModeChange"/>. A mode of this client's user changed.
+/// </summary>
+public sealed class UserModeChangeEventArgs : EventArgs
 {
     /// <summary>
-    /// Whether a mode was added or removed.
+    /// Tells if the mode was added or removed.
     /// </summary>
-    public ModeAction Action;
+    public ModeAction Action { get; }
 
     /// <summary>
-    /// The mode that was changed.
+    /// The mode that changed.
     /// </summary>
-    public UserMode Mode;
+    public UserMode Mode { get; }
 
-    /// <summary>
-    /// This user's mode has changed.
-    /// </summary>
-    /// <param name="action">Whether a mode was added or removed.</param>
-    /// <param name="mode">The mode that was changed.</param>
-    /// <seealso cref="Listener.OnUserModeChange"/>
     public UserModeChangeEventArgs(ModeAction action, UserMode mode)
     {
         Action = action;

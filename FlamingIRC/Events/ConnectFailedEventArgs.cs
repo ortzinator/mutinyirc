@@ -3,30 +3,26 @@
 namespace FlamingIRC;
 
 /// <summary>
-/// Event data raised when an attempt to connect to the IRC server fails
-/// before the connection is established (e.g. refused, authentication
-/// failed, or socket error during connect).
+/// The data for <see cref="Connection.ConnectFailed"/>. The attempt to connect to the IRC server
+/// failed before the connection opened. For example, the server refused the connection,
+/// authentication failed, or a socket error occurred.
 /// </summary>
-public class ConnectFailedEventArgs : EventArgs
+public sealed class ConnectFailedEventArgs : EventArgs
 {
     /// <summary>
-    /// Why the connection attempt failed.
+    /// The reason that the connection attempt failed.
     /// </summary>
-    public ConnectError Reason;
+    public ConnectError Reason { get; }
 
     /// <summary>
-    /// The underlying socket error code when <see cref="Reason"/> is
-    /// <see cref="ConnectError.SocketError"/>; zero when the failure
-    /// did not originate from a socket error.
+    /// The socket error code when <see cref="Reason"/> is <see cref="ConnectError.SocketError"/>.
+    /// For all other reasons, it is zero.
     /// </summary>
-    public int SocketErrorCode;
+    public int SocketErrorCode { get; }
 
     /// <summary>
-    /// Initializes a new instance with both a reason and a socket error code.
-    /// Use this overload when the failure was triggered by a socket error.
+    /// Use this constructor when a socket error caused the failure.
     /// </summary>
-    /// <param name="reason">Why the connection attempt failed.</param>
-    /// <param name="socketErrorCode">The underlying socket error code.</param>
     public ConnectFailedEventArgs(ConnectError reason, int socketErrorCode)
     {
         Reason = reason;
@@ -34,9 +30,8 @@ public class ConnectFailedEventArgs : EventArgs
     }
 
     /// <summary>
-    /// Initializes a new instance for a failure that has no associated
-    /// socket error code (e.g. <see cref="ConnectError.AuthenticationFailed"/>).
+    /// Use this constructor when the failure has no socket error code, for example
+    /// <see cref="ConnectError.AuthenticationFailed"/>.
     /// </summary>
-    /// <param name="reason">Why the connection attempt failed.</param>
     public ConnectFailedEventArgs(ConnectError reason) => Reason = reason;
 }
