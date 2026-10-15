@@ -38,26 +38,27 @@ namespace FlamingIRC;
 public sealed class DccFileSession
 {
     /// <summary>
-    /// The remote user did not accept the file within the timeout period.
+    /// The remote user did not accept the file in the timeout period. The session closes.
     /// </summary>
-    public event FileTransferTimeoutEventHandler OnFileTransferTimeout;
+    public event EventHandler<DccFileSessionEventArgs> OnFileTransferTimeout;
     /// <summary>
-    /// The file transfer connection is open and data will be sent or
-    /// received.
+    /// The file transfer connection is open, and the transfer of data starts.
     /// </summary>
-    public event FileTransferStartedEventHandler OnFileTransferStarted;
+    public event EventHandler<DccFileSessionEventArgs> OnFileTransferStarted;
     /// <summary>
-    /// The file transfer was interrupted and did not complete.
+    /// The file transfer stopped before it completed. Usually, this client or the remote
+    /// user cancelled the transfer.
     /// </summary>
-    public event FileTransferInterruptedEventHandler OnFileTransferInterrupted;
+    public event EventHandler<DccFileSessionEventArgs> OnFileTransferInterrupted;
     /// <summary>
-    /// The file transfer was successful.
+    /// The file transfer completed successfully.
     /// </summary>
-    public event FileTransferCompletedEventHandler OnFileTransferCompleted;
+    public event EventHandler<DccFileSessionEventArgs> OnFileTransferCompleted;
     /// <summary>
-    /// How much of the file has been sent or received so far.
+    /// The session sent or received one block of data. Use this event to show the progress
+    /// of the transfer.
     /// </summary>
-    public event FileTransferProgressEventHandler OnFileTransferProgress;
+    public event EventHandler<DccFileProgressEventArgs> OnFileTransferProgress;
 
     //Does this session use send-ahead mode
     private bool turboMode;
@@ -180,7 +181,7 @@ public sealed class DccFileSession
     private void SignalTransferStart()
     {
         ResetActivityTimer();
-        OnFileTransferStarted?.Invoke(this);
+        OnFileTransferStarted?.Invoke(this, new DccFileSessionEventArgs(this));
     }
     private void Listen()
     {
@@ -314,7 +315,7 @@ public sealed class DccFileSession
     internal void AddBytesProcessed(int bytesRead)
     {
         dccFileInfo.AddBytesTransfered(bytesRead);
-        OnFileTransferProgress?.Invoke(this, bytesRead);
+        OnFileTransferProgress?.Invoke(this, new DccFileProgressEventArgs(this, bytesRead));
     }
     /// <summary>
     /// Called by DccListener when it receives a DCC Accept message.
@@ -399,7 +400,7 @@ public sealed class DccFileSession
         }
         else
         {
-            OnFileTransferTimeout?.Invoke(this);
+            OnFileTransferTimeout?.Invoke(this, new DccFileSessionEventArgs(this));
             Cleanup();
         }
     }
@@ -411,7 +412,7 @@ public sealed class DccFileSession
     {
         Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Interrupted()");
         Cleanup();
-        OnFileTransferInterrupted?.Invoke(this);
+        OnFileTransferInterrupted?.Invoke(this, new DccFileSessionEventArgs(this));
     }
     /// <summary>
     /// The file transfer is done. So close everything
@@ -421,7 +422,7 @@ public sealed class DccFileSession
     {
         Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Finished()");
         Cleanup();
-        OnFileTransferCompleted?.Invoke(this);
+        OnFileTransferCompleted?.Invoke(this, new DccFileSessionEventArgs(this));
     }
 
     /// <summary>
@@ -433,7 +434,7 @@ public sealed class DccFileSession
         lock (this)
         {
             Cleanup();
-            OnFileTransferInterrupted?.Invoke(this);
+            OnFileTransferInterrupted?.Invoke(this, new DccFileSessionEventArgs(this));
         }
     }
     /// <summary>

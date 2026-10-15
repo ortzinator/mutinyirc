@@ -39,18 +39,18 @@ namespace FlamingIRC;
 public sealed class DccListener
 {
     /// <summary>
-    /// A user from any Connection has sent a request to open a DCC
-    /// chat session.
+    /// A user on a Connection sent a request to open a DCC chat session.
     /// </summary>
-    public event DccChatRequestEventHandler OnDccChatRequest;
+    public event EventHandler<DccChatRequestEventArgs> OnDccChatRequest;
     /// <summary>
-    /// A remote user has sent a request to send a file.
+    /// A remote user offers to send a file to this client.
     /// </summary>
-    public event DccSendRequestEventHandler OnDccSendRequest;
+    public event EventHandler<DccSendRequestEventArgs> OnDccSendRequest;
     /// <summary>
-    /// A remote user requests that he be sent a file.
+    /// A remote user asks this client to send a file. To send the file, use
+    /// <see cref="DccFileSession.Send"/>.
     /// </summary>
-    public event DccGetRequestEventHandler OnDccGetRequest;
+    public event EventHandler<DccGetRequestEventArgs> OnDccGetRequest;
 
     private static DccListener listener;
     private static readonly object lockObject = new object();
@@ -135,7 +135,7 @@ public sealed class DccListener
                     }
                     try
                     {
-                        OnDccChatRequest(dccUser);
+                        OnDccChatRequest(this, new DccChatRequestEventArgs(dccUser));
                     }
                     catch (ArgumentException ae)
                     {
@@ -167,11 +167,11 @@ public sealed class DccListener
                     }
                     try
                     {
-                        OnDccSendRequest(
+                        OnDccSendRequest(this, new DccSendRequestEventArgs(
                             dccUser,
                             tokens[FileName],
                             int.Parse(tokens[FileSize], CultureInfo.InvariantCulture),
-                            IsTurbo(5, tokens));
+                            IsTurbo(5, tokens)));
                     }
                     catch (ArgumentException ae)
                     {
@@ -190,12 +190,12 @@ public sealed class DccListener
                 {
                     try
                     {
-                        OnDccGetRequest(
+                        OnDccGetRequest(this, new DccGetRequestEventArgs(
                             new DccUser(
                             connection,
                             Rfc2812Util.ParseUserLine(requestor)),
                             tokens[FileName],
-                            IsTurbo(2, tokens));
+                            IsTurbo(2, tokens)));
                     }
                     catch (ArgumentException ae)
                     {

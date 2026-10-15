@@ -39,23 +39,22 @@ public sealed class DccChatSession
 {
 
     /// <summary>
-    /// The remote user did not respond to a Chat request
-    /// within the timeout period.
+    /// The remote user did not answer the chat request in the timeout period.
     /// </summary>
-    public event ChatRequestTimeoutEventHandler OnChatRequestTimeout;
+    public event EventHandler<DccChatSessionEventArgs> OnChatRequestTimeout;
     /// <summary>
-    /// A chat session has been opened. This is called when a session
-    /// has been opened regardless of who initiated the session.
+    /// The chat session is open. This event occurs for each session, when this client or
+    /// the remote user started it.
     /// </summary>
-    public event ChatSessionOpenedEventHandler OnChatSessionOpened;
+    public event EventHandler<DccChatSessionEventArgs> OnChatSessionOpened;
     /// <summary>
-    /// The chat session has been closed by either participant.
+    /// The chat session is closed. This client or the remote user closed it.
     /// </summary>
-    public event ChatSessionClosedEventHandler OnChatSessionClosed;
+    public event EventHandler<DccChatSessionEventArgs> OnChatSessionClosed;
     /// <summary>
-    /// Text from the remote user was received
+    /// The remote user sent a line of text.
     /// </summary>
-    public event ChatMessageReceivedEventHandler OnChatMessageReceived;
+    public event EventHandler<DccChatMessageEventArgs> OnChatMessageReceived;
 
     //Default timeout is 30 seconds
     private const int DefaultTimeout = 30000;
@@ -102,7 +101,7 @@ public sealed class DccChatSession
     private void SendClosedEvent()
     {
         Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::SendClosedEvent()");
-        OnChatSessionClosed?.Invoke(this);
+        OnChatSessionClosed?.Invoke(this, new DccChatSessionEventArgs(this));
     }
     /// <summary>
     /// Create the correctly formatted DCC CHAT message and send it.
@@ -131,7 +130,7 @@ public sealed class DccChatSession
         if (listening)
         {
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::TimerExpired() Chat session " + ToString() + " timed out.");
-            OnChatRequestTimeout?.Invoke(this);
+            OnChatRequestTimeout?.Invoke(this, new DccChatSessionEventArgs(this));
             Close();
         }
     }
@@ -150,7 +149,7 @@ public sealed class DccChatSession
             server.Stop();
             listening = false;
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Listen() Remote user connected.");
-            OnChatSessionOpened?.Invoke(this);
+            OnChatSessionOpened?.Invoke(this, new DccChatSessionEventArgs(this));
             //Start listening for messages
             ReceiveMessages();
         }
@@ -171,7 +170,7 @@ public sealed class DccChatSession
         {
             client = new TcpClient();
             client.Connect(ClientInfo.RemoteEndPoint);
-            OnChatSessionOpened?.Invoke(this);
+            OnChatSessionOpened?.Invoke(this, new DccChatSessionEventArgs(this));
             ReceiveMessages();
         }
         catch (Exception se)
@@ -207,7 +206,7 @@ public sealed class DccChatSession
                     Debug.Indent();
                     Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccChatSession::ReceiveMessages() Session: " + ToString() + " Received: " + message);
                     Debug.Unindent();
-                    OnChatMessageReceived(this, message);
+                    OnChatMessageReceived(this, new DccChatMessageEventArgs(this, message));
                 }
             }
             receiving = false;
