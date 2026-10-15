@@ -180,7 +180,7 @@ public class ChannelViewModel : IrcViewModel
         ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Message, e.User));
     }
 
-    private void Channel_OnKick(object? sender, KickEventArgs e)
+    private void Channel_OnKick(object? sender, Common.KickEventArgs e)
     {
         AddMessage(ChannelStrings.Kick.With(e.Kickee, e.User.Nick, e.Reason));
     }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Legacy.ClassicAssert;
 
@@ -13,14 +14,14 @@ public class ChannelModeParsingTests
     private const string Libera = "CHANMODES=eIbq,k,flj,CFLMPQScgimnprstuz PREFIX=(ov)@+";
 
     private Connection _connection;
-    private ChannelModeInfo[] _modes;
+    private IReadOnlyList<ChannelModeInfo> _modes;
 
     [SetUp]
     public void SetupTest()
     {
         _connection = new Connection(new ConnectionArgs(), false, false);
         _modes = null;
-        _connection.Listener.OnChannelModeChange += (who, channel, modes, raw) => _modes = modes;
+        _connection.Listener.OnChannelModeChange += (_, e) => _modes = e.Modes;
     }
 
     private void Receive005(string tokens) =>
@@ -38,7 +39,7 @@ public class ChannelModeParsingTests
 
         ReceiveMode("+qo *!*@spammer.example SomeNick");
 
-        Assert.AreEqual(2, _modes.Length);
+        Assert.AreEqual(2, _modes.Count);
         Assert.AreEqual(ChannelMode.Quiet, _modes[0].Mode);
         Assert.AreEqual("*!*@spammer.example", _modes[0].Parameter);
         Assert.AreEqual('\0', _modes[0].PrefixSymbol, "The quiet list gives no status");
@@ -55,7 +56,7 @@ public class ChannelModeParsingTests
 
         ReceiveMode("+j-lo 3:5 SomeNick");
 
-        Assert.AreEqual(3, _modes.Length);
+        Assert.AreEqual(3, _modes.Count);
         Assert.AreEqual("3:5", _modes[0].Parameter);
         Assert.AreEqual(ChannelMode.UserLimit, _modes[1].Mode);
         Assert.AreEqual("", _modes[1].Parameter);
@@ -71,7 +72,7 @@ public class ChannelModeParsingTests
 
         ReceiveMode("+qv Owner Voiced");
 
-        Assert.AreEqual(2, _modes.Length);
+        Assert.AreEqual(2, _modes.Count);
         Assert.AreEqual("Owner", _modes[0].Parameter);
         Assert.AreEqual('~', _modes[0].PrefixSymbol);
         Assert.AreEqual("Voiced", _modes[1].Parameter);
@@ -108,7 +109,7 @@ public class ChannelModeParsingTests
     {
         ReceiveMode("+kloO secret 10 SomeNick Creator");
 
-        Assert.AreEqual(4, _modes.Length);
+        Assert.AreEqual(4, _modes.Count);
         Assert.AreEqual("secret", _modes[0].Parameter);
         Assert.AreEqual("10", _modes[1].Parameter);
         Assert.AreEqual("SomeNick", _modes[2].Parameter);
@@ -122,7 +123,7 @@ public class ChannelModeParsingTests
     {
         // A caller can use a Listener without a Connection. It must still read CHANMODES.
         var listener = new Listener();
-        listener.OnChannelModeChange += (who, channel, modes, raw) => _modes = modes;
+        listener.OnChannelModeChange += (_, e) => _modes = e.Modes;
 
         listener.Parse($":irc.fake.com 005 me {Libera} :are supported by this server");
         listener.Parse(":Op!~op@op.example MODE #ortzirc +qo *!*@spammer.example SomeNick");
@@ -137,12 +138,12 @@ public class ChannelModeParsingTests
         // The '324' reply to a MODE query goes through the same parser as a MODE change.
         // Unreal puts 'f' in group B.
         Receive005("CHANMODES=beIqa,kfL,lH,psmntirRcOAQKVCuzNSMTGZ PREFIX=(qaohv)~&@%+");
-        ChannelModeInfo[] reply = null;
-        _connection.Listener.OnChannelModeRequest += (channel, modes) => reply = modes;
+        IReadOnlyList<ChannelModeInfo> reply = null;
+        _connection.Listener.OnChannelModeRequest += (_, e) => reply = e.Modes;
 
         _connection.Listener.Parse(":irc.fake.com 324 me #ortzirc +fnt [5j]:10");
 
-        Assert.AreEqual(3, reply.Length);
+        Assert.AreEqual(3, reply.Count);
         Assert.AreEqual("[5j]:10", reply[0].Parameter);
         Assert.AreEqual("", reply[1].Parameter);
     }

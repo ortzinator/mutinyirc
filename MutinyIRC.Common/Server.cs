@@ -167,7 +167,7 @@ public class Server : MessageContext, IDisposable
         Connection.Listener.OnPrivateAction += Listener_OnPrivateAction;
         Connection.Listener.OnPrivateNotice += Listener_OnPrivateNotice;
         Connection.Listener.OnPublicNotice += Listener_OnPublicNotice;
-        Connection.Listener.OnRecieveTopic += ListenerOnRecieveTopic;
+        Connection.Listener.OnReceiveTopic += Listener_OnReceiveTopic;
         Connection.Listener.OnNick += Listener_OnNick;
         Connection.Listener.OnKick += Listener_OnKick;
         Connection.Listener.OnPrivate += Listener_OnPrivate;
@@ -182,11 +182,11 @@ public class Server : MessageContext, IDisposable
         Connection.RawMessageReceived += Connection_OnRawMessageReceived;
     }
 
-    private void Listener_OnQuit(User user, string reason)
+    private void Listener_OnQuit(object sender, QuitEventArgs e)
     {
         foreach (KeyValuePair<string, Channel> pair in Channels)
         {
-            pair.Value.UserQuit(user, reason);
+            pair.Value.UserQuit(e.User, e.Reason);
         }
     }
 
@@ -195,14 +195,14 @@ public class Server : MessageContext, IDisposable
         NickError.Fire(this, e);
     }
 
-    private void Listener_OnWhois(WhoisInfo whoisInfo)
+    private void Listener_OnWhois(object sender, WhoisEventArgs e)
     {
-        WhoisReceived.Fire(this, new DataEventArgs<WhoisInfo>(whoisInfo));
+        WhoisReceived.Fire(this, new DataEventArgs<WhoisInfo>(e.WhoisInfo));
     }
 
-    private void Listener_OnPing(string message)
+    private void Listener_OnPing(object sender, PingEventArgs e)
     {
-        PingReceived.Fire(this, new DataEventArgs<string>(message));
+        PingReceived.Fire(this, new DataEventArgs<string>(e.Message));
     }
 
     private void Listener_OnAway(object sender, AwayEventArgs e)
@@ -349,7 +349,7 @@ public class Server : MessageContext, IDisposable
         Connection.Listener.OnPrivateAction -= Listener_OnPrivateAction;
         Connection.Listener.OnPrivateNotice -= Listener_OnPrivateNotice;
         Connection.Listener.OnPublicNotice -= Listener_OnPublicNotice;
-        Connection.Listener.OnRecieveTopic -= ListenerOnRecieveTopic;
+        Connection.Listener.OnReceiveTopic -= Listener_OnReceiveTopic;
         Connection.Listener.OnNick -= Listener_OnNick;
         Connection.Listener.OnKick -= Listener_OnKick;
         Connection.Listener.OnPrivate -= Listener_OnPrivate;
@@ -624,14 +624,14 @@ public class Server : MessageContext, IDisposable
         }
     }
 
-    private void Listener_OnKick(User user, string channel, string kickee, string reason)
+    private void Listener_OnKick(object sender, FlamingIRC.KickEventArgs e)
     {
-        if (!Channels.TryGetValue(channel, out Channel chan))
+        if (!Channels.TryGetValue(e.Channel, out Channel chan))
             return;
-        if (kickee == UserNick)
+        if (e.Kickee == UserNick)
             chan.Membership = ChannelMembership.NotJoined;
-        Kick.Fire(this, new KickEventArgs(user, chan, kickee, reason));
-        chan.UserKick(user, kickee, reason);
+        Kick.Fire(this, new KickEventArgs(e.Kicker, chan, e.Kickee, e.Reason));
+        chan.UserKick(e.Kicker, e.Kickee, e.Reason);
     }
 
     private void Listener_OnUserModeChange(object sender, UserModeChangeEventArgs e)
@@ -644,11 +644,11 @@ public class Server : MessageContext, IDisposable
         OnNick.Fire(this, new NickChangeEventArgs(e.User, e.NewNick));
     }
 
-    private void ListenerOnRecieveTopic(string channel, string topic)
+    private void Listener_OnReceiveTopic(object sender, TopicEventArgs e)
     {
-        if (!Channels.TryGetValue(channel, out Channel chan))
+        if (!Channels.TryGetValue(e.Channel, out Channel chan))
             return;
-        chan.ShowTopic(topic);
+        chan.ShowTopic(e.Topic);
     }
 
     private void Listener_OnPrivateNotice(object sender, UserMessageEventArgs e)
@@ -771,8 +771,10 @@ public class Server : MessageContext, IDisposable
             chan.CommitPendingNames();
     }
 
-    private void Listener_OnJoin(User user, string channel)
+    private void Listener_OnJoin(object sender, JoinEventArgs e)
     {
+        User user = e.User;
+        string channel = e.Channel;
         var chan = CreateChannel(channel);
         if (chan == null)
             return;
@@ -791,9 +793,11 @@ public class Server : MessageContext, IDisposable
         }
     }
 
-    private void Listener_OnPart(User user, string channel, string reason)
+    private void Listener_OnPart(object sender, FlamingIRC.PartEventArgs e)
     {
-        if (!Channels.TryGetValue(channel, out Channel chan))
+        User user = e.User;
+        string reason = e.Reason;
+        if (!Channels.TryGetValue(e.Channel, out Channel chan))
             return;
 
         if (IsMe(user))
@@ -817,22 +821,23 @@ public class Server : MessageContext, IDisposable
         Registered?.Invoke(this, e);
     }
 
-    private void Listener_OnChannelModeChange(User who, string channel, ChannelModeInfo[] modes,
-                                              string raw)
+    private void Listener_OnChannelModeChange(object sender,
+                                              FlamingIRC.ChannelModeChangeEventArgs e)
     {
-        if (!Channels.TryGetValue(channel, out Channel chan))
+        if (!Channels.TryGetValue(e.Channel, out Channel chan))
             return;
-        ChannelModeChange.Fire(this, new ChannelModeChangeEventArgs(who, chan, modes, raw));
+        ChannelModeChange.Fire(this,
+            new ChannelModeChangeEventArgs(e.Changer, chan, e.Modes, e.Raw));
 
-        chan.ApplyModeChanges(modes);
+        chan.ApplyModeChanges(e.Modes);
     }
 
     // The reply to the MODE request sent on join. It reports every mode the channel has, so
     // the channel takes it as a snapshot and not as a change.
-    private void Listener_OnChannelModeRequest(string channel, ChannelModeInfo[] modes)
+    private void Listener_OnChannelModeRequest(object sender, ChannelModeRequestEventArgs e)
     {
-        if (Channels.TryGetValue(channel, out Channel chan))
-            chan.ApplyModeSnapshot(modes);
+        if (Channels.TryGetValue(e.Channel, out Channel chan))
+            chan.ApplyModeSnapshot(e.Modes);
     }
 
     private void Listener_OnError(object sender, ErrorMessageEventArgs a)

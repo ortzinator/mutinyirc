@@ -360,7 +360,7 @@ public class Connection : TcpTextClient, IConnection
     /// Respond to IRC keep-alives.
     /// </summary>
     /// <param name="message">The message that should be echoed back</param>
-    private void KeepAlive(string message) => _sender.Pong(message);
+    private void KeepAlive(object sender, PingEventArgs e) => _sender.Pong(e.Message);
 
     private void UpdateLastTime(object sender, EventArgs e) => _lastTraffic = DateTime.Now;
 

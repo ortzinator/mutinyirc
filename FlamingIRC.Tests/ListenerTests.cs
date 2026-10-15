@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Legacy.ClassicAssert;
 
@@ -318,16 +319,11 @@ public class ListenerTests
             From = _userString,
             Target = "#ortzirc"
         };
-        User expectedUser = null;
-        string expectedChannel = null;
-        _listener.OnJoin += delegate (User user, string channel)
-        {
-            expectedUser = user;
-            expectedChannel = channel;
-        };
+        JoinEventArgs givenArgs = null;
+        _listener.OnJoin += (_, e) => givenArgs = e;
         _listener.ProcessJoinCommand(msg);
-        Assert.AreEqual(_testUser, expectedUser);
-        Assert.AreEqual("#ortzirc", expectedChannel);
+        Assert.AreEqual(_testUser, givenArgs.User);
+        Assert.AreEqual("#ortzirc", givenArgs.Channel);
 
     }
 
@@ -343,7 +339,7 @@ public class ListenerTests
             Target = ":#ortzirc"
         };
         string receivedChannel = null;
-        _listener.OnJoin += (_, channel) => receivedChannel = channel;
+        _listener.OnJoin += (_, e) => receivedChannel = e.Channel;
         _listener.ProcessJoinCommand(msg);
         Assert.AreEqual("#ortzirc", receivedChannel);
     }
@@ -359,32 +355,20 @@ public class ListenerTests
             Message = "noob",
             Tokens = _kick.Split(new[] { ' ' })
         };
-        User givenUser = null;
-        string givenChannel = null;
-        string givenKickee = null;
-        string givenReason = null;
-        _listener.OnKick += delegate (User user, string channel, string kickee, string reason)
-        {
-            givenUser = user;
-            givenChannel = channel;
-            givenKickee = kickee;
-            givenReason = reason;
-        };
+        KickEventArgs givenArgs = null;
+        _listener.OnKick += (_, e) => givenArgs = e;
         _listener.ProcessKickCommand(msg);
-        Assert.AreEqual(_testUser, givenUser);
-        Assert.AreEqual(givenChannel, "#ortzirc");
-        Assert.AreEqual(givenKickee, "OrtzIRC");
-        Assert.AreEqual(givenReason, "noob");
+        Assert.AreEqual(_testUser, givenArgs.Kicker);
+        Assert.AreEqual("#ortzirc", givenArgs.Channel);
+        Assert.AreEqual("OrtzIRC", givenArgs.Kickee);
+        Assert.AreEqual("noob", givenArgs.Reason);
     }
 
     [Test]
     public void Parse_Ping_OnPingFires()
     {
         string givenMsg = String.Empty;
-        _listener.OnPing += delegate (string message)
-        {
-            givenMsg = message;
-        };
+        _listener.OnPing += (_, e) => givenMsg = e.Message;
         _listener.Parse("PING :irc.funet.fi");
         Assert.AreEqual("irc.funet.fi", givenMsg);
     }
@@ -418,10 +402,10 @@ public class ListenerTests
     {
         string givenChannel = string.Empty;
         string givenTopic = string.Empty;
-        _listener.OnRecieveTopic += (channel, topic) =>
+        _listener.OnReceiveTopic += (_, e) =>
         {
-            givenChannel = channel;
-            givenTopic = topic;
+            givenChannel = e.Channel;
+            givenTopic = e.Topic;
         };
         _listener.ParseReply(_topic.Split(new[] { ' ' }));
         Assert.That(givenChannel, Is.EqualTo("#lancer"));
@@ -431,22 +415,15 @@ public class ListenerTests
     [Test]
     public void Parse_ChannelMode_FiresOnChannelModeChange()
     {
-        User givenWho = null;
-        string givenChannel = null;
-        ChannelModeInfo[] givenModes = null;
-
-        _listener.OnChannelModeChange += (who, channel, modes, raw) =>
-        {
-            givenWho = who;
-            givenChannel = channel;
-            givenModes = modes;
-        };
+        ChannelModeChangeEventArgs givenArgs = null;
+        _listener.OnChannelModeChange += (_, e) => givenArgs = e;
         _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com MODE #ortzirc +m");
-        Assert.AreEqual(_testUser, givenWho);
-        Assert.AreEqual("#ortzirc", givenChannel);
-        Assert.AreEqual(1, givenModes.Length);
-        Assert.AreEqual(ModeAction.Add, givenModes[0].Action);
-        Assert.AreEqual(ChannelMode.Moderated, givenModes[0].Mode);
+        Assert.AreEqual(_testUser, givenArgs.Changer);
+        Assert.AreEqual("#ortzirc", givenArgs.Channel);
+        Assert.AreEqual(1, givenArgs.Modes.Count);
+        Assert.AreEqual(ModeAction.Add, givenArgs.Modes[0].Action);
+        Assert.AreEqual(ChannelMode.Moderated, givenArgs.Modes[0].Mode);
+        Assert.AreEqual("+m", givenArgs.Raw);
     }
 
     [Test]
@@ -466,10 +443,10 @@ public class ListenerTests
     {
         User givenUser = null;
         string givenReason = null;
-        _listener.OnQuit += (user, reason) =>
+        _listener.OnQuit += (_, e) =>
         {
-            givenUser = user;
-            givenReason = reason;
+            givenUser = e.User;
+            givenReason = e.Reason;
         };
         _listener.Parse(
             ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT :Quit: Leaving");
@@ -482,10 +459,10 @@ public class ListenerTests
     {
         User givenUser = null;
         string givenReason = null;
-        _listener.OnQuit += (user, reason) =>
+        _listener.OnQuit += (_, e) =>
         {
-            givenUser = user;
-            givenReason = reason;
+            givenUser = e.User;
+            givenReason = e.Reason;
         };
         _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT");
         Assert.AreEqual(_testUser, givenUser);
@@ -498,11 +475,11 @@ public class ListenerTests
         User givenUser = null;
         string givenChannel = null;
         string givenReason = null;
-        _listener.OnPart += (user, channel, reason) =>
+        _listener.OnPart += (_, e) =>
         {
-            givenUser = user;
-            givenChannel = channel;
-            givenReason = reason;
+            givenUser = e.User;
+            givenChannel = e.Channel;
+            givenReason = e.Reason;
         };
         _listener.Parse(
             ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PART #ortzirc :Goodbye");
@@ -517,11 +494,11 @@ public class ListenerTests
         User givenUser = null;
         string givenChannel = null;
         string givenReason = null;
-        _listener.OnPart += (user, channel, reason) =>
+        _listener.OnPart += (_, e) =>
         {
-            givenUser = user;
-            givenChannel = channel;
-            givenReason = reason;
+            givenUser = e.User;
+            givenChannel = e.Channel;
+            givenReason = e.Reason;
         };
         _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PART #ortzirc");
         Assert.AreEqual(_testUser, givenUser);
@@ -547,11 +524,11 @@ public class ListenerTests
         User givenUser = null;
         string givenNick = null;
         string givenReason = null;
-        _listener.OnKill += (user, nick, reason) =>
+        _listener.OnKill += (_, e) =>
         {
-            givenUser = user;
-            givenNick = nick;
-            givenReason = reason;
+            givenUser = e.Killer;
+            givenNick = e.Nick;
+            givenReason = e.Reason;
         };
         _listener.Parse(":irc.server.net KILL Ortzinator :Killed by operator");
         Assert.AreEqual("irc.server.net", givenUser.Nick);
@@ -565,11 +542,11 @@ public class ListenerTests
         User givenUser = null;
         string givenNick = null;
         string givenReason = null;
-        _listener.OnKill += (user, nick, reason) =>
+        _listener.OnKill += (_, e) =>
         {
-            givenUser = user;
-            givenNick = nick;
-            givenReason = reason;
+            givenUser = e.Killer;
+            givenNick = e.Nick;
+            givenReason = e.Reason;
         };
         _listener.Parse(":irc.server.net KILL Ortzinator");
         Assert.AreEqual("Ortzinator", givenNick);
@@ -603,5 +580,201 @@ public class ListenerTests
         _listener.OnUnAway += (sender, args) => fired = true;
         _listener.Parse(":irc.server.net 305 OrtzIRC :You are no longer marked as being away");
         Assert.IsTrue(fired);
+    }
+
+    [Test]
+    public void Parse_List_FiresOnListForEachChannelThenLast()
+    {
+        var given = new List<ListEventArgs>();
+        _listener.OnList += (_, e) => given.Add(e);
+        _listener.Parse(":irc.server.net 322 OrtzIRC #ortzirc 12 :All about IRC");
+        _listener.Parse(":irc.server.net 323 OrtzIRC :End of /LIST");
+        Assert.AreEqual(2, given.Count);
+        Assert.AreEqual("#ortzirc", given[0].Channel);
+        Assert.AreEqual(12, given[0].VisibleNickCount);
+        Assert.AreEqual("All about IRC", given[0].Topic);
+        Assert.IsFalse(given[0].IsLast);
+        Assert.IsTrue(given[1].IsLast);
+    }
+
+    [Test]
+    public void Parse_Ison_FiresOnIson()
+    {
+        IsonEventArgs givenArgs = null;
+        _listener.OnIson += (_, e) => givenArgs = e;
+        _listener.Parse(":irc.server.net 303 OrtzIRC Buster");
+        Assert.AreEqual("Buster", givenArgs.Nicks);
+    }
+
+    [Test]
+    public void Parse_Who_FiresOnWhoForEachUserThenLast()
+    {
+        var given = new List<WhoEventArgs>();
+        _listener.OnWho += (_, e) => given.Add(e);
+        _listener.Parse(
+            ":irc.server.net 352 OrtzIRC #ortzirc ~buster buster.host hub.server.net Buster H@ :3 Buster");
+        _listener.Parse(":irc.server.net 315 OrtzIRC #ortzirc :End of /WHO list.");
+        Assert.AreEqual(2, given.Count);
+        Assert.AreEqual("Buster", given[0].User.Nick);
+        Assert.AreEqual("#ortzirc", given[0].Channel);
+        Assert.AreEqual("hub.server.net", given[0].IrcServer);
+        Assert.AreEqual("H@", given[0].Mask);
+        Assert.AreEqual(3, given[0].HopCount);
+        Assert.AreEqual("Buster", given[0].RealName);
+        Assert.IsFalse(given[0].IsLast);
+        Assert.IsTrue(given[1].IsLast);
+    }
+
+    [Test]
+    public void Parse_Whois_FiresOnWhoisWithTheCollectedReplies()
+    {
+        WhoisEventArgs givenArgs = null;
+        _listener.OnWhois += (_, e) => givenArgs = e;
+        _listener.Parse(":irc.server.net 311 OrtzIRC Buster ~buster buster.host * :Buster Bluth");
+        _listener.Parse(":irc.server.net 312 OrtzIRC Buster hub.server.net :The hub");
+        _listener.Parse(":irc.server.net 317 OrtzIRC Buster 42 1700000000 :seconds idle");
+        _listener.Parse(":irc.server.net 318 OrtzIRC Buster :End of /WHOIS list.");
+        Assert.AreEqual("Buster", givenArgs.WhoisInfo.User.Nick);
+        Assert.AreEqual("Buster Bluth", givenArgs.WhoisInfo.RealName);
+        Assert.AreEqual("hub.server.net", givenArgs.WhoisInfo.Server);
+        Assert.AreEqual("The hub", givenArgs.WhoisInfo.ServerDescription);
+    }
+
+    [Test]
+    public void Parse_Whowas_FiresOnWhowasThenLast()
+    {
+        var given = new List<WhowasEventArgs>();
+        _listener.OnWhowas += (_, e) => given.Add(e);
+        _listener.Parse(":irc.server.net 314 OrtzIRC Buster ~buster buster.host * :Buster Bluth");
+        _listener.Parse(":irc.server.net 369 OrtzIRC Buster :End of WHOWAS");
+        Assert.AreEqual(2, given.Count);
+        Assert.AreEqual("Buster", given[0].User.Nick);
+        Assert.AreEqual("Buster Bluth", given[0].RealName);
+        Assert.IsFalse(given[0].IsLast);
+        Assert.IsTrue(given[1].IsLast);
+    }
+
+    [Test]
+    public void Parse_UserModeReply_FiresOnUserModeRequest()
+    {
+        UserModeRequestEventArgs givenArgs = null;
+        _listener.OnUserModeRequest += (_, e) => givenArgs = e;
+        _listener.Parse(":irc.server.net 221 OrtzIRC +iw");
+        Assert.That(givenArgs.Modes, Is.EqualTo(new[] { UserMode.Invisible, UserMode.Wallops }));
+    }
+
+    [Test]
+    public void Parse_BanList_FiresOnChannelListThenLast()
+    {
+        var given = new List<ChannelListEventArgs>();
+        _listener.OnChannelList += (_, e) => given.Add(e);
+        _listener.Parse(
+            ":irc.server.net 367 OrtzIRC #ortzirc *!*@bad.host Ortzinator!~ortz@host 1700000000");
+        _listener.Parse(":irc.server.net 368 OrtzIRC #ortzirc :End of channel ban list");
+        Assert.AreEqual(2, given.Count);
+        Assert.AreEqual("#ortzirc", given[0].Channel);
+        Assert.AreEqual(ChannelMode.Ban, given[0].Mode);
+        Assert.AreEqual("*!*@bad.host", given[0].Item);
+        Assert.AreEqual("Ortzinator", given[0].Setter.Nick);
+        Assert.AreEqual(1700000000L, given[0].WhenSet);
+        Assert.IsFalse(given[0].IsLast);
+        Assert.AreEqual(ChannelMode.Ban, given[1].Mode);
+        Assert.IsTrue(given[1].IsLast);
+    }
+
+    [Test]
+    public void Parse_Version_FiresOnVersion()
+    {
+        VersionEventArgs givenArgs = null;
+        _listener.OnVersion += (_, e) => givenArgs = e;
+        _listener.Parse(":irc.server.net 351 OrtzIRC ircd-1.0.0 irc.server.net :Some comments");
+        Assert.AreEqual("ircd-1.0.0 irc.server.net :Some comments", givenArgs.VersionInfo);
+    }
+
+    [Test]
+    public void Parse_Motd_FiresOnMotdForEachLineThenLast()
+    {
+        var given = new List<MotdEventArgs>();
+        _listener.OnMotd += (_, e) => given.Add(e);
+        _listener.Parse(":irc.server.net 372 OrtzIRC :- Welcome aboard");
+        _listener.Parse(":irc.server.net 376 OrtzIRC :End of /MOTD command.");
+        Assert.AreEqual(2, given.Count);
+        Assert.That(given[0].Message, Does.EndWith("- Welcome aboard"));
+        Assert.IsFalse(given[0].IsLast);
+        Assert.IsTrue(given[1].IsLast);
+    }
+
+    [Test]
+    public void Parse_Time_FiresOnTime()
+    {
+        TimeEventArgs givenArgs = null;
+        _listener.OnTime += (_, e) => givenArgs = e;
+        _listener.Parse(":irc.server.net 391 OrtzIRC irc.server.net :Tuesday October 14 2026");
+        Assert.That(givenArgs.Time, Does.StartWith("irc.server.net"));
+        Assert.That(givenArgs.Time, Does.EndWith("Tuesday October 14 2026"));
+    }
+
+    [Test]
+    public void Parse_Info_FiresOnInfoForEachLineThenLast()
+    {
+        var given = new List<InfoEventArgs>();
+        _listener.OnInfo += (_, e) => given.Add(e);
+        _listener.Parse(":irc.server.net 371 OrtzIRC :Written in C");
+        _listener.Parse(":irc.server.net 374 OrtzIRC :End of /INFO list.");
+        Assert.AreEqual(2, given.Count);
+        Assert.That(given[0].Message, Does.EndWith("Written in C"));
+        Assert.IsFalse(given[0].IsLast);
+        Assert.IsTrue(given[1].IsLast);
+    }
+
+    [Test]
+    public void Parse_Admin_FiresOnAdmin()
+    {
+        AdminEventArgs givenArgs = null;
+        _listener.OnAdmin += (_, e) => givenArgs = e;
+        _listener.Parse(":irc.server.net 257 OrtzIRC :Helsinki, Finland");
+        Assert.AreEqual("Helsinki, Finland", givenArgs.Message);
+    }
+
+    [Test]
+    public void Parse_Lusers_FiresOnLusers()
+    {
+        LusersEventArgs givenArgs = null;
+        _listener.OnLusers += (_, e) => givenArgs = e;
+        _listener.Parse(":irc.server.net 251 OrtzIRC :There are 5 users on 1 server");
+        Assert.AreEqual("There are 5 users on 1 server", givenArgs.Message);
+    }
+
+    [Test]
+    public void Parse_Links_FiresOnLinksForEachServerThenLast()
+    {
+        var given = new List<LinksEventArgs>();
+        _listener.OnLinks += (_, e) => given.Add(e);
+        _listener.Parse(":irc.server.net 364 OrtzIRC *.server.net hub.server.net :1 Example Net");
+        _listener.Parse(":irc.server.net 365 OrtzIRC * :End of /LINKS list.");
+        Assert.AreEqual(2, given.Count);
+        Assert.AreEqual("*.server.net", given[0].Mask);
+        Assert.AreEqual("hub.server.net", given[0].Hostname);
+        Assert.AreEqual(1, given[0].HopCount);
+        Assert.AreEqual("Example Net", given[0].ServerInfo);
+        Assert.IsFalse(given[0].IsLast);
+        Assert.AreEqual(-1, given[1].HopCount);
+        Assert.IsTrue(given[1].IsLast);
+    }
+
+    [Test]
+    public void Parse_Stats_FiresOnStatsThenLast()
+    {
+        var given = new List<StatsEventArgs>();
+        _listener.OnStats += (_, e) => given.Add(e);
+        _listener.Parse(":irc.server.net 243 OrtzIRC O *@oper.host * Buster");
+        _listener.Parse(":irc.server.net 219 OrtzIRC o :End of /STATS report");
+        Assert.AreEqual(2, given.Count);
+        Assert.AreEqual(StatsQuery.Operators, given[0].QueryType);
+        Assert.AreEqual("O *@oper.host * Buster", given[0].Message);
+        Assert.IsFalse(given[0].IsLast);
+        Assert.AreEqual(StatsQuery.Operators, given[1].QueryType);
+        Assert.AreEqual("End of /STATS report", given[1].Message);
+        Assert.IsTrue(given[1].IsLast);
     }
 }

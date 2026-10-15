@@ -215,7 +215,7 @@ public class ServerViewModel : IrcViewModel
         }
     }
 
-    private void Server_PartSelf(object? sender, PartEventArgs e)
+    private void Server_PartSelf(object? sender, Common.PartEventArgs e)
     {
         var nwSettings = IrcSettingsManager.Instance.GetNetwork(_server);
         var chan = nwSettings?.GetChannel(e.Channel.Name);

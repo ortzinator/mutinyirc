@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using FlamingIRC;
 
 namespace MutinyIRC.Common;
@@ -293,7 +294,7 @@ public sealed class Channel : MessageContext
     /// Applies channel mode changes: the key, and the status prefixes of the affected users,
     /// which saves re-fetching the whole NAMES list.
     /// </summary>
-    public void ApplyModeChanges(ChannelModeInfo[] modes)
+    public void ApplyModeChanges(IReadOnlyList<ChannelModeInfo> modes)
     {
         bool touchedUsers = false;
 
@@ -344,11 +345,11 @@ public sealed class Channel : MessageContext
     /// reply names it. The key is written once, so a reply that repeats the key the channel
     /// already has announces nothing.
     /// </summary>
-    public void ApplyModeSnapshot(ChannelModeInfo[] modes)
+    public void ApplyModeSnapshot(IReadOnlyList<ChannelModeInfo> modes)
     {
         ApplyModeChanges(modes);
 
-        if (!Array.Exists(modes, m => m.Mode == ChannelMode.Password))
+        if (!modes.Any(m => m.Mode == ChannelMode.Password))
             Key = null;
     }
 
