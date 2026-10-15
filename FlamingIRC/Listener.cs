@@ -40,31 +40,34 @@ namespace FlamingIRC;
 public class Listener
 {
     /// <summary>
-    /// Messages that are not handled by other events and are not errors.
+    /// The server sent a numeric reply that is not an error and that no other event is for.
     /// </summary>
     public event EventHandler<ReplyEventArgs> OnReply;
     /// <summary>
-    /// Error messages from the IRC server.
+    /// The IRC server sent an error, or FlamingIRC found an error.
     /// </summary>
     public event EventHandler<ErrorMessageEventArgs> OnError;
     /// <summary>
-    ///A <see cref="Sender.PrivateNotice"/> or <see cref="Sender.PrivateMessage"/> message was sent to someone who is away.
+    /// This client sent a <see cref="Sender.PrivateNotice"/> or a
+    /// <see cref="Sender.PrivateMessage"/> to a user who is away.
     /// </summary>
     public event EventHandler<AwayEventArgs> OnAway;
     /// <summary>
-    /// The server confirmed that the local user is now marked away (in response to <see cref="Sender.Away"/>).
+    /// The server confirmed that this client's user is away. This is the reply to
+    /// <see cref="Sender.Away"/>.
     /// </summary>
     public event EventHandler OnNowAway;
     /// <summary>
-    /// The server confirmed that the local user is no longer away (in response to <see cref="Sender.UnAway"/>).
+    /// The server confirmed that this client's user is not away. This is the reply to
+    /// <see cref="Sender.UnAway"/>.
     /// </summary>
     public event EventHandler OnUnAway;
     /// <summary>
-    /// An <see cref="Sender.Invite"/> message was successfully sent to another user.
+    /// The server sent the invite from <see cref="Sender.Invite"/> to the other user.
     /// </summary>
     public event EventHandler<InviteEventArgs> OnInviteSent;
     /// <summary>
-    /// The user tried to change his nick but it failed.
+    /// The server did not accept a nick that this client's user tried to use.
     /// </summary>
     public event EventHandler<NickErrorEventArgs> OnNickError;
     /// <summary>
@@ -72,11 +75,11 @@ public class Listener
     /// </summary>
     public event EventHandler<PingEventArgs> OnPing;
     /// <summary>
-    /// Keep track of activity
+    /// The Listener received a line from the server. Use this event to track activity.
     /// </summary>
     public event EventHandler OnAnything;
     /// <summary>
-    /// Connection with the IRC server is open and registered.
+    /// The connection to the IRC server is open and registered.
     /// </summary>
     public event EventHandler OnRegistered;
     /// <summary>
@@ -88,11 +91,11 @@ public class Listener
     /// </summary>
     //public event EventHandler OnDisconnected;
     /// <summary>
-    /// A Notice type message was sent to a channel.
+    /// A user sent a NOTICE to a channel.
     /// </summary>
     public event EventHandler<UserChannelMessageEventArgs> OnPublicNotice;
     /// <summary>
-    /// A private Notice type message was sent to the user.
+    /// A user or the server sent a NOTICE to this client.
     /// </summary>
     public event EventHandler<UserMessageEventArgs> OnPrivateNotice;
     /// <summary>
@@ -100,27 +103,27 @@ public class Listener
     /// </summary>
     public event EventHandler<JoinEventArgs> OnJoin;
     /// <summary>
-    /// A public message was sent to a channel.
+    /// A user sent a message to a channel.
     /// </summary>
     public event EventHandler<UserChannelMessageEventArgs> OnPublic;
     /// <summary>
-    /// An action message was sent to a channel.
+    /// A user sent an action (/me) to a channel.
     /// </summary>
     public event EventHandler<UserChannelMessageEventArgs> OnAction;
     /// <summary>
-    /// A private action message was sent to the user.
+    /// A user sent an action (/me) to this client.
     /// </summary>
     public event EventHandler<UserMessageEventArgs> OnPrivateAction;
     /// <summary>
-    /// A user changed his nickname.
+    /// A user changed nick.
     /// </summary>
     public event EventHandler<NickChangeEventArgs> OnNick;
     /// <summary>
-    /// A private message was sent to the user.
+    /// A user sent a private message to this client.
     /// </summary>
     public event EventHandler<UserMessageEventArgs> OnPrivate;
     /// <summary>
-    /// A channel's topic has changed.
+    /// A user changed the topic of a channel.
     /// </summary>
     public event EventHandler<UserChannelMessageEventArgs> OnTopicChanged;
     /// <summary>
@@ -136,11 +139,11 @@ public class Listener
     /// </summary>
     public event EventHandler<QuitEventArgs> OnQuit;
     /// <summary>
-    /// The user has been invited to a channel.
+    /// A user invited this client's user to a channel.
     /// </summary>
     public event EventHandler<InviteEventArgs> OnInvite;
     /// <summary>
-    /// A user was kicked from a channel.
+    /// A user removed (kicked) a user from a channel.
     /// </summary>
     public event EventHandler<KickEventArgs> OnKick;
     /// <summary>
@@ -168,7 +171,7 @@ public class Listener
     /// </summary>
     public event EventHandler<WhowasEventArgs> OnWhowas;
     /// <summary>
-    /// Someone's user mode has changed.
+    /// A mode of this client's user changed.
     /// </summary>
     public event EventHandler<UserModeChangeEventArgs> OnUserModeChange;
     /// <summary>
@@ -180,7 +183,7 @@ public class Listener
     /// </summary>
     public event EventHandler<ChannelModeRequestEventArgs> OnChannelModeRequest;
     /// <summary>
-    /// A channel's mode has changed.
+    /// A user or the server changed one or more modes of a channel.
     /// </summary>
     public event EventHandler<ChannelModeChangeEventArgs> OnChannelModeChange;
     /// <summary>
@@ -370,7 +373,9 @@ public class Listener
     {
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
             $"[{Thread.CurrentThread.Name}] Listener::ProcessKillCommand() target={ircMessage.Target}");
-        OnKill?.Invoke(this, new KillEventArgs(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message ?? ""));
+        OnKill?.Invoke(this, new KillEventArgs(
+            Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target,
+            ircMessage.Message ?? string.Empty));
     }
 
     private void ProcessModeCommand(IrcMessage ircMessage)
@@ -406,7 +411,9 @@ public class Listener
     {
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
             $"[{Thread.CurrentThread.Name}] Listener::ProcessKickCommand() channel={ircMessage.Tokens[2]}");
-        OnKick?.Invoke(this, new KickEventArgs(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Tokens[2], ircMessage.Tokens[3], ircMessage.Message));
+        OnKick?.Invoke(this, new KickEventArgs(
+            Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Tokens[2], ircMessage.Tokens[3],
+            ircMessage.Message));
     }
 
     public void ProcessInviteCommand(string[] tokens)
@@ -420,14 +427,17 @@ public class Listener
     {
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
             $"[{Thread.CurrentThread.Name}] Listener::ProcessQuitCommand() from={ircMessage.From}");
-        OnQuit?.Invoke(this, new QuitEventArgs(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Message ?? ""));
+        OnQuit?.Invoke(this, new QuitEventArgs(
+            Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Message ?? string.Empty));
     }
 
     private void ProcessPartCommand(IrcMessage ircMessage)
     {
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
             $"[{Thread.CurrentThread.Name}] Listener::ProcessPartCommand() channel={ircMessage.Target}");
-        OnPart?.Invoke(this, new PartEventArgs(Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message ?? ""));
+        OnPart?.Invoke(this, new PartEventArgs(
+            Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target,
+            ircMessage.Message ?? string.Empty));
     }
 
     private void ProcessTopicCommand(IrcMessage ircMessage)
@@ -449,7 +459,8 @@ public class Listener
     {
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
             $"[{Thread.CurrentThread.Name}] Listener::ProcessJoinCommand() channel={ircMessage.Target}");
-        OnJoin?.Invoke(this, new JoinEventArgs(Rfc2812Util.UserFromString(ircMessage.From), RemoveLeadingColon(ircMessage.Target)));
+        OnJoin?.Invoke(this, new JoinEventArgs(
+            Rfc2812Util.UserFromString(ircMessage.From), RemoveLeadingColon(ircMessage.Target)));
     }
 
     public void ProcessNoticeCommand(string[] tokens)
@@ -589,7 +600,7 @@ public class Listener
                     false));
                 break;
             case ReplyCode.RPL_LISTEND:
-                OnList?.Invoke(this, new ListEventArgs("", 0, "", true));
+                OnList?.Invoke(this, new ListEventArgs(string.Empty, 0, string.Empty, true));
                 break;
             case ReplyCode.ERR_NICKNAMEINUSE:
             case ReplyCode.ERR_NICKCOLLISION:
@@ -603,7 +614,8 @@ public class Listener
                 break;
             case ReplyCode.RPL_TOPIC:
                 tokens[4] = RemoveLeadingColon(tokens[4]);
-                OnReceiveTopic?.Invoke(this, new TopicEventArgs(tokens[3], CondenseStrings(tokens, 4)));
+                OnReceiveTopic?.Invoke(this, new TopicEventArgs(
+                    tokens[3], CondenseStrings(tokens, 4)));
                 break;
             case ReplyCode.RPL_INVITING:
                 OnInviteSent.Fire(this, new InviteEventArgs(tokens[3], tokens[4]));
@@ -629,7 +641,8 @@ public class Listener
                     false));
                 break;
             case ReplyCode.RPL_ENDOFWHO:
-                OnWho?.Invoke(this, new WhoEventArgs(User.Empty, "", "", "", 0, "", true));
+                OnWho?.Invoke(this, new WhoEventArgs(
+                    User.Empty, string.Empty, string.Empty, string.Empty, 0, string.Empty, true));
                 break;
             case ReplyCode.RPL_WHOISUSER:
                 User whoUser = new User(tokens[3], tokens[4], tokens[5]);
@@ -669,10 +682,11 @@ public class Listener
             case ReplyCode.RPL_WHOWASUSER:
                 User whoWasUser = new User(tokens[3], tokens[4], tokens[5]);
                 tokens[7] = RemoveLeadingColon(tokens[7]);
-                OnWhowas?.Invoke(this, new WhowasEventArgs(whoWasUser, CondenseStrings(tokens, 7), false));
+                OnWhowas?.Invoke(this, new WhowasEventArgs(
+                    whoWasUser, CondenseStrings(tokens, 7), false));
                 break;
             case ReplyCode.RPL_ENDOFWHOWAS:
-                OnWhowas?.Invoke(this, new WhowasEventArgs(User.Empty, "", true));
+                OnWhowas?.Invoke(this, new WhowasEventArgs(User.Empty, string.Empty, true));
                 break;
             case ReplyCode.RPL_UMODEIS:
                 {
@@ -691,7 +705,8 @@ public class Listener
                 try
                 {
                     ChannelModeInfo[] modes = ChannelModeInfo.ParseModes(tokens, 4, ChannelModeSyntax.FromServerProperties(ServerProperties));
-                    OnChannelModeRequest?.Invoke(this, new ChannelModeRequestEventArgs(tokens[3], modes));
+                    OnChannelModeRequest?.Invoke(this, new ChannelModeRequestEventArgs(
+                        tokens[3], modes));
                 }
                 catch (Exception)
                 {
@@ -700,25 +715,37 @@ public class Listener
                 }
                 break;
             case ReplyCode.RPL_BANLIST:
-                OnChannelList?.Invoke(this, new ChannelListEventArgs(tokens[3], ChannelMode.Ban, tokens[4], Rfc2812Util.UserFromString(tokens[5]), Convert.ToInt64(tokens[6], CultureInfo.InvariantCulture), false));
+                OnChannelList?.Invoke(this, new ChannelListEventArgs(
+                    tokens[3], ChannelMode.Ban, tokens[4], Rfc2812Util.UserFromString(tokens[5]),
+                    Convert.ToInt64(tokens[6], CultureInfo.InvariantCulture), false));
                 break;
             case ReplyCode.RPL_ENDOFBANLIST:
-                OnChannelList?.Invoke(this, new ChannelListEventArgs(tokens[3], ChannelMode.Ban, "", User.Empty, 0, true));
+                OnChannelList?.Invoke(this, new ChannelListEventArgs(
+                    tokens[3], ChannelMode.Ban, string.Empty, User.Empty, 0, true));
                 break;
             case ReplyCode.RPL_INVITELIST:
-                OnChannelList?.Invoke(this, new ChannelListEventArgs(tokens[3], ChannelMode.Invitation, tokens[4], Rfc2812Util.UserFromString(tokens[5]), Convert.ToInt64(tokens[6]), false));
+                OnChannelList?.Invoke(this, new ChannelListEventArgs(
+                    tokens[3], ChannelMode.Invitation, tokens[4],
+                    Rfc2812Util.UserFromString(tokens[5]),
+                    Convert.ToInt64(tokens[6], CultureInfo.InvariantCulture), false));
                 break;
             case ReplyCode.RPL_ENDOFINVITELIST:
-                OnChannelList?.Invoke(this, new ChannelListEventArgs(tokens[3], ChannelMode.Invitation, "", User.Empty, 0, true));
+                OnChannelList?.Invoke(this, new ChannelListEventArgs(
+                    tokens[3], ChannelMode.Invitation, string.Empty, User.Empty, 0, true));
                 break;
             case ReplyCode.RPL_EXCEPTLIST:
-                OnChannelList?.Invoke(this, new ChannelListEventArgs(tokens[3], ChannelMode.Exception, tokens[4], Rfc2812Util.UserFromString(tokens[5]), Convert.ToInt64(tokens[6]), false));
+                OnChannelList?.Invoke(this, new ChannelListEventArgs(
+                    tokens[3], ChannelMode.Exception, tokens[4],
+                    Rfc2812Util.UserFromString(tokens[5]),
+                    Convert.ToInt64(tokens[6], CultureInfo.InvariantCulture), false));
                 break;
             case ReplyCode.RPL_ENDOFEXCEPTLIST:
-                OnChannelList?.Invoke(this, new ChannelListEventArgs(tokens[3], ChannelMode.Exception, "", User.Empty, 0, true));
+                OnChannelList?.Invoke(this, new ChannelListEventArgs(
+                    tokens[3], ChannelMode.Exception, string.Empty, User.Empty, 0, true));
                 break;
             case ReplyCode.RPL_UNIQOPIS:
-                OnChannelList?.Invoke(this, new ChannelListEventArgs(tokens[3], ChannelMode.ChannelCreator, tokens[4], User.Empty, 0, true));
+                OnChannelList?.Invoke(this, new ChannelListEventArgs(
+                    tokens[3], ChannelMode.ChannelCreator, tokens[4], User.Empty, 0, true));
                 break;
             case ReplyCode.RPL_VERSION:
                 OnVersion?.Invoke(this, new VersionEventArgs(CondenseStrings(tokens, 3)));
@@ -736,14 +763,16 @@ public class Listener
             case ReplyCode.RPL_ADMINLOC1:
             case ReplyCode.RPL_ADMINLOC2:
             case ReplyCode.RPL_ADMINEMAIL:
-                OnAdmin?.Invoke(this, new AdminEventArgs(RemoveLeadingColon(CondenseStrings(tokens, 3))));
+                OnAdmin?.Invoke(this, new AdminEventArgs(
+                    RemoveLeadingColon(CondenseStrings(tokens, 3))));
                 break;
             case ReplyCode.RPL_LUSERCLIENT:
             case ReplyCode.RPL_LUSEROP:
             case ReplyCode.RPL_LUSERUNKNOWN:
             case ReplyCode.RPL_LUSERCHANNELS:
             case ReplyCode.RPL_LUSERME:
-                OnLusers?.Invoke(this, new LusersEventArgs(RemoveLeadingColon(CondenseStrings(tokens, 3))));
+                OnLusers?.Invoke(this, new LusersEventArgs(
+                    RemoveLeadingColon(CondenseStrings(tokens, 3))));
                 break;
             case ReplyCode.RPL_LINKS:
                 OnLinks?.Invoke(this, new LinksEventArgs(tokens[3], //mask
@@ -752,16 +781,20 @@ public class Listener
                     CondenseStrings(tokens, 6), false));
                 break;
             case ReplyCode.RPL_ENDOFLINKS:
-                OnLinks?.Invoke(this, new LinksEventArgs(string.Empty, string.Empty, -1, string.Empty, true));
+                OnLinks?.Invoke(this, new LinksEventArgs(
+                    string.Empty, string.Empty, -1, string.Empty, true));
                 break;
             case ReplyCode.RPL_STATSLINKINFO:
             case ReplyCode.RPL_STATSCOMMANDS:
             case ReplyCode.RPL_STATSUPTIME:
             case ReplyCode.RPL_STATSOLINE:
-                OnStats?.Invoke(this, new StatsEventArgs(GetQueryType(code), RemoveLeadingColon(CondenseStrings(tokens, 3)), false));
+                OnStats?.Invoke(this, new StatsEventArgs(
+                    GetQueryType(code), RemoveLeadingColon(CondenseStrings(tokens, 3)), false));
                 break;
             case ReplyCode.RPL_ENDOFSTATS:
-                OnStats?.Invoke(this, new StatsEventArgs(Rfc2812Util.CharToStatsQuery(tokens[3][0]), RemoveLeadingColon(CondenseStrings(tokens, 4)), true));
+                OnStats?.Invoke(this, new StatsEventArgs(
+                    Rfc2812Util.CharToStatsQuery(tokens[3][0]),
+                    RemoveLeadingColon(CondenseStrings(tokens, 4)), true));
                 break;
             default:
                 HandleDefaultReply(code, tokens);

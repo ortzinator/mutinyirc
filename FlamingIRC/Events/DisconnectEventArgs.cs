@@ -14,8 +14,8 @@ public sealed class DisconnectEventArgs : EventArgs
     public DisconnectReason Reason { get; }
 
     /// <summary>
-    /// The socket error code when <see cref="Reason"/> is <see cref="DisconnectReason.SocketError"/>.
-    /// For all other reasons, it is zero.
+    /// The socket error code when <see cref="Reason"/> is
+    /// <see cref="DisconnectReason.SocketError"/>. For all other reasons, it is zero.
     /// </summary>
     public int SocketErrorCode { get; }
 

@@ -357,9 +357,8 @@ public class Connection : TcpTextClient, IConnection
     }
 
     /// <summary>
-    /// Respond to IRC keep-alives.
+    /// Sends a PONG reply to each keep-alive PING from the server.
     /// </summary>
-    /// <param name="message">The message that should be echoed back</param>
     private void KeepAlive(object sender, PingEventArgs e) => _sender.Pong(e.Message);
 
     private void UpdateLastTime(object sender, EventArgs e) => _lastTraffic = DateTime.Now;

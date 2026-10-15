@@ -8,7 +8,7 @@ namespace FlamingIRC;
 public sealed class UserModeChangeEventArgs : EventArgs
 {
     /// <summary>
-    /// Tells if the mode was added or removed.
+    /// Tells if the change adds or removes the mode.
     /// </summary>
     public ModeAction Action { get; }
 

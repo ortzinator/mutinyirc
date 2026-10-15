@@ -38,7 +38,7 @@ namespace FlamingIRC;
 public sealed class DccFileSession
 {
     /// <summary>
-    /// The remote user did not accept the file in the timeout period. The session closes.
+    /// The session had no activity for the timeout period. The session closes.
     /// </summary>
     public event EventHandler<DccFileSessionEventArgs> OnFileTransferTimeout;
     /// <summary>

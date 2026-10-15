@@ -18,7 +18,7 @@ public sealed class KickEventArgs : EventArgs
     public string Channel { get; }
 
     /// <summary>
-    /// The nick of the user who was kicked.
+    /// The nick of the user whom the kicker removed from the channel.
     /// </summary>
     public string Kickee { get; }
 

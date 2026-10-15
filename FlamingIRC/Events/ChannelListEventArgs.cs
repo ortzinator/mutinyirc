@@ -31,7 +31,7 @@ public sealed class ChannelListEventArgs : EventArgs
     public User Setter { get; }
 
     /// <summary>
-    /// The time when the mask was set, in seconds since the Unix epoch. It is 0 for
+    /// The time when the setter added the mask, in seconds since the Unix epoch. It is 0 for
     /// <see cref="ChannelMode.ChannelCreator"/> and in the last reply.
     /// </summary>
     public long WhenSet { get; }
