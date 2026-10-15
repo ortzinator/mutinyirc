@@ -456,7 +456,7 @@ public class Connection : TcpTextClient, IConnection
                               $"[{Thread.CurrentThread.Name}] Connection::SendCommand() exception={ex}");
         }
 
-        RawMessageSent.Fire(this, new DataEventArgs<string>(command.ToString()));
+        RawMessageSent?.Invoke(this, new DataEventArgs<string>(command.ToString()));
 
         command.Remove(0, command.Length);
     }
@@ -531,7 +531,7 @@ public class Connection : TcpTextClient, IConnection
 
     protected override void OnConnect()
     {
-        ConnectionEstablished.Fire(this, new EventArgs());
+        ConnectionEstablished?.Invoke(this, new EventArgs());
         _sender.RegisterConnection(_connectionArgs);
     }
 
@@ -592,6 +592,6 @@ public class Connection : TcpTextClient, IConnection
             Listener.Parse(line);
         }
 
-        RawMessageReceived.Fire(this, new DataEventArgs<string>(line));
+        RawMessageReceived?.Invoke(this, new DataEventArgs<string>(line));
     }
 }
