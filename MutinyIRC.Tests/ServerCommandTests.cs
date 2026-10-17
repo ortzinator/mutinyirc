@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Commands;
 using MutinyIRC.Common;
 using MutinyIRC.PluginFramework;
+using MutinyIRC.TestShared;
 using NUnit.Framework;
 
 namespace MutinyIRC.Tests;
@@ -188,25 +188,12 @@ public class ServerCommandTests
         }
     }
 
-    private CommandResultInfo Dispatch(MessageContext context, params string[] args)
-    {
-        var manager = new PluginManager();
-        Type type = typeof(ServerCommand);
-        manager._commands.Add(type.FullName,
-            new CommandInfo(type.Assembly.Location, type.FullName, "server", typeof(ICommand)));
-
-        return manager.ExecuteCommand(new CommandExecutionInfo
-        {
-            Name = "server",
-            Context = context,
-            ParameterList = new List<object>(args),
-        });
-    }
-
     [Test]
     public void Dispatch_FromAChannelWindow_ChangesTheChannelsServer()
     {
-        Dispatch(new Channel(_server, "#mutiny"), "irc.example.org", "6667");
+        var channel = new Channel(_server, "#mutiny");
+
+        CommandHarness.For<ServerCommand>("server").Dispatch(channel, "irc.example.org", "6667");
 
         Assert.That(_server.LastArgs.Hostname, Is.EqualTo("irc.example.org"));
         Assert.That(_server.LastArgs.Port, Is.EqualTo(6667));
@@ -215,7 +202,9 @@ public class ServerCommandTests
     [Test]
     public void Dispatch_FromAQueryWindow_ChangesTheSessionsServer()
     {
-        Dispatch(new PrivateMessageSession(_server, new User { Nick = "someone" }), "irc.example.org");
+        var pm = new PrivateMessageSession(_server, new User { Nick = "someone" });
+
+        CommandHarness.For<ServerCommand>("server").Dispatch(pm, "irc.example.org");
 
         Assert.That(_server.LastArgs.Hostname, Is.EqualTo("irc.example.org"));
     }

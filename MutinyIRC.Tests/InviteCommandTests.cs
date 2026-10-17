@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Commands;
 using MutinyIRC.Common;
-using MutinyIRC.PluginFramework;
+using MutinyIRC.TestShared;
 using NUnit.Framework;
 
 namespace MutinyIRC.Tests;
@@ -15,7 +14,7 @@ public class InviteCommandTests
     private Server _server;
     private Channel _channel;
     private PrivateMessageSession _pm;
-    private PluginManager _manager;
+    private CommandHarness _harness;
 
     [SetUp]
     public void Setup()
@@ -27,24 +26,13 @@ public class InviteCommandTests
         _channel = new Channel(_server, "#mutiny");
         _pm = new PrivateMessageSession(_server, new User { Nick = "someone" });
 
-        _manager = new PluginManager();
-        var type = typeof(Invite);
-        _manager._commands.Add(type.FullName,
-            new CommandInfo(type.Assembly.Location, type.FullName, "invite", typeof(ICommand)));
+        _harness = CommandHarness.For<Invite>("invite");
     }
-
-    private CommandResultInfo Dispatch(MessageContext context, params string[] args)
-        => _manager.ExecuteCommand(new CommandExecutionInfo
-        {
-            Name = "invite",
-            Context = context,
-            ParameterList = new List<object>(args),
-        });
 
     [Test]
     public void NickAndChannel_SendsInvite()
     {
-        Dispatch(_channel, "someone", "#other");
+        _harness.Dispatch(_channel, "someone", "#other");
 
         A.CallTo(() => _fakeSender.Invite("someone", "#other")).MustHaveHappened();
     }
@@ -52,7 +40,7 @@ public class InviteCommandTests
     [Test]
     public void NickOnly_FromChannel_InvitesToCurrentChannel()
     {
-        Dispatch(_channel, "someone");
+        _harness.Dispatch(_channel, "someone");
 
         A.CallTo(() => _fakeSender.Invite("someone", "#mutiny")).MustHaveHappened();
     }
@@ -60,7 +48,7 @@ public class InviteCommandTests
     [Test]
     public void NickAndChannel_FromServer_SendsInvite()
     {
-        Dispatch(_server, "someone", "#other");
+        _harness.Dispatch(_server, "someone", "#other");
 
         A.CallTo(() => _fakeSender.Invite("someone", "#other")).MustHaveHappened();
     }
@@ -68,7 +56,7 @@ public class InviteCommandTests
     [Test]
     public void NickAndChannel_FromPrivateMessage_SendsInvite()
     {
-        Dispatch(_pm, "someone", "#other");
+        _harness.Dispatch(_pm, "someone", "#other");
 
         A.CallTo(() => _fakeSender.Invite("someone", "#other")).MustHaveHappened();
     }

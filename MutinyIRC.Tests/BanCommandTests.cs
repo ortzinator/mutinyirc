@@ -1,9 +1,9 @@
-using System.Collections.Generic;
 using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Commands;
 using MutinyIRC.Common;
 using MutinyIRC.PluginFramework;
+using MutinyIRC.TestShared;
 using NUnit.Framework;
 
 namespace MutinyIRC.Tests;
@@ -15,7 +15,7 @@ public class BanCommandTests
     private Server _server;
     private Channel _channel;
     private PrivateMessageSession _pm;
-    private PluginManager _manager;
+    private CommandHarness _harness;
 
     [SetUp]
     public void Setup()
@@ -33,24 +33,13 @@ public class BanCommandTests
 
         _pm = new PrivateMessageSession(_server, new User { Nick = "someone" });
 
-        _manager = new PluginManager();
-        var type = typeof(Ban);
-        _manager._commands.Add(type.FullName,
-            new CommandInfo(type.Assembly.Location, type.FullName, "ban", typeof(ICommand)));
+        _harness = CommandHarness.For<Ban>("ban");
     }
-
-    private CommandResultInfo Dispatch(MessageContext context, params string[] args)
-        => _manager.ExecuteCommand(new CommandExecutionInfo
-        {
-            Name = "ban",
-            Context = context,
-            ParameterList = new List<object>(args),
-        });
 
     [Test]
     public void BanByNick_HostKnown_UsesWildcardHostMask()
     {
-        Dispatch(_channel, "bob");
+        _harness.Dispatch(_channel, "bob");
 
         A.CallTo(() => _fakeSender.ChangeChannelMode(
             "#mutiny", ModeAction.Add, ChannelMode.Ban, "*!*@dsl.example.net"))
@@ -60,7 +49,7 @@ public class BanCommandTests
     [Test]
     public void BanByNick_HostUnknown_FallsBackToNickMask()
     {
-        Dispatch(_channel, "ghost");
+        _harness.Dispatch(_channel, "ghost");
 
         A.CallTo(() => _fakeSender.ChangeChannelMode(
             "#mutiny", ModeAction.Add, ChannelMode.Ban, "ghost!*@*"))
@@ -70,7 +59,7 @@ public class BanCommandTests
     [Test]
     public void BanByNick_NotInChannel_FallsBackToNickMask()
     {
-        Dispatch(_channel, "stranger");
+        _harness.Dispatch(_channel, "stranger");
 
         A.CallTo(() => _fakeSender.ChangeChannelMode(
             "#mutiny", ModeAction.Add, ChannelMode.Ban, "stranger!*@*"))
@@ -80,7 +69,7 @@ public class BanCommandTests
     [Test]
     public void BanByLiteralMask_PassesThroughVerbatim()
     {
-        Dispatch(_channel, "*!*@evil.host");
+        _harness.Dispatch(_channel, "*!*@evil.host");
 
         A.CallTo(() => _fakeSender.ChangeChannelMode(
             "#mutiny", ModeAction.Add, ChannelMode.Ban, "*!*@evil.host"))
@@ -90,7 +79,7 @@ public class BanCommandTests
     [Test]
     public void KickBan_BansThenKicks()
     {
-        Dispatch(_channel, "-k", "bob", "spamming");
+        _harness.Dispatch(_channel, "-k", "bob", "spamming");
 
         A.CallTo(() => _fakeSender.ChangeChannelMode(
             "#mutiny", ModeAction.Add, ChannelMode.Ban, "*!*@dsl.example.net"))
@@ -101,7 +90,7 @@ public class BanCommandTests
     [Test]
     public void KickBan_NoReason_DefaultsToOwnNick()
     {
-        Dispatch(_channel, "-k", "bob");
+        _harness.Dispatch(_channel, "-k", "bob");
 
         A.CallTo(() => _fakeSender.Kick("#mutiny", "me", "bob")).MustHaveHappened();
     }
@@ -109,7 +98,7 @@ public class BanCommandTests
     [Test]
     public void RemoveBan_SendsMinusB_NoKick()
     {
-        Dispatch(_channel, "-r", "*!*@evil.host");
+        _harness.Dispatch(_channel, "-r", "*!*@evil.host");
 
         A.CallTo(() => _fakeSender.ChangeChannelMode(
             "#mutiny", ModeAction.Remove, ChannelMode.Ban, "*!*@evil.host"))
@@ -121,7 +110,7 @@ public class BanCommandTests
     [Test]
     public void KickAndRemoveTogether_Fails()
     {
-        CommandResultInfo result = Dispatch(_channel, "-kr", "bob");
+        CommandResultInfo result = _harness.Dispatch(_channel, "-kr", "bob");
 
         Assert.That(result.Result, Is.EqualTo(Result.Fail));
         A.CallTo(() => _fakeSender.ChangeChannelMode(
@@ -132,7 +121,7 @@ public class BanCommandTests
     [Test]
     public void ExplicitChannel_FromPrivateMessage_Bans()
     {
-        Dispatch(_pm, "#mutiny", "bob");
+        _harness.Dispatch(_pm, "#mutiny", "bob");
 
         A.CallTo(() => _fakeSender.ChangeChannelMode(
             "#mutiny", ModeAction.Add, ChannelMode.Ban, "*!*@dsl.example.net"))
@@ -142,7 +131,7 @@ public class BanCommandTests
     [Test]
     public void FromPrivateMessage_NoChannel_Fails()
     {
-        CommandResultInfo result = Dispatch(_pm, "bob");
+        CommandResultInfo result = _harness.Dispatch(_pm, "bob");
 
         Assert.That(result.Result, Is.EqualTo(Result.Fail));
         A.CallTo(() => _fakeSender.ChangeChannelMode(
@@ -153,7 +142,7 @@ public class BanCommandTests
     [Test]
     public void UntrackedChannel_Fails()
     {
-        CommandResultInfo result = Dispatch(_pm, "#nowhere", "bob");
+        CommandResultInfo result = _harness.Dispatch(_pm, "#nowhere", "bob");
 
         Assert.That(result.Result, Is.EqualTo(Result.Fail));
         A.CallTo(() => _fakeSender.ChangeChannelMode(
@@ -164,7 +153,7 @@ public class BanCommandTests
     [Test]
     public void MissingTarget_Fails()
     {
-        CommandResultInfo result = Dispatch(_channel, "-k");
+        CommandResultInfo result = _harness.Dispatch(_channel, "-k");
 
         Assert.That(result.Result, Is.EqualTo(Result.Fail));
     }

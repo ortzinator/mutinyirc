@@ -21,4 +21,8 @@
     <ProjectReference Include="..\MutinyIRC.Common\MutinyIRC.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\TestShared\CommandHarness.cs" Link="TestShared\CommandHarness.cs" />
+  </ItemGroup>
+
 </Project>

@@ -1,9 +1,9 @@
-using System.Collections.Generic;
 using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Commands;
 using MutinyIRC.Common;
 using MutinyIRC.PluginFramework;
+using MutinyIRC.TestShared;
 using NUnit.Framework;
 
 namespace MutinyIRC.Tests;
@@ -14,7 +14,7 @@ public class NoticeCommandTests
     private ISender _fakeSender;
     private Server _server;
     private Channel _channel;
-    private PluginManager _manager;
+    private CommandHarness _harness;
 
     [SetUp]
     public void Setup()
@@ -26,24 +26,13 @@ public class NoticeCommandTests
         A.CallTo(() => _server.Connection).Returns(fakeConn);
         _channel = new Channel(_server, "#mutiny");
 
-        _manager = new PluginManager();
-        var type = typeof(Notice);
-        _manager._commands.Add(type.FullName,
-            new CommandInfo(type.Assembly.Location, type.FullName, "notice", typeof(ICommand)));
+        _harness = CommandHarness.For<Notice>("notice");
     }
-
-    private CommandResultInfo Dispatch(MessageContext context, params string[] args)
-        => _manager.ExecuteCommand(new CommandExecutionInfo
-        {
-            Name = "notice",
-            Context = context,
-            ParameterList = new List<object>(args),
-        });
 
     [Test]
     public void NickTarget_SendsPrivateNotice()
     {
-        Dispatch(_channel, "someone", "hello", "there");
+        _harness.Dispatch(_channel, "someone", "hello", "there");
 
         A.CallTo(() => _fakeSender.PrivateNotice("someone", "hello there")).MustHaveHappened();
     }
@@ -51,7 +40,7 @@ public class NoticeCommandTests
     [Test]
     public void ChannelTarget_SendsPublicNotice()
     {
-        Dispatch(_channel, "#other", "heads", "up");
+        _harness.Dispatch(_channel, "#other", "heads", "up");
 
         A.CallTo(() => _fakeSender.PublicNotice("#other", "heads up")).MustHaveHappened();
     }
@@ -62,7 +51,7 @@ public class NoticeCommandTests
         UserMessageEventArgs captured = null;
         _channel.NoticeSent += (_, e) => captured = e;
 
-        Dispatch(_channel, "someone", "hi");
+        _harness.Dispatch(_channel, "someone", "hi");
 
         Assert.That(captured, Is.Not.Null);
         Assert.That(captured.User.Nick, Is.EqualTo("someone"));
@@ -72,7 +61,7 @@ public class NoticeCommandTests
     [Test]
     public void MissingMessage_FailsWithUsage()
     {
-        CommandResultInfo result = Dispatch(_channel, "someone");
+        CommandResultInfo result = _harness.Dispatch(_channel, "someone");
 
         Assert.That(result.Result, Is.EqualTo(Result.Fail));
         A.CallTo(() => _fakeSender.PrivateNotice(A<string>._, A<string>._)).MustNotHaveHappened();

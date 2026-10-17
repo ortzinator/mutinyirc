@@ -1,10 +1,10 @@
-using System.Collections.Generic;
 using System.Linq;
 using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Commands;
 using MutinyIRC.Common;
 using MutinyIRC.PluginFramework;
+using MutinyIRC.TestShared;
 using NUnit.Framework;
 
 namespace MutinyIRC.Tests;
@@ -15,7 +15,7 @@ public class QueryCommandTests
     private ISender _fakeSender;
     private Server _server;
     private Channel _channel;
-    private PluginManager _manager;
+    private CommandHarness _harness;
 
     [SetUp]
     public void Setup()
@@ -27,24 +27,13 @@ public class QueryCommandTests
         A.CallTo(() => _server.Connection).Returns(fakeConn);
         _channel = new Channel(_server, "#mutiny");
 
-        _manager = new PluginManager();
-        var type = typeof(Query);
-        _manager._commands.Add(type.FullName,
-            new CommandInfo(type.Assembly.Location, type.FullName, "query", typeof(ICommand)));
+        _harness = CommandHarness.For<Query>("query");
     }
-
-    private CommandResultInfo Dispatch(MessageContext context, params string[] args)
-        => _manager.ExecuteCommand(new CommandExecutionInfo
-        {
-            Name = "query",
-            Context = context,
-            ParameterList = new List<object>(args),
-        });
 
     [Test]
     public void NickOnly_OpensTabWithoutSending()
     {
-        CommandResultInfo result = Dispatch(_channel, "someone");
+        CommandResultInfo result = _harness.Dispatch(_channel, "someone");
 
         Assert.That(result.Result, Is.EqualTo(Result.Success));
         Assert.That(_server.PMSessions.Any(s => s.User.Nick == "someone"), Is.True);
@@ -54,7 +43,7 @@ public class QueryCommandTests
     [Test]
     public void NickWithMessage_OpensTabAndSends()
     {
-        CommandResultInfo result = Dispatch(_channel, "someone", "hello", "there");
+        CommandResultInfo result = _harness.Dispatch(_channel, "someone", "hello", "there");
 
         Assert.That(result.Result, Is.EqualTo(Result.Success));
         Assert.That(_server.PMSessions.Any(s => s.User.Nick == "someone"), Is.True);
@@ -68,7 +57,7 @@ public class QueryCommandTests
         _server.PrivateMessageSessionAdded += (_, e) =>
             e.PrivateMessageSession.MessageSent += (_, args) => echoed = args.Data;
 
-        Dispatch(_channel, "someone", "hi");
+        _harness.Dispatch(_channel, "someone", "hi");
 
         Assert.That(echoed, Is.EqualTo("hi"));
     }
@@ -78,7 +67,7 @@ public class QueryCommandTests
     {
         _server.ServiceNicks.Add("NickServ");
 
-        CommandResultInfo result = Dispatch(_channel, "NickServ", "identify", "secret");
+        CommandResultInfo result = _harness.Dispatch(_channel, "NickServ", "identify", "secret");
 
         Assert.That(result.Result, Is.EqualTo(Result.Fail));
         A.CallTo(() => _fakeSender.PrivateMessage(A<string>._, A<string>._)).MustNotHaveHappened();

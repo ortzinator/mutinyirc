@@ -22,4 +22,8 @@
     <ProjectReference Include="..\MutinyIRC.PluginFramework.Tests.Fixtures\MutinyIRC.PluginFramework.Tests.Fixtures.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\TestShared\CommandHarness.cs" Link="TestShared\CommandHarness.cs" />
+  </ItemGroup>
+
 </Project>

@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Commands;
 using MutinyIRC.Common;
-using MutinyIRC.PluginFramework;
+using MutinyIRC.TestShared;
 using NUnit.Framework;
 
 namespace MutinyIRC.Tests;
@@ -13,7 +12,7 @@ public class ModeCommandTests
 {
     private ISender _fakeSender;
     private Channel _channel;
-    private PluginManager _manager;
+    private CommandHarness _harness;
 
     [SetUp]
     public void Setup()
@@ -25,26 +24,13 @@ public class ModeCommandTests
         A.CallTo(() => server.Connection).Returns(fakeConn);
         _channel = new Channel(server, "#mutiny");
 
-        _manager = new PluginManager();
-        var type = typeof(Mode);
-        _manager._commands.Add(type.FullName,
-            new CommandInfo(type.Assembly.Location, type.FullName, "mode", typeof(ICommand)));
+        _harness = CommandHarness.For<Mode>("mode");
     }
-
-    // Dispatches /mode through the real PluginManager so the coercion path (or, here, the
-    // [RawArguments] opt-out) is exercised — not just the command body in isolation.
-    private void Dispatch(params string[] args)
-        => _manager.ExecuteCommand(new CommandExecutionInfo
-        {
-            Name = "mode",
-            Context = _channel,
-            ParameterList = new List<object>(args),
-        });
 
     [Test]
     public void BareMode_RequestsCurrentChannelModes()
     {
-        Dispatch();
+        _harness.Dispatch(_channel);
 
         A.CallTo(() => _fakeSender.Raw("MODE #mutiny")).MustHaveHappened();
     }
@@ -52,7 +38,7 @@ public class ModeCommandTests
     [Test]
     public void PlusSpec_AppliesToCurrentChannel()
     {
-        Dispatch("+o", "nick");
+        _harness.Dispatch(_channel, "+o", "nick");
 
         A.CallTo(() => _fakeSender.Raw("MODE #mutiny +o nick")).MustHaveHappened();
     }
@@ -60,7 +46,7 @@ public class ModeCommandTests
     [Test] // the case that previously forced char[] coercion + Removal reconstruction
     public void MinusSpec_PassesThroughVerbatim()
     {
-        Dispatch("-ooo", "a", "b", "c");
+        _harness.Dispatch(_channel, "-ooo", "a", "b", "c");
 
         A.CallTo(() => _fakeSender.Raw("MODE #mutiny -ooo a b c")).MustHaveHappened();
     }
@@ -68,7 +54,7 @@ public class ModeCommandTests
     [Test]
     public void PlusFlagOnly_SetsModeOnCurrentChannel()
     {
-        Dispatch("+i");
+        _harness.Dispatch(_channel, "+i");
 
         A.CallTo(() => _fakeSender.Raw("MODE #mutiny +i")).MustHaveHappened();
     }
@@ -76,7 +62,7 @@ public class ModeCommandTests
     [Test]
     public void MinusFlagOnly_RemovesModeOnCurrentChannel()
     {
-        Dispatch("-i");
+        _harness.Dispatch(_channel, "-i");
 
         A.CallTo(() => _fakeSender.Raw("MODE #mutiny -i")).MustHaveHappened();
     }
@@ -84,7 +70,7 @@ public class ModeCommandTests
     [Test]
     public void ExplicitChannel_RequestsThatChannelsModes()
     {
-        Dispatch("#other");
+        _harness.Dispatch(_channel, "#other");
 
         A.CallTo(() => _fakeSender.Raw("MODE #other")).MustHaveHappened();
     }
@@ -92,7 +78,7 @@ public class ModeCommandTests
     [Test]
     public void ExplicitChannel_WithPlusSpec()
     {
-        Dispatch("#other", "+o", "nick");
+        _harness.Dispatch(_channel, "#other", "+o", "nick");
 
         A.CallTo(() => _fakeSender.Raw("MODE #other +o nick")).MustHaveHappened();
     }
@@ -100,7 +86,7 @@ public class ModeCommandTests
     [Test]
     public void ExplicitChannel_WithRemoval()
     {
-        Dispatch("#other", "-o", "nick");
+        _harness.Dispatch(_channel, "#other", "-o", "nick");
 
         A.CallTo(() => _fakeSender.Raw("MODE #other -o nick")).MustHaveHappened();
     }
@@ -108,7 +94,7 @@ public class ModeCommandTests
     [Test]
     public void NickTarget_RequestsThatNicksModes()
     {
-        Dispatch("someone");
+        _harness.Dispatch(_channel, "someone");
 
         A.CallTo(() => _fakeSender.Raw("MODE someone")).MustHaveHappened();
     }
@@ -116,7 +102,7 @@ public class ModeCommandTests
     [Test]
     public void NickTarget_WithUserMode()
     {
-        Dispatch("someone", "+i");
+        _harness.Dispatch(_channel, "someone", "+i");
 
         A.CallTo(() => _fakeSender.Raw("MODE someone +i")).MustHaveHappened();
     }

@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Commands;
 using MutinyIRC.Common;
-using MutinyIRC.PluginFramework;
+using MutinyIRC.TestShared;
 using NUnit.Framework;
 
 namespace MutinyIRC.Tests;
@@ -15,7 +14,7 @@ public class RawCommandTests
     private Server _server;
     private Channel _channel;
     private PrivateMessageSession _pm;
-    private PluginManager _manager;
+    private CommandHarness _harness;
 
     [SetUp]
     public void Setup()
@@ -29,25 +28,13 @@ public class RawCommandTests
         _channel = new Channel(_server, "#mutiny");
         _pm = new PrivateMessageSession(_server, new User { Nick = "someone" });
 
-        _manager = new PluginManager();
-        var type = typeof(Raw);
-        _manager._commands.Add(type.FullName,
-            new CommandInfo(type.Assembly.Location, type.FullName, "raw", typeof(ICommand)));
+        _harness = CommandHarness.For<Raw>("raw");
     }
-
-    // Dispatches /raw through the real PluginManager so the [RawArguments] opt-out is exercised.
-    private void Dispatch(MessageContext context, params string[] args)
-        => _manager.ExecuteCommand(new CommandExecutionInfo
-        {
-            Name = "raw",
-            Context = context,
-            ParameterList = new List<object>(args),
-        });
 
     [Test]
     public void ServerContext_ForwardsVerbatim()
     {
-        Dispatch(_server, "WHOIS", "someone");
+        _harness.Dispatch(_server, "WHOIS", "someone");
 
         A.CallTo(() => _fakeSender.Raw("WHOIS someone")).MustHaveHappened();
     }
@@ -55,7 +42,7 @@ public class RawCommandTests
     [Test]
     public void ChannelContext_RoutesToServer()
     {
-        Dispatch(_channel, "JOIN", "#channel");
+        _harness.Dispatch(_channel, "JOIN", "#channel");
 
         A.CallTo(() => _fakeSender.Raw("JOIN #channel")).MustHaveHappened();
     }
@@ -63,7 +50,7 @@ public class RawCommandTests
     [Test]
     public void PrivateMessageContext_RoutesToServer()
     {
-        Dispatch(_pm, "PRIVMSG", "#chan", ":hello");
+        _harness.Dispatch(_pm, "PRIVMSG", "#chan", ":hello");
 
         A.CallTo(() => _fakeSender.Raw("PRIVMSG #chan :hello")).MustHaveHappened();
     }
@@ -71,7 +58,7 @@ public class RawCommandTests
     [Test] // colons, spaces, and a leading + must survive untouched
     public void PreservesColonsAndLeadingPlus()
     {
-        Dispatch(_channel, "PRIVMSG", "#chan", ":+ohai");
+        _harness.Dispatch(_channel, "PRIVMSG", "#chan", ":+ohai");
 
         A.CallTo(() => _fakeSender.Raw("PRIVMSG #chan :+ohai")).MustHaveHappened();
     }
@@ -79,7 +66,7 @@ public class RawCommandTests
     [Test]
     public void EmptyArguments_SendsNothing()
     {
-        Dispatch(_server);
+        _harness.Dispatch(_server);
 
         A.CallTo(() => _fakeSender.Raw(A<string>._)).MustNotHaveHappened();
     }
