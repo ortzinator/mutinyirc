@@ -315,7 +315,7 @@
                                                  x:Name="newServerBox"
                                                  Classes="inline"
                                                  Text="{Binding NewServerText}"
-                                                 Watermark="add server — host:port"
+                                                 PlaceholderText="add server — host:port"
                                                  FontSize="12.5"
                                                  Background="Transparent"
                                                  BorderThickness="0"
@@ -399,13 +399,13 @@
                         <StackPanel Grid.Column="0">
                             <TextBlock Classes="fieldLabel" Text="Nickname"/>
                             <TextBox Text="{Binding Nick}" FontSize="13" Height="32"
-                                     Watermark="{Binding NickWatermark}"
+                                     PlaceholderText="{Binding NickWatermark}"
                                      VerticalContentAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
                             <TextBlock Classes="fieldLabel" Text="Alternate"/>
                             <TextBox Text="{Binding AlternateNick}" FontSize="13" Height="32"
-                                     Watermark="{Binding AlternateNickWatermark}"
+                                     PlaceholderText="{Binding AlternateNickWatermark}"
                                      VerticalContentAlignment="Center"/>
                         </StackPanel>
                     </Grid>
@@ -481,7 +481,7 @@
                                 <TextBox x:Name="newChannelBox"
                                          Classes="inline"
                                          Text="{Binding NewChannelText}"
-                                         Watermark="#channel key"
+                                         PlaceholderText="#channel key"
                                          FontSize="12.5"
                                          Width="150"
                                          Background="Transparent"
