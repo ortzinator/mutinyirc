@@ -15,9 +15,9 @@ namespace MutinyIRC.Commands;
 [Plugin("Quit", "Disconnects from the current server. Usage: /quit [message]")]
 public class Quit : ICommand
 {
-    private const string fallbackMessage = "MutinyIRC";
+    private const string FallbackMessage = "MutinyIRC";
 
-    private static string DefaultMessage() => RandomMessages.Instance.GetMessage("quit") ?? fallbackMessage;
+    private static string DefaultMessage() => RandomMessages.Instance.GetMessage("quit") ?? FallbackMessage;
 
     /// <summary>Quits with a message from any window.</summary>
     [RawArguments]

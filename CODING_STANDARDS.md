@@ -7,7 +7,7 @@ Those items are open questions, not settled rules.
 
 `.editorconfig` decides anything a tool can check. This document explains the intent behind those
 settings and records the conventions that `.editorconfig` cannot express.
-[Known Contradictions](#known-contradictions) covers which settings the build enforces, and how.
+[Language and Tooling](#language-and-tooling) covers which settings the build enforces, and how.
 
 ## Language and Tooling
 
@@ -15,16 +15,30 @@ settings and records the conventions that `.editorconfig` cannot express.
 - **Language:** C# (the default language version for .NET 8).
 - **Build check:** run `dotnet build MutinyIRC.sln` after you change code. `Directory.Build.props`
   sets `EnforceCodeStyleInBuild`, so the `IDE####` severities in `.editorconfig` apply to the
-  build. Style diagnostics are **warnings**. A clean build has 0 errors.
+  build. Style diagnostics are **warnings** by default. Every rule that the codebase already
+  satisfies is an **error**, so a clean build has 0 errors and 0 warnings. When a warning-level
+  rule reaches zero hits, promote it to `error` in `.editorconfig`.
 - **Unused code**, enforced at build time:
   - `CS8019` — unnecessary `using` directives (**error**).
   - `CA1823` — unused private fields (**error**).
-  - `IDE0051` / `IDE0059` / `IDE0060` — uncalled private code, unused locals, unused parameters
-    (warnings).
+  - `IDE0052` / `IDE0059` / `IDE0060` — unread private members, unused value assignments, unused
+    parameters (**errors**).
+  - `IDE0051` — uncalled private code (warning).
+- **Not checked by the build:** `dotnet format` reports `IDE0001` and `IDE0002`, but the build
+  does not.
 
 Remove dead usings, parameters, locals, and private members as you write. Do not leave them for
-later. The codebase already carries a backlog of style warnings (see
-[Known Contradictions](#known-contradictions)). Do not add to it.
+later.
+
+A parameter that a signature needs but the body ignores is not dead code. The plugin framework
+dispatches command overloads **by the type of the first parameter**, so a `context`, `channel`, or
+`server` parameter is part of the dispatch contract. Name such a parameter `_`, which `IDE0060`
+ignores:
+
+```csharp
+public CommandResultInfo Execute(TestMessageContext _, string a)
+    => CommandResultInfo.Success("string:" + a);
+```
 
 ## Files and Encoding
 
@@ -41,8 +55,9 @@ later. The codebase already carries a backlog of style warnings (see
 These rules follow the `.editorconfig` (the Microsoft and ReSharper sections):
 
 - **Put braces on a new line** for all constructs (`csharp_new_line_before_open_brace = all`).
-- **Modifier order:** `private, protected, internal, async, file, public, override, sealed,
-  virtual, static, abstract, readonly, extern, unsafe, volatile, new, required`.
+- **Modifier order:** `private, protected, internal, file, public, override, sealed, virtual,
+  static, abstract, readonly, extern, unsafe, volatile, new, required, async`. `async` comes last,
+  so write `public async Task` and `private static async Task`.
 - **Maximum line length: 100** (`resharper_csharp_max_line_length = 100`). This is a ReSharper
   hint. The build does not enforce it.
 - **The formatter keeps single-line blocks and expression-bodied members on one line** when they
@@ -111,8 +126,14 @@ consistently: fields initialize to `string.Empty`.
   `Server_Disconnected`).
 
 The `dotnet_naming_rule` entries in `.editorconfig` enforce field naming (diagnostic `IDE1006`) at
-**warning** severity. The legacy FlamingIRC socket subsystem is the one exception — see
-[Known Contradictions](#known-contradictions).
+**error** severity.
+
+A lazily created singleton keeps its instance in a private static field named `Singleton`, behind
+a public `Instance` or `DefaultInstance` property.
+
+Some private fields are found by name through reflection, for example
+`IrcSettingsManager.Singleton` in the UI tests. Use a rename refactoring, not a text replacement,
+to rename a field, and search for the old name as a string literal.
 
 ## Strings
 
@@ -153,7 +174,12 @@ Only `MutinyIRC.UI` sets `<Nullable>enable</Nullable>`. The other projects do no
   fallback value or with a `!` that hides a real bug. Use `null!` initialization only for fields
   that something assigns before use, such as a DI-injected field or a field set in a lifecycle
   hook. This prevents cascading warnings.
-- In the other projects, nullable annotations are not necessary and are usually absent.
+- `IDE0370` ("suppression is unnecessary") gives a false positive on a `= null!` field or property
+  initializer: without the `!`, the compiler gives `CS8625`. Keep the `!` and wrap the
+  declarations in `#pragma warning disable IDE0370` / `restore`, with a comment that says why, as
+  in `ServerViewModel` and `PrivateMessageViewModel`.
+- In the other projects, nullable annotations are not necessary and are usually absent. A `!`
+  there suppresses nothing, so do not write one.
 
 ## Documentation Comments
 
@@ -216,16 +242,7 @@ These rules hold the design together. Do not work around them:
 In these places the `.editorconfig` and the codebase disagree, or the codebase disagrees with
 itself. Each item needs a decision.
 
-### 1. FlamingIRC legacy fields do not follow the field naming rule
-
-About 35 private fields in the legacy FlamingIRC socket subsystem (`Dcc/`, `Ctcp/`, `Listener`,
-`UserList`, `ServerProperties`) use bare `camelCase` instead of `_camelCase`. The naming rule
-therefore stays at `warning` and not `error`. The subsystem is consistent with itself, has few
-tests, and uses bare names that collide easily (`buffer`, `socket`, `thread`, `server`, `list`). A
-text-based rename would corrupt them. **Decision needed:** rename the fields with a Roslyn rename
-that handles shadowing correctly, or keep the legacy subsystem on its own convention permanently.
-
-### 2. GPL license headers are inconsistent
+### 1. GPL license headers are inconsistent
 
 The full GPLv2 header appears on **26 legacy `FlamingIRC` files** (`Sender.cs`, `Listener.cs`,
 `Connection.cs`, the `Dcc/` and `Ctcp/` trees, and others). It is **absent** from the newer
@@ -233,26 +250,3 @@ FlamingIRC files (`Events/*`, `IConnection.cs`, `ThreadHelper.cs`, `Extensions.c
 **every other project** (`MutinyIRC.Common`, the UI, and the rest have no header). **Decision
 needed:** add the header to all FlamingIRC files, because FlamingIRC has a separate license; remove
 it everywhere; or document that only the original files carry it.
-
-### 3. Style warning backlog
-
-Style rules became build-enforced only recently, so the codebase carries **130 pre-existing style
-warnings**. The build has 0 errors, and these warnings serve as a worklist. Most of them:
-
-| Rule | Count | What it wants |
-|---|---|---|
-| `IDE1006` | 67 | Naming rule — this is item 1 above |
-| `IDE0370` | 22 | Suppression is unnecessary (stale `#pragma` or attributes) |
-| `IDE0060` | 11 | Unused parameter |
-| `IDE0200` | 8 | Remove unnecessary lambda expression |
-
-Fix `IDE0060` case by case. Do not fix it in one pass. Almost every current hit is a parameter the
-structure needs, and the analyzer cannot see this. The plugin framework dispatches command
-overloads **by the type of the first parameter**, so a `context`, `channel`, or `server` parameter
-is part of the dispatch contract even when the body ignores it. Suppress or keep those parameters.
-Remove a parameter only when nothing depends on it.
-
-Promote a rule to `error` when its count reaches zero. `IDE0052` moved this way already.
-
-`resharper_csharp_max_line_length = 100` applies only in ReSharper and Rider. The build does not
-enforce it. `dotnet format` reports `IDE0001` and `IDE0002`; the build does not.

@@ -8,22 +8,22 @@ namespace MutinyIRC.Common;
 /// </summary>
 public static class TextLoggerManager
 {
-    private static bool _loggerActive;
+    private static bool IsActive;
 
     public static bool LoggerActive
     {
-        get => _loggerActive;
+        get => IsActive;
 
         set
         {
-            if (value == _loggerActive) return;
+            if (value == IsActive) return;
 
             if (value)
                 TurnOn();
             else
                 TurnOff();
 
-            _loggerActive = value;
+            IsActive = value;
         }
     }
 

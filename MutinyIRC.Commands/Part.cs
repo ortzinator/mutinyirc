@@ -9,9 +9,9 @@ namespace MutinyIRC.Commands;
 [Plugin("Part", "Leaves a channel. Usage: /part [#channel] [message]")]
 public class Part : ICommand
 {
-    private const string fallbackMessage = "Goodbye!";
+    private const string FallbackMessage = "Goodbye!";
 
-    private static string DefaultMessage() => RandomMessages.Instance.GetMessage("part") ?? fallbackMessage;
+    private static string DefaultMessage() => RandomMessages.Instance.GetMessage("part") ?? FallbackMessage;
 
     /// <summary>
     /// Parts the current channel with a message

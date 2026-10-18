@@ -27,7 +27,7 @@ public class MTObservableCollection<T> : ObservableCollection<T>
         if (Dispatcher.UIThread.CheckAccess())
             base.ClearItems();
         else
-            Dispatcher.UIThread.Post(() => base.ClearItems());
+            Dispatcher.UIThread.Post(base.ClearItems);
     }
 
     protected override void SetItem(int index, T item)

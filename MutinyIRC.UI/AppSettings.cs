@@ -7,7 +7,7 @@ namespace MutinyIRC.UI;
 
 public sealed class AppSettings
 {
-    private static AppSettings? _instance;
+    private static AppSettings? Singleton;
     private static readonly string SettingsPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
         "MutinyIRC", "settings.json");
@@ -16,9 +16,9 @@ public sealed class AppSettings
     {
         get
         {
-            if (_instance != null) return _instance;
-            _instance = Load();
-            return _instance;
+            if (Singleton != null) return Singleton;
+            Singleton = Load();
+            return Singleton;
         }
     }
 

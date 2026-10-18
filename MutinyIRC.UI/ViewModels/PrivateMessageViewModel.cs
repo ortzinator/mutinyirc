@@ -11,12 +11,11 @@ public class PrivateMessageViewModel : IrcViewModel
 {
     // IDE0370 is a false positive here: without the '!' the build gives CS8625.
 #pragma warning disable IDE0370
-    private readonly PrivateMessageSession _session = null!;
+    public PrivateMessageSession Session { get; } = null!;
     private readonly PluginManager _pluginManager = null!;
 #pragma warning restore IDE0370
 
-    public PrivateMessageSession Session => _session;
-    public override Server? OwningServer => _session.Server;
+    public override Server? OwningServer => Session.Server;
 
     private string _otherNick = string.Empty;
     public string OtherNick
@@ -43,42 +42,42 @@ public class PrivateMessageViewModel : IrcViewModel
         if (Avalonia.Controls.Design.IsDesignMode)
             return;
 
-        _session = session;
+        Session = session;
         _pluginManager = pluginManager;
         OtherNick = session.User.Nick;
         Name = session.User.Nick;
         _isServerConnected = session.Server.IsConnected;
 
-        _session.MessageReceived += Session_MessageReceived;
-        _session.MessageSent += Session_MessageSent;
-        _session.ActionReceived += Session_ActionReceived;
-        _session.ActionSent += Session_ActionSent;
-        _session.NoticeSent += Session_NoticeSent;
+        Session.MessageReceived += Session_MessageReceived;
+        Session.MessageSent += Session_MessageSent;
+        Session.ActionReceived += Session_ActionReceived;
+        Session.ActionSent += Session_ActionSent;
+        Session.NoticeSent += Session_NoticeSent;
 
-        _session.Server.OnNick += Server_OnNick;
-        _session.Server.Disconnected += Server_Disconnected;
-        _session.Server.Connected += Server_Connected;
-        _session.Server.ConnectionLost += Server_ConnectionLost;
+        Session.Server.OnNick += Server_OnNick;
+        Session.Server.Disconnected += Server_Disconnected;
+        Session.Server.Connected += Server_Connected;
+        Session.Server.ConnectionLost += Server_ConnectionLost;
     }
 
     private void Session_MessageReceived(object? sender, Common.DataEventArgs<string> e)
     {
-        AddIncoming(new ChannelMessageViewModel(DateTime.Now, e.Data, _session.User));
+        AddIncoming(new ChannelMessageViewModel(DateTime.Now, e.Data, Session.User));
     }
 
     private void Session_MessageSent(object? sender, Common.DataEventArgs<string> e)
     {
-        ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Data, _session.Server.UserNick));
+        ChatLines.Add(new ChannelMessageViewModel(DateTime.Now, e.Data, Session.Server.UserNick));
     }
 
     private void Session_ActionReceived(object? sender, Common.DataEventArgs<string> e)
     {
-        AddIncoming(new ChannelActionViewModel(DateTime.Now, e.Data, _session.User));
+        AddIncoming(new ChannelActionViewModel(DateTime.Now, e.Data, Session.User));
     }
 
     private void Session_ActionSent(object? sender, Common.DataEventArgs<string> e)
     {
-        ChatLines.Add(new ChannelActionViewModel(DateTime.Now, e.Data, _session.Server.UserNick));
+        ChatLines.Add(new ChannelActionViewModel(DateTime.Now, e.Data, Session.Server.UserNick));
     }
 
     private void Session_NoticeSent(object? sender, UserMessageEventArgs e)
@@ -90,7 +89,7 @@ public class PrivateMessageViewModel : IrcViewModel
     {
         if (string.Equals(e.User.Nick, OtherNick, StringComparison.OrdinalIgnoreCase))
         {
-            _session.User.Nick = e.NewNick;
+            Session.User.Nick = e.NewNick;
             OtherNick = e.NewNick;
             Name = e.NewNick;
             ChatLines.Add(new ChatItemViewModel(DateTime.Now,
@@ -119,7 +118,7 @@ public class PrivateMessageViewModel : IrcViewModel
         if (string.IsNullOrEmpty(commandLine))
             return;
 
-        CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(_session, commandLine));
+        CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(Session, commandLine));
         if (result != null && result.Result == Result.Fail)
         {
             ChatLines.Add(new ErrorMessageViewModel(DateTime.Now, result.Message));
@@ -128,17 +127,17 @@ public class PrivateMessageViewModel : IrcViewModel
 
     public override void Dispose()
     {
-        if (_session == null) return;
+        if (Session == null) return;
 
-        _session.MessageReceived -= Session_MessageReceived;
-        _session.MessageSent -= Session_MessageSent;
-        _session.ActionReceived -= Session_ActionReceived;
-        _session.ActionSent -= Session_ActionSent;
-        _session.NoticeSent -= Session_NoticeSent;
+        Session.MessageReceived -= Session_MessageReceived;
+        Session.MessageSent -= Session_MessageSent;
+        Session.ActionReceived -= Session_ActionReceived;
+        Session.ActionSent -= Session_ActionSent;
+        Session.NoticeSent -= Session_NoticeSent;
 
-        _session.Server.OnNick -= Server_OnNick;
-        _session.Server.Disconnected -= Server_Disconnected;
-        _session.Server.Connected -= Server_Connected;
-        _session.Server.ConnectionLost -= Server_ConnectionLost;
+        Session.Server.OnNick -= Server_OnNick;
+        Session.Server.Disconnected -= Server_Disconnected;
+        Session.Server.Connected -= Server_Connected;
+        Session.Server.ConnectionLost -= Server_ConnectionLost;
     }
 }

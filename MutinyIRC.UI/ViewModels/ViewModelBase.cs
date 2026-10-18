@@ -17,7 +17,7 @@ public abstract class ViewModelBase : ObservableObject
     private RelayCommand? _closeCommand;
     public ICommand CloseCommand
     {
-        get { return _closeCommand ?? (_closeCommand = new RelayCommand(Close, CanClose)); }
+        get { return _closeCommand ??= new RelayCommand(Close, CanClose); }
     }
 
     /// <summary>

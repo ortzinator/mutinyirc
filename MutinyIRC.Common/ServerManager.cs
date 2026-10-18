@@ -10,7 +10,7 @@ public class ServerManager
     public event EventHandler<ServerEventArgs> ServerAdded;
     public event EventHandler<ServerEventArgs> ServerRemoved;
 
-    private static ServerManager instance;
+    private static ServerManager Singleton;
 
     public List<Server> ServerList { get; private set; }
 
@@ -18,9 +18,9 @@ public class ServerManager
     {
         get
         {
-            instance ??= new ServerManager { ServerList = new List<Server>() };
+            Singleton ??= new ServerManager { ServerList = new List<Server>() };
 
-            return instance;
+            return Singleton;
         }
     }
 

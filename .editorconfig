@@ -38,6 +38,20 @@ dotnet_diagnostic.CS8019.severity = error # Remove unnecessary using directives
 dotnet_diagnostic.CA1823.severity = error # Avoid unused private fields
 dotnet_diagnostic.IDE0052.severity = error # Remove unread private members (count is zero; keep it there)
 
+# These rules are at zero. Keep them there.
+dotnet_diagnostic.IDE0004.severity = error # Remove unnecessary cast
+dotnet_diagnostic.IDE0017.severity = error # Use object initializers
+dotnet_diagnostic.IDE0032.severity = error # Use auto property
+dotnet_diagnostic.IDE0036.severity = error # Order modifiers
+dotnet_diagnostic.IDE0039.severity = error # Use local function instead of lambda
+dotnet_diagnostic.IDE0045.severity = error # Use conditional expression for assignment
+dotnet_diagnostic.IDE0059.severity = error # Remove unnecessary value assignment
+dotnet_diagnostic.IDE0060.severity = error # Remove unused parameter (use a discard if a signature needs it)
+dotnet_diagnostic.IDE0074.severity = error # Use compound assignment
+dotnet_diagnostic.IDE0078.severity = error # Use pattern matching
+dotnet_diagnostic.IDE0200.severity = error # Remove unnecessary lambda expression
+dotnet_diagnostic.IDE0370.severity = error # Remove unnecessary suppression (see CODING_STANDARDS.md for false positives)
+
 # CA1801/CA1804/CA1811 are legacy FxCop rules that no longer ship in the .NET analyzers; setting
 # their severity here did nothing. The live equivalents are IDE0060 (unused parameters), IDE0059
 # (unused locals), and IDE0051 (uncalled private code), which run via EnforceCodeStyleInBuild.
@@ -115,25 +129,23 @@ resharper_wrap_before_arrow_with_expressions = true
 resharper_wrap_object_and_collection_initializer_style = chop_always
 
 # Naming: private instance fields use _camelCase; private static/const fields stay PascalCase.
-# Kept at warning (not error) so the legacy FlamingIRC socket subsystem, which still uses a
-# bare-camelCase convention, does not break the build before it is migrated.
-dotnet_diagnostic.IDE1006.severity = warning
+dotnet_diagnostic.IDE1006.severity = error
 
-dotnet_naming_rule.private_const_fields_pascal.severity = warning
+dotnet_naming_rule.private_const_fields_pascal.severity = error
 dotnet_naming_rule.private_const_fields_pascal.symbols = private_const_fields
 dotnet_naming_rule.private_const_fields_pascal.style = pascal_case
 dotnet_naming_symbols.private_const_fields.applicable_kinds = field
 dotnet_naming_symbols.private_const_fields.applicable_accessibilities = private
 dotnet_naming_symbols.private_const_fields.required_modifiers = const
 
-dotnet_naming_rule.private_static_fields_pascal.severity = warning
+dotnet_naming_rule.private_static_fields_pascal.severity = error
 dotnet_naming_rule.private_static_fields_pascal.symbols = private_static_fields
 dotnet_naming_rule.private_static_fields_pascal.style = pascal_case
 dotnet_naming_symbols.private_static_fields.applicable_kinds = field
 dotnet_naming_symbols.private_static_fields.applicable_accessibilities = private
 dotnet_naming_symbols.private_static_fields.required_modifiers = static
 
-dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_rule.private_fields_underscore.severity = error
 dotnet_naming_rule.private_fields_underscore.symbols = private_fields
 dotnet_naming_rule.private_fields_underscore.style = underscore_camel_case
 dotnet_naming_symbols.private_fields.applicable_kinds = field

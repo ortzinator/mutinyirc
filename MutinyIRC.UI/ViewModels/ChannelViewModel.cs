@@ -12,13 +12,9 @@ namespace MutinyIRC.UI.ViewModels;
 
 public class ChannelViewModel : IrcViewModel
 {
-    private readonly Channel _channel;
-    public Channel Channel => _channel;
-    public override Server? OwningServer => _channel.Server;
-    private List<UserViewModel> _userList = new();
-    private readonly PluginManager _pluginManager;
-
-    public PluginManager PluginManager => _pluginManager;
+    public Channel Channel { get; }
+    public override Server? OwningServer => Channel.Server;
+    public PluginManager PluginManager { get; }
 
     private const string ChannelPrefixes = "#&+!";
 
@@ -66,15 +62,15 @@ public class ChannelViewModel : IrcViewModel
         }
     }
 
-    public List<UserViewModel> UserList => _userList;
+    public List<UserViewModel> UserList { get; private set; } = new();
 
     // ── User list presentation ──
     // UserList stays the flat source of truth (count, tab completion). UserRows is what the
     // list renders: the same users grouped by status and narrowed by UserFilter, with a header
     // in front of each non-empty group.
 
-    private IReadOnlyList<IUserListRow> _userRows = UserListGrouping.Build(new List<UserViewModel>());
-    public IReadOnlyList<IUserListRow> UserRows => _userRows;
+    public IReadOnlyList<IUserListRow> UserRows { get; private set; } =
+        UserListGrouping.Build(new List<UserViewModel>());
 
     private string _userFilter = string.Empty;
 
@@ -91,7 +87,7 @@ public class ChannelViewModel : IrcViewModel
 
     /// <summary>Placeholder for the filter box — it doubles as the channel's member count.</summary>
     public string UserFilterWatermark =>
-        $"Filter {_userList.Count} member{(_userList.Count == 1 ? string.Empty : "s")}";
+        $"Filter {UserList.Count} member{(UserList.Count == 1 ? string.Empty : "s")}";
 
     /// <summary>
     /// The badge a user's row carries, or null for most people. Only two are worth calling out and
@@ -100,7 +96,7 @@ public class ChannelViewModel : IrcViewModel
     /// </summary>
     private string? TagFor(User user)
     {
-        Server server = _channel.Server;
+        Server server = Channel.Server;
 
         if (string.Equals(user.Nick, server.UserNick, StringComparison.OrdinalIgnoreCase))
             return "you";
@@ -110,41 +106,41 @@ public class ChannelViewModel : IrcViewModel
 
     private void RebuildUserRows()
     {
-        _userRows = UserListGrouping.Build(_userList, _userFilter);
+        UserRows = UserListGrouping.Build(UserList, _userFilter);
         OnPropertyChanged(nameof(UserRows));
     }
 
     /// <summary>Bare nicks of everyone in the channel, in the user list's display order.</summary>
     public override IReadOnlyList<string> CompletionCandidates
-        => _userList.ConvertAll(u => u.Nick);
+        => UserList.ConvertAll(u => u.Nick);
 
     public ChannelViewModel(Channel channel, PluginManager pluginManager)
     {
-        _pluginManager = pluginManager;
+        PluginManager = pluginManager;
 
-        _channel = channel;
-        _channel.Users.Updated += NickList_Updated;
+        Channel = channel;
+        Channel.Users.Updated += NickList_Updated;
         base.Name = channel.Name;
         // The key usually arrives with the mode reply that follows the join, after this panel
         // exists, so take what the channel has now and follow it from there.
-        IsKeyed = _channel.Key != null;
-        _channel.KeyChanged += Channel_KeyChanged;
+        IsKeyed = Channel.Key != null;
+        Channel.KeyChanged += Channel_KeyChanged;
 
-        _channel.OnMessage += Channel_OnMessage;
-        _channel.OnAction += Channel_OnAction;
-        _channel.TopicReceived += Channel_TopicReceived;
-        _channel.OnJoin += Channel_OnJoin;
-        _channel.UserParted += Channel_UserParted;
-        _channel.OtherUserParted += Channel_OtherUserParted;
-        _channel.UserQuitted += Channel_OnUserQuitted;
-        _channel.NickChanged += Channel_OnNick;
-        _channel.OnKick += Channel_OnKick;
-        _channel.MessagedChannel += Channel_MessagedChannel;
-        _channel.NoticeSent += Channel_NoticeSent;
-        _channel.OnNotice += Channel_OnNotice;
+        Channel.OnMessage += Channel_OnMessage;
+        Channel.OnAction += Channel_OnAction;
+        Channel.TopicReceived += Channel_TopicReceived;
+        Channel.OnJoin += Channel_OnJoin;
+        Channel.UserParted += Channel_UserParted;
+        Channel.OtherUserParted += Channel_OtherUserParted;
+        Channel.UserQuitted += Channel_OnUserQuitted;
+        Channel.NickChanged += Channel_OnNick;
+        Channel.OnKick += Channel_OnKick;
+        Channel.MessagedChannel += Channel_MessagedChannel;
+        Channel.NoticeSent += Channel_NoticeSent;
+        Channel.OnNotice += Channel_OnNotice;
 
-        _channel.Server.Disconnected += Server_Disconnected;
-        _channel.Server.ChannelRemoved += Server_ChannelRemoved;
+        Channel.Server.Disconnected += Server_Disconnected;
+        Channel.Server.ChannelRemoved += Server_ChannelRemoved;
     }
 
     /// <summary>
@@ -155,7 +151,7 @@ public class ChannelViewModel : IrcViewModel
     /// </summary>
     private void Server_ChannelRemoved(object? sender, ChannelEventArgs e)
     {
-        if (e.Channel == _channel)
+        if (e.Channel == Channel)
             Close();
     }
 
@@ -237,10 +233,10 @@ public class ChannelViewModel : IrcViewModel
 
     private void NickList_Updated(object? sender, EventArgs e)
     {
-        _userList = new List<UserViewModel>();
-        foreach (User user in _channel.Users)
-            _userList.Add(new UserViewModel(user, TagFor(user)));
-        _userList.Sort((user1, user2) => user1.CompareTo(user2));
+        UserList = new List<UserViewModel>();
+        foreach (User user in Channel.Users)
+            UserList.Add(new UserViewModel(user, TagFor(user)));
+        UserList.Sort((user1, user2) => user1.CompareTo(user2));
         RebuildUserRows();
         OnPropertyChanged(nameof(UserList));
         OnPropertyChanged(nameof(UserFilterWatermark));
@@ -252,7 +248,7 @@ public class ChannelViewModel : IrcViewModel
         if (string.IsNullOrEmpty(commandLine))
             return;
 
-        CommandResultInfo result = _pluginManager.ExecuteCommand(_pluginManager.ParseCommand(_channel, commandLine));
+        CommandResultInfo result = PluginManager.ExecuteCommand(PluginManager.ParseCommand(Channel, commandLine));
         if (result != null && result.Result == Result.Fail)
         {
             ChatLines.Add(new ErrorMessageViewModel(DateTime.Now, result.Message));
@@ -304,23 +300,23 @@ public class ChannelViewModel : IrcViewModel
 
     public override void Dispose()
     {
-        _channel.Users.Updated -= NickList_Updated;
+        Channel.Users.Updated -= NickList_Updated;
 
-        _channel.OnMessage -= Channel_OnMessage;
-        _channel.OnAction -= Channel_OnAction;
-        _channel.TopicReceived -= Channel_TopicReceived;
-        _channel.KeyChanged -= Channel_KeyChanged;
-        _channel.OnJoin -= Channel_OnJoin;
-        _channel.UserParted -= Channel_UserParted;
-        _channel.OtherUserParted -= Channel_OtherUserParted;
-        _channel.UserQuitted -= Channel_OnUserQuitted;
-        _channel.NickChanged -= Channel_OnNick;
-        _channel.OnKick -= Channel_OnKick;
-        _channel.MessagedChannel -= Channel_MessagedChannel;
-        _channel.NoticeSent -= Channel_NoticeSent;
-        _channel.OnNotice -= Channel_OnNotice;
+        Channel.OnMessage -= Channel_OnMessage;
+        Channel.OnAction -= Channel_OnAction;
+        Channel.TopicReceived -= Channel_TopicReceived;
+        Channel.KeyChanged -= Channel_KeyChanged;
+        Channel.OnJoin -= Channel_OnJoin;
+        Channel.UserParted -= Channel_UserParted;
+        Channel.OtherUserParted -= Channel_OtherUserParted;
+        Channel.UserQuitted -= Channel_OnUserQuitted;
+        Channel.NickChanged -= Channel_OnNick;
+        Channel.OnKick -= Channel_OnKick;
+        Channel.MessagedChannel -= Channel_MessagedChannel;
+        Channel.NoticeSent -= Channel_NoticeSent;
+        Channel.OnNotice -= Channel_OnNotice;
 
-        _channel.Server.Disconnected -= Server_Disconnected;
-        _channel.Server.ChannelRemoved -= Server_ChannelRemoved;
+        Channel.Server.Disconnected -= Server_Disconnected;
+        Channel.Server.ChannelRemoved -= Server_ChannelRemoved;
     }
 }

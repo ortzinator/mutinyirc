@@ -11,7 +11,7 @@ namespace MutinyIRC.UI;
 
 public sealed class IrcSettingsManager
 {
-    private static IrcSettingsManager? instance;
+    private static IrcSettingsManager? Singleton;
     private static readonly string DefaultSettingsPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
         "MutinyIRC", "servers.json");
@@ -43,10 +43,10 @@ public sealed class IrcSettingsManager
     {
         get
         {
-            if (instance != null) return instance;
-            instance = new IrcSettingsManager(DefaultSettingsPath);
-            instance.Load();
-            return instance;
+            if (Singleton != null) return Singleton;
+            Singleton = new IrcSettingsManager(DefaultSettingsPath);
+            Singleton.Load();
+            return Singleton;
         }
     }
 

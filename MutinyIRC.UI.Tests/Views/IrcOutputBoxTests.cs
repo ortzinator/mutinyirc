@@ -123,7 +123,7 @@ public class IrcOutputBoxTests
         box.DataContext = new ChannelViewModelStub(items);
         Dispatcher.UIThread.RunJobs();
 
-        Assert.DoesNotThrow(() => box.ScrollToBottom());
+        Assert.DoesNotThrow(box.ScrollToBottom);
         Dispatcher.UIThread.RunJobs();
 
         Assert.That(box.Scrolled, Is.False);

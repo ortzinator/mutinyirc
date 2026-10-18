@@ -38,11 +38,9 @@ public class Ban : ICommand
         int i = 0;
 
         // Explicit channel token, otherwise the window's channel.
-        string channelName;
-        if (i < tokens.Length && (tokens[i][0] == '#' || tokens[i][0] == '&'))
-            channelName = tokens[i++];
-        else
-            channelName = defaultChannel?.Name;
+        string channelName = i < tokens.Length && (tokens[i][0] == '#' || tokens[i][0] == '&')
+            ? tokens[i++]
+            : defaultChannel?.Name;
 
         if (channelName == null)
             return CommandResultInfo.Fail(Usage);

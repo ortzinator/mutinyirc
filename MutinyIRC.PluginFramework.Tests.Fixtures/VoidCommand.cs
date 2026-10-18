@@ -11,12 +11,12 @@ public class VoidCommand : ICommand
 {
     public static List<string> Calls { get; } = new List<string>();
 
-    public void Execute(TestMessageContext ctx, string a)
+    public void Execute(TestMessageContext _, string a)
     {
         Calls.Add("one:" + a);
     }
 
-    public void Execute(TestMessageContext ctx, string a, string b)
+    public void Execute(TestMessageContext _, string a, string b)
     {
         Calls.Add("two:" + a + "|" + b);
     }

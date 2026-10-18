@@ -69,18 +69,18 @@ public class ViewModelCloseTests
         bool closing = false;
         int viewModelCloseCount = 0;
 
-        Action simulatedClosingHandler = () =>
+        void SimulatedClosingHandler()
         {
             if (closing) return;
             closing = true;
             viewModelCloseCount++;
             vm.Close();
-        };
+        }
 
         // RequestClose handler mirrors: viewModel.RequestClose += (_, _) => window.Close();
-        vm.RequestClose += (_, _) => simulatedClosingHandler();
+        vm.RequestClose += (_, _) => SimulatedClosingHandler();
 
-        Assert.DoesNotThrow(() => simulatedClosingHandler());
+        Assert.DoesNotThrow(SimulatedClosingHandler);
         Assert.That(viewModelCloseCount, Is.EqualTo(1),
             "viewModel.Close() must be called exactly once despite re-entrant RequestClose");
     }
@@ -90,7 +90,7 @@ public class ViewModelCloseTests
     {
         var vm = new StubViewModel();
         vm.Close();
-        Assert.DoesNotThrow(() => vm.Close());
+        Assert.DoesNotThrow(vm.Close);
     }
 
     /// <summary>
@@ -115,11 +115,11 @@ public class ViewModelCloseTests
     {
         var vm = new DesignChannelViewModelStub();
         int count = 0;
-        EventHandler handler = (_, _) => count++;
-        vm.RequestClose += handler;
+        void Handler(object? sender, EventArgs e) => count++;
+        vm.RequestClose += Handler;
 
         vm.Close();
-        vm.RequestClose -= handler;
+        vm.RequestClose -= Handler;
         vm.Close();
 
         Assert.That(count, Is.EqualTo(1),
@@ -150,7 +150,7 @@ public class ViewModelCloseTests
         vm.RequestClose += (_, _) => window.Close();
 
         window.Show();
-        Assert.DoesNotThrow(() => window.Close());
+        Assert.DoesNotThrow(window.Close);
         Assert.That(viewModelCloseCalls, Is.EqualTo(1));
     }
 

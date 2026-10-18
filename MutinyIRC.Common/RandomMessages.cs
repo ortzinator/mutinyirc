@@ -19,7 +19,7 @@ public class RandomMessages
         WriteIndented = true
     };
 
-    private static RandomMessages _instance;
+    private static RandomMessages Singleton;
 
     /// <summary>
     /// Process-wide instance backed by the default file path. Lazily loads on first access.
@@ -28,10 +28,10 @@ public class RandomMessages
     {
         get
         {
-            if (_instance != null) return _instance;
-            _instance = new RandomMessages(DefaultFilePath);
-            _instance.Load();
-            return _instance;
+            if (Singleton != null) return Singleton;
+            Singleton = new RandomMessages(DefaultFilePath);
+            Singleton.Load();
+            return Singleton;
         }
     }
 

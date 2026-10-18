@@ -143,9 +143,9 @@ public class ServerViewModel : IrcViewModel
     // and whenever this server window's own flag changes (handled in OnPropertyChanged).
     private void UnreadSources_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        foreach (INotifyPropertyChanged panel in e.OldItems ?? (IList)Array.Empty<object>())
+        foreach (INotifyPropertyChanged panel in e.OldItems ?? Array.Empty<object>())
             panel.PropertyChanged -= Panel_PropertyChanged;
-        foreach (INotifyPropertyChanged panel in e.NewItems ?? (IList)Array.Empty<object>())
+        foreach (INotifyPropertyChanged panel in e.NewItems ?? Array.Empty<object>())
             panel.PropertyChanged += Panel_PropertyChanged;
 
         OnPropertyChanged(nameof(HasUnreadAnywhere));

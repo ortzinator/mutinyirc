@@ -22,7 +22,7 @@ namespace MutinyIRC.UI.Tests.ViewModels;
 public class ServerViewModelRegistrationTests
 {
     private static readonly FieldInfo SingletonField =
-        typeof(IrcSettingsManager).GetField("instance", BindingFlags.NonPublic | BindingFlags.Static)!;
+        typeof(IrcSettingsManager).GetField("Singleton", BindingFlags.NonPublic | BindingFlags.Static)!;
 
     private Server _server = null!;
     private ServerViewModel _vm = null!;

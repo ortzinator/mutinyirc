@@ -29,8 +29,8 @@ public class UserListTests
         target.Add(new User { Nick = "@SpamServ" });
         target.Add(new User { Nick = "+HTF" });
         target.Add(new User { Nick = "+ninjers" });
-        Comparison<User> comparison = (user1, user2) => user1.CompareTo(user2);
-        target.Sort(comparison);
+        static int Compare(User user1, User user2) => user1.CompareTo(user2);
+        target.Sort(Compare);
         foreach (User user in target)
         {
             Debug.WriteLine(user.Nick);

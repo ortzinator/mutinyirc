@@ -6,20 +6,20 @@ namespace MutinyIRC.UI;
 
 public class CompositionRoot
 {
-    private static IKernel _ninjectKernel = null!;
+    private static IKernel NinjectKernel = null!;
 
     public static void Wire(INinjectModule module)
     {
-        _ninjectKernel = new StandardKernel(module);
+        NinjectKernel = new StandardKernel(module);
     }
 
     public static T Resolve<T>()
     {
-        return _ninjectKernel.Get<T>();
+        return NinjectKernel.Get<T>();
     }
 
     public static T Resolve<T>(params IParameter[] parameterObjects)
     {
-        return _ninjectKernel.Get<T>(parameterObjects);
+        return NinjectKernel.Get<T>(parameterObjects);
     }
 }

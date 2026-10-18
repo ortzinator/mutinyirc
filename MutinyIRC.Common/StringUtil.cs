@@ -28,9 +28,4 @@ public static class StringUtil
     {
         return Encoding.ASCII.GetBytes(str);
     }
-
-    public static string FromBytes(this string str, byte[] array)
-    {
-        return Encoding.ASCII.GetString(array);
-    }
 }

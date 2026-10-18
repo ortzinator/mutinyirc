@@ -11,21 +11,21 @@ public class TestCommand : ICommand
     public CommandResultInfo Execute()
         => CommandResultInfo.Success("no-context");
 
-    public CommandResultInfo Execute(TestMessageContext ctx)
+    public CommandResultInfo Execute(TestMessageContext _)
         => CommandResultInfo.Success("noargs");
 
-    public CommandResultInfo Execute(TestMessageContext ctx, string a)
+    public CommandResultInfo Execute(TestMessageContext _, string a)
         => CommandResultInfo.Success("string:" + a);
 
-    public CommandResultInfo Execute(TestMessageContext ctx, string a, string b)
+    public CommandResultInfo Execute(TestMessageContext _, string a, string b)
         => CommandResultInfo.Success("string,string:" + a + "|" + b);
 
-    public CommandResultInfo Execute(TestMessageContext ctx, ChannelInfo channel, string msg)
+    public CommandResultInfo Execute(TestMessageContext _, ChannelInfo channel, string msg)
         => CommandResultInfo.Success("channel,string:" + channel.Name + "|" + msg);
 
-    public CommandResultInfo Execute(TestMessageContext ctx, char[] flags)
+    public CommandResultInfo Execute(TestMessageContext _, char[] flags)
         => CommandResultInfo.Success("switch:" + new string(flags));
 
-    public CommandResultInfo Execute(OtherTestMessageContext ctx, string a)
+    public CommandResultInfo Execute(OtherTestMessageContext _, string a)
         => CommandResultInfo.Success("other-context:" + a);
 }

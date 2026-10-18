@@ -167,7 +167,7 @@ public class RandomMessagesTests
         Assert.IsFalse(File.Exists(_tempFile));
         var sut = NewSut();
 
-        Assert.DoesNotThrow(() => sut.Load());
+        Assert.DoesNotThrow(sut.Load);
         Assert.IsNull(sut.GetMessage("quit"));
     }
 
@@ -177,7 +177,7 @@ public class RandomMessagesTests
         File.WriteAllText(_tempFile, "{ this is not json");
         var sut = NewSut();
 
-        Assert.DoesNotThrow(() => sut.Load());
+        Assert.DoesNotThrow(sut.Load);
         Assert.IsNull(sut.GetMessage("quit"));
     }
 
@@ -202,7 +202,7 @@ public class RandomMessagesTests
 
         // "quit" should contain one of the two persisted messages.
         var quit = reader.GetMessage("quit");
-        Assert.IsTrue(quit == "Bye" || quit == "Later", $"Unexpected quit message: {quit}");
+        Assert.IsTrue(quit is "Bye" or "Later", $"Unexpected quit message: {quit}");
     }
 
     [Test]

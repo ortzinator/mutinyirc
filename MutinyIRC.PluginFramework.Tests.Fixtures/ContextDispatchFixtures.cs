@@ -22,10 +22,10 @@ public class ContextGeneralizationCommand : ICommand
 [Plugin("specificity")]
 public class ContextSpecificityCommand : ICommand
 {
-    public CommandResultInfo Execute(MessageContext context, string a)
+    public CommandResultInfo Execute(MessageContext _, string a)
         => CommandResultInfo.Success("general:" + a);
 
-    public CommandResultInfo Execute(Channel channel, string a)
+    public CommandResultInfo Execute(Channel _, string a)
         => CommandResultInfo.Success("channel:" + a);
 }
 
@@ -37,7 +37,7 @@ public class ContextSpecificityCommand : ICommand
 [Plugin("serveronly")]
 public class ServerOnlyCommand : ICommand
 {
-    public CommandResultInfo Execute(Server server, string a)
+    public CommandResultInfo Execute(Server _, string a)
         => CommandResultInfo.Success("server:" + a);
 }
 

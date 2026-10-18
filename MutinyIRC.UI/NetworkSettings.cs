@@ -125,8 +125,10 @@ public class NetworkSettings
 
     public ChannelSettings AddChannel(Channel data)
     {
-        var chan = new ChannelSettings();
-        chan.Name = data.Name;
+        var chan = new ChannelSettings
+        {
+            Name = data.Name
+        };
         AddChannel(chan);
         return chan;
     }

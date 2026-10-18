@@ -80,7 +80,7 @@ public abstract class IrcViewModel : ViewModelBase, IDisposable
     private RelayCommand<string>? _executeCommand;
     public ICommand ExecuteCommand
     {
-        get { return _executeCommand ?? (_executeCommand = new RelayCommand<string>(OnExecute)); }
+        get { return _executeCommand ??= new RelayCommand<string>(OnExecute); }
     }
 
     protected virtual void OnExecute(string? commandLine)

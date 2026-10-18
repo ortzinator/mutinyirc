@@ -59,7 +59,7 @@ public partial class IrcOutputBox : UserControl
     public void ScrollToBottom()
     {
         _isPinned = true;
-        Dispatcher.UIThread.Post(() => scrollViewer.ScrollToEnd(), DispatcherPriority.Loaded);
+        Dispatcher.UIThread.Post(scrollViewer.ScrollToEnd, DispatcherPriority.Loaded);
     }
 
     private void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -67,7 +67,7 @@ public partial class IrcOutputBox : UserControl
         if (e.Action == NotifyCollectionChangedAction.Add && _isPinned)
         {
             // Defer until after the new item has been measured and arranged.
-            Dispatcher.UIThread.Post(() => scrollViewer.ScrollToEnd(), DispatcherPriority.Loaded);
+            Dispatcher.UIThread.Post(scrollViewer.ScrollToEnd, DispatcherPriority.Loaded);
         }
     }
 }

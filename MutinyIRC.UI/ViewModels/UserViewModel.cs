@@ -13,8 +13,7 @@ public class UserViewModel : ObservableObject, IUserListRow, IComparable<UserVie
     /// <summary>The bare nickname without any mode prefix (used for command targets).</summary>
     public string Nick => _user.Nick;
 
-    private readonly Mode _mode;
-    public Mode Mode => _mode;
+    public Mode Mode { get; }
 
     /// <summary>
     /// The glyph shown in the user list's prefix column. Users with no status get a dim
@@ -38,7 +37,7 @@ public class UserViewModel : ObservableObject, IUserListRow, IComparable<UserVie
     {
         Tag = tag;
         _user = user;
-        _mode = user.Prefix switch
+        Mode = user.Prefix switch
         {
             '~' or '&' => Mode.Owner,
             '@' => Mode.Op,
