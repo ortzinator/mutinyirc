@@ -21,9 +21,8 @@ settings and records the conventions that `.editorconfig` cannot express.
 - **Unused code**, enforced at build time:
   - `CS8019` — unnecessary `using` directives (**error**).
   - `CA1823` — unused private fields (**error**).
-  - `IDE0052` / `IDE0059` / `IDE0060` — unread private members, unused value assignments, unused
-    parameters (**errors**).
-  - `IDE0051` — uncalled private code (warning).
+  - `IDE0051` / `IDE0052` / `IDE0059` / `IDE0060` — uncalled private code, unread private members,
+    unused value assignments, unused parameters (**errors**).
 - **Not checked by the build:** `dotnet format` reports `IDE0001` and `IDE0002`, but the build
   does not.
 
@@ -156,7 +155,7 @@ public static string MakeColor(string text, MircColor textColor)
 ## Immutability
 
 Mark a private field `readonly` (or `static readonly`) when only its declaration or a constructor
-assigns it. `IDE0044` is a warning and flags the fields you miss.
+assigns it. `IDE0044` is an error and flags the fields you miss.
 
 ## Namespaces and Usings
 

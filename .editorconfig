@@ -15,7 +15,6 @@ dotnet_analyzer_diagnostic.category-Style.severity = warning
 # Here we ignore some rule violations that they are not really important for us
 dotnet_diagnostic.IDE0008.severity = silent # Explicit type, not var
 dotnet_diagnostic.IDE0011.severity = silent # Add braces
-dotnet_diagnostic.IDE0044.severity = warning # Add readonly modifier
 dotnet_diagnostic.IDE0090.severity = silent # Use implicit new
 dotnet_diagnostic.IDE0300.severity = silent # Use collection expression for array
 dotnet_diagnostic.IDE0301.severity = silent # Use collection expression for empty
@@ -44,7 +43,9 @@ dotnet_diagnostic.IDE0017.severity = error # Use object initializers
 dotnet_diagnostic.IDE0032.severity = error # Use auto property
 dotnet_diagnostic.IDE0036.severity = error # Order modifiers
 dotnet_diagnostic.IDE0039.severity = error # Use local function instead of lambda
+dotnet_diagnostic.IDE0044.severity = error # Add readonly modifier
 dotnet_diagnostic.IDE0045.severity = error # Use conditional expression for assignment
+dotnet_diagnostic.IDE0051.severity = error # Remove unused private members
 dotnet_diagnostic.IDE0059.severity = error # Remove unnecessary value assignment
 dotnet_diagnostic.IDE0060.severity = error # Remove unused parameter (use a discard if a signature needs it)
 dotnet_diagnostic.IDE0074.severity = error # Use compound assignment
