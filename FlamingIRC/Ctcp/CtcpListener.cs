@@ -69,24 +69,24 @@ public class CtcpListener
     /// </summary>
     public event EventHandler<CtcpPingEventArgs> OnCtcpPingRequest;
 
-    private static readonly Regex ctcpRegex;
-    private static readonly string ctcpTypes;
-    private readonly Connection connection;
+    private static readonly Regex CtcpRegex;
+    private static readonly string CtcpTypes;
+    private readonly Connection _connection;
     private const int Name = 0;
     private const int Command = 1;
     private const int Text = 2;
 
     static CtcpListener()
     {
-        ctcpTypes = "(FINGER|USERINFO|VERSION|SOURCE|CLIENTINFO|ERRMSG|PING|TIME)";
-        ctcpRegex = new Regex(":([^ ]+) [A-Z]+ [^:]+:\u0001" + ctcpTypes + "([^\u0001]*)\u0001", RegexOptions.Compiled | RegexOptions.Singleline);
+        CtcpTypes = "(FINGER|USERINFO|VERSION|SOURCE|CLIENTINFO|ERRMSG|PING|TIME)";
+        CtcpRegex = new Regex(":([^ ]+) [A-Z]+ [^:]+:\u0001" + CtcpTypes + "([^\u0001]*)\u0001", RegexOptions.Compiled | RegexOptions.Singleline);
     }
 
     /// <summary>
     /// Create a new listener using a specific connection.
     /// </summary>
     /// <param name="connection">The connection to the IRC server.</param>
-    internal CtcpListener(Connection connection) => this.connection = connection;
+    internal CtcpListener(Connection connection) => _connection = connection;
 
     private bool IsReply(string[] tokens)
     {
@@ -101,7 +101,7 @@ public class CtcpListener
     {
         try
         {
-            Match match = ctcpRegex.Match(message);
+            Match match = CtcpRegex.Match(message);
             return new string[] { match.Groups[1].ToString(), match.Groups[2].ToString(), match.Groups[3].ToString().Trim() };
         }
         catch (Exception)
@@ -117,9 +117,9 @@ public class CtcpListener
         {
             if (ctcpTokens[Command].ToUpper(CultureInfo.CurrentCulture) == CtcpUtil.Ping)
             {
-                if (connection.CtcpSender.IsMyRequest(ctcpTokens[Text]))
+                if (_connection.CtcpSender.IsMyRequest(ctcpTokens[Text]))
                 {
-                    connection.CtcpSender.ReplyReceived(ctcpTokens[Text]);
+                    _connection.CtcpSender.ReplyReceived(ctcpTokens[Text]);
                     OnCtcpPingReply?.Invoke(this, new CtcpPingEventArgs(
                         Rfc2812Util.UserFromString(ctcpTokens[Name]), ctcpTokens[Text]));
                 }
@@ -151,7 +151,7 @@ public class CtcpListener
         }
         else
         {
-            connection.Listener.Error(ReplyCode.UnparseableMessage, line);
+            _connection.Listener.Error(ReplyCode.UnparseableMessage, line);
             Debug.WriteLineIf(CtcpUtil.CtcpTrace.TraceWarning, "Unknown CTCP command '" + line + "' recieved by CtcpListener");
         }
     }
@@ -161,6 +161,6 @@ public class CtcpListener
     /// </summary>
     /// <param name="message">The raw message from the IRC server</param>
     /// <returns>True if this is a Ctcp request or reply.</returns>
-    public static bool IsCtcpMessage(string message) => ctcpRegex.IsMatch(message);
+    public static bool IsCtcpMessage(string message) => CtcpRegex.IsMatch(message);
 
 }

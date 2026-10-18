@@ -242,8 +242,8 @@ public class Listener
     private const string MODE = "MODE";
     private const string KILL = "KILL";
     private const string ACTION = "\u0001ACTION";
-    private readonly char[] Separator = { ' ' };
-    private readonly Regex channelPattern;
+    private readonly char[] _separator = { ' ' };
+    private readonly Regex _channelPattern;
     private readonly Regex _replyRegex;
     private readonly Regex _propertiesRegex;
 
@@ -251,7 +251,7 @@ public class Listener
     /// Table to hold WhoIsInfos while they are being created. The key is the
     /// nick and the value if the WhoisInfo struct.
     /// </summary>
-    private Hashtable whoisInfos;
+    private Hashtable _whoisInfos;
 
     /// <summary>
     /// Create an instance ready to parse
@@ -259,7 +259,7 @@ public class Listener
     /// </summary>
     public Listener()
     {
-        channelPattern = new Regex("([#!+&]\\w+)", RegexOptions.Compiled | RegexOptions.Singleline);
+        _channelPattern = new Regex("([#!+&]\\w+)", RegexOptions.Compiled | RegexOptions.Singleline);
         _replyRegex = new Regex("^:([^\\s]*) ([\\d]{3}) ([^\\s]*) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
         _propertiesRegex = new Regex("([A-Z]+)=([^\\s]+)", RegexOptions.Compiled | RegexOptions.Singleline);
     }
@@ -380,7 +380,7 @@ public class Listener
 
     private void ProcessModeCommand(IrcMessage ircMessage)
     {
-        if (channelPattern.IsMatch(ircMessage.Target))
+        if (_channelPattern.IsMatch(ircMessage.Target))
         {
             if (OnChannelModeChange == null) return;
 
@@ -510,7 +510,7 @@ public class Listener
                     $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() private action");
             }
         }
-        else if (channelPattern.IsMatch(tokens[2]))
+        else if (_channelPattern.IsMatch(tokens[2]))
         {
             OnPublic?.Invoke(this,
                 new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2],
@@ -528,7 +528,7 @@ public class Listener
 
     public void ProcessPrivmsgCommand(IrcMessage message)
     {
-        var msgTokens = message.Message.Split(Separator);
+        var msgTokens = message.Message.Split(_separator);
         if (msgTokens[0] == ACTION)
         {
             if (Rfc2812Util.IsValidChannelName(message.Target))
@@ -546,7 +546,7 @@ public class Listener
                     $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() private action");
             }
         }
-        else if (channelPattern.IsMatch(message.Target))
+        else if (_channelPattern.IsMatch(message.Target))
         {
             OnPublic?.Invoke(this,
                 new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Target,
@@ -677,7 +677,7 @@ public class Listener
                 string nick = tokens[3];
                 WhoisInfo whoisEndInfo = LookupInfo(nick);
                 OnWhois?.Invoke(this, new WhoisEventArgs(whoisEndInfo));
-                whoisInfos.Remove(nick);
+                _whoisInfos.Remove(nick);
                 break;
             case ReplyCode.RPL_WHOWASUSER:
                 User whoWasUser = new User(tokens[3], tokens[4], tokens[5]);
@@ -851,14 +851,14 @@ public class Listener
     /// <returns></returns>
     private WhoisInfo LookupInfo(string nick)
     {
-        whoisInfos ??= new Hashtable();
+        _whoisInfos ??= new Hashtable();
 
-        WhoisInfo info = (WhoisInfo)whoisInfos[nick];
+        WhoisInfo info = (WhoisInfo)_whoisInfos[nick];
 
         if (info == null)
         {
             info = new WhoisInfo();
-            whoisInfos[nick] = info;
+            _whoisInfos[nick] = info;
         }
         return info;
     }
@@ -911,7 +911,7 @@ public class Listener
     {
         var msg = new IrcMessage();
 
-        string[] tokens = message.Split(Separator);
+        string[] tokens = message.Split(_separator);
         msg.Tokens = tokens;
 
         msg.From = RemoveLeadingColon(tokens[0]);

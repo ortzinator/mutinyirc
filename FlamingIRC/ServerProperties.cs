@@ -21,12 +21,12 @@ public sealed class ServerProperties
 {
     // The server sends every token uppercase, but callers ask for them in the case they read
     // best ("Network"). Comparison is ordinal because these are protocol tokens, not prose.
-    private readonly Hashtable properties;
+    private readonly Hashtable _properties;
 
     /// <summary>
     /// Instances should only be created by the Connection class.
     /// </summary>
-    internal ServerProperties() => properties = new Hashtable(StringComparer.OrdinalIgnoreCase);
+    internal ServerProperties() => _properties = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Read-only indexer for the various server
@@ -37,9 +37,9 @@ public sealed class ServerProperties
     {
         get
         {
-            if (properties[key] != null)
+            if (_properties[key] != null)
             {
-                return (string)properties[key];
+                return (string)_properties[key];
             }
             else
             {
@@ -52,7 +52,7 @@ public sealed class ServerProperties
     /// Add a property retrieved from the IRC server. A server may split its properties over
     /// several '005' replies and repeat a token, so a later value replaces an earlier one.
     /// </summary>
-    internal void SetProperty(string key, string propertyValue) => properties[key] = propertyValue;
+    internal void SetProperty(string key, string propertyValue) => _properties[key] = propertyValue;
 
     /// <summary>
     /// Get a read-only enumeration of all the elements
@@ -66,12 +66,12 @@ public sealed class ServerProperties
     /// Console.WriteLine("Key:" + entry.Key + " Value:" + entry.Value );
     /// }
     /// </code></example>
-    public IDictionaryEnumerator GetEnumerator() => properties.GetEnumerator();
+    public IDictionaryEnumerator GetEnumerator() => _properties.GetEnumerator();
     /// <summary>
     /// Test if this instance contains a given key.
     /// </summary>
     /// <param name="key">The server properties key to test.</param>
     /// <returns>True if it is present.</returns>
-    public bool ContainsKey(string key) => properties[key] != null;
+    public bool ContainsKey(string key) => _properties[key] != null;
 
 }

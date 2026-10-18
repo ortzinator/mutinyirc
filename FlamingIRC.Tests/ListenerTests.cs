@@ -9,29 +9,29 @@ namespace FlamingIRC.Tests;
 public class ListenerTests
 {
     private Listener _listener;
-    private static readonly string _pong =
+    private static readonly string Pong =
         ":hitchcock.freenode.net PONG hitchcock.freenode.net :ping";
-    private static readonly string _names =
+    private static readonly string Names =
         ":hitchcock.freenode.net 353 OrtzIRC = #ortzirc :Ortzinator OrtzIRC @ChanServ";
-    private static readonly string _join =
+    private static readonly string Join =
         ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com JOIN #ortzirc";
-    private static readonly string _noticePrivate =
+    private static readonly string NoticePrivate =
         ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NOTICE OrtzIRC :foobar";
-    private static readonly string _privmsg =
+    private static readonly string Privmsg =
         ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :foobar";
-    private static readonly string _privmsgAction =
+    private static readonly string PrivmsgAction =
         ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PRIVMSG #ortzirc :\u0001ACTION foobars\u0001";
-    private static readonly string _nick =
+    private static readonly string Nick =
         ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com NICK :Ortz";
-    private static readonly string _kick =
+    private static readonly string Kick =
         ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com KICK #ortzirc OrtzIRC :OrtzIRC";
 
-    private static readonly string _topic =
+    private static readonly string Topic =
         ":hitchcock.freenode.net 332 Ortzinator #lancer :foobar";
 
-    private static readonly string _userString =
+    private static readonly string UserString =
         "Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com";
-    private static readonly User _testUser = Rfc2812Util.UserFromString(_userString);
+    private static readonly User TestUser = Rfc2812Util.UserFromString(UserString);
 
     [OneTimeSetUp]
     public void SetupMethods()
@@ -58,7 +58,7 @@ public class ListenerTests
     [Test]
     public void ParseIrcMessage_PongMessage()
     {
-        IrcMessage msg = _listener.ParseIrcMessage(_pong);
+        IrcMessage msg = _listener.ParseIrcMessage(Pong);
         Assert.AreEqual("PONG", msg.Command);
         Assert.AreEqual("hitchcock.freenode.net", msg.From);
         Assert.AreEqual(ReplyCode.Null, msg.ReplyCode);
@@ -67,8 +67,8 @@ public class ListenerTests
     [Test]
     public void ParseIrcMessage_NoticeMessage()
     {
-        IrcMessage msg = _listener.ParseIrcMessage(_noticePrivate);
-        Assert.AreEqual(_userString, msg.From);
+        IrcMessage msg = _listener.ParseIrcMessage(NoticePrivate);
+        Assert.AreEqual(UserString, msg.From);
         Assert.AreEqual("NOTICE", msg.Command);
         Assert.AreEqual("foobar", msg.Message);
     }
@@ -76,7 +76,7 @@ public class ListenerTests
     [Test]
     public void ParseIrcMessage_NamesMessage()
     {
-        IrcMessage msg = _listener.ParseIrcMessage(_names);
+        IrcMessage msg = _listener.ParseIrcMessage(Names);
         Assert.AreEqual("hitchcock.freenode.net", msg.From);
         Assert.AreEqual(ReplyCode.RPL_NAMREPLY, msg.ReplyCode);
         Assert.AreEqual("Ortzinator OrtzIRC @ChanServ", msg.Message);
@@ -97,7 +97,7 @@ public class ListenerTests
         msg.From = "hitchcock.freenode.net";
         msg.Message = "Ortzinator OrtzIRC @ChanServ";
         msg.Target = "#ortzirc";
-        msg.Tokens = _names.Split(new[] { ' ' });
+        msg.Tokens = Names.Split(new[] { ' ' });
         msg.ReplyCode = ReplyCode.RPL_NAMREPLY;
 
         NamesEventArgs givenArgs = null;
@@ -112,8 +112,8 @@ public class ListenerTests
     [Test]
     public void ParseIrcMessage_Privmsg()
     {
-        IrcMessage msg = _listener.ParseIrcMessage(_privmsg);
-        Assert.AreEqual(_userString, msg.From);
+        IrcMessage msg = _listener.ParseIrcMessage(Privmsg);
+        Assert.AreEqual(UserString, msg.From);
         Assert.AreEqual("foobar", msg.Message);
         Assert.AreEqual("#ortzirc", msg.Target);
     }
@@ -121,8 +121,8 @@ public class ListenerTests
     [Test]
     public void ParseIrcMessage_PrivmsgAction()
     {
-        IrcMessage msg = _listener.ParseIrcMessage(_privmsgAction);
-        Assert.AreEqual(_userString, msg.From);
+        IrcMessage msg = _listener.ParseIrcMessage(PrivmsgAction);
+        Assert.AreEqual(UserString, msg.From);
         Assert.AreEqual("\u0001ACTION foobars\u0001", msg.Message);
         Assert.AreEqual("#ortzirc", msg.Target);
     }
@@ -133,10 +133,10 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "PRIVMSG",
-            From = _userString,
+            From = UserString,
             Message = "\u0001ACTION foobars\u0001",
             Target = "#ortzirc",
-            Tokens = _privmsgAction.Split(new[] { ' ' })
+            Tokens = PrivmsgAction.Split(new[] { ' ' })
         };
         UserChannelMessageEventArgs givenArgs = null;
 
@@ -145,7 +145,7 @@ public class ListenerTests
             givenArgs = args;
         };
         _listener.ProcessPrivmsgCommand(msg);
-        Assert.AreEqual(_testUser, givenArgs.User);
+        Assert.AreEqual(TestUser, givenArgs.User);
         Assert.AreEqual("#ortzirc", givenArgs.Channel);
         Assert.AreEqual("foobars", givenArgs.Message);
     }
@@ -156,10 +156,10 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "PRIVMSG",
-            From = _userString,
+            From = UserString,
             Message = "\u0001ACTION foobars\u0001",
             Target = "Buster",
-            Tokens = _privmsg.Split(new[] { ' ' })
+            Tokens = Privmsg.Split(new[] { ' ' })
         };
         UserMessageEventArgs givenArgs = null;
 
@@ -168,7 +168,7 @@ public class ListenerTests
             givenArgs = args;
         };
         _listener.ProcessPrivmsgCommand(msg);
-        Assert.AreEqual(_testUser, givenArgs.User);
+        Assert.AreEqual(TestUser, givenArgs.User);
         Assert.AreEqual("foobars", givenArgs.Message);
     }
 
@@ -178,10 +178,10 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "PRIVMSG",
-            From = _userString,
+            From = UserString,
             Message = "foobar",
             Target = "#ortzirc",
-            Tokens = _privmsg.Split(new[] { ' ' })
+            Tokens = Privmsg.Split(new[] { ' ' })
         };
         UserChannelMessageEventArgs givenArgs = null;
 
@@ -190,7 +190,7 @@ public class ListenerTests
             givenArgs = args;
         };
         _listener.ProcessPrivmsgCommand(msg);
-        Assert.AreEqual(_testUser, givenArgs.User);
+        Assert.AreEqual(TestUser, givenArgs.User);
         Assert.AreEqual("#ortzirc", givenArgs.Channel);
         Assert.AreEqual("foobar", givenArgs.Message);
     }
@@ -201,10 +201,10 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "PRIVMSG",
-            From = _userString,
+            From = UserString,
             Message = "foobar",
             Target = "Buster",
-            Tokens = _privmsg.Split(new[] { ' ' })
+            Tokens = Privmsg.Split(new[] { ' ' })
         };
         UserMessageEventArgs givenArgs = null;
 
@@ -213,7 +213,7 @@ public class ListenerTests
             givenArgs = args;
         };
         _listener.ProcessPrivmsgCommand(msg);
-        Assert.AreEqual(_testUser, givenArgs.User);
+        Assert.AreEqual(TestUser, givenArgs.User);
         Assert.AreEqual("foobar", givenArgs.Message);
     }
 
@@ -226,26 +226,26 @@ public class ListenerTests
     [Test]
     public void ParseIrcMessage_PrivateNotice()
     {
-        IrcMessage msg = _listener.ParseIrcMessage(_noticePrivate);
-        Assert.AreEqual(_userString, msg.From);
+        IrcMessage msg = _listener.ParseIrcMessage(NoticePrivate);
+        Assert.AreEqual(UserString, msg.From);
         Assert.AreEqual("foobar", msg.Message);
-        Assert.AreEqual(_noticePrivate.Split(new[] { ' ' }), msg.Tokens);
+        Assert.AreEqual(NoticePrivate.Split(new[] { ' ' }), msg.Tokens);
         Assert.AreEqual("OrtzIRC", msg.Target);
     }
 
     [Test]
     public void ParseIrcMessage_JoinCommand()
     {
-        IrcMessage msg = _listener.ParseIrcMessage(_join);
-        Assert.AreEqual(_userString, msg.From);
+        IrcMessage msg = _listener.ParseIrcMessage(Join);
+        Assert.AreEqual(UserString, msg.From);
         Assert.AreEqual("#ortzirc", msg.Target);
     }
 
     [Test]
     public void ParseIrcMessage_KickCommand()
     {
-        IrcMessage msg = _listener.ParseIrcMessage(_kick);
-        Assert.AreEqual(_userString, msg.From);
+        IrcMessage msg = _listener.ParseIrcMessage(Kick);
+        Assert.AreEqual(UserString, msg.From);
         Assert.AreEqual("#ortzirc", msg.Target);
     }
 
@@ -255,10 +255,10 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "NOTICE",
-            From = _userString,
+            From = UserString,
             Message = "foobar",
             Target = "OrtzIRC",
-            Tokens = _privmsg.Split(new[] { ' ' })
+            Tokens = Privmsg.Split(new[] { ' ' })
         };
         UserMessageEventArgs givenArgs = null;
 
@@ -267,7 +267,7 @@ public class ListenerTests
             givenArgs = args;
         };
         _listener.ProcessNoticeCommand(msg);
-        Assert.AreEqual(_testUser, givenArgs.User);
+        Assert.AreEqual(TestUser, givenArgs.User);
         Assert.AreEqual("foobar", givenArgs.Message);
     }
 
@@ -277,9 +277,9 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "NICK",
-            From = _userString,
+            From = UserString,
             Message = "Ortz",
-            Tokens = _nick.Split(new[] { ' ' })
+            Tokens = Nick.Split(new[] { ' ' })
         };
         NickChangeEventArgs givenArgs = null;
         _listener.OnNick += delegate (object sender, NickChangeEventArgs args)
@@ -287,7 +287,7 @@ public class ListenerTests
             givenArgs = args;
         };
         _listener.ProcessNickCommand(msg);
-        Assert.AreEqual(_testUser, givenArgs.User);
+        Assert.AreEqual(TestUser, givenArgs.User);
         Assert.AreEqual("Ortz", givenArgs.NewNick);
     }
 
@@ -297,7 +297,7 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "INVITE",
-            From = _userString,
+            From = UserString,
             Message = "#ortzirc"
         };
         InviteEventArgs givenArgs = null;
@@ -316,13 +316,13 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "JOIN",
-            From = _userString,
+            From = UserString,
             Target = "#ortzirc"
         };
         JoinEventArgs givenArgs = null;
         _listener.OnJoin += (_, e) => givenArgs = e;
         _listener.ProcessJoinCommand(msg);
-        Assert.AreEqual(_testUser, givenArgs.User);
+        Assert.AreEqual(TestUser, givenArgs.User);
         Assert.AreEqual("#ortzirc", givenArgs.Channel);
 
     }
@@ -335,7 +335,7 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "JOIN",
-            From = _userString,
+            From = UserString,
             Target = ":#ortzirc"
         };
         string receivedChannel = null;
@@ -350,15 +350,15 @@ public class ListenerTests
         IrcMessage msg = new IrcMessage
         {
             Command = "KICK",
-            From = _userString,
+            From = UserString,
             Target = "OrtzIRC",
             Message = "noob",
-            Tokens = _kick.Split(new[] { ' ' })
+            Tokens = Kick.Split(new[] { ' ' })
         };
         KickEventArgs givenArgs = null;
         _listener.OnKick += (_, e) => givenArgs = e;
         _listener.ProcessKickCommand(msg);
-        Assert.AreEqual(_testUser, givenArgs.Kicker);
+        Assert.AreEqual(TestUser, givenArgs.Kicker);
         Assert.AreEqual("#ortzirc", givenArgs.Channel);
         Assert.AreEqual("OrtzIRC", givenArgs.Kickee);
         Assert.AreEqual("noob", givenArgs.Reason);
@@ -407,7 +407,7 @@ public class ListenerTests
             givenChannel = e.Channel;
             givenTopic = e.Topic;
         };
-        _listener.ParseReply(_topic.Split(new[] { ' ' }));
+        _listener.ParseReply(Topic.Split(new[] { ' ' }));
         Assert.That(givenChannel, Is.EqualTo("#lancer"));
         Assert.That(givenTopic, Is.EqualTo("foobar"));
     }
@@ -418,7 +418,7 @@ public class ListenerTests
         ChannelModeChangeEventArgs givenArgs = null;
         _listener.OnChannelModeChange += (_, e) => givenArgs = e;
         _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com MODE #ortzirc +m");
-        Assert.AreEqual(_testUser, givenArgs.Changer);
+        Assert.AreEqual(TestUser, givenArgs.Changer);
         Assert.AreEqual("#ortzirc", givenArgs.Channel);
         Assert.AreEqual(1, givenArgs.Modes.Count);
         Assert.AreEqual(ModeAction.Add, givenArgs.Modes[0].Action);
@@ -450,7 +450,7 @@ public class ListenerTests
         };
         _listener.Parse(
             ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT :Quit: Leaving");
-        Assert.AreEqual(_testUser, givenUser);
+        Assert.AreEqual(TestUser, givenUser);
         Assert.AreEqual("Quit: Leaving", givenReason);
     }
 
@@ -465,7 +465,7 @@ public class ListenerTests
             givenReason = e.Reason;
         };
         _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com QUIT");
-        Assert.AreEqual(_testUser, givenUser);
+        Assert.AreEqual(TestUser, givenUser);
         Assert.AreEqual("", givenReason);
     }
 
@@ -483,7 +483,7 @@ public class ListenerTests
         };
         _listener.Parse(
             ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PART #ortzirc :Goodbye");
-        Assert.AreEqual(_testUser, givenUser);
+        Assert.AreEqual(TestUser, givenUser);
         Assert.AreEqual("#ortzirc", givenChannel);
         Assert.AreEqual("Goodbye", givenReason);
     }
@@ -501,7 +501,7 @@ public class ListenerTests
             givenReason = e.Reason;
         };
         _listener.Parse(":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com PART #ortzirc");
-        Assert.AreEqual(_testUser, givenUser);
+        Assert.AreEqual(TestUser, givenUser);
         Assert.AreEqual("#ortzirc", givenChannel);
         Assert.AreEqual("", givenReason);
     }
@@ -513,7 +513,7 @@ public class ListenerTests
         _listener.OnTopicChanged += (sender, args) => givenArgs = args;
         _listener.Parse(
             ":Ortzinator!~ortz@cpe-075-184-002-005.nc.res.rr.com TOPIC #ortzirc :New topic here");
-        Assert.AreEqual(_testUser, givenArgs.User);
+        Assert.AreEqual(TestUser, givenArgs.User);
         Assert.AreEqual("#ortzirc", givenArgs.Channel);
         Assert.AreEqual("New topic here", givenArgs.Message);
     }

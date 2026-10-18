@@ -6,8 +6,8 @@ namespace FlamingIRC;
 
 public class UserList : IList<User>, INotifyUpdate
 {
-    private readonly List<User> list;
-    private EventHandler onUpdate;
+    private readonly List<User> _list;
+    private EventHandler _onUpdate;
 
     /// <summary>
     /// Specifies whether or not to trigger the Updated event.
@@ -18,38 +18,38 @@ public class UserList : IList<User>, INotifyUpdate
 
     public UserList()
     {
-        list = new List<User>();
+        _list = new List<User>();
         NotifyUpdate = true;
     }
 
     public UserList(List<User> userList)
     {
-        list = userList;
+        _list = userList;
         NotifyUpdate = true;
     }
 
     #region IList<User> Members
 
-    public int IndexOf(User item) => list.IndexOf(item);
+    public int IndexOf(User item) => _list.IndexOf(item);
 
     public void Insert(int index, User item)
     {
-        list.Insert(index, item);
+        _list.Insert(index, item);
         OnUpdate();
     }
 
     public void RemoveAt(int index)
     {
-        list.RemoveAt(index);
+        _list.RemoveAt(index);
         OnUpdate();
     }
 
     public User this[int index]
     {
-        get => list[index];
+        get => _list[index];
         set
         {
-            list[index] = value;
+            _list[index] = value;
             OnUpdate();
         }
     }
@@ -60,27 +60,27 @@ public class UserList : IList<User>, INotifyUpdate
 
     public void Add(User item)
     {
-        list.Add(item);
+        _list.Add(item);
         OnUpdate();
     }
 
     public void Clear()
     {
-        list.Clear();
+        _list.Clear();
         OnUpdate();
     }
 
-    public bool Contains(User item) => list.Contains(item);
+    public bool Contains(User item) => _list.Contains(item);
 
-    public void CopyTo(User[] array, int arrayIndex) => list.CopyTo(array, arrayIndex);
+    public void CopyTo(User[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
 
-    public int Count => list.Count;
+    public int Count => _list.Count;
 
     public bool IsReadOnly => false;
 
     public bool Remove(User item)
     {
-        var a = list.Remove(item);
+        var a = _list.Remove(item);
         OnUpdate();
         return a;
     }
@@ -89,13 +89,13 @@ public class UserList : IList<User>, INotifyUpdate
 
     #region IEnumerable<User> Members
 
-    public IEnumerator<User> GetEnumerator() => list.GetEnumerator();
+    public IEnumerator<User> GetEnumerator() => _list.GetEnumerator();
 
     #endregion
 
     #region IEnumerable Members
 
-    IEnumerator IEnumerable.GetEnumerator() => list.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
 
     #endregion
 
@@ -103,20 +103,20 @@ public class UserList : IList<User>, INotifyUpdate
 
     public event EventHandler Updated
     {
-        add => onUpdate += value; remove => onUpdate -= value;
+        add => _onUpdate += value; remove => _onUpdate -= value;
     }
 
     #endregion
 
     private void OnUpdate()
     {
-        if (onUpdate != null && NotifyUpdate)
-            onUpdate(this, new EventArgs());
+        if (_onUpdate != null && NotifyUpdate)
+            _onUpdate(this, new EventArgs());
     }
 
     public User GetUser(string nick)
     {
-        foreach (var user in list)
+        foreach (var user in _list)
             if (user.Nick.ToUpper() == nick.ToUpper())
                 return user;
 
@@ -130,5 +130,5 @@ public class UserList : IList<User>, INotifyUpdate
     /// </summary>
     public void Refresh() => OnUpdate();
 
-    public void Sort(Comparison<User> comparison) => list.Sort(comparison);
+    public void Sort(Comparison<User> comparison) => _list.Sort(comparison);
 }

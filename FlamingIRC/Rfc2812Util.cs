@@ -36,9 +36,9 @@ namespace FlamingIRC;
 public sealed class Rfc2812Util
 {
     // Regex that matches a legal IRC nick
-    private static readonly Regex nickRegex;
+    private static readonly Regex NickRegex;
     //Regex to create a User from a string
-    private static readonly Regex nameSplitterRegex;
+    private static readonly Regex NameSplitterRegex;
     private const string ChannelPrefix = "#!+&";
     private const string UserModes = "awiorOs";
     private const string ChannelModes = "OohvaimnqpsrtklbeI";
@@ -55,8 +55,8 @@ public sealed class Rfc2812Util
     /// </summary>
     static Rfc2812Util()
     {
-        nickRegex = new Regex(nickReg);
-        nameSplitterRegex = new Regex("[!@]", RegexOptions.Compiled | RegexOptions.Singleline);
+        NickRegex = new Regex(nickReg);
+        NameSplitterRegex = new Regex("[!@]", RegexOptions.Compiled | RegexOptions.Singleline);
     }
 
     /// <summary>
@@ -89,10 +89,10 @@ public sealed class Rfc2812Util
         {
             return null;
         }
-        Match match = nameSplitterRegex.Match(fullUserName);
+        Match match = NameSplitterRegex.Match(fullUserName);
         if (match.Success)
         {
-            string[] parts = nameSplitterRegex.Split(fullUserName);
+            string[] parts = NameSplitterRegex.Split(fullUserName);
             return parts;
         }
         else
@@ -163,7 +163,7 @@ public sealed class Rfc2812Util
         {
             return false;
         }
-        if (nickRegex.IsMatch(nick))
+        if (NickRegex.IsMatch(nick))
         {
             return true;
         }

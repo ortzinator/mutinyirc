@@ -58,18 +58,18 @@ public sealed class DccChatSession
 
     //Default timeout is 30 seconds
     private const int DefaultTimeout = 30000;
-    private TcpClient client;
-    private TcpListener server;
-    private Thread thread;
-    private int listenPort;
-    private bool listening;
-    private bool receiving;
+    private TcpClient _client;
+    private TcpListener _server;
+    private Thread _thread;
+    private int _listenPort;
+    private bool _listening;
+    private bool _receiving;
 
     internal DccChatSession(DccUser dccUser)
     {
         ClientInfo = dccUser;
-        listening = false;
-        receiving = false;
+        _listening = false;
+        _receiving = false;
     }
 
     /// <summary>
@@ -77,7 +77,7 @@ public sealed class DccChatSession
     /// is currently connected to another user.
     /// </summary>
     /// <value>True if the client is connected.</value>
-    public bool Connected => client != null;
+    public bool Connected => _client != null;
     /// <summary>
     /// Iinformation about the remote user.
     /// </summary>
@@ -88,7 +88,7 @@ public sealed class DccChatSession
     {
         try
         {
-            client?.Close();
+            _client?.Close();
         }
         catch (Exception ex)
         {
@@ -127,7 +127,7 @@ public sealed class DccChatSession
     /// <param name="state">An instance of DccChatSession</param>
     private void TimerExpired(object state)
     {
-        if (listening)
+        if (_listening)
         {
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::TimerExpired() Chat session " + ToString() + " timed out.");
             OnChatRequestTimeout?.Invoke(this, new DccChatSessionEventArgs(this));
@@ -140,14 +140,14 @@ public sealed class DccChatSession
         try
         {
             //Wait for remote client to connect
-            IPEndPoint localEndPoint = new IPEndPoint(DccUtil.LocalHost(), listenPort);
-            server = new TcpListener(localEndPoint);
-            listening = true;
-            server.Start();
+            IPEndPoint localEndPoint = new IPEndPoint(DccUtil.LocalHost(), _listenPort);
+            _server = new TcpListener(localEndPoint);
+            _listening = true;
+            _server.Start();
             //Got one!
-            client = server.AcceptTcpClient();
-            server.Stop();
-            listening = false;
+            _client = _server.AcceptTcpClient();
+            _server.Stop();
+            _listening = false;
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Listen() Remote user connected.");
             OnChatSessionOpened?.Invoke(this, new DccChatSessionEventArgs(this));
             //Start listening for messages
@@ -168,8 +168,8 @@ public sealed class DccChatSession
         Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Connect()");
         try
         {
-            client = new TcpClient();
-            client.Connect(ClientInfo.RemoteEndPoint);
+            _client = new TcpClient();
+            _client.Connect(ClientInfo.RemoteEndPoint);
             OnChatSessionOpened?.Invoke(this, new DccChatSessionEventArgs(this));
             ReceiveMessages();
         }
@@ -196,9 +196,9 @@ public sealed class DccChatSession
         Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::ReceiveMessages()");
         try
         {
-            receiving = true;
+            _receiving = true;
             string message = "";
-            StreamReader reader = new StreamReader(client.GetStream(), ClientInfo.Connection.TextEncoding);
+            StreamReader reader = new StreamReader(_client.GetStream(), ClientInfo.Connection.TextEncoding);
             while ((message = reader.ReadLine()) != null)
             {
                 if (OnChatMessageReceived != null)
@@ -209,7 +209,7 @@ public sealed class DccChatSession
                     OnChatMessageReceived?.Invoke(this, new DccChatMessageEventArgs(this, message));
                 }
             }
-            receiving = false;
+            _receiving = false;
             //Read loop broken. Remote user must have closed the socket
             ClientInfo.Connection.Listener.Error(ReplyCode.ConnectionFailed, "Chat connection closed by remote user.");
         }
@@ -239,7 +239,7 @@ public sealed class DccChatSession
                 //before sending. Also strip off any existing new lines so
                 //we don't accidentally send two.
                 byte[] messageBytes = ClientInfo.Connection.TextEncoding.GetBytes(text.TrimEnd() + "\n");
-                client.GetStream().Write(messageBytes, 0, messageBytes.Length);
+                _client.GetStream().Write(messageBytes, 0, messageBytes.Length);
                 Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccChatSession::SendMessage() Sent : " + text + " Size: " + messageBytes.Length);
             }
             catch (Exception ex)
@@ -257,11 +257,11 @@ public sealed class DccChatSession
         lock (this)
         {
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Close()");
-            if (listening)
+            if (_listening)
             {
-                server.Stop();
+                _server.Stop();
             }
-            else if (receiving)
+            else if (_receiving)
             {
                 //Closing the client breaks the blocking ReadLine in ReceiveMessages,
                 //which then exits via the general exception/finally path.
@@ -292,11 +292,11 @@ public sealed class DccChatSession
         Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Accept()");
         DccChatSession session = new DccChatSession(dccUser);
         //Start session Thread
-        session.thread = new Thread(new ThreadStart(session.Connect))
+        session._thread = new Thread(new ThreadStart(session.Connect))
         {
             Name = session.ToString()
         };
-        session.thread.Start();
+        session._thread.Start();
         return session;
     }
     /// <summary>
@@ -350,14 +350,14 @@ public sealed class DccChatSession
         //Create session object
         DccChatSession session = new DccChatSession(dccUser)
         {
-            listenPort = listenPort
+            _listenPort = listenPort
         };
         //Start session Thread
-        session.thread = new Thread(new ThreadStart(session.Listen))
+        session._thread = new Thread(new ThreadStart(session.Listen))
         {
             Name = session.ToString()
         };
-        session.thread.Start();
+        session._thread.Start();
         //Send Chat request to remote user
         session.SendChatRequest(listenIPAddress, listenPort);
         //Start timeout thread if timeout > 0

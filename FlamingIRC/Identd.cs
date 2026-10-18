@@ -39,17 +39,17 @@ namespace FlamingIRC;
 /// </summary>
 public sealed class Identd
 {
-    private static TcpListener listener;
-    private static bool running;
-    private static readonly object lockObject;
-    private static string username;
+    private static TcpListener ListenSocket;
+    private static bool Running;
+    private static readonly object LockObject;
+    private static string Username;
     private const string Reply = " : USERID : UNIX : ";
     private const int IdentdPort = 113;
 
     static Identd()
     {
-        running = false;
-        lockObject = new object();
+        Running = false;
+        LockObject = new object();
     }
 
     //Declare constructor private so it cannot be instatiated.
@@ -65,14 +65,14 @@ public sealed class Identd
     /// <exception cref="Exception">If the server has already been started.</exception>
     public static void Start(string userName)
     {
-        lock (lockObject)
+        lock (LockObject)
         {
-            if (running)
+            if (Running)
             {
                 throw new Exception("Identd already started.");
             }
-            running = true;
-            username = userName;
+            Running = true;
+            Username = userName;
             Thread socketThread = new Thread(Run) { Name = "Identd", IsBackground = true };
             socketThread.Start();
         }
@@ -83,9 +83,9 @@ public sealed class Identd
     /// <returns>True if it is running</returns>
     public static bool IsRunning()
     {
-        lock (lockObject)
+        lock (LockObject)
         {
-            return running;
+            return Running;
         }
     }
     /// <summary>
@@ -93,14 +93,14 @@ public sealed class Identd
     /// </summary>
     public static void Stop()
     {
-        lock (lockObject)
+        lock (LockObject)
         {
-            if (running)
+            if (Running)
             {
-                listener.Stop();
+                ListenSocket.Stop();
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Stop()");
-                listener = null;
-                running = false;
+                ListenSocket = null;
+                Running = false;
             }
         }
     }
@@ -110,14 +110,14 @@ public sealed class Identd
         Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run()");
         try
         {
-            listener = new TcpListener(IPAddress.Loopback, IdentdPort);
-            listener.Start();
+            ListenSocket = new TcpListener(IPAddress.Loopback, IdentdPort);
+            ListenSocket.Start();
 
         loop:
             {
                 try
                 {
-                    TcpClient client = listener.AcceptTcpClient();
+                    TcpClient client = ListenSocket.AcceptTcpClient();
                     //Read query
                     StreamReader reader = new StreamReader(client.GetStream());
                     string line = reader.ReadLine();
@@ -125,7 +125,7 @@ public sealed class Identd
 
                     //Send back reply
                     StreamWriter writer = new StreamWriter(client.GetStream());
-                    writer.WriteLine(line.Trim() + Reply + username);
+                    writer.WriteLine(line.Trim() + Reply + Username);
                     writer.Flush();
 
                     //Close connection with client
@@ -144,7 +144,7 @@ public sealed class Identd
         }
         finally
         {
-            running = false;
+            Running = false;
         }
     }
 

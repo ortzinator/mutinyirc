@@ -52,14 +52,14 @@ public sealed class DccListener
     /// </summary>
     public event EventHandler<DccGetRequestEventArgs> OnDccGetRequest;
 
-    private static DccListener listener;
-    private static readonly object lockObject = new object();
+    private static DccListener Singleton;
+    private static readonly object LockObject = new object();
     //Checks if a line is likely a DCC request
-    private static readonly Regex dccMatchRegex;
+    private static readonly Regex DccMatchRegex;
     //Split the DCC into space separated tokens
-    private readonly Regex tokenizer;
+    private readonly Regex _tokenizer;
     //Extract out the DCC specific info
-    private readonly Regex parser;
+    private readonly Regex _parser;
     //The values of the DCC string tokens
     private const int Action = 0;
     private const int FileName = 1;
@@ -75,7 +75,7 @@ public sealed class DccListener
 
     static DccListener()
     {
-        dccMatchRegex =
+        DccMatchRegex =
             new Regex(
                 ":([^ ]+) PRIVMSG [^:]+:\u0001DCC (CHAT|SEND|GET|RESUME|ACCEPT)[^\u0001]*\u0001",
                 RegexOptions.Compiled | RegexOptions.Singleline);
@@ -83,8 +83,8 @@ public sealed class DccListener
 
     private DccListener()
     {
-        parser = new Regex(":([^ ]+) PRIVMSG [^:]+:\u0001DCC ([^\u0001]*)\u0001", RegexOptions.Compiled | RegexOptions.Singleline);
-        tokenizer = new Regex("[\\s]+", RegexOptions.Compiled | RegexOptions.Singleline);
+        _parser = new Regex(":([^ ]+) PRIVMSG [^:]+:\u0001DCC ([^\u0001]*)\u0001", RegexOptions.Compiled | RegexOptions.Singleline);
+        _tokenizer = new Regex("[\\s]+", RegexOptions.Compiled | RegexOptions.Singleline);
     }
 
     /// <summary>
@@ -105,9 +105,9 @@ public sealed class DccListener
     internal void Parse(Connection connection, string message)
     {
         Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccListener::Parse()");
-        Match match = parser.Match(message);
+        Match match = _parser.Match(message);
         string requestor = match.Groups[1].ToString();
-        string[] tokens = tokenizer.Split(match.Groups[2].ToString().Trim());
+        string[] tokens = _tokenizer.Split(match.Groups[2].ToString().Trim());
         switch (tokens[Action])
         {
             case CHAT:
@@ -257,15 +257,15 @@ public sealed class DccListener
             //Create the singleton instance in a lazy manner.
             //Multiple Connection threads could call this at once
             //so it is synchronized.
-            lock (lockObject)
+            lock (LockObject)
             {
-                if (listener == null)
+                if (Singleton == null)
                 {
                     Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccListener::init");
-                    listener = new DccListener();
+                    Singleton = new DccListener();
                 }
             }
-            return listener;
+            return Singleton;
         }
     }
 
@@ -274,5 +274,5 @@ public sealed class DccListener
     /// </summary>
     /// <param name="message">The raw message from the IRC server</param>
     /// <returns>True if this is a DCC request.</returns>
-    public static bool IsDccRequest(string message) => dccMatchRegex.IsMatch(message);
+    public static bool IsDccRequest(string message) => DccMatchRegex.IsMatch(message);
 }

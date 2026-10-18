@@ -33,16 +33,16 @@ namespace FlamingIRC;
 /// </summary>
 public sealed class DccFileInfo
 {
-    private readonly FileInfo fileInfo;
+    private readonly FileInfo _fileInfo;
 
     //Where in the file to start reading or writing
     //Number of bytes sent or received so far in this
     //session
-    private long bytesTransfered;
+    private long _bytesTransfered;
 
     //Total number of bytes to send or receive
     //The last position ack value
-    private long lastAckValue;
+    private long _lastAckValue;
 
     /// <summary>
     /// Create a new instance using information sent from the remote user
@@ -53,10 +53,10 @@ public sealed class DccFileInfo
     /// request.</param>
     public DccFileInfo(FileInfo fileInfo, long completeFileSize)
     {
-        this.fileInfo = fileInfo;
+        _fileInfo = fileInfo;
         CompleteFileSize = completeFileSize;
         FileStartingPosition = 0;
-        bytesTransfered = 0;
+        _bytesTransfered = 0;
     }
     /// <summary>
     /// Create a new instance using the file information from a local file
@@ -66,14 +66,14 @@ public sealed class DccFileInfo
     /// <exception cref="ArgumentException">If the file does not already exist.</exception>
     public DccFileInfo(FileInfo fileInfo)
     {
-        this.fileInfo = fileInfo;
+        _fileInfo = fileInfo;
         if (!fileInfo.Exists)
         {
             throw new ArgumentException(fileInfo.Name + " does not exist.");
         }
         CompleteFileSize = fileInfo.Length;
         FileStartingPosition = 0;
-        bytesTransfered = 0;
+        _bytesTransfered = 0;
     }
     /// <summary>
     /// Create a new instance using the file information from a local file
@@ -83,14 +83,14 @@ public sealed class DccFileInfo
     /// <exception cref="ArgumentException">If the file does not already exist.</exception>
     public DccFileInfo(string fileName)
     {
-        fileInfo = new FileInfo(fileName);
-        if (!fileInfo.Exists)
+        _fileInfo = new FileInfo(fileName);
+        if (!_fileInfo.Exists)
         {
             throw new ArgumentException(fileName + " does not exist.");
         }
-        CompleteFileSize = fileInfo.Length;
+        CompleteFileSize = _fileInfo.Length;
         FileStartingPosition = 0;
-        bytesTransfered = 0;
+        _bytesTransfered = 0;
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public sealed class DccFileInfo
         {
             lock (this)
             {
-                return bytesTransfered;
+                return _bytesTransfered;
             }
         }
     }
@@ -124,7 +124,7 @@ public sealed class DccFileInfo
     /// without the path.
     /// </summary>
     /// <value>A read-only string.</value>
-    public string DccFileName => DccUtil.SpacesToUnderscores(fileInfo.Name);
+    public string DccFileName => DccUtil.SpacesToUnderscores(_fileInfo.Name);
 
     internal FileStream TransferStream { get; private set; }
 
@@ -137,7 +137,7 @@ public sealed class DccFileInfo
     {
         lock (this)
         {
-            bytesTransfered += additionalBytes;
+            _bytesTransfered += additionalBytes;
         }
     }
     /// <summary>
@@ -159,7 +159,7 @@ public sealed class DccFileInfo
     /// Is the position where the remote user would to to resume
     /// valid?
     /// </summary>
-    internal bool ResumePositionValid(long position) => position > 1 && position < fileInfo.Length;
+    internal bool ResumePositionValid(long position) => position > 1 && position < _fileInfo.Length;
     /// <summary>
     /// Can this file be resumed, i.e. does it
     /// support random access?
@@ -168,14 +168,14 @@ public sealed class DccFileInfo
     /// <summary>
     /// Start a Resume where the file last left off.
     /// </summary>
-    internal void SetResumeToFileSize() => FileStartingPosition = fileInfo.Length;
+    internal void SetResumeToFileSize() => FileStartingPosition = _fileInfo.Length;
     /// <summary>
     /// Set the point at which the transfer will begin
     /// </summary>
     internal void SetResumePosition(long resumePosition)
     {
         FileStartingPosition = resumePosition;
-        bytesTransfered = FileStartingPosition;
+        _bytesTransfered = FileStartingPosition;
     }
     /// <summary>
     /// Where in the file is the transfer currently at?
@@ -202,15 +202,15 @@ public sealed class DccFileInfo
     /// <summary>
     /// Set this file stream to a read only one.
     /// </summary>
-    internal void OpenForRead() => TransferStream = fileInfo.OpenRead();
+    internal void OpenForRead() => TransferStream = _fileInfo.OpenRead();
     /// <summary>
     /// Set this file stream to a write only one.
     /// </summary>
-    internal void OpenForWrite() => TransferStream = fileInfo.OpenWrite();
+    internal void OpenForWrite() => TransferStream = _fileInfo.OpenWrite();
     /// <summary>
     /// Should we try to resume this file download?
     /// </summary>
-    internal bool ShouldResume() => fileInfo.Length > 0 && CanResume();
+    internal bool ShouldResume() => _fileInfo.Length > 0 && CanResume();
     /// <summary>
     /// Determine whether the acks sent during an upload
     /// signal that all bytes have been sent.
@@ -224,8 +224,8 @@ public sealed class DccFileInfo
     /// <returns>True if the acks are done</returns>
     internal bool AcksFinished(long ack)
     {
-        bool done = ack == BytesTransfered || ack == lastAckValue;
-        lastAckValue = ack;
+        bool done = ack == BytesTransfered || ack == _lastAckValue;
+        _lastAckValue = ack;
         return done;
     }
 

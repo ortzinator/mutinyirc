@@ -41,11 +41,11 @@ public sealed class TextColor
     private const string TextColorFormat = "\x0003{0}{1}\x0003";
     private const string FullColorFormat = "\x0003{0},{1}{2}\x0003";
 
-    private static readonly Regex colorPattern;
+    private static readonly Regex ColorPattern;
 
     static TextColor()
     {
-        colorPattern = new Regex("\\u0003[\\d]{1,2}(,[\\d]{1,2})?([^\\u0003]+)\\u0003",
+        ColorPattern = new Regex("\\u0003[\\d]{1,2}(,[\\d]{1,2})?([^\\u0003]+)\\u0003",
             RegexOptions.Compiled | RegexOptions.Singleline);
     }
 
@@ -75,7 +75,7 @@ public sealed class TextColor
 
     private static string StripColor(string text)
     {
-        Match match = colorPattern.Match(text);
+        Match match = ColorPattern.Match(text);
         if (match.Success)
         {
             return text.Substring(0, match.Index) +

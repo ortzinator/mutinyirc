@@ -37,13 +37,13 @@ namespace FlamingIRC;
 /// </summary>
 public sealed class CtcpSender : CommandBuilder
 {
-    private readonly ArrayList pingList;
+    private readonly ArrayList _pingList;
 
     /// <summary>
     /// Create an instance using a specific connection.
     /// </summary>
     /// <param name="connection">The connection to an IRC server.</param>
-    internal CtcpSender(Connection connection) : base(connection) => pingList = new ArrayList();
+    internal CtcpSender(Connection connection) : base(connection) => _pingList = new ArrayList();
 
     /// <summary>
     /// Test if the timestamp is one that this client sent out.
@@ -52,13 +52,13 @@ public sealed class CtcpSender : CommandBuilder
     /// </summary>
     /// <param name="timestamp">The timstamp</param>
     /// <returns>True if the timestamp was sent by this client.</returns>
-    internal bool IsMyRequest(string timestamp) => pingList.Contains(timestamp);
+    internal bool IsMyRequest(string timestamp) => _pingList.Contains(timestamp);
     /// <summary>
     /// Remove a timstamp from the list
     /// we are maintaining.
     /// </summary>
     /// <param name="timestamp">The timestamp that was sent back.</param>
-    internal void ReplyReceived(string timestamp) => pingList.Remove(timestamp);
+    internal void ReplyReceived(string timestamp) => _pingList.Remove(timestamp);
 
     /// <summary>
     /// Send a reply in response to a CTCP request. Replies that exceed
@@ -173,7 +173,7 @@ public sealed class CtcpSender : CommandBuilder
                 ClearBuffer();
                 throw new ArgumentException(nick + " is not a valid nick.");
             }
-            pingList.Add(timestamp);
+            _pingList.Add(timestamp);
             SendMessage("PRIVMSG", nick, CtcpQuote + CtcpUtil.Ping + " " + timestamp + CtcpQuote);
         }
     }

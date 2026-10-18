@@ -61,18 +61,18 @@ public sealed class DccFileSession
     public event EventHandler<DccFileProgressEventArgs> OnFileTransferProgress;
 
     //Does this session use send-ahead mode
-    private bool turboMode;
+    private bool _turboMode;
 
     //The last time any data was received or sent successfully
     //used to test for a timeout.
     //Signals whether the session is waiting for an Accept message 
     //in reponse to a Resume request.
-    private bool waitingOnAccept;
-    private readonly byte[] buffer;
-    private readonly int listenPort;
-    private Socket socket;
-    private Socket serverSocket;
-    private Thread thread;
+    private bool _waitingOnAccept;
+    private readonly byte[] _buffer;
+    private readonly int _listenPort;
+    private Socket _socket;
+    private Socket _serverSocket;
+    private Thread _thread;
 
     internal DccFileInfo dccFileInfo;
 
@@ -84,11 +84,11 @@ public sealed class DccFileSession
     {
         User = dccUser;
         this.dccFileInfo = dccFileInfo;
-        buffer = new byte[bufferSize];
-        this.listenPort = listenPort;
+        _buffer = new byte[bufferSize];
+        _listenPort = listenPort;
         ID = sessionID;
         LastActivity = DateTime.Now;
-        waitingOnAccept = false;
+        _waitingOnAccept = false;
     }
 
     internal DateTime LastActivity { get; private set; }
@@ -121,7 +121,7 @@ public sealed class DccFileSession
         builder.Append(" :\x0001DCC ACCEPT ");
         builder.Append(dccFileInfo.DccFileName);
         builder.Append(" ");
-        builder.Append(listenPort);
+        builder.Append(_listenPort);
         builder.Append(" ");
         builder.Append(dccFileInfo.FileStartingPosition);
         builder.Append("\x0001\n");
@@ -136,10 +136,10 @@ public sealed class DccFileSession
         builder.Append(" ");
         builder.Append(DccUtil.IPAddressToLong(sendAddress).ToString());
         builder.Append(" ");
-        builder.Append(listenPort);
+        builder.Append(_listenPort);
         builder.Append(" ");
         builder.Append(dccFileInfo.CompleteFileSize);
-        builder.Append(turboMode ? " T" : "");
+        builder.Append(_turboMode ? " T" : "");
         builder.Append("\x0001\n");
         User.Connection.Sender.Raw(builder.ToString());
     }
@@ -150,7 +150,7 @@ public sealed class DccFileSession
         builder.Append(" :\x0001DCC RESUME ");
         builder.Append(dccFileInfo.DccFileName);
         builder.Append(" ");
-        builder.Append(listenPort);
+        builder.Append(_listenPort);
         builder.Append(" ");
         builder.Append(dccFileInfo.FileStartingPosition);
         builder.Append("\x0001\n");
@@ -163,12 +163,12 @@ public sealed class DccFileSession
     {
         Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Cleanup()");
         DccFileSessionManager.DefaultInstance.RemoveSession(this);
-        serverSocket?.Close();
-        if (socket != null)
+        _serverSocket?.Close();
+        if (_socket != null)
         {
             try
             {
-                socket.Close();
+                _socket.Close();
             }
             catch (Exception)
             {
@@ -189,18 +189,18 @@ public sealed class DccFileSession
         try
         {
             //Wait for remote client to connect
-            IPEndPoint localEndPoint = new IPEndPoint(DccUtil.LocalHost(), listenPort);
-            serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            serverSocket.Bind(localEndPoint);
-            serverSocket.Listen(1);
+            IPEndPoint localEndPoint = new IPEndPoint(DccUtil.LocalHost(), _listenPort);
+            _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _serverSocket.Bind(localEndPoint);
+            _serverSocket.Listen(1);
             //Got one!
-            socket = serverSocket.Accept();
-            serverSocket.Close();
+            _socket = _serverSocket.Accept();
+            _serverSocket.Close();
             Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Listen() Remote user connected.");
             //Advance to the correct point in the file in case this is a resume 
             dccFileInfo.GotoReadPosition();
             SignalTransferStart();
-            if (turboMode)
+            if (_turboMode)
             {
                 Upload();
             }
@@ -217,14 +217,14 @@ public sealed class DccFileSession
     }
     private void Upload()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Upload()" + (turboMode ? " Turbo" : " Legacy") + " mode");
+        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Upload()" + (_turboMode ? " Turbo" : " Legacy") + " mode");
         try
         {
             int bytesRead = 0;
             byte[] ack = new byte[4];
-            while ((bytesRead = dccFileInfo.TransferStream.Read(buffer, 0, buffer.Length)) != 0)
+            while ((bytesRead = dccFileInfo.TransferStream.Read(_buffer, 0, _buffer.Length)) != 0)
             {
-                socket.Send(buffer, 0, bytesRead, SocketFlags.None);
+                _socket.Send(_buffer, 0, bytesRead, SocketFlags.None);
                 ResetActivityTimer();
                 AddBytesProcessed(bytesRead);
             }
@@ -244,20 +244,20 @@ public sealed class DccFileSession
         {
             int bytesRead = 0;
             byte[] ack = new byte[4];
-            while ((bytesRead = dccFileInfo.TransferStream.Read(buffer, 0, buffer.Length)) != 0)
+            while ((bytesRead = dccFileInfo.TransferStream.Read(_buffer, 0, _buffer.Length)) != 0)
             {
-                socket.Send(buffer, 0, bytesRead, SocketFlags.None);
+                _socket.Send(_buffer, 0, bytesRead, SocketFlags.None);
                 ResetActivityTimer();
                 AddBytesProcessed(bytesRead);
                 //Wait for acks from client
-                socket.Receive(ack);
+                _socket.Receive(ack);
             }
             //Some IRC clients need a moment to catch up on their acks if our send buffer
             //is larger than their receive buffer. Test to make sure they ack all the bytes
             //before closing. This is only needed in legacy mode.
             while (!dccFileInfo.AcksFinished(DccUtil.DccBytesToLong(ack)))
             {
-                socket.Receive(ack);
+                _socket.Receive(ack);
             }
             //Now we are done
             Finished();
@@ -270,15 +270,15 @@ public sealed class DccFileSession
     }
     private void Download()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Download()" + (turboMode ? " Turbo" : " Legacy") + " mode");
+        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Download()" + (_turboMode ? " Turbo" : " Legacy") + " mode");
         try
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket.Connect(User.RemoteEndPoint);
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket.Connect(User.RemoteEndPoint);
             int bytesRead = 0;
             while (!dccFileInfo.AllBytesTransfered())
             {
-                bytesRead = socket.Receive(buffer);
+                bytesRead = _socket.Receive(_buffer);
                 //Remote server closed the connection before all bytes were sent
                 if (bytesRead == 0)
                 {
@@ -287,11 +287,11 @@ public sealed class DccFileSession
                 }
                 ResetActivityTimer();
                 AddBytesProcessed(bytesRead);
-                dccFileInfo.TransferStream.Write(buffer, 0, bytesRead);
+                dccFileInfo.TransferStream.Write(_buffer, 0, bytesRead);
                 //Send ack if in legacy mode
-                if (!turboMode)
+                if (!_turboMode)
                 {
-                    socket.Send(DccUtil.DccBytesReceivedFormat(dccFileInfo.CurrentFilePosition()));
+                    _socket.Send(DccUtil.DccBytesReceivedFormat(dccFileInfo.CurrentFilePosition()));
                 }
             }
             dccFileInfo.TransferStream.Flush();
@@ -326,13 +326,13 @@ public sealed class DccFileSession
         lock (this)
         {
             //Are we still waiting on the accept?
-            if (!waitingOnAccept)
+            if (!_waitingOnAccept)
             {
                 //Assume that a normal receive has gone ahead
                 return;
             }
             //No longer waiting
-            waitingOnAccept = false;
+            _waitingOnAccept = false;
             if (!dccFileInfo.AcceptPositionMatches(position))
             {
                 User.Connection.Listener.Error(ReplyCode.BadDccAcceptValue, "Asked to start at " + dccFileInfo.FileStartingPosition + " but was sent " + position);
@@ -342,11 +342,11 @@ public sealed class DccFileSession
             ResetActivityTimer();
             dccFileInfo.SetResumeToFileSize();
             dccFileInfo.GotoWritePosition();
-            thread = new Thread(new ThreadStart(Download))
+            _thread = new Thread(new ThreadStart(Download))
             {
                 Name = ToString()
             };
-            thread.Start();
+            _thread.Start();
         }
     }
     /// <summary>
@@ -388,15 +388,15 @@ public sealed class DccFileSession
     internal void TimedOut()
     {
         Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, ToString() + " timed out.");
-        if (waitingOnAccept)
+        if (_waitingOnAccept)
         {
-            waitingOnAccept = false;
+            _waitingOnAccept = false;
             //Start a new thread to download the whole file
-            thread = new Thread(new ThreadStart(Download))
+            _thread = new Thread(new ThreadStart(Download))
             {
                 Name = ToString()
             };
-            thread.Start();
+            _thread.Start();
         }
         else
         {
@@ -509,18 +509,18 @@ public sealed class DccFileSession
             session = new DccFileSession(dccUser, dccFileInfo, bufferSize, listenPort, "S" + listenPort)
             {
                 //set turbo mode
-                turboMode = turbo
+                _turboMode = turbo
             };
             //Add session to active sessions hashtable
             DccFileSessionManager.DefaultInstance.AddSession(session);
             //Create stream to file
             dccFileInfo.OpenForRead();
             //Start session Thread
-            session.thread = new Thread(new ThreadStart(session.Listen))
+            session._thread = new Thread(new ThreadStart(session.Listen))
             {
                 Name = session.ToString()
             };
-            session.thread.Start();
+            session._thread.Start();
             //Send DCC Send request to remote user
             session.DccSend(IPAddress.Parse(listenIPAddress));
             return session;
@@ -567,7 +567,7 @@ public sealed class DccFileSession
                 dccUser.remoteEndPoint.Port, "C" + dccUser.remoteEndPoint.Port)
             {
                 //Has the initiator specified the turbo protocol? 
-                turboMode = turbo
+                _turboMode = turbo
             };
             //Open file for writing
             dccFileInfo.OpenForWrite();
@@ -575,17 +575,17 @@ public sealed class DccFileSession
             //Determine if we can resume a download
             if (session.dccFileInfo.ShouldResume())
             {
-                session.waitingOnAccept = true;
+                session._waitingOnAccept = true;
                 session.dccFileInfo.SetResumeToFileSize();
                 session.SendResume();
             }
             else
             {
-                session.thread = new Thread(new ThreadStart(session.Download))
+                session._thread = new Thread(new ThreadStart(session.Download))
                 {
                     Name = session.ToString()
                 };
-                session.thread.Start();
+                session._thread.Start();
             }
             return session;
         }

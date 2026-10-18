@@ -33,9 +33,9 @@ namespace FlamingIRC;
 /// </summary>
 public sealed class CtcpResponder
 {
-    private readonly Connection connection;
-    private long nextTime;
-    private string fingerMessage;
+    private readonly Connection _connection;
+    private long _nextTime;
+    private string _fingerMessage;
 
     /// <summary>
     /// Create an instance and register handlers for
@@ -46,13 +46,13 @@ public sealed class CtcpResponder
     /// <param name="connection">The containing connection.</param>
     public CtcpResponder(Connection connection)
     {
-        this.connection = connection;
-        nextTime = DateTime.Now.ToFileTime();
+        _connection = connection;
+        _nextTime = DateTime.Now.ToFileTime();
         //Wait at least 2 second in between automatic CTCP responses
         ResponseDelay = 2000;
         //Send back user nick by default for finger requests.
         UserResponse = "Thresher CTCP Responder";
-        fingerMessage = UserResponse;
+        _fingerMessage = UserResponse;
         VersionResponse = "Thresher IRC library 1.1";
         SourceResponse = "http://thresher.sourceforge.net";
         ClientInfoResponse = "This client supports: UserInfo, Finger, Version, Source, Ping, Time and ClientInfo";
@@ -78,7 +78,7 @@ public sealed class CtcpResponder
     /// to the finger response. This default to the User message.</value>
     public string FingerResponse
     {
-        get => fingerMessage + " Idle time " + FormatIdleTime() + "."; set => fingerMessage = value;
+        get => _fingerMessage + " Idle time " + FormatIdleTime() + "."; set => _fingerMessage = value;
     }
     /// <summary>
     /// A message about the user.
@@ -110,9 +110,9 @@ public sealed class CtcpResponder
     private string FormatIdleTime()
     {
         StringBuilder builder = new StringBuilder();
-        builder.Append(connection.IdleTime.Hours + " Hours, ");
-        builder.Append(connection.IdleTime.Minutes + " Minutes, ");
-        builder.Append(connection.IdleTime.Seconds + " Seconds");
+        builder.Append(_connection.IdleTime.Hours + " Hours, ");
+        builder.Append(_connection.IdleTime.Minutes + " Minutes, ");
+        builder.Append(_connection.IdleTime.Seconds + " Seconds");
         return builder.ToString();
     }
     /// <summary>
@@ -134,52 +134,52 @@ public sealed class CtcpResponder
     /// of ticks. No Ctcp replies will be sent if the current time is not later
     /// than this value.
     /// </summary>
-    private void UpdateTime() => nextTime = DateTime.Now.ToFileTime() +
+    private void UpdateTime() => _nextTime = DateTime.Now.ToFileTime() +
         (long)(ResponseDelay * TimeSpan.TicksPerMillisecond);
     private void OnCtcpRequest(object sender, CtcpRequestEventArgs e)
     {
         string command = e.Command;
         User who = e.User;
-        if (DateTime.Now.ToFileTime() > nextTime)
+        if (DateTime.Now.ToFileTime() > _nextTime)
         {
             switch (command)
             {
                 case CtcpUtil.Finger:
-                    connection.CtcpSender.CtcpReply(command, who.Nick, fingerMessage + " Idle time: " + FormatIdleTime());
+                    _connection.CtcpSender.CtcpReply(command, who.Nick, _fingerMessage + " Idle time: " + FormatIdleTime());
                     break;
                 case CtcpUtil.Time:
-                    connection.CtcpSender.CtcpReply(command, who.Nick, FormatDateTime());
+                    _connection.CtcpSender.CtcpReply(command, who.Nick, FormatDateTime());
                     break;
                 case CtcpUtil.User:
-                    connection.CtcpSender.CtcpReply(command, who.Nick, UserResponse);
+                    _connection.CtcpSender.CtcpReply(command, who.Nick, UserResponse);
                     break;
                 case CtcpUtil.Version:
-                    connection.CtcpSender.CtcpReply(command, who.Nick, VersionResponse);
+                    _connection.CtcpSender.CtcpReply(command, who.Nick, VersionResponse);
                     break;
                 case CtcpUtil.Source:
-                    connection.CtcpSender.CtcpReply(command, who.Nick, SourceResponse);
+                    _connection.CtcpSender.CtcpReply(command, who.Nick, SourceResponse);
                     break;
                 case CtcpUtil.ClientInfo:
-                    connection.CtcpSender.CtcpReply(command, who.Nick, ClientInfoResponse);
+                    _connection.CtcpSender.CtcpReply(command, who.Nick, ClientInfoResponse);
                     break;
                 default:
                     string error = command + " is not a supported Ctcp query.";
-                    connection.CtcpSender.CtcpReply(command, who.Nick, error);
+                    _connection.CtcpSender.CtcpReply(command, who.Nick, error);
                     break;
             }
             UpdateTime();
         }
     }
     private void OnCtcpPingRequest(object sender, CtcpPingEventArgs e)
-        => connection.CtcpSender.CtcpPingReply(e.User.Nick, e.Timestamp);
+        => _connection.CtcpSender.CtcpPingReply(e.User.Nick, e.Timestamp);
 
     /// <summary>
     /// Stop listening to the CtcpListener.
     /// </summary>
     internal void Disable()
     {
-        connection.CtcpListener.OnCtcpRequest -= OnCtcpRequest;
-        connection.CtcpListener.OnCtcpPingRequest -= OnCtcpPingRequest;
+        _connection.CtcpListener.OnCtcpRequest -= OnCtcpRequest;
+        _connection.CtcpListener.OnCtcpPingRequest -= OnCtcpPingRequest;
     }
 
 }
