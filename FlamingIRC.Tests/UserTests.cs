@@ -28,8 +28,10 @@ public class UserTests
     [Test]
     public void PrefixSetter_NullChar_NoException()
     {
-        User user = new User();
-        user.Prefix = '\0';
+        _ = new User
+        {
+            Prefix = '\0'
+        };
     }
 
     [Test]
@@ -37,8 +39,10 @@ public class UserTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(delegate ()
         {
-            User user = new User();
-            user.Prefix = 'X';
+            _ = new User
+            {
+                Prefix = 'X'
+            };
         });
     }
 

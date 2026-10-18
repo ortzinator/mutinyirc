@@ -92,13 +92,15 @@ public class ListenerTests
     [Test]
     public void ProcessNamesReply_IrcMessage()
     {
-        IrcMessage msg = new IrcMessage();
-        msg.Command = "PRIVMSG";
-        msg.From = "hitchcock.freenode.net";
-        msg.Message = "Ortzinator OrtzIRC @ChanServ";
-        msg.Target = "#ortzirc";
-        msg.Tokens = Names.Split(new[] { ' ' });
-        msg.ReplyCode = ReplyCode.RPL_NAMREPLY;
+        IrcMessage msg = new IrcMessage
+        {
+            Command = "PRIVMSG",
+            From = "hitchcock.freenode.net",
+            Message = "Ortzinator OrtzIRC @ChanServ",
+            Target = "#ortzirc",
+            Tokens = Names.Split(new[] { ' ' }),
+            ReplyCode = ReplyCode.RPL_NAMREPLY
+        };
 
         NamesEventArgs givenArgs = null;
 

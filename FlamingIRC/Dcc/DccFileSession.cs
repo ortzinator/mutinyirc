@@ -525,7 +525,7 @@ public sealed class DccFileSession
             session.DccSend(IPAddress.Parse(listenIPAddress));
             return session;
         }
-        catch (Exception ex)
+        catch
         {
             if (session != null)
             {
@@ -589,7 +589,7 @@ public sealed class DccFileSession
             }
             return session;
         }
-        catch (Exception ex)
+        catch
         {
             if (session != null)
             {
