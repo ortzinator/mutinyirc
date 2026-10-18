@@ -25,19 +25,28 @@ public class ModeToBrushConverterTests
     private static readonly ModeToBrushConverter Converter = new();
     private static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
+    // Converts the mode and fails the test if the result is not a brush.
+    private static IBrush ConvertToBrush(Mode mode)
+    {
+        object? result = Converter.Convert(mode, typeof(IBrush), null, Culture);
+        return result as IBrush
+            ?? throw new AssertionException(
+                $"Expected an IBrush for {mode}, got {result?.GetType().Name ?? "null"}");
+    }
+
     // --- Fallback / type-safety tests (no Application required) ---
 
     [Test]
     public void Convert_NullValue_ReturnsIBrush()
     {
-        var result = Converter.Convert(null!, typeof(IBrush), null!, Culture);
+        var result = Converter.Convert(null, typeof(IBrush), null, Culture);
         Assert.That(result, Is.InstanceOf<IBrush>());
     }
 
     [Test]
     public void Convert_WrongType_ReturnsIBrush()
     {
-        var result = Converter.Convert("not-a-mode", typeof(IBrush), null!, Culture);
+        var result = Converter.Convert("not-a-mode", typeof(IBrush), null, Culture);
         Assert.That(result, Is.InstanceOf<IBrush>());
     }
 
@@ -45,7 +54,7 @@ public class ModeToBrushConverterTests
     public void ConvertBack_ThrowsNotSupportedException()
     {
         Assert.Throws<NotSupportedException>(() =>
-            Converter.ConvertBack(Brushes.Black, typeof(Mode), null!, Culture));
+            Converter.ConvertBack(Brushes.Black, typeof(Mode), null, Culture));
     }
 
     // --- Tests requiring the headless Application (theme resource lookups) ---
@@ -53,35 +62,35 @@ public class ModeToBrushConverterTests
     [AvaloniaTest]
     public void Convert_OpMode_ReturnsBrush()
     {
-        var result = Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
+        var result = Converter.Convert(Mode.Op, typeof(IBrush), null, Culture);
         Assert.That(result, Is.InstanceOf<IBrush>());
     }
 
     [AvaloniaTest]
     public void Convert_VoiceMode_ReturnsBrush()
     {
-        var result = Converter.Convert(Mode.Voice, typeof(IBrush), null!, Culture);
+        var result = Converter.Convert(Mode.Voice, typeof(IBrush), null, Culture);
         Assert.That(result, Is.InstanceOf<IBrush>());
     }
 
     [AvaloniaTest]
     public void Convert_RegularMode_ReturnsBrush()
     {
-        var result = Converter.Convert(Mode.Regular, typeof(IBrush), null!, Culture);
+        var result = Converter.Convert(Mode.Regular, typeof(IBrush), null, Culture);
         Assert.That(result, Is.InstanceOf<IBrush>());
     }
 
     [AvaloniaTest]
     public void Convert_HalfOpMode_ReturnsBrush()
     {
-        var result = Converter.Convert(Mode.HalfOp, typeof(IBrush), null!, Culture);
+        var result = Converter.Convert(Mode.HalfOp, typeof(IBrush), null, Culture);
         Assert.That(result, Is.InstanceOf<IBrush>());
     }
 
     [AvaloniaTest]
     public void Convert_OwnerMode_ReturnsBrush()
     {
-        var result = Converter.Convert(Mode.Owner, typeof(IBrush), null!, Culture);
+        var result = Converter.Convert(Mode.Owner, typeof(IBrush), null, Culture);
         Assert.That(result, Is.InstanceOf<IBrush>());
     }
 
@@ -95,8 +104,8 @@ public class ModeToBrushConverterTests
     {
         Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
 
-        var owner = Converter.Convert(Mode.Owner, typeof(IBrush), null!, Culture);
-        var op = Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
+        var owner = Converter.Convert(Mode.Owner, typeof(IBrush), null, Culture);
+        var op = Converter.Convert(Mode.Op, typeof(IBrush), null, Culture);
 
         Assert.That(owner, Is.SameAs(op),
             "Owner shares the op colour; the '~' glyph carries the rank difference");
@@ -112,10 +121,10 @@ public class ModeToBrushConverterTests
     public void Convert_OpMode_DarkAndLightThemeReturnDifferentBrushes()
     {
         Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
-        var darkBrush = (IBrush)Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
+        var darkBrush = ConvertToBrush(Mode.Op);
 
         Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
-        var lightBrush = (IBrush)Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
+        var lightBrush = ConvertToBrush(Mode.Op);
 
         // Dark: ModeOpForeground = #FFF2C94C (amber)
         // Light: ModeOpForeground = #FF8A6D00 (deep gold)
@@ -129,10 +138,10 @@ public class ModeToBrushConverterTests
     public void Convert_VoiceMode_DarkAndLightThemeReturnDifferentBrushes()
     {
         Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
-        var darkBrush = (IBrush)Converter.Convert(Mode.Voice, typeof(IBrush), null!, Culture);
+        var darkBrush = ConvertToBrush(Mode.Voice);
 
         Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
-        var lightBrush = (IBrush)Converter.Convert(Mode.Voice, typeof(IBrush), null!, Culture);
+        var lightBrush = ConvertToBrush(Mode.Voice);
 
         Assert.That(darkBrush.ToString(), Is.Not.EqualTo(lightBrush.ToString()),
             "Voice brush must differ between themes");
@@ -146,7 +155,7 @@ public class ModeToBrushConverterTests
     public void Convert_OpMode_DarkTheme_ReturnsThemeResourceNotFallback()
     {
         Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
-        var brush = (IBrush)Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
+        var brush = ConvertToBrush(Mode.Op);
 
         Assert.That(brush, Is.Not.SameAs(Brushes.Goldenrod),
             "Dark theme Op brush must be the themed resource, not the hardcoded fallback");
@@ -156,7 +165,7 @@ public class ModeToBrushConverterTests
     public void Convert_OpMode_LightTheme_ReturnsThemeResourceNotFallback()
     {
         Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
-        var brush = (IBrush)Converter.Convert(Mode.Op, typeof(IBrush), null!, Culture);
+        var brush = ConvertToBrush(Mode.Op);
 
         Assert.That(brush, Is.Not.SameAs(Brushes.Goldenrod),
             "Light theme Op brush must be the themed resource, not the hardcoded fallback");

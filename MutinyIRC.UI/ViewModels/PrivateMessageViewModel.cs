@@ -9,8 +9,11 @@ namespace MutinyIRC.UI.ViewModels;
 
 public class PrivateMessageViewModel : IrcViewModel
 {
+    // IDE0370 is a false positive here: without the '!' the build gives CS8625.
+#pragma warning disable IDE0370
     private readonly PrivateMessageSession _session = null!;
     private readonly PluginManager _pluginManager = null!;
+#pragma warning restore IDE0370
 
     public PrivateMessageSession Session => _session;
     public override Server? OwningServer => _session.Server;

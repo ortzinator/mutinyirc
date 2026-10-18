@@ -21,7 +21,10 @@ public class ChatItemViewModel : ObservableObject
 
 public class ChannelMessageViewModel : ChatItemViewModel
 {
+    // IDE0370 is a false positive here: without the '!' the build gives CS8625.
+#pragma warning disable IDE0370
     public User User { get; set; } = null!;
+#pragma warning restore IDE0370
 
     protected ChannelMessageViewModel() { }
 

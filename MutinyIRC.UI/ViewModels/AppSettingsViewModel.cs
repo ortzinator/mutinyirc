@@ -5,12 +5,12 @@ namespace MutinyIRC.UI.ViewModels;
 public partial class AppSettingsViewModel : ObservableObject
 {
     [ObservableProperty] private bool _showTimestamps;
-    [ObservableProperty] private string _firstNick = null!;
-    [ObservableProperty] private string _secondNick = null!;
-    [ObservableProperty] private string _thirdNick = null!;
+    [ObservableProperty] private string _firstNick;
+    [ObservableProperty] private string _secondNick;
+    [ObservableProperty] private string _thirdNick;
     [ObservableProperty] private bool _loggerActivated;
     [ObservableProperty] private bool _loggerTimestampsActivated;
-    [ObservableProperty] private string _loggerTimestampFormat = null!;
+    [ObservableProperty] private string _loggerTimestampFormat;
 
     public AppSettingsViewModel()
     {

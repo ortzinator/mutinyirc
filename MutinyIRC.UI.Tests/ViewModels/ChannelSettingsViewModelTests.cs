@@ -26,7 +26,7 @@ public class ChannelSettingsViewModelTests
     [Test]
     public void Constructor_FromModel_NullNameBecomesEmpty()
     {
-        var model = new ChannelSettings { Name = null!, Key = "k", AutoJoin = true };
+        var model = new ChannelSettings { Name = null, Key = "k", AutoJoin = true };
         var vm = new ChannelSettingsViewModel(model);
         Assert.That(vm.Name, Is.EqualTo(string.Empty));
     }
@@ -34,7 +34,7 @@ public class ChannelSettingsViewModelTests
     [Test]
     public void Constructor_FromModel_NullKeyBecomesEmpty()
     {
-        var model = new ChannelSettings { Name = "#chan", Key = null!, AutoJoin = false };
+        var model = new ChannelSettings { Name = "#chan", Key = null, AutoJoin = false };
         var vm = new ChannelSettingsViewModel(model);
         Assert.That(vm.Key, Is.EqualTo(string.Empty));
     }

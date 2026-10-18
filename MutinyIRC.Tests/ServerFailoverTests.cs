@@ -25,7 +25,7 @@ public class ServerFailoverTests
     {
         public List<string> Dialled { get; } = new();
 
-        public IConnection Current { get; private set; } = null!;
+        public IConnection Current { get; private set; }
 
         public WalkingServer(IReadOnlyList<ConnectionArgs> candidates) : base(candidates) { }
 
@@ -58,8 +58,8 @@ public class ServerFailoverTests
     private static ConnectionArgs Candidate(string host, int port) =>
         new("nick", host, false) { Port = port };
 
-    private WalkingServer _server = null!;
-    private List<int> _reconnectAttempts = null!;
+    private WalkingServer _server;
+    private List<int> _reconnectAttempts;
 
     private WalkingServer Build(params ConnectionArgs[] candidates)
     {

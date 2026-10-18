@@ -142,7 +142,7 @@ public class RandomMessages
         string tempPath = _filePath + ".tmp";
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(_filePath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(_filePath));
 
             using (FileStream stream = File.Create(tempPath))
             {

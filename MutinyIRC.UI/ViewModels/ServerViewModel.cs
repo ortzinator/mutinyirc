@@ -18,8 +18,11 @@ public class ServerViewModel : IrcViewModel
 {
     private int _nickRetryAttempt;
     private bool _nickRetryFailed;
+    // IDE0370 is a false positive here: without the '!' the build gives CS8625.
+#pragma warning disable IDE0370
     private readonly Server _server = null!;
     private readonly PluginManager _pluginManager = null!;
+#pragma warning restore IDE0370
 
     public MTObservableCollection<ChannelViewModel> Channels { get; } = new MTObservableCollection<ChannelViewModel>();
     public MTObservableCollection<PrivateMessageViewModel> PrivateMessages { get; } = new MTObservableCollection<PrivateMessageViewModel>();
