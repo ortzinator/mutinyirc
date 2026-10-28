@@ -84,7 +84,9 @@ places at once — flat for selection, per-connection for display.
 
 A server certificate you have accepted for a host by the SHA-256 fingerprint of the whole certificate.
 It is a fallback: a certificate is accepted when it is trusted (it passes the normal chain and hostname
-check) *or* when it matches the pin, so a pin never refuses a trusted certificate. The verb is *pin*.
+check) *or* when it matches the pin, so a pin never refuses a trusted certificate. A pin belongs to one
+[entry point](#entry-point), and an entry point has at most one: pinning a new certificate replaces the old
+pin. The verb is *pin*.
 See `docs/adr/0002-pins-as-fallback-trust.md`. Avoid "trusted fingerprint": "trusted" means only that a
 certificate passes the normal check.
 
