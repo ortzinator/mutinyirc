@@ -80,6 +80,14 @@ sidebar does not bind to that collection: it binds to the [shown connection](#sh
 that connection's `Channels` and `PrivateMessages`, so a channel or private-message panel is held in two
 places at once — flat for selection, per-connection for display.
 
+## Pinned certificate
+
+A server certificate you have accepted for a host by the SHA-256 fingerprint of the whole certificate.
+It is a fallback: a certificate is accepted when it is trusted (it passes the normal chain and hostname
+check) *or* when it matches the pin, so a pin never refuses a trusted certificate. The verb is *pin*.
+See `docs/adr/0002-pins-as-fallback-trust.md`. Avoid "trusted fingerprint": "trusted" means only that a
+certificate passes the normal check.
+
 ## Row list (user list)
 
 The flat `IReadOnlyList<IUserListRow>` a channel's user list binds to (`ChannelViewModel.UserRows`),
