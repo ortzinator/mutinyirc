@@ -25,6 +25,8 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Timers;
@@ -198,6 +200,26 @@ public class Connection : TcpTextClient, IConnection
     }
 
     private TimeSpan _pingTimeout = TimeSpan.FromSeconds(90);
+
+    /// <summary>
+    /// Decides whether to accept a server certificate that fails the normal check, for example
+    /// a self-signed certificate that the user trusts.
+    /// </summary>
+    /// <remarks>
+    /// The connection calls this only when the normal check fails, so it cannot reject a
+    /// certificate that passes. It runs on a thread-pool thread during the TLS handshake. If the
+    /// callback returns false or throws an exception, the connect fails with
+    /// <see cref="ConnectError.CertificateRejected" />, and
+    /// <see cref="ConnectFailedEventArgs.RejectedCertificate" /> holds the certificate.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// connection.CertificateValidationFailedCallback = (certificate, _, _) =>
+    ///     certificate.GetCertHashString(HashAlgorithmName.SHA256) == trustedFingerprint;
+    /// </code>
+    /// </example>
+    /// <value>Null, the default, rejects every certificate that fails the normal check.</value>
+    public Func<X509Certificate, X509Chain, SslPolicyErrors, bool> CertificateValidationFailedCallback { get; set; }
 
     /// <summary>
     /// The object used to send commands to the IRC server.
@@ -547,9 +569,23 @@ public class Connection : TcpTextClient, IConnection
             ConnectionLost?.Invoke(this, new DisconnectEventArgs(reason, (int)socketErrorCode));
     }
 
+    /// <summary>
+    /// Call <see cref="CertificateValidationFailedCallback" />, or reject the certificate if it
+    /// is null.
+    /// </summary>
+    protected override bool OnCertificateValidationFailed(X509Certificate certificate, X509Chain chain,
+                                                          SslPolicyErrors errors)
+        => CertificateValidationFailedCallback?.Invoke(certificate, chain, errors) ?? false;
+
     protected override void OnConnectFailed(ConnectError reason, int? socketErrorCode)
+        => OnConnectFailed(reason, socketErrorCode, null);
+
+    protected override void OnConnectFailed(ConnectError reason, int? socketErrorCode,
+                                            RejectedCertificate rejectedCertificate)
     {
-        if (socketErrorCode == null)
+        if (rejectedCertificate != null)
+            ConnectFailed?.Invoke(this, new ConnectFailedEventArgs(reason, rejectedCertificate));
+        else if (socketErrorCode == null)
             ConnectFailed?.Invoke(this, new ConnectFailedEventArgs(reason));
         else
             ConnectFailed?.Invoke(this, new ConnectFailedEventArgs(reason, (int)socketErrorCode));

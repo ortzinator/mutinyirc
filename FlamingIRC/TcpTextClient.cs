@@ -205,7 +205,7 @@ public abstract class TcpTextClient
         if (await session.OpenAsync(server, port, ssl, OnCertificateValidate).ConfigureAwait(false) is { } failure)
         {
             if (TryEnd(session))
-                OnConnectFailed(failure.Error, failure.SocketErrorCode);
+                OnConnectFailed(failure.Error, failure.SocketErrorCode, failure.RejectedCertificate);
             return;
         }
 
@@ -223,7 +223,11 @@ public abstract class TcpTextClient
         await ReadLines(session).ConfigureAwait(false);
     }
 
-    private bool OnCertificateValidate(X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
+    /// <summary>
+    /// Accept a certificate that passes the normal check. Give any other certificate to
+    /// <see cref="OnCertificateValidationFailed" />.
+    /// </summary>
+    internal bool OnCertificateValidate(X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
     {
         if (errors == SslPolicyErrors.None)
             return true;
@@ -345,12 +349,33 @@ public abstract class TcpTextClient
 
     protected abstract void OnConnectFailed(ConnectError error, int? socketErrorCode);
 
+    /// <summary>
+    /// Report a failed connect attempt, with the server certificate if the certificate check
+    /// rejected it.
+    /// </summary>
+    /// <remarks>
+    /// The default calls <see cref="OnConnectFailed(ConnectError, int?)" /> and drops the
+    /// certificate. Override this to get the certificate.
+    /// </remarks>
+    /// <param name="error">Why the connect failed.</param>
+    /// <param name="socketErrorCode">The socket error code, or null if there is none.</param>
+    /// <param name="rejectedCertificate">
+    /// The rejected server certificate when <paramref name="error" /> is
+    /// <see cref="ConnectError.CertificateRejected" /> and the server sent a certificate.
+    /// Otherwise null.
+    /// </param>
+    protected virtual void OnConnectFailed(ConnectError error, int? socketErrorCode,
+                                           RejectedCertificate rejectedCertificate)
+        => OnConnectFailed(error, socketErrorCode);
+
     protected abstract void OnReceiveLine(string line);
 
     /// <summary>
-    /// Why a connect attempt failed, in the form <see cref="OnConnectFailed" /> reports it.
+    /// Why a connect attempt failed, in the form <see cref="OnConnectFailed(ConnectError, int?, RejectedCertificate)" />
+    /// reports it.
     /// </summary>
-    private readonly record struct ConnectFailure(ConnectError Error, int? SocketErrorCode)
+    private readonly record struct ConnectFailure(ConnectError Error, int? SocketErrorCode,
+                                                  RejectedCertificate RejectedCertificate = null)
     {
         /// <param name="e">The exception from the connect or the TLS handshake.</param>
         /// <param name="certificateRejected">
@@ -358,19 +383,26 @@ public abstract class TcpTextClient
         /// rejected certificate and other handshake failures with the same exception type, so
         /// the exception alone cannot tell them apart.
         /// </param>
-        public static ConnectFailure From(Exception e, bool certificateRejected) => e switch
+        /// <param name="rejectedCertificate">
+        /// A copy of the rejected certificate, or null if the server sent none.
+        /// </param>
+        public static ConnectFailure From(Exception e, bool certificateRejected,
+                                          RejectedCertificate rejectedCertificate)
         {
-            SocketException socketError => new(ConnectError.SocketError, socketError.ErrorCode),
-            AuthenticationException => new(certificateRejected
-                ? ConnectError.CertificateRejected
-                : ConnectError.AuthenticationFailed, null),
-            // The server reset the connection during the handshake.
-            IOException { InnerException: SocketException socketError } =>
-                new(ConnectError.SocketError, socketError.ErrorCode),
-            // This includes an IOException with no socket error, for example when the server
-            // closes the connection during the handshake.
-            _ => new(ConnectError.Other, null)
-        };
+            return e switch
+            {
+                SocketException socketError => new(ConnectError.SocketError, socketError.ErrorCode),
+                AuthenticationException => certificateRejected
+                    ? new(ConnectError.CertificateRejected, null, rejectedCertificate)
+                    : new(ConnectError.AuthenticationFailed, null),
+                // The server reset the connection during the handshake.
+                IOException { InnerException: SocketException socketError } =>
+                    new(ConnectError.SocketError, socketError.ErrorCode),
+                // This includes an IOException with no socket error, for example when the server
+                // closes the connection during the handshake.
+                _ => new(ConnectError.Other, null)
+            };
+        }
     }
 
     /// <summary>
@@ -413,6 +445,7 @@ public abstract class TcpTextClient
                                                      Func<X509Certificate, X509Chain, SslPolicyErrors, bool> validate)
         {
             var certificateRejected = false;
+            RejectedCertificate rejectedCertificate = null;
             Stream stream = null;
             try
             {
@@ -424,6 +457,9 @@ public abstract class TcpTextClient
                     {
                         bool accepted = validate(certificate, chain, errors);
                         certificateRejected = !accepted;
+                        // Copy the certificate now. SslStream disposes it after this callback.
+                        if (!accepted && certificate != null)
+                            rejectedCertificate = new RejectedCertificate(certificate.GetRawCertData(), errors);
                         return accepted;
                     });
                     stream = tls;
@@ -435,7 +471,7 @@ public abstract class TcpTextClient
                 Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
                     $"[{Thread.CurrentThread.Name}] TcpTextClient::Session.OpenAsync() connect failed={e}");
                 stream?.Dispose();
-                return ConnectFailure.From(e, certificateRejected);
+                return ConnectFailure.From(e, certificateRejected, rejectedCertificate);
             }
 
             _stream = stream;

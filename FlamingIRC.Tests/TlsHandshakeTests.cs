@@ -72,16 +72,30 @@ public class TlsHandshakeTests
 
     private ConnectionArgs Args() => new ConnectionArgs("tester", "localhost", true) { Port = _port };
 
-    private static Task<ConnectError> NextConnectFailure(Connection connection)
+    private static async Task<ConnectError> NextConnectFailure(Connection connection) =>
+        (await NextConnectFailedArgs(connection)).Reason;
+
+    private static Task<ConnectFailedEventArgs> NextConnectFailedArgs(Connection connection)
     {
-        var failed = new TaskCompletionSource<ConnectError>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var failed = new TaskCompletionSource<ConnectFailedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
         void Handler(object sender, ConnectFailedEventArgs e)
         {
             connection.ConnectFailed -= Handler;
-            failed.TrySetResult(e.Reason);
+            failed.TrySetResult(e);
         }
         connection.ConnectFailed += Handler;
         return failed.Task;
+    }
+
+    /// <summary>
+    /// Completes with true when the connection opens, or with false when the connect fails.
+    /// </summary>
+    private static Task<bool> NextConnectResult(Connection connection)
+    {
+        var result = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        connection.ConnectionEstablished += (_, _) => result.TrySetResult(true);
+        connection.ConnectFailed += (_, _) => result.TrySetResult(false);
+        return result.Task;
     }
 
     [Test]
@@ -126,6 +140,96 @@ public class TlsHandshakeTests
 
         Assert.That(await failure.WaitAsync(Wait), Is.EqualTo(ConnectError.CertificateRejected),
             "An exception from the validation override must count as a rejection");
+    }
+
+    [Test]
+    public async Task CallbackThatAccepts_Connects()
+    {
+        var connection = new Connection(Args(), false, false)
+        {
+            CertificateValidationFailedCallback = (_, _, _) => true
+        };
+
+        Task<bool> result = NextConnectResult(connection);
+        connection.Connect();
+
+        Assert.That(await result.WaitAsync(Wait), Is.True,
+            "A callback that returns true must accept the certificate");
+    }
+
+    [Test]
+    public async Task CallbackThatRejects_FailsConnectWithCertificateRejected()
+    {
+        var connection = new Connection(Args(), false, false)
+        {
+            CertificateValidationFailedCallback = (_, _, _) => false
+        };
+
+        Task<ConnectError> failure = NextConnectFailure(connection);
+        connection.Connect();
+
+        Assert.That(await failure.WaitAsync(Wait), Is.EqualTo(ConnectError.CertificateRejected));
+    }
+
+    [Test]
+    public async Task CallbackThatThrows_FailsConnectInsteadOfCrashing()
+    {
+        var connection = new Connection(Args(), false, false)
+        {
+            CertificateValidationFailedCallback = (_, _, _) => throw new InvalidOperationException("callback failed")
+        };
+
+        Task<ConnectError> failure = NextConnectFailure(connection);
+        connection.Connect();
+
+        Assert.That(await failure.WaitAsync(Wait), Is.EqualTo(ConnectError.CertificateRejected),
+            "An exception from the callback must count as a rejection");
+    }
+
+    [Test]
+    public void Callback_IsNotCalledForACertificateThatPassesTheNormalCheck()
+    {
+        var called = false;
+        var connection = new Connection(Args(), false, false)
+        {
+            CertificateValidationFailedCallback = (_, _, _) => called = true
+        };
+
+        bool accepted = connection.OnCertificateValidate(_certificate, null, SslPolicyErrors.None);
+
+        Assert.That(accepted, Is.True);
+        Assert.That(called, Is.False, "The callback is only for a certificate that fails the normal check");
+    }
+
+    [Test]
+    public async Task CertificateRejected_CarriesTheServerCertificate()
+    {
+        var connection = new Connection(Args(), false, false);
+
+        Task<ConnectFailedEventArgs> failure = NextConnectFailedArgs(connection);
+        connection.Connect();
+        ConnectFailedEventArgs args = await failure.WaitAsync(Wait);
+
+        Assert.That(args.Reason, Is.EqualTo(ConnectError.CertificateRejected));
+        Assert.That(args.RejectedCertificate, Is.Not.Null);
+        Assert.That(args.RejectedCertificate.RawData.ToArray(), Is.EqualTo(_certificate.RawData));
+        Assert.That(args.RejectedCertificate.GetFingerprint(HashAlgorithmName.SHA256),
+            Is.EqualTo(_certificate.GetCertHashString(HashAlgorithmName.SHA256)));
+        Assert.That(args.RejectedCertificate.PolicyErrors, Is.Not.EqualTo(SslPolicyErrors.None));
+    }
+
+    [Test]
+    public async Task SocketFailure_CarriesNoCertificate()
+    {
+        _listener.Stop();
+        var connection = new Connection(Args(), false, false);
+
+        Task<ConnectFailedEventArgs> failure = NextConnectFailedArgs(connection);
+        connection.Connect();
+        ConnectFailedEventArgs args = await failure.WaitAsync(Wait);
+
+        Assert.That(args.Reason, Is.Not.EqualTo(ConnectError.CertificateRejected));
+        Assert.That(args.RejectedCertificate, Is.Null);
     }
 
     private sealed class ThrowingValidationConnection(ConnectionArgs args) : Connection(args, false, false)
