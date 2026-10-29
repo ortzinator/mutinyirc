@@ -71,15 +71,16 @@ public class ServerViewModelMintedNetworkTests
                     new RejectedCertificate(certificate.RawData, SslPolicyErrors.RemoteCertificateChainErrors)));
 
         /// <summary>
-        /// Registers the current connection. The 005 that announces the network name comes
-        /// first; pass an empty name for a server that announces no network.
+        /// Registers the current connection as a real server does: the 001 welcome, then the
+        /// 005 that announces the network name. Pass an empty name for a server that announces
+        /// no network.
         /// </summary>
         public void RegisterCurrent(string reportedNetworkName)
         {
+            Current.Listener.Parse($":{Host} 001 me :Welcome");
             if (reportedNetworkName != string.Empty)
                 Current.Listener.Parse(
                     $":{Host} 005 me NETWORK={reportedNetworkName} :are supported by this server");
-            Current.Listener.Parse($":{Host} 001 me :Welcome");
         }
     }
 

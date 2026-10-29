@@ -134,6 +134,7 @@ public class ServerViewModel : IrcViewModel
         PrivateMessages.CollectionChanged += UnreadSources_CollectionChanged;
 
         _server.Registered += Server_Registered;
+        _server.NetworkNameReported += Server_NetworkNameReported;
         _server.ConnectFailed += Server_ConnectFailed;
         _server.Reconnecting += Server_Reconnecting;
         _server.EveryEntryPointRefused += Server_EveryEntryPointRefused;
@@ -412,6 +413,7 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_Connecting(object? sender, CancelEventArgs e)
     {
+        _network = null;
         ConnectionStatus = ServerStrings.StatusConnecting;
         AddMessage(ServerStrings.ConnectingMessage.With(_server.Url, _server.Port));
     }
@@ -583,16 +585,8 @@ public class ServerViewModel : IrcViewModel
         network.AddServer(new ServerSettings(_server.Url, _server.Port,
             _server.Connection.ConnectionData.Ssl));
 
-        // Connecting to a network is what marks it worth dialling at startup. The flag sits on
-        // the network, so reaching it through any of its hosts sets it once.
-        network.AutoConnect = true;
-
-        Name = ServerStrings.ServerFormTitleBar.With(
-            _server.UserNick,
-            network.Name,
-            _server.Url,
-            _server.Port);
-        NetworkName = network.Name;
+        _network = network;
+        AdoptNetwork(network);
         ConnectionStatus = ConnectedStatus();
         WarnIfCertificateNotChecked();
         SayIfConnectedThroughPin();
@@ -603,6 +597,37 @@ public class ServerViewModel : IrcViewModel
         _nickRetryAttempt = 0;
         _nickRetryFailed = false;
 
+        JoinAutoJoinChannels(network);
+    }
+
+    // The network that the registration of this connection resolved, or null before
+    // registration. A new connect attempt clears it.
+    private NetworkSettings? _network;
+
+    // The network that registration named after the host, because no saved network listed the
+    // host and the server had not reported a name yet. The first reported name can still move
+    // the host into a saved network of that name.
+    private NetworkSettings? _hostNamedNetwork;
+
+    /// <summary>
+    /// Marks <paramref name="network"/> for startup and shows its name in the server window.
+    /// </summary>
+    private void AdoptNetwork(NetworkSettings network)
+    {
+        // Connecting to a network is what marks it worth dialling at startup. The flag sits on
+        // the network, so reaching it through any of its hosts sets it once.
+        network.AutoConnect = true;
+
+        Name = ServerStrings.ServerFormTitleBar.With(
+            _server.UserNick,
+            network.Name,
+            _server.Url,
+            _server.Port);
+        NetworkName = network.Name;
+    }
+
+    private void JoinAutoJoinChannels(NetworkSettings network)
+    {
         foreach (ChannelSettings channel in network.Channels)
         {
             if (channel.AutoJoin)
@@ -619,25 +644,55 @@ public class ServerViewModel : IrcViewModel
     /// that network instead of standing up a duplicate. A server that reports no name leaves the
     /// host as the sole thing to name the network after.
     ///
-    /// A network that the pin action minted is the exception: the host is saved only because its
-    /// certificate was pinned, so the first reported name can still move it into a saved network.
+    /// Most servers report the name in 005, after the 001 that registers the connection.
+    /// <see cref="Server_NetworkNameReported"/> then does the merge and the rename.
     /// </remarks>
     private NetworkSettings ResolveNetwork()
     {
         IrcSettingsManager settings = IrcSettingsManager.Instance;
         string reportedName = _server.Connection.ServerProperties["Network"];
 
-        NetworkSettings network = settings.GetNetwork(_server)
+        NetworkSettings? saved = settings.GetNetwork(_server);
+        NetworkSettings network = saved
             ?? settings.GetOrAddNetwork(reportedName == string.Empty ? _server.Url : reportedName);
 
-        if (network.MintedByPin && reportedName != string.Empty)
-            network = settings.SettleMintedNetwork(network, reportedName);
+        _hostNamedNetwork = saved == null && reportedName == string.Empty ? network : null;
+
+        return reportedName == string.Empty ? network : SettleByReportedName(network, reportedName);
+    }
+
+    /// <summary>
+    /// Applies the network name that the server reported to <paramref name="network"/>.
+    /// </summary>
+    /// <remarks>
+    /// A network that the pin action minted, or that registration named after the host, is the
+    /// exception. Only Mutiny made it, so the reported name can still move its host into a saved
+    /// network of that name.
+    /// </remarks>
+    /// <returns>The network that the entry point now belongs to.</returns>
+    private NetworkSettings SettleByReportedName(NetworkSettings network, string reportedName)
+    {
+        if (network.MintedByPin || network == _hostNamedNetwork)
+            network = IrcSettingsManager.Instance.SettleMintedNetwork(network, reportedName);
+        _hostNamedNetwork = null;
 
         // The server owns the name and may change it on any connect.
-        if (reportedName != string.Empty)
-            network.Name = reportedName;
-
+        network.Name = reportedName;
         return network;
+    }
+
+    // Servers send NETWORK= in 005, after the 001 that registered the connection. A name that
+    // comes before registration is for DoRegister to read.
+    private void Server_NetworkNameReported(object? sender, Common.DataEventArgs<string> e)
+    {
+        if (_network == null)
+            return;
+
+        NetworkSettings settled = SettleByReportedName(_network, e.Data);
+        AdoptNetwork(settled);
+        if (settled != _network)
+            JoinAutoJoinChannels(settled);
+        _network = settled;
     }
 
     private void Server_WhoisReceived(object? sender, Common.DataEventArgs<WhoisInfo> e)
@@ -696,6 +751,7 @@ public class ServerViewModel : IrcViewModel
         // Detach every handler wired in the constructor so the Server (which outlives this VM)
         // doesn't keep it alive. Keep this list in sync with the constructor's subscriptions.
         _server.Registered -= Server_Registered;
+        _server.NetworkNameReported -= Server_NetworkNameReported;
         _server.ConnectFailed -= Server_ConnectFailed;
         _server.Reconnecting -= Server_Reconnecting;
         _server.EveryEntryPointRefused -= Server_EveryEntryPointRefused;

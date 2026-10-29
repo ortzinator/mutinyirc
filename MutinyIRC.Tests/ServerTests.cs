@@ -323,4 +323,31 @@ public class ServerTests
         Assert.IsFalse(_server.IsAway, "RPL_UNAWAY must clear the away status");
         Assert.IsTrue(fired, "RPL_UNAWAY must fire CameBack");
     }
+
+    [Test]
+    public void Isupport_WithANetworkToken_ReportsTheNameOnce()
+    {
+        var names = new System.Collections.Generic.List<string>();
+        _server.NetworkNameReported += (_, e) => names.Add(e.Data);
+
+        _server.Connection.Listener.Parse(":server.name 001 test :Welcome");
+        _server.Connection.Listener.Parse(":server.name 005 test CHANTYPES=# :are supported by this server");
+        _server.Connection.Listener.Parse(":server.name 005 test NETWORK=Libera :are supported by this server");
+        _server.Connection.Listener.Parse(":server.name 005 test NICKLEN=16 :are supported by this server");
+
+        NUnit.Framework.Assert.That(names, Is.EqualTo(new[] { "Libera" }),
+            "Only the 005 that gives a new network name reports it");
+    }
+
+    [Test]
+    public void Isupport_WithAChangedNetworkToken_ReportsTheNewName()
+    {
+        var names = new System.Collections.Generic.List<string>();
+        _server.NetworkNameReported += (_, e) => names.Add(e.Data);
+
+        _server.Connection.Listener.Parse(":server.name 005 test NETWORK=Libera :are supported by this server");
+        _server.Connection.Listener.Parse(":server.name 005 test NETWORK=LiberaChat :are supported by this server");
+
+        NUnit.Framework.Assert.That(names, Is.EqualTo(new[] { "Libera", "LiberaChat" }));
+    }
 }

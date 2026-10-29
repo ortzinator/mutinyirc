@@ -55,13 +55,17 @@ public class ServerViewModelStatusTests
         _vm = new ServerViewModel(_server, new PluginManager());
     }
 
+    /// <summary>
+    /// Registers in the order a real server sends it: the 001 welcome, then the 005 that
+    /// announces the network name.
+    /// </summary>
     private void Register(string reportedNetworkName)
     {
+        _server.Connection.Listener.Parse(":irc.fake.com 001 me :Welcome");
+
         if (reportedNetworkName != string.Empty)
             _server.Connection.Listener.Parse(
                 $":irc.fake.com 005 me NETWORK={reportedNetworkName} CHANTYPES=# :are supported by this server");
-
-        _server.Connection.Listener.Parse(":irc.fake.com 001 me :Welcome");
     }
 
     [Test]

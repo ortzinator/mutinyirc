@@ -28,7 +28,8 @@ temporary trust path that nothing saves and that the refusal cannot explain. Rej
 its reported name. A self-signed host that reports `Libera` would stay alone and not join your saved Libera network.
 Thus the merge by reported name also applies to a network that was minted at pin time and still has only one
 entry point: if the server reports the name of a different saved network, the entry point moves to that network and
-keeps its pin. To find such a network at registration, MutinyIRC must know that the pin action minted it.
+keeps its pin. To find such a network when the server reports its name, MutinyIRC must know that the pin action
+minted it.
 
 A refused host that you pin stays in your saved networks, even if it never registers. You remove it the same way
 as any other network.

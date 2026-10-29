@@ -97,8 +97,9 @@ Saved as `ServerSettings.PinnedFingerprint` (hex) and read through `CertificateT
 in the server window (`CertificateRefusalViewModel`) pins the refused certificate and dials that entry
 point again; on a changed pin it reads **Replace pinned certificate** and asks first. For a host that no
 saved network lists, the button first mints and saves a network named after the host
-(`IrcSettingsManager.MintPinnedNetwork`), marked `NetworkSettings.MintedByPin`. At the first registration
-that reports a name, `IrcSettingsManager.SettleMintedNetwork` clears the mark, and if the network still has
+(`IrcSettingsManager.MintPinnedNetwork`), marked `NetworkSettings.MintedByPin`. When the server first
+reports a name (`NETWORK=` in RPL_ISUPPORT 005, which comes after registration; `Server.NetworkNameReported`),
+`IrcSettingsManager.SettleMintedNetwork` clears the mark, and if the network still has
 one entry point and a different saved network has the reported name, the entry point moves there with its
 pin. See `docs/adr/0004-pinning-mints-the-network.md`.
 In the Networks dialog, a pinned entry point shows a *pin line* under its row

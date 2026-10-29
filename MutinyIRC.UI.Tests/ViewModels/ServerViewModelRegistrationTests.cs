@@ -64,18 +64,21 @@ public class ServerViewModelRegistrationTests
     }
 
     /// <summary>
-    /// Drives a real registration: the 005 that announces the network name, then the 001 that
-    /// completes registration and fires <see cref="Server.Registered"/>. Pass an empty name to
-    /// register against a server that announces no network.
+    /// Drives a real registration in the order a real server sends it: the 001 that completes
+    /// registration and fires <see cref="Server.Registered"/>, then the 005 that announces the
+    /// network name. Pass an empty name to register against a server that announces no network.
     /// </summary>
     private void Register(string reportedNetworkName)
     {
-        if (reportedNetworkName != string.Empty)
-            _server.Connection.Listener.Parse(
-                $":irc.fake.com 005 me NETWORK={reportedNetworkName} CHANTYPES=# :are supported by this server");
-
         _server.Connection.Listener.Parse(":irc.fake.com 001 me :Welcome to the Internet Relay Network");
+
+        if (reportedNetworkName != string.Empty)
+            ReportNetwork(reportedNetworkName);
     }
+
+    private void ReportNetwork(string reportedNetworkName) =>
+        _server.Connection.Listener.Parse(
+            $":irc.fake.com 005 me NETWORK={reportedNetworkName} CHANTYPES=# :are supported by this server");
 
     private static NetworkSettings SaveLibera(IrcSettingsManager manager)
     {
@@ -200,5 +203,34 @@ public class ServerViewModelRegistrationTests
 
         Assert.That(manager.Networks.Count, Is.EqualTo(1));
         Assert.That(libera.Name, Is.EqualTo("LiberaChat"));
+    }
+
+    [Test]
+    public void Registering_NameReportedBeforeTheWelcome_StillJoinsTheNamedNetwork()
+    {
+        // Some servers send 005 before 001. Registration then reads the name itself.
+        IrcSettingsManager manager = UseEmptySettings();
+        NetworkSettings libera = SaveLibera(manager);
+
+        Dial("eu.libera.chat");
+        ReportNetwork("Libera");
+        _server.Connection.Listener.Parse(":irc.fake.com 001 me :Welcome to the Internet Relay Network");
+
+        Assert.That(manager.Networks.Single(), Is.SameAs(libera));
+        Assert.That(libera.Servers.Select(s => s.Url),
+            Is.EqualTo(new[] { "irc.libera.chat", "eu.libera.chat" }));
+        Assert.That(_server.Channels.Keys, Does.Contain("#MutinyIRC"));
+    }
+
+    [Test]
+    public void Registering_NewHostOfKnownNetwork_MarksThatNetworkForAutoConnect()
+    {
+        IrcSettingsManager manager = UseEmptySettings();
+        NetworkSettings libera = SaveLibera(manager);
+
+        Dial("eu.libera.chat");
+        Register("Libera");
+
+        Assert.That(libera.AutoConnect, Is.True);
     }
 }

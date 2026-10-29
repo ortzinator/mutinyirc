@@ -216,6 +216,7 @@ public class Server : MessageContext, IDisposable
         Connection.Listener.OnPart += Listener_OnPart;
         Connection.Listener.OnPublic += Listener_OnPublic;
         Connection.Listener.OnRegistered += Listener_OnRegistered;
+        Connection.Listener.OnReply += Listener_OnReply;
         Connection.Listener.OnNames += Listener_OnNames;
         Connection.Listener.OnChannelModeChange += Listener_OnChannelModeChange;
         Connection.Listener.OnChannelModeRequest += Listener_OnChannelModeRequest;
@@ -402,6 +403,7 @@ public class Server : MessageContext, IDisposable
         Connection.Listener.OnPart -= Listener_OnPart;
         Connection.Listener.OnPublic -= Listener_OnPublic;
         Connection.Listener.OnRegistered -= Listener_OnRegistered;
+        Connection.Listener.OnReply -= Listener_OnReply;
         Connection.Listener.OnNames -= Listener_OnNames;
         Connection.Listener.OnChannelModeChange -= Listener_OnChannelModeChange;
         Connection.Listener.OnChannelModeRequest -= Listener_OnChannelModeRequest;
@@ -467,6 +469,17 @@ public class Server : MessageContext, IDisposable
     public event EventHandler<ErrorMessageEventArgs> ErrorMessageRecieved;
 
     public event EventHandler Registered;
+
+    /// <summary>
+    /// Fired when an RPL_ISUPPORT (005) reply gives a network name (NETWORK=) that is not the
+    /// name this connection reported last. Servers send 005 after the 001 welcome, so this
+    /// event usually comes after <see cref="Registered"/>. Some servers send no name.
+    /// </summary>
+    public event EventHandler<DataEventArgs<string>> NetworkNameReported;
+
+    // The last name that NetworkNameReported gave for the current connection. Only the thread
+    // of the current connection reads or writes it.
+    private string _reportedNetworkName = string.Empty;
 
     public event EventHandler<PartEventArgs> Part;
 
@@ -811,6 +824,8 @@ public class Server : MessageContext, IDisposable
 
     private void Connection_OnConnectSuccess(object sender, EventArgs e)
     {
+        // A new connection reports its network name again.
+        _reportedNetworkName = string.Empty;
         Connected.Fire(this, EventArgs.Empty);
     }
 
@@ -993,6 +1008,20 @@ public class Server : MessageContext, IDisposable
         // timer together. A later drop then reads "attempt 1" and waits ReconnectBaseDelay.
         CancelReconnect();
         Registered?.Invoke(this, e);
+    }
+
+    private void Listener_OnReply(object sender, ReplyEventArgs e)
+    {
+        if (e.ReplyCode != ReplyCode.RPL_BOUNCE)
+            return;
+
+        // The listener stores the 005 tokens before it raises OnReply.
+        string name = Connection.ServerProperties["Network"];
+        if (name == string.Empty || name == _reportedNetworkName)
+            return;
+
+        _reportedNetworkName = name;
+        NetworkNameReported.Fire(this, new DataEventArgs<string>(name));
     }
 
     private void Listener_OnChannelModeChange(object sender,
