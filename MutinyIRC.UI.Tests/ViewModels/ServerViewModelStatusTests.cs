@@ -195,6 +195,35 @@ public class ServerViewModelStatusTests
     }
 
     [AvaloniaTest]
+    public void EveryEntryPointRefused_TheReconnectButton_DialsAgain()
+    {
+        DialAndFail(new ConnectFailedEventArgs(ConnectError.CertificateRejected));
+        EveryEntryPointRefusedViewModel stop =
+            _vm.ChatLines.OfType<EveryEntryPointRefusedViewModel>().Single();
+
+        stop.ReconnectCommand.Execute(null);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_vm.ConnectionStatus, Is.EqualTo(ServerStrings.StatusConnecting),
+                "The button starts a new connect attempt");
+            Assert.That(stop.CanReconnect, Is.False, "A used button goes away");
+        });
+    }
+
+    [AvaloniaTest]
+    public void EveryEntryPointRefused_ANewerStop_RetiresTheOlderButton()
+    {
+        DialAndFail(new ConnectFailedEventArgs(ConnectError.CertificateRejected));
+
+        _server.Connection.ConnectFailed += Raise.With(_server.Connection,
+            new ConnectFailedEventArgs(ConnectError.CertificateRejected));
+
+        Assert.That(_vm.ChatLines.OfType<EveryEntryPointRefusedViewModel>().Select(s => s.CanReconnect),
+            Is.EqualTo(new[] { false, true }), "Only the newest stop offers the button");
+    }
+
+    [AvaloniaTest]
     public void HandshakeFailure_IsNotReportedAsACertificateRejection()
     {
         DialAndFail(new ConnectFailedEventArgs(ConnectError.AuthenticationFailed));

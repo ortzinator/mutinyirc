@@ -63,6 +63,7 @@ namespace MutinyIRC.UI.Resources
         internal static string WarnDisconnect => ResourceManager.GetString("WarnDisconnect", resourceCulture);
         internal static string StatusConnectedPinned => ResourceManager.GetString("StatusConnectedPinned", resourceCulture);
         internal static string ConnectedPinnedMessage => ResourceManager.GetString("ConnectedPinnedMessage", resourceCulture);
+        internal static string ReconnectButton => ResourceManager.GetString("ReconnectButton", resourceCulture);
         internal static string TrustCertificateButton => ResourceManager.GetString("TrustCertificateButton", resourceCulture);
         internal static string ReplacePinnedCertificateButton => ResourceManager.GetString("ReplacePinnedCertificateButton", resourceCulture);
         internal static string CertificatePinHostOnOtherPort => ResourceManager.GetString("CertificatePinHostOnOtherPort", resourceCulture);

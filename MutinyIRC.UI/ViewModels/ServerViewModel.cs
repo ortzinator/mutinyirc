@@ -359,11 +359,40 @@ public class ServerViewModel : IrcViewModel
         AddMessage(ServerStrings.AttemptingReconnect.With((int)e.Delay.TotalSeconds));
     }
 
-    // Every entry point refused its certificate, so the Server stopped and nothing reconnects.
+    // The newest stop block, the only one whose Reconnect button works. Only the UI thread reads
+    // or writes it.
+    private EveryEntryPointRefusedViewModel? _reconnectableStop;
+
+    // Every entry point refused its certificate, so the Server stopped and nothing reconnects
+    // until the user clicks Reconnect.
     private void Server_EveryEntryPointRefused(object? sender, EventArgs e)
     {
         ConnectionStatus = ServerStrings.StatusCertificateRefused;
-        AddIncoming(new ErrorMessageViewModel(DateTime.Now, ServerStrings.EveryEntryPointRefusedMessage));
+        var stop = new EveryEntryPointRefusedViewModel(DateTime.Now, ReconnectFromStop);
+        OnUiThread(() =>
+        {
+            RetireStop();
+            _reconnectableStop = stop;
+        });
+        AddIncoming(stop);
+    }
+
+    /// <summary>Takes the Reconnect button off the newest stop block, if it still has one.</summary>
+    private void RetireStop()
+    {
+        if (_reconnectableStop != null)
+            _reconnectableStop.CanReconnect = false;
+        _reconnectableStop = null;
+    }
+
+    /// <summary>Starts a new connect attempt from the first entry point of the network.</summary>
+    private void ReconnectFromStop(EveryEntryPointRefusedViewModel stop)
+    {
+        if (stop != _reconnectableStop)
+            return;
+
+        RetireStop();
+        _server.Reconnect();
     }
 
     private void Server_Disconnected(object? sender, EventArgs e)
@@ -515,7 +544,11 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_Registered(object? sender, EventArgs e)
     {
-        OnUiThread(RetireRefusal);
+        OnUiThread(() =>
+        {
+            RetireRefusal();
+            RetireStop();
+        });
         DoRegister();
     }
 
