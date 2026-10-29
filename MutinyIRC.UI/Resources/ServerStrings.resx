@@ -194,6 +194,14 @@
     <value>Reconnecting · retry {0}</value>
     <comment>Sidebar connection state while waiting to reconnect. {0} is the attempt number.</comment>
   </data>
+  <data name="StatusCertificateRefused" xml:space="preserve">
+    <value>Certificate refused</value>
+    <comment>Sidebar connection state after every entry point refused its certificate, so Mutiny stopped trying.</comment>
+  </data>
+  <data name="EveryEntryPointRefusedMessage" xml:space="preserve">
+    <value>Every server refused its certificate. Mutiny stopped trying. Trust a certificate, or reconnect.</value>
+    <comment>Displayed in the server window when every entry point of the network refused its TLS certificate, so no reconnect is scheduled.</comment>
+  </data>
   <data name="StatusDisconnected" xml:space="preserve">
     <value>Disconnected</value>
     <comment>Sidebar connection state for a connection that is down.</comment>

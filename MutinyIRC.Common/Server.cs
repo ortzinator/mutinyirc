@@ -47,6 +47,12 @@ public class Server : MessageContext, IDisposable
     private readonly List<ConnectionArgs> _candidates = new List<ConnectionArgs>();
     private int _candidateIndex;
 
+    // The skip list: the indexes in _candidates of the entry points that refused their
+    // certificate in this connect attempt. The walk and the backoff rounds pass over them. A
+    // registration does not clear it, because a later drop is part of the same attempt. Only
+    // Reconnect, DialEntryPoint and ChangeServer clear it. Guarded by _reconnectGate.
+    private readonly HashSet<int> _refused = new HashSet<int>();
+
     /// <summary>
     /// Nicknames whose PRIVMSGs bypass the PM tab UI and surface in the server
     /// window instead (NickServ, ChanServ, etc). Hosts seed this per connection
@@ -389,6 +395,13 @@ public class Server : MessageContext, IDisposable
     /// </summary>
     public event EventHandler<ReconnectingEventArgs> Reconnecting;
 
+    /// <summary>
+    /// Fired when every entry point of this connection has refused its certificate in this
+    /// connect attempt. The run stops: no reconnect is scheduled. <see cref="Reconnect"/> or
+    /// <see cref="DialEntryPoint"/> starts a new attempt.
+    /// </summary>
+    public event EventHandler EveryEntryPointRefused;
+
     public event EventHandler<DataEventArgs<string>> RawMessageReceived;
 
     public event EventHandler<ChannelMessageEventArgs> ChannelMessaged;
@@ -535,6 +548,66 @@ public class Server : MessageContext, IDisposable
     private void Dial()
     {
         Connection.TryConnect();
+    }
+
+    /// <summary>
+    /// Starts a new connect attempt from the first entry point: the user asked to reconnect.
+    /// It ends the current connection, if there is one, and clears the skip list.
+    /// </summary>
+    public void Reconnect() => Restart(0);
+
+    /// <summary>
+    /// Starts a new connect attempt that dials the entry point at <paramref name="host"/> and
+    /// <paramref name="port"/> at once. It ends the current connection, if there is one, and
+    /// clears the skip list. Use it after the user trusts the certificate of that entry point.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// No entry point of this connection has that host and port.
+    /// </exception>
+    public void DialEntryPoint(string host, int port)
+    {
+        int index;
+        lock (_reconnectGate)
+        {
+            index = _candidates.FindIndex(c =>
+                string.Equals(c.Hostname, host, StringComparison.OrdinalIgnoreCase) && c.Port == port);
+        }
+
+        if (index < 0)
+            throw new ArgumentException($"{host}:{port} is not an entry point of this connection.",
+                                        nameof(host));
+
+        Restart(index);
+    }
+
+    /// <summary>
+    /// Ends the current connection and run, clears the skip list, and dials the entry point at
+    /// <paramref name="index"/>.
+    /// </summary>
+    private void Restart(int index)
+    {
+        if (_disposed)
+            return;
+
+        Disconnect();
+
+        lock (_reconnectGate)
+        {
+            _refused.Clear();
+            _candidateIndex = index;
+        }
+
+        // Disconnect unhooked the events. A Server built round a bare connection has no list,
+        // so it keeps that connection.
+        if (_candidates.Count > 0)
+        {
+            ConnectionArgs args = _candidates[index];
+            args.Nick ??= Connection.ConnectionData.Nick;
+            SetupConnection(args);
+        }
+
+        HookEvents();
+        Connect();
     }
 
     public void Disconnect()
@@ -688,39 +761,83 @@ public class Server : MessageContext, IDisposable
     private void Connection_ConnectFailed(object sender, ConnectFailedEventArgs e)
     {
         ConnectFailed.Fire(this, e);
-        AdvanceOrReconnect();
+        AdvanceOrReconnect(e.Reason == ConnectError.CertificateRejected);
     }
 
     /// <summary>
-    /// Answers a host that did not respond. If another entry point is left in this pass, the
-    /// connection moves to it and dials at once — a host that is down is not a reason to wait.
-    /// A pass that runs off the end returns to the first entry point and starts a backoff round,
-    /// so the delay grows once per full pass rather than once per host.
+    /// Answers a dial that failed. If another entry point is left in this pass, the connection
+    /// moves to it and dials at once — a host that is down is not a reason to wait. A pass that
+    /// runs off the end returns to the first entry point and starts a backoff round, so the delay
+    /// grows once per full pass rather than once per host.
+    ///
+    /// When <paramref name="certificateRefused"/> is true, the failed entry point goes on the
+    /// skip list, and the walk and later backoff rounds pass over it. When every entry point is
+    /// on the skip list, the run stops and <see cref="EveryEntryPointRefused"/> fires.
     /// </summary>
-    private void AdvanceOrReconnect()
+    private void AdvanceOrReconnect(bool certificateRefused)
     {
-        bool hasNext;
         int next;
+        bool wrapped;
 
         lock (_reconnectGate)
         {
             if (_disposed)
                 return;
 
-            next = _candidateIndex + 1;
-            hasNext = next < _candidates.Count;
-            _candidateIndex = hasNext ? next : 0;
+            // A Server built round a bare connection has no list: it has one entry point.
+            int count = Math.Max(_candidates.Count, 1);
+
+            if (certificateRefused)
+                _refused.Add(_candidateIndex);
+
+            next = NextUnrefused(_candidateIndex + 1, count);
+            wrapped = next < 0;
+            if (wrapped)
+                next = NextUnrefused(0, count);
+
+            if (next < 0)
+            {
+                // Nothing is left to dial. Waiting would only get the same refusals again.
+                _reconnectTimer?.Dispose();
+                _reconnectTimer = null;
+                _reconnectAttempt = 0;
+            }
+            else
+            {
+                _candidateIndex = next;
+            }
+        }
+
+        if (next < 0)
+        {
+            EveryEntryPointRefused.Fire(this, EventArgs.Empty);
+            return;
         }
 
         // With one entry point, or none, the connection already points where it must, and
         // rebuilding it would only throw away the socket the reconnect timer is going to use.
         if (_candidates.Count > 1)
-            UseCandidate(_candidateIndex);
+            UseCandidate(next);
 
-        if (hasNext)
-            Connect();
-        else
+        if (wrapped)
             ScheduleReconnect();
+        else
+            Connect();
+    }
+
+    /// <summary>
+    /// Returns the first index from <paramref name="start"/> up to <paramref name="count"/> that
+    /// is not on the skip list, or -1 when there is none. Call it under _reconnectGate.
+    /// </summary>
+    private int NextUnrefused(int start, int count)
+    {
+        for (int i = start; i < count; i++)
+        {
+            if (!_refused.Contains(i))
+                return i;
+        }
+
+        return -1;
     }
 
     /// <summary>
@@ -1018,6 +1135,7 @@ public class Server : MessageContext, IDisposable
             _candidates.Clear();
             _candidates.Add(args);
             _candidateIndex = 0;
+            _refused.Clear();
         }
 
         UnhookEvents();

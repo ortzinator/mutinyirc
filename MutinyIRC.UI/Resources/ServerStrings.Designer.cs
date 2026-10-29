@@ -36,11 +36,13 @@
         internal static string ConnectionLostUnknownMessage => ResourceManager.GetString("ConnectionLostUnknownMessage", resourceCulture);
         internal static string Disconnected => ResourceManager.GetString("Disconnected", resourceCulture);
         internal static string DisconnectSocketError => ResourceManager.GetString("DisconnectSocketError", resourceCulture);
+        internal static string EveryEntryPointRefusedMessage => ResourceManager.GetString("EveryEntryPointRefusedMessage", resourceCulture);
         internal static string NickTakenMessage => ResourceManager.GetString("NickTakenMessage", resourceCulture);
         internal static string RandomNickMessage => ResourceManager.GetString("RandomNickMessage", resourceCulture);
         internal static string ServerErrorMessage => ResourceManager.GetString("ServerErrorMessage", resourceCulture);
         internal static string ServerFormTitleBar => ResourceManager.GetString("ServerFormTitleBar", resourceCulture);
-        internal static string StatusConnected => ResourceManager.GetString("StatusConnected", resourceCulture);
+        internal static string StatusCertificateRefused => ResourceManager.GetString("StatusCertificateRefused", resourceCulture);
+        internal static string StatusConnected =>ResourceManager.GetString("StatusConnected", resourceCulture);
         internal static string StatusConnectedSecure => ResourceManager.GetString("StatusConnectedSecure", resourceCulture);
         internal static string StatusConnecting => ResourceManager.GetString("StatusConnecting", resourceCulture);
         internal static string StatusDisconnected => ResourceManager.GetString("StatusDisconnected", resourceCulture);

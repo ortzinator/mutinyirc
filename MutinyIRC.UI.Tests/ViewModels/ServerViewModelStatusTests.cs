@@ -180,6 +180,21 @@ public class ServerViewModelStatusTests
     }
 
     [AvaloniaTest]
+    public void EveryEntryPointRefused_SaysMutinyStoppedTrying()
+    {
+        // One entry point, so its refusal is a refusal from every entry point.
+        DialAndFail(new ConnectFailedEventArgs(ConnectError.CertificateRejected));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_vm.ConnectionStatus, Is.EqualTo("Certificate refused"));
+            Assert.That(_vm.ChatLines.OfType<ErrorMessageViewModel>().Select(l => l.Message),
+                Does.Contain("Every server refused its certificate. Mutiny stopped trying. " +
+                             "Trust a certificate, or reconnect."));
+        });
+    }
+
+    [AvaloniaTest]
     public void HandshakeFailure_IsNotReportedAsACertificateRejection()
     {
         DialAndFail(new ConnectFailedEventArgs(ConnectError.AuthenticationFailed));

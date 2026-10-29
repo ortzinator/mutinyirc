@@ -117,6 +117,7 @@ public class ServerViewModel : IrcViewModel
         _server.Registered += Server_Registered;
         _server.ConnectFailed += Server_ConnectFailed;
         _server.Reconnecting += Server_Reconnecting;
+        _server.EveryEntryPointRefused += Server_EveryEntryPointRefused;
         _server.ErrorMessageRecieved += Server_ErrorMessageRecieved;
         _server.Connecting += Server_Connecting;
         _server.Disconnected += Server_Disconnected;
@@ -305,6 +306,13 @@ public class ServerViewModel : IrcViewModel
     {
         ConnectionStatus = ServerStrings.StatusReconnecting.With(e.Attempt);
         AddMessage(ServerStrings.AttemptingReconnect.With((int)e.Delay.TotalSeconds));
+    }
+
+    // Every entry point refused its certificate, so the Server stopped and nothing reconnects.
+    private void Server_EveryEntryPointRefused(object? sender, EventArgs e)
+    {
+        ConnectionStatus = ServerStrings.StatusCertificateRefused;
+        AddIncoming(new ErrorMessageViewModel(DateTime.Now, ServerStrings.EveryEntryPointRefusedMessage));
     }
 
     private void Server_Disconnected(object? sender, EventArgs e)
@@ -505,6 +513,7 @@ public class ServerViewModel : IrcViewModel
         _server.Registered -= Server_Registered;
         _server.ConnectFailed -= Server_ConnectFailed;
         _server.Reconnecting -= Server_Reconnecting;
+        _server.EveryEntryPointRefused -= Server_EveryEntryPointRefused;
         _server.ErrorMessageRecieved -= Server_ErrorMessageRecieved;
         _server.Connecting -= Server_Connecting;
         _server.Disconnected -= Server_Disconnected;

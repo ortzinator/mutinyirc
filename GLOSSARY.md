@@ -47,6 +47,11 @@ answers. It is simply the order of `NetworkSettings.Servers`, which the Networks
 the next host at once, and only a pass that runs off the end starts a round of the reconnect backoff. Thus
 "retry N" in the sidebar counts passes over the hosts, not hosts.
 
+An entry point that refuses its certificate goes on the **skip list** (`Server._refused`) for the rest of
+the connect attempt: the walk and later backoff rounds pass over it. When every entry point is on it,
+`Server` stops and raises `EveryEntryPointRefused` instead of a backoff round. `Server.Reconnect` and
+`Server.DialEntryPoint` start a new attempt and clear it.
+
 ## Network
 
 The thing you connect to — "Libera", not `irc.libera.chat`. A network owns its entry points, its channels
