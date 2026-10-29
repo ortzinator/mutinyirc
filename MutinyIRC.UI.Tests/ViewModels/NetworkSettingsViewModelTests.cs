@@ -481,8 +481,8 @@ public class NetworkSettingsViewModelTests
     [Test]
     public void ToModel_KeepsEveryPin()
     {
-        // Saving the Networks dialog writes the networks it rebuilt, so a pin that the dialog
-        // does not carry through is lost.
+        // A save of the Networks dialog writes the networks it rebuilt. Thus the dialog loses a
+        // pin that it does not carry through.
         var model = new NetworkSettings("TestNet");
         model.AddServer(new ServerSettings("a.example.net", 6697, true) { PinnedFingerprint = new string('A', 64) });
         model.AddServer(new ServerSettings("b.example.net", 6697, true));

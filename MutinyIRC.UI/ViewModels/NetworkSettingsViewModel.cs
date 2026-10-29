@@ -4,6 +4,7 @@ using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MutinyIRC.Common;
+using MutinyIRC.UI.Resources;
 
 namespace MutinyIRC.UI.ViewModels;
 
@@ -40,15 +41,6 @@ public partial class NetworkSettingsViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsVerifyCertificatesHintWarning))]
     private bool _verifyCertificates = true;
 
-    internal const string VerifyOnHint =
-        "Refuses a server whose certificate fails the check, unless you pinned that certificate";
-
-    internal const string VerifyOffHint =
-        "Off: Mutiny accepts any certificate from this network's servers";
-
-    internal const string NoTlsHint =
-        "None of this network's servers use TLS, so there is no certificate to check.";
-
     /// <summary>
     /// Whether the verify switch can do anything. A plaintext entry point has no certificate,
     /// so the switch is disabled when no entry point uses TLS.
@@ -57,9 +49,9 @@ public partial class NetworkSettingsViewModel : ObservableObject
 
     /// <summary>The line under the verify switch that says what it does now.</summary>
     public string VerifyCertificatesHint =>
-        !CanVerifyCertificates ? NoTlsHint
-        : VerifyCertificates ? VerifyOnHint
-        : VerifyOffHint;
+        !CanVerifyCertificates ? ServerStrings.VerifyCertificatesNoTlsHint
+        : VerifyCertificates ? ServerStrings.VerifyCertificatesOnHint
+        : ServerStrings.VerifyCertificatesOffHint;
 
     /// <summary>
     /// Whether <see cref="VerifyCertificatesHint"/> is a warning: the switch is off for a
@@ -271,7 +263,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
             AlternateNick = string.IsNullOrWhiteSpace(AlternateNick) ? null : AlternateNick,
             AutoConnect = AutoConnect,
             VerifyCertificates = VerifyCertificates,
-            MintedByPin = MintedByPin,
+            MintedByPin = MintedByPin
         };
 
         foreach (var vm in Servers)

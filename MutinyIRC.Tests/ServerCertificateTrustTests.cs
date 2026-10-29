@@ -15,8 +15,8 @@ namespace MutinyIRC.Tests;
 /// <summary>
 /// Dials a loopback TLS server that presents a self-signed certificate, so the normal check
 /// fails every time. The trust lookup that the UI gives to <see cref="Server"/> decides what
-/// happens next: with the network's verify switch on, the connection is refused; with it off,
-/// the connection opens and says that it did not check the certificate.
+/// occurs next. With the verify switch of the network on, the connection is refused. With it
+/// off, the connection opens and says that it did not check the certificate.
 /// </summary>
 [TestFixture]
 public class ServerCertificateTrustTests

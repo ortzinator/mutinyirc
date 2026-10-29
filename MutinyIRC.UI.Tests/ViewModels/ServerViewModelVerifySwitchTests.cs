@@ -14,7 +14,8 @@ namespace MutinyIRC.UI.Tests.ViewModels;
 
 /// <summary>
 /// Covers what the server window and the sidebar say about a connection that was accepted only
-/// because the network's verify switch is off, and what they say when the certificate passed.
+/// because the verify switch of the network is off. Also covers what they say when the
+/// certificate passed.
 /// </summary>
 [TestFixture]
 public class ServerViewModelVerifySwitchTests
@@ -32,13 +33,13 @@ public class ServerViewModelVerifySwitchTests
     [SetUp]
     public void Setup()
     {
-        // Registration files the connection under a network, so give it settings of its own,
-        // over a file of this fixture's own, instead of the user's real servers.json.
+        // Registration files the connection under a network. Thus give it settings of its own,
+        // over a file of this fixture, not the real servers.json of the user.
         SettingsSingleton.SetValue(null, new IrcSettingsManager(
             System.IO.Path.Combine(System.IO.Path.GetTempPath(),
                                    System.IO.Path.GetRandomFileName() + ".json")));
 
-        // A real connection that never opens: the test plays the TLS handshake by calling the
+        // A real connection that never opens. The test plays the TLS handshake: it calls the
         // certificate callback that Server gave it.
         _connection = new Connection(new ConnectionArgs("me", Host, true) { Port = Port }, false, false);
         _server = new Server(_connection);

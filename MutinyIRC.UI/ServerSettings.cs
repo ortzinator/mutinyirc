@@ -32,7 +32,7 @@ public class ServerSettings : IEquatable<ServerSettings>
     /// <summary>
     /// The SHA-256 fingerprint of the certificate pinned on this entry point, as hex digits, or
     /// null when it has no pin. A certificate that fails the normal check but matches the pin is
-    /// accepted. An entry point has at most one pin, so pinning a new certificate replaces it.
+    /// accepted. An entry point has at most one pin, so a new pin replaces the old pin.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? PinnedFingerprint { get; set; }

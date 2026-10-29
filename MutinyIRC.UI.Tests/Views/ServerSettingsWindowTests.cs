@@ -25,7 +25,7 @@ public class ServerSettingsWindowTests
         var libera = new NetworkSettings("Libera") { Nick = "sparkplug" };
         libera.AddServer(new ServerSettings("irc.libera.chat", 6697, true)
         {
-            PinnedFingerprint = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF",
+            PinnedFingerprint = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
         });
         libera.AddServer(new ServerSettings("eu.libera.chat", 6667, false));
         libera.AddChannel(new Common.ChannelSettings("#mutinyirc", true));

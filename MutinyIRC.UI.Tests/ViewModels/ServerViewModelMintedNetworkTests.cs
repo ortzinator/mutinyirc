@@ -20,8 +20,8 @@ namespace MutinyIRC.UI.Tests.ViewModels;
 /// <summary>
 /// Covers the "Trust this certificate" button for a host that no saved network lists, for
 /// example one dialled with <c>/server</c>. The pin action mints and saves a network named after
-/// the host, and at registration that network can merge into a saved network by the name that
-/// the server reports.
+/// the host. When the server reports its network name, that network can merge into a saved
+/// network of that name.
 /// </summary>
 [TestFixture]
 public class ServerViewModelMintedNetworkTests
@@ -36,7 +36,7 @@ public class ServerViewModelMintedNetworkTests
     private const int Port = 6697;
 
     /// <summary>
-    /// A connection over one TLS entry point, as <c>/server</c> makes it, whose dials only record
+    /// A connection over one TLS entry point, as <c>/server</c> makes it. Its dials only record
     /// the entry point, so a test can refuse a certificate or register at will.
     /// </summary>
     private sealed class FakedServer : Server

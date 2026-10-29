@@ -71,5 +71,9 @@ namespace MutinyIRC.UI.Resources
         internal static string ReplacePinMessage => ResourceManager.GetString("ReplacePinMessage", resourceCulture);
         internal static string ReplacePinConfirmButton => ResourceManager.GetString("ReplacePinConfirmButton", resourceCulture);
         internal static string ReplacePinCancelButton => ResourceManager.GetString("ReplacePinCancelButton", resourceCulture);
+        internal static string VerifyCertificatesOnHint => ResourceManager.GetString("VerifyCertificatesOnHint", resourceCulture);
+        internal static string VerifyCertificatesOffHint => ResourceManager.GetString("VerifyCertificatesOffHint", resourceCulture);
+        internal static string VerifyCertificatesNoTlsHint => ResourceManager.GetString("VerifyCertificatesNoTlsHint", resourceCulture);
+        internal static string EntryPointPinLine => ResourceManager.GetString("EntryPointPinLine", resourceCulture);
     }
 }

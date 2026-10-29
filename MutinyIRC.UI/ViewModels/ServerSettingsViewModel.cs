@@ -1,6 +1,8 @@
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MutinyIRC.Common;
+using MutinyIRC.UI.Resources;
 
 namespace MutinyIRC.UI.ViewModels;
 
@@ -16,7 +18,7 @@ public partial class ServerSettingsViewModel : ObservableObject
     [ObservableProperty] private int _port = ServerSettings.DefaultPort;
     [ObservableProperty] private bool _ssl;
 
-    // The pin of this entry point. ToModel carries it through, so saving the dialog keeps it.
+    // The pin of this entry point. ToModel carries it through, so a save of the dialog keeps it.
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPinned))]
     [NotifyPropertyChangedFor(nameof(PinLine))]
@@ -53,7 +55,7 @@ public partial class ServerSettingsViewModel : ObservableObject
 
             string formatted = CertificateRefusal.FormatFingerprint(PinnedFingerprint);
             int length = Math.Min(formatted.Length, PinLineBytes * 3 - 1);
-            return $"Pinned {formatted[..length]}…";
+            return ServerStrings.EntryPointPinLine.With(formatted[..length]);
         }
     }
 

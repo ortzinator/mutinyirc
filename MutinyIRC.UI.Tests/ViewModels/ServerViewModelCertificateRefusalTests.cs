@@ -68,8 +68,8 @@ public class ServerViewModelCertificateRefusalTests
             new ConnectFailedEventArgs(ConnectError.CertificateRejected,
                                        new RejectedCertificate(certificate.RawData, errors)));
 
-    // The connection has one entry point, so its refusal also stops the run, and a second
-    // error block ("Every server refused its certificate...") follows the refusal.
+    // The connection has one entry point, so its refusal also stops the run. A second error
+    // block ("Every server refused its certificate...") follows the refusal.
     private ErrorMessageViewModel TheErrorBlock() =>
         _vm.ChatLines.OfType<ErrorMessageViewModel>()
             .First(l => l.Message != ServerStrings.EveryEntryPointRefusedMessage);

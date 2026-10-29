@@ -294,4 +294,20 @@
     <value>Cancel</value>
     <comment>Button in the pin replacement dialog that keeps the old pin.</comment>
   </data>
+  <data name="VerifyCertificatesOnHint" xml:space="preserve">
+    <value>Refuses a server whose certificate fails the check, unless you pinned that certificate</value>
+    <comment>Networks dialog: the hint under the "Verify TLS certificates" switch when the switch is on.</comment>
+  </data>
+  <data name="VerifyCertificatesOffHint" xml:space="preserve">
+    <value>Off: Mutiny accepts any certificate from this network's servers</value>
+    <comment>Networks dialog: the warning under the "Verify TLS certificates" switch when the switch is off.</comment>
+  </data>
+  <data name="VerifyCertificatesNoTlsHint" xml:space="preserve">
+    <value>None of this network's servers use TLS, so there is no certificate to check.</value>
+    <comment>Networks dialog: the hint under the "Verify TLS certificates" switch when no entry point of the network uses TLS.</comment>
+  </data>
+  <data name="EntryPointPinLine" xml:space="preserve">
+    <value>Pinned {0}…</value>
+    <comment>Networks dialog: the line under a pinned entry point. {0} is the first bytes of the pinned fingerprint.</comment>
+  </data>
 </root>

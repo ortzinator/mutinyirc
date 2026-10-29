@@ -257,9 +257,8 @@ public class SettingsViewModelTests
     [Test]
     public void Save_KeepsTheMintedByPinMark()
     {
-        // Until a registration names a minted network, the mark is what lets that registration
-        // move the entry point to the saved network of that name. A dialog save before then
-        // must not clear it.
+        // Until a server names a minted network, the mark lets the name move the entry point to
+        // the saved network of that name. A dialog save before then must not clear it.
         var minted = new NetworkSettings("a.example") { MintedByPin = true };
         minted.AddServer(new ServerSettings("a.example", 6697, true) { PinnedFingerprint = Fingerprint });
         IrcSettingsManager manager = ManagerWith(minted, Network("Libera", "irc.libera.chat"));

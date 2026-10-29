@@ -26,7 +26,7 @@ public class DesignSettingsViewModel : SettingsViewModel
             Port = 6697,
             Ssl = true,
             Order = 2,
-            PinnedFingerprint = "3A7F0C9E51B2D84466E1A0F3C7D92B580E4A1C6F93D0B7E25A8C4F1D06B9E372",
+            PinnedFingerprint = "3A7F0C9E51B2D84466E1A0F3C7D92B580E4A1C6F93D0B7E25A8C4F1D06B9E372"
         });
         libera.Servers.Add(new ServerSettingsViewModel
         { Url = "irc.libera.chat", Port = 6667, Ssl = false, Order = 3 });

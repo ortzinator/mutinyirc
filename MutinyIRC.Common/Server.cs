@@ -838,9 +838,9 @@ public class Server : MessageContext, IDisposable
 
     /// <summary>
     /// Answers a dial that failed. If another entry point is left in this pass, the connection
-    /// moves to it and dials at once — a host that is down is not a reason to wait. A pass that
-    /// runs off the end returns to the first entry point and starts a backoff round, so the delay
-    /// grows once per full pass rather than once per host.
+    /// moves to it and dials at once. A host that is down is not a reason to wait. A pass that
+    /// runs off the end returns to the first entry point and starts a backoff round. Thus the
+    /// delay grows once per full pass, not once per host.
     ///
     /// When <paramref name="certificateRefused"/> is true, the failed entry point goes on the
     /// skip list, and the walk and later backoff rounds pass over it. When every entry point is

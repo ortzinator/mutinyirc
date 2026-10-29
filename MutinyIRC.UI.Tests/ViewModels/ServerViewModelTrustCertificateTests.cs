@@ -18,9 +18,9 @@ using NUnit.Framework;
 namespace MutinyIRC.UI.Tests.ViewModels;
 
 /// <summary>
-/// Covers the "Trust this certificate" button on a refusal in the server window: it pins the
-/// refused certificate on the refused entry point and dials that entry point at once. Only the
-/// newest refusal has a working button, and replacing a pin needs a confirm.
+/// Covers the "Trust this certificate" button on a refusal in the server window. The button pins
+/// the refused certificate on the refused entry point and dials that entry point at once. Only
+/// the newest refusal has a working button, and a pin replacement needs a confirm.
 /// </summary>
 [TestFixture]
 public class ServerViewModelTrustCertificateTests

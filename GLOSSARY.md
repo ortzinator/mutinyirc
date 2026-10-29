@@ -49,8 +49,9 @@ the next host at once, and only a pass that runs off the end starts a round of t
 
 An entry point that refuses its certificate goes on the **skip list** (`Server._refused`) for the rest of
 the connect attempt: the walk and later backoff rounds pass over it. When every entry point is on it,
-`Server` stops and raises `EveryEntryPointRefused` instead of a backoff round. `Server.Reconnect` and
-`Server.DialEntryPoint` start a new attempt and clear it.
+`Server` stops and raises `EveryEntryPointRefused` instead of a backoff round. The **Reconnect** button on
+that stop message (`EveryEntryPointRefusedViewModel`) calls `Server.Reconnect`. `Server.Reconnect` and
+`Server.DialEntryPoint` start a new attempt and clear the list. `Server.ChangeServer` clears it too.
 
 ## Network
 

@@ -4,12 +4,12 @@ namespace MutinyIRC.Common;
 
 /// <summary>
 /// The trust settings that apply to one entry point when its server certificate fails the
-/// normal check: the network's verify switch and the entry point's pin. The host gives them to
-/// <see cref="Server.CertificateTrustLookup"/>.
+/// normal check. They are the verify switch of the network and the pin of the entry point. The
+/// host gives them to <see cref="Server.CertificateTrustLookup"/>.
 /// </summary>
 /// <remarks>
-/// Each setting is an init property with a safe default, so a new setting can come later
-/// without a change to the code that makes one.
+/// Each setting is an init property with a safe default. Thus a new setting can come later,
+/// and the code that makes one does not change.
 /// </remarks>
 /// <example>
 /// <code>

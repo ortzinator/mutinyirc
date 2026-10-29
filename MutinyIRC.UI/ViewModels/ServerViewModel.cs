@@ -163,7 +163,7 @@ public class ServerViewModel : IrcViewModel
         {
             CertificateAcceptance.VerificationOff => ServerStrings.StatusConnectedUnverified,
             CertificateAcceptance.Pinned => ServerStrings.StatusConnectedPinned,
-            _ => ServerStrings.StatusConnectedSecure,
+            _ => ServerStrings.StatusConnectedSecure
         };
     }
 

@@ -166,8 +166,8 @@ public sealed class IrcSettingsManager
 
     /// <summary>
     /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
-    /// <paramref name="port"/>: the verify switch of the network that lists the host, and the
-    /// pin of the saved entry point with that host and port. A host that no saved network lists
+    /// <paramref name="port"/>. The verify switch comes from the network that lists the host.
+    /// The pin comes from the saved entry point with that host and port. A host that no saved network lists
     /// is verified and has no pin.
     /// </summary>
     /// <remarks>
@@ -188,7 +188,7 @@ public sealed class IrcSettingsManager
 
     /// <summary>
     /// Pins <paramref name="fingerprint"/> on the saved entry point <paramref name="host"/>:
-    /// <paramref name="port"/>, replacing any old pin, and saves the settings.
+    /// <paramref name="port"/> and saves the settings. The new pin replaces an old pin.
     /// </summary>
     /// <returns>False, and nothing changes, when no saved network lists that entry point.</returns>
     /// <remarks>Call it on the UI thread.</remarks>
@@ -225,10 +225,12 @@ public sealed class IrcSettingsManager
     }
 
     /// <summary>
-    /// Settles, at registration, the network that the pin action minted:
-    /// <paramref name="minted"/> stops being marked as minted, and if it still has one entry
-    /// point and a different saved network has the name <paramref name="reportedName"/>, its
-    /// entry point moves to that network with its pin and <paramref name="minted"/> goes.
+    /// Settles a network that Mutiny made, when the server reports its network name. The pin
+    /// action makes such a network, and so does a registration that the server did not name.
+    /// The mark <see cref="NetworkSettings.MintedByPin"/> on <paramref name="minted"/> goes.
+    /// Then the entry point can move to a different saved network that has the name
+    /// <paramref name="reportedName"/>. This occurs only when <paramref name="minted"/> has one
+    /// entry point. The entry point keeps its pin, and <paramref name="minted"/> goes.
     /// </summary>
     /// <returns>The network that the entry point now belongs to.</returns>
     /// <remarks>Call it on the UI thread, and only with a reported name that is not empty.</remarks>

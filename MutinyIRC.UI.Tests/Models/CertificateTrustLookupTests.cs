@@ -8,8 +8,8 @@ namespace MutinyIRC.UI.Tests.Models;
 
 /// <summary>
 /// Covers how the saved networks answer the certificate trust lookup that a connection makes
-/// at each TLS handshake: the verify switch of the network that lists the host, and the pin of
-/// the entry point (host and port). Also covers how a pin is saved on an entry point.
+/// at each TLS handshake. The answer holds the verify switch of the network that lists the host,
+/// and the pin of the entry point (host and port). Also covers how a pin is saved on an entry point.
 /// </summary>
 [TestFixture]
 public class CertificateTrustLookupTests

@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using MutinyIRC.Common;
@@ -22,12 +23,20 @@ public partial class PinReplacementWindow : Window
         cancelButton.Content = ServerStrings.ReplacePinCancelButton;
     }
 
+    /// <param name="refusal">
+    /// A refusal whose <see cref="CertificateRefusalViewModel.ReplacesPin"/> is true.
+    /// </param>
+    /// <exception cref="ArgumentException">The refusal replaces no pin.</exception>
     public PinReplacementWindow(CertificateRefusalViewModel refusal) : this()
     {
+        // The window opens only when the refusal replaces a pin, so the pin is always there.
+        string pinnedFingerprint = refusal.PinnedFingerprint
+            ?? throw new ArgumentException("The refusal replaces no pin.", nameof(refusal));
+
         messageText.Text = ServerStrings.ReplacePinMessage.With(refusal.Host, refusal.Port);
         fingerprintsText.Text = string.Join("\n",
             ServerStrings.CertificatePinnedLine.With(
-                CertificateRefusal.FormatFingerprint(refusal.PinnedFingerprint ?? string.Empty)),
+                CertificateRefusal.FormatFingerprint(pinnedFingerprint)),
             ServerStrings.CertificateNowLine.With(CertificateRefusal.FormatFingerprint(refusal.Fingerprint)));
     }
 

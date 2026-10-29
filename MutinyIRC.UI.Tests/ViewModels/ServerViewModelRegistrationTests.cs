@@ -64,9 +64,9 @@ public class ServerViewModelRegistrationTests
     }
 
     /// <summary>
-    /// Drives a real registration in the order a real server sends it: the 001 that completes
-    /// registration and fires <see cref="Server.Registered"/>, then the 005 that announces the
-    /// network name. Pass an empty name to register against a server that announces no network.
+    /// Drives a real registration in the order of a real server. First comes the 001 that
+    /// completes registration and fires <see cref="Server.Registered"/>. Then comes the 005 that
+    /// announces the network name. Pass an empty name to register against a server that announces no network.
     /// </summary>
     private void Register(string reportedNetworkName)
     {

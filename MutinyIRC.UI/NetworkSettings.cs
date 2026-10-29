@@ -43,9 +43,9 @@ public class NetworkSettings
 
     /// <summary>
     /// Whether the pin action minted this network for a refused host that no saved network
-    /// listed, and no registration has named it yet. While it is set and the network has one
-    /// entry point, a registration that reports the name of a different saved network moves the
-    /// entry point there. See <c>docs/adr/0004-pinning-mints-the-network.md</c>.
+    /// listed, and no server has named it yet. The mark has an effect only while the network has
+    /// one entry point. Then a server that reports the name of a different saved network moves
+    /// the entry point to that network. See <c>docs/adr/0004-pinning-mints-the-network.md</c>.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool MintedByPin { get; set; }
