@@ -50,6 +50,16 @@ public class ServerFailoverTests
             Current.ConnectFailed += Raise.With(this,
                 new ConnectFailedEventArgs(ConnectError.ConnectionRefused));
 
+        /// <summary>Tells the connection in use that it refused the server's certificate.</summary>
+        public void RefuseCurrentCertificate() =>
+            Current.ConnectFailed += Raise.With(this,
+                new ConnectFailedEventArgs(ConnectError.CertificateRejected));
+
+        /// <summary>Tells the connection in use that a live session dropped.</summary>
+        public void DropCurrentConnection() =>
+            Current.ConnectionLost += Raise.With(this,
+                new DisconnectEventArgs(DisconnectReason.RemoteHostClosedConnection));
+
         /// <summary>Feeds the welcome reply, which is what ends a run of tries.</summary>
         public void Register() =>
             Current.Listener.Parse(":irc.example 001 nick :Welcome to the network");
@@ -308,6 +318,164 @@ public class ServerFailoverTests
         await Task.Delay(TimeSpan.FromSeconds(1.5));
 
         Assert.That(_server.Dialled, Is.Empty);
+    }
+
+    // ── Refused certificates ─────────────────────────────────────────────────
+
+    [Test]
+    public void ARefusedCertificate_MovesToTheNextEntryPointAtOnce()
+    {
+        Build(Candidate("refused.example", 6697), Candidate("healthy.example", 6697));
+
+        _server.RefuseCurrentCertificate();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Dialled, Is.EqualTo(new[] { "healthy.example:6697" }));
+            Assert.That(_reconnectAttempts, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void ARefusedEntryPoint_IsSkippedAfterALaterDrop()
+    {
+        Build(Candidate("refused.example", 6697), Candidate("healthy.example", 6697));
+
+        _server.RefuseCurrentCertificate();
+        _server.Register();
+        _server.DropCurrentConnection();
+        _server.FailCurrentDial();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Url, Is.EqualTo("healthy.example"),
+                "the backoff round goes back to the healthy host, not to the refused one");
+            Assert.That(_reconnectAttempts, Is.EqualTo(new[] { 1, 2 }));
+        });
+    }
+
+    [Test]
+    public void EveryEntryPointRefused_StopsWithoutABackoffRound()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+        int stops = 0;
+        _server.EveryEntryPointRefused += (_, _) => stops++;
+
+        _server.RefuseCurrentCertificate();
+        _server.RefuseCurrentCertificate();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(stops, Is.EqualTo(1));
+            Assert.That(_reconnectAttempts, Is.Empty, "waiting would only get the same refusals");
+            Assert.That(_server.Dialled, Is.EqualTo(new[] { "b.example:6697" }));
+        });
+    }
+
+    [Test]
+    public void OneEntryPoint_ARefusal_StopsWithoutABackoffRound()
+    {
+        Build(Candidate("a.example", 6697));
+        int stops = 0;
+        _server.EveryEntryPointRefused += (_, _) => stops++;
+
+        _server.RefuseCurrentCertificate();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(stops, Is.EqualTo(1));
+            Assert.That(_reconnectAttempts, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void ARefusedAndADownHost_TheDownHostGetsABackoffRoundWithoutTheRefusedOne()
+    {
+        Build(Candidate("refused.example", 6697), Candidate("down.example", 6697));
+        int stops = 0;
+        _server.EveryEntryPointRefused += (_, _) => stops++;
+
+        _server.RefuseCurrentCertificate();
+        _server.FailCurrentDial();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_reconnectAttempts, Is.EqualTo(new[] { 1 }));
+            Assert.That(_server.Url, Is.EqualTo("down.example"),
+                "the backoff round dials the down host, and skips the refused one");
+            Assert.That(stops, Is.Zero);
+        });
+    }
+
+    [Test]
+    public void Reconnect_AfterAStop_DialsTheFirstEntryPointAgain()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+        _server.RefuseCurrentCertificate();
+        _server.RefuseCurrentCertificate();
+
+        _server.Reconnect();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Url, Is.EqualTo("a.example"));
+            Assert.That(_server.Dialled, Is.EqualTo(new[] { "b.example:6697", "a.example:6697" }));
+        });
+    }
+
+    [Test]
+    public void Reconnect_ClearsTheSkipList()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+        _server.RefuseCurrentCertificate();
+        _server.RefuseCurrentCertificate();
+
+        _server.Reconnect();
+        _server.FailCurrentDial();
+
+        Assert.That(_server.Url, Is.EqualTo("b.example"),
+            "a new attempt walks every entry point again");
+    }
+
+    [Test]
+    public void DialEntryPoint_DialsThatEntryPointAndClearsTheSkipList()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+        _server.RefuseCurrentCertificate();
+        _server.RefuseCurrentCertificate();
+
+        _server.DialEntryPoint("b.example", 6697);
+        _server.FailCurrentDial();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Dialled, Is.EqualTo(new[] { "b.example:6697", "b.example:6697" }),
+                "b is dialled at once");
+            Assert.That(_server.Url, Is.EqualTo("a.example"),
+                "a failure on b wraps to a, which is no longer skipped");
+            Assert.That(_reconnectAttempts, Is.EqualTo(new[] { 1 }));
+        });
+    }
+
+    [Test]
+    public void ChangeServer_ClearsTheSkipList()
+    {
+        Build(Candidate("a.example", 6697));
+        _server.RefuseCurrentCertificate();
+
+        _server.ChangeServer(Candidate("chosen.example", 6697));
+        _server.FailCurrentDial();
+
+        Assert.That(_reconnectAttempts, Is.EqualTo(new[] { 1 }),
+            "the new host is not skipped because the old one refused its certificate");
+    }
+
+    [Test]
+    public void DialEntryPoint_AnEntryPointNotInTheList_Throws()
+    {
+        Build(Candidate("a.example", 6697));
+
+        Assert.That(() => _server.DialEntryPoint("other.example", 6697), Throws.ArgumentException);
     }
 
     // ── Guards ───────────────────────────────────────────────────────────────

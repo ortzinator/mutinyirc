@@ -126,7 +126,47 @@
   </data>
   <data name="CertificateRejectedMessage" xml:space="preserve">
     <value>Could not connect: the server's TLS certificate is not trusted.</value>
-    <comment>Displayed to the user when a TLS connection fails because the server's certificate did not pass validation (self-signed, expired, or issued for another host).</comment>
+    <comment>Displayed to the user when a TLS connection fails because the server's certificate did not pass validation, and FlamingIRC did not report the certificate.</comment>
+  </data>
+  <data name="CertificateRefusedMessage" xml:space="preserve">
+    <value>Refused {0}: its certificate is not trusted, because {1}.</value>
+    <comment>First line of the error block for a refused certificate. {0} is host:port. {1} is one or more CertificateReason strings.</comment>
+  </data>
+  <data name="CertificateFingerprintLine" xml:space="preserve">
+    <value>SHA-256: {0}</value>
+    <comment>The fingerprint line of the refused-certificate error block. {0} is colon-separated uppercase hex.</comment>
+  </data>
+  <data name="CertificateChangedMessage" xml:space="preserve">
+    <value>WARNING: the certificate of {0} has CHANGED since you pinned it. Someone may be intercepting the connection, or the server got a new certificate.</value>
+    <comment>First line of the error block when a refused certificate is for an entry point that has a pin. {0} is host:port.</comment>
+  </data>
+  <data name="CertificatePinnedLine" xml:space="preserve">
+    <value>Pinned: {0}</value>
+    <comment>The fingerprint of the pinned certificate, in the changed-certificate error block.</comment>
+  </data>
+  <data name="CertificateNowLine" xml:space="preserve">
+    <value>Now: {0}</value>
+    <comment>The fingerprint of the certificate the server sent now, in the changed-certificate error block.</comment>
+  </data>
+  <data name="CertificateReasonNameMismatch" xml:space="preserve">
+    <value>it is issued for {0}, not this host</value>
+    <comment>Reason for a refused certificate. {0} is the name the certificate is issued for.</comment>
+  </data>
+  <data name="CertificateReasonSelfSigned" xml:space="preserve">
+    <value>it is self-signed, so no trusted authority vouches for it</value>
+    <comment>Reason for a refused certificate.</comment>
+  </data>
+  <data name="CertificateReasonExpired" xml:space="preserve">
+    <value>it expired on {0}</value>
+    <comment>Reason for a refused certificate. {0} is the expiry date.</comment>
+  </data>
+  <data name="CertificateReasonUntrusted" xml:space="preserve">
+    <value>no trusted authority vouches for it</value>
+    <comment>Reason for a refused certificate, for any chain error that the other reasons do not explain.</comment>
+  </data>
+  <data name="CertificateReasonSeparator" xml:space="preserve">
+    <value>, and </value>
+    <comment>Joins two reasons for a refused certificate.</comment>
   </data>
   <data name="ConnectionFailedMessage" xml:space="preserve">
     <value>Could not connect: ({0})</value>
@@ -201,6 +241,14 @@
   <data name="StatusReconnecting" xml:space="preserve">
     <value>Reconnecting · retry {0}</value>
     <comment>Sidebar connection state while waiting to reconnect. {0} is the attempt number.</comment>
+  </data>
+  <data name="StatusCertificateRefused" xml:space="preserve">
+    <value>Certificate refused</value>
+    <comment>Sidebar connection state after every entry point refused its certificate, so Mutiny stopped trying.</comment>
+  </data>
+  <data name="EveryEntryPointRefusedMessage" xml:space="preserve">
+    <value>Every server refused its certificate. Mutiny stopped trying. Trust a certificate, or reconnect.</value>
+    <comment>Displayed in the server window when every entry point of the network refused its TLS certificate, so no reconnect is scheduled.</comment>
   </data>
   <data name="StatusDisconnected" xml:space="preserve">
     <value>Disconnected</value>
