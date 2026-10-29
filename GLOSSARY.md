@@ -96,6 +96,9 @@ Saved as `ServerSettings.PinnedFingerprint` (hex) and read through `CertificateT
 `IrcSettingsManager.PinCertificate` sets it. The **Trust this certificate** button on the newest refusal
 in the server window (`CertificateRefusalViewModel`) pins the refused certificate and dials that entry
 point again; on a changed pin it reads **Replace pinned certificate** and asks first.
+In the Networks dialog, a pinned entry point shows a *pin line* under its row
+(`ServerSettingsViewModel.PinLine`) with a **Forget** link (`ForgetPinCommand`). A change of host or port, or
+TLS turned off, also clears the pin. A reorder keeps it. All of these take effect when the dialog is saved.
 See `docs/adr/0002-pins-as-fallback-trust.md`. Avoid "trusted fingerprint": "trusted" means only that a
 certificate passes the normal check.
 

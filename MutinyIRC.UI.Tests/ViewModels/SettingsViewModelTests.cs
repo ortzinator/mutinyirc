@@ -183,4 +183,74 @@ public class SettingsViewModelTests
 
         Assert.That(manager.Networks[0].Name, Is.EqualTo("Libera"));
     }
+
+    // ── Pins ─────────────────────────────────────────────────────────────────
+
+    private const string Fingerprint =
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF";
+
+    private IrcSettingsManager ManagerWithPinnedEntryPoint()
+    {
+        var libera = new NetworkSettings("Libera");
+        libera.AddServer(new ServerSettings("a.example", 6697, true) { PinnedFingerprint = Fingerprint });
+        libera.AddServer(new ServerSettings("b.example", 6697, true));
+        return ManagerWith(libera);
+    }
+
+    [Test]
+    public void Save_AfterForget_TheEntryPointHasNoPin()
+    {
+        IrcSettingsManager manager = ManagerWithPinnedEntryPoint();
+        var vm = new SettingsViewModel(manager);
+
+        vm.Networks[0].Servers[0].ForgetPinCommand.Execute(null);
+
+        Assert.That(manager.GetCertificateTrust("a.example", 6697).PinnedFingerprint, Is.EqualTo(Fingerprint),
+            "Forget waits for the save, as other edits in the dialog do");
+
+        vm.Save();
+
+        Assert.That(manager.GetCertificateTrust("a.example", 6697).PinnedFingerprint, Is.Null,
+            "with no pin, the next connect to a self-signed server is refused");
+    }
+
+    [Test]
+    public void Save_AfterAReorder_KeepsThePin()
+    {
+        IrcSettingsManager manager = ManagerWithPinnedEntryPoint();
+        var vm = new SettingsViewModel(manager);
+
+        vm.Networks[0].MoveServerDownCommand.Execute(vm.Networks[0].Servers[0]);
+        vm.Save();
+
+        Assert.That(manager.GetCertificateTrust("a.example", 6697).PinnedFingerprint, Is.EqualTo(Fingerprint));
+    }
+
+    [Test]
+    public void Save_AfterTlsIsTurnedOff_TheEntryPointHasNoPin()
+    {
+        IrcSettingsManager manager = ManagerWithPinnedEntryPoint();
+        var vm = new SettingsViewModel(manager);
+
+        vm.Networks[0].Servers[0].Ssl = false;
+        vm.Save();
+
+        Assert.That(manager.GetCertificateTrust("a.example", 6697).PinnedFingerprint, Is.Null);
+    }
+
+    [Test]
+    public void Save_AfterTheEntryPointIsRemovedAndAddedAgain_ItHasNoPin()
+    {
+        IrcSettingsManager manager = ManagerWithPinnedEntryPoint();
+        var vm = new SettingsViewModel(manager);
+        NetworkSettingsViewModel network = vm.Networks[0];
+
+        network.RemoveServerCommand.Execute(network.Servers[0]);
+        network.NewServerText = "a.example:6697";
+        network.AddServerCommand.Execute(null);
+        vm.Save();
+
+        Assert.That(manager.GetCertificateTrust("a.example", 6697).PinnedFingerprint, Is.Null,
+            "removing an entry point removes its pin");
+    }
 }

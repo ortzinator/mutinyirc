@@ -79,6 +79,23 @@
             <Setter Property="Opacity" Value="1"/>
         </Style>
 
+        <!-- A text action, such as Forget on a pin line: no frame, only the accent colour. -->
+        <Style Selector="Button.link">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.link:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}"/>
+            <Setter Property="TextBlock.TextDecorations" Value="Underline"/>
+        </Style>
+
         <!-- The first entry point is the one dialled first, so its number carries the accent. -->
         <Style Selector="TextBlock.order">
             <Setter Property="Foreground" Value="{DynamicResource TextQuaternary}"/>
@@ -236,12 +253,13 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type vm:ServerSettingsViewModel}">
                                             <Border Classes="serverRow"
-                                                    Height="36"
                                                     Padding="4,0,6,0"
                                                     BorderBrush="{DynamicResource DividerBrush}"
                                                     BorderThickness="0,0,0,1"
                                                     Background="Transparent">
+                                              <StackPanel>
                                                 <Grid ColumnDefinitions="16,20,*,Auto,Auto,22"
+                                                      Height="35"
                                                       VerticalAlignment="Center">
 
                                                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
@@ -310,6 +328,25 @@
                                                         <ic:SymbolIcon Symbol="Dismiss" FontSize="10"/>
                                                     </Button>
                                                 </Grid>
+
+                                                <!-- The pin of this entry point, if it has one. Forget clears it
+                                                     when the dialog is saved, as the other edits here are. -->
+                                                <StackPanel x:Name="pinLine"
+                                                            Orientation="Horizontal"
+                                                            Spacing="8"
+                                                            Margin="42,-6,0,7"
+                                                            IsVisible="{Binding IsPinned}">
+                                                    <TextBlock Text="{Binding PinLine}"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource TextTertiary}"
+                                                               VerticalAlignment="Center"/>
+                                                    <Button x:Name="forgetPinButton"
+                                                            Classes="link"
+                                                            Content="Forget"
+                                                            ToolTip.Tip="Forget the pinned certificate of this server"
+                                                            Command="{Binding ForgetPinCommand}"/>
+                                                </StackPanel>
+                                              </StackPanel>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>

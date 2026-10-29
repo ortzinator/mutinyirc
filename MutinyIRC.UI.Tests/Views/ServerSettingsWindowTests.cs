@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
@@ -22,7 +23,10 @@ public class ServerSettingsWindowTests
     private static SettingsViewModel BuildViewModel()
     {
         var libera = new NetworkSettings("Libera") { Nick = "sparkplug" };
-        libera.AddServer(new ServerSettings("irc.libera.chat", 6697, true));
+        libera.AddServer(new ServerSettings("irc.libera.chat", 6697, true)
+        {
+            PinnedFingerprint = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF",
+        });
         libera.AddServer(new ServerSettings("eu.libera.chat", 6667, false));
         libera.AddChannel(new Common.ChannelSettings("#mutinyirc", true));
         libera.AddChannel(new Common.ChannelSettings("#backstage", true, string.Empty, "hunter2"));
@@ -212,5 +216,46 @@ public class ServerSettingsWindowTests
             .Where(b => b.Classes.Contains("serverRow"));
 
         Assert.That(rows, Is.Empty, "a network with no entry points draws no rows");
+    }
+
+    private static List<StackPanel> PinLines(Window window) =>
+        window.GetVisualDescendants()
+            .OfType<StackPanel>()
+            .Where(p => p.Name == "pinLine")
+            .ToList();
+
+    [AvaloniaTest]
+    public void OnlyThePinnedEntryPoint_ShowsThePinLine()
+    {
+        var window = ShowWindow(out _);
+
+        var lines = PinLines(window);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(lines, Has.Count.EqualTo(2), "every row carries a pin line");
+            Assert.That(lines[0].IsVisible, Is.True, "irc.libera.chat has a pin");
+            Assert.That(lines[1].IsVisible, Is.False, "eu.libera.chat has none");
+            Assert.That(lines[0].GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text),
+                Does.Contain("Pinned 01:23:45:67:89:AB:CD:EF…"));
+        });
+    }
+
+    [AvaloniaTest]
+    public void Forget_HidesThePinLineAndClearsThePin()
+    {
+        var window = ShowWindow(out SettingsViewModel vm);
+        Button forget = PinLines(window)[0].GetVisualDescendants()
+            .OfType<Button>()
+            .Single(b => b.Name == "forgetPinButton");
+
+        forget.Command!.Execute(forget.CommandParameter);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(PinLines(window)[0].IsVisible, Is.False);
+            Assert.That(vm.SelectedNetwork!.Servers[0].PinnedFingerprint, Is.Null);
+        });
     }
 }
