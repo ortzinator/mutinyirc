@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -270,9 +270,9 @@
     <value>Replace pinned certificate</value>
     <comment>Button on a changed-certificate refusal. It opens a confirm dialog before it replaces the pin.</comment>
   </data>
-  <data name="CertificatePinNeedsSavedNetwork" xml:space="preserve">
-    <value>Mutiny can pin a certificate only for a server that a saved network lists. Add {0}:{1} to a network in the Networks dialog, then connect again.</value>
-    <comment>Displayed when the user trusts a certificate of a server that no saved network lists. {0} is the host, {1} the port.</comment>
+  <data name="CertificatePinHostOnOtherPort" xml:space="preserve">
+    <value>Mutiny cannot pin this certificate, because a saved network lists {0} on a port other than {1}. Change the port of that entry point in the Networks dialog, then connect again.</value>
+    <comment>Displayed when the user trusts a certificate of a host that a saved network lists on a different port. {0} is the host, {1} the refused port.</comment>
   </data>
   <data name="ReplacePinTitle" xml:space="preserve">
     <value>Replace pinned certificate?</value>

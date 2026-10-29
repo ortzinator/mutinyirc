@@ -203,6 +203,53 @@ public sealed class IrcSettingsManager
         return true;
     }
 
+    /// <summary>
+    /// Mints and saves a network for the TLS entry point <paramref name="host"/>:
+    /// <paramref name="port"/>, which no saved network lists. The network is named after the
+    /// host, its one entry point holds the pin <paramref name="fingerprint"/>, and it is marked
+    /// <see cref="NetworkSettings.MintedByPin"/>.
+    /// </summary>
+    /// <returns>
+    /// Null, and nothing changes, when a saved network lists the host already (on another port).
+    /// </returns>
+    /// <remarks>Call it on the UI thread.</remarks>
+    public NetworkSettings? MintPinnedNetwork(string host, int port, string fingerprint)
+    {
+        var network = new NetworkSettings(host) { MintedByPin = true };
+        network.AddServer(new ServerSettings(host, port, true) { PinnedFingerprint = fingerprint });
+        if (!Networks.TryAdd(network))
+            return null;
+
+        Save();
+        return network;
+    }
+
+    /// <summary>
+    /// Settles, at registration, the network that the pin action minted:
+    /// <paramref name="minted"/> stops being marked as minted, and if it still has one entry
+    /// point and a different saved network has the name <paramref name="reportedName"/>, its
+    /// entry point moves to that network with its pin and <paramref name="minted"/> goes.
+    /// </summary>
+    /// <returns>The network that the entry point now belongs to.</returns>
+    /// <remarks>Call it on the UI thread, and only with a reported name that is not empty.</remarks>
+    public NetworkSettings SettleMintedNetwork(NetworkSettings minted, string reportedName)
+    {
+        minted.MintedByPin = false;
+        if (minted.Servers.Count != 1)
+            return minted;
+
+        NetworkSettings? named = Networks.FirstOrDefault(network =>
+            network != minted && network.Name.Equals(reportedName, StringComparison.OrdinalIgnoreCase));
+        if (named == null)
+            return minted;
+
+        ServerSettings entryPoint = minted.Servers[0];
+        minted.RemoveServer(entryPoint);
+        Networks.Remove(minted);
+        named.AddServer(entryPoint);
+        return named;
+    }
+
     private ServerSettings? GetEntryPoint(string host, int port) =>
         Networks.SelectMany(network => network.Servers)
                 .FirstOrDefault(entryPoint =>

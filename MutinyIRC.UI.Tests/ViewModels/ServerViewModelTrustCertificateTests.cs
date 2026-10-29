@@ -174,24 +174,6 @@ public class ServerViewModelTrustCertificateTests
     }
 
     [AvaloniaTest]
-    public async Task Trust_ForAnEntryPointThatNoSavedNetworkLists_SaysSoAndDialsNothing()
-    {
-        _server.RefuseCurrent(_certificate);
-        _settings.Networks.ReplaceAll(Array.Empty<NetworkSettings>());
-        int dials = _server.Dialled.Count;
-
-        await Refusals().Single().TrustCommand.ExecuteAsync(null);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(_server.Dialled, Has.Count.EqualTo(dials), "nothing is dialled");
-            Assert.That(_vm.ChatLines.OfType<ErrorMessageViewModel>().Last().Message, Is.EqualTo(
-                "Mutiny can pin a certificate only for a server that a saved network lists. "
-                + "Add a.fake.com:6697 to a network in the Networks dialog, then connect again."));
-        });
-    }
-
-    [AvaloniaTest]
     public void OnlyTheNewestRefusal_HasAWorkingButton()
     {
         _server.RefuseCurrent(_certificate);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using FlamingIRC;
 using MutinyIRC.Common;
 
@@ -39,6 +40,15 @@ public class NetworkSettings
     /// also for a file written before the switch existed.
     /// </summary>
     public bool VerifyCertificates { get; set; } = true;
+
+    /// <summary>
+    /// Whether the pin action minted this network for a refused host that no saved network
+    /// listed, and no registration has named it yet. While it is set and the network has one
+    /// entry point, a registration that reports the name of a different saved network moves the
+    /// entry point there. See <c>docs/adr/0004-pinning-mints-the-network.md</c>.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool MintedByPin { get; set; }
 
     // A servers.json with "Servers": null would otherwise overwrite the list with null and make
     // every reader null-check it. Absent means empty, so say that once, here.

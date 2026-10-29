@@ -95,7 +95,12 @@ pin. The verb is *pin*.
 Saved as `ServerSettings.PinnedFingerprint` (hex) and read through `CertificateTrust.PinnedFingerprint`.
 `IrcSettingsManager.PinCertificate` sets it. The **Trust this certificate** button on the newest refusal
 in the server window (`CertificateRefusalViewModel`) pins the refused certificate and dials that entry
-point again; on a changed pin it reads **Replace pinned certificate** and asks first.
+point again; on a changed pin it reads **Replace pinned certificate** and asks first. For a host that no
+saved network lists, the button first mints and saves a network named after the host
+(`IrcSettingsManager.MintPinnedNetwork`), marked `NetworkSettings.MintedByPin`. At the first registration
+that reports a name, `IrcSettingsManager.SettleMintedNetwork` clears the mark, and if the network still has
+one entry point and a different saved network has the reported name, the entry point moves there with its
+pin. See `docs/adr/0004-pinning-mints-the-network.md`.
 In the Networks dialog, a pinned entry point shows a *pin line* under its row
 (`ServerSettingsViewModel.PinLine`) with a **Forget** link (`ForgetPinCommand`). A change of host or port, or
 TLS turned off, also clears the pin. A reorder keeps it. All of these take effect when the dialog is saved.
