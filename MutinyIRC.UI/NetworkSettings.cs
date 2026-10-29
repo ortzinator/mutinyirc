@@ -33,6 +33,13 @@ public class NetworkSettings
     /// flag belongs here and not on each entry point.</summary>
     public bool AutoConnect { get; set; }
 
+    /// <summary>
+    /// The "Verify TLS certificates" switch. When it is off, a connection to any of this
+    /// network's entry points accepts a certificate that fails the normal check. On by default,
+    /// also for a file written before the switch existed.
+    /// </summary>
+    public bool VerifyCertificates { get; set; } = true;
+
     // A servers.json with "Servers": null would otherwise overwrite the list with null and make
     // every reader null-check it. Absent means empty, so say that once, here.
     private List<ServerSettings> _servers = new();

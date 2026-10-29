@@ -80,7 +80,23 @@ public class ServerViewModel : IrcViewModel
     public string ConnectionStatus
     {
         get => _connectionStatus;
-        private set => SetProperty(ref _connectionStatus, value);
+        private set
+        {
+            SetProperty(ref _connectionStatus, value);
+            // A new status is a plain one until something says otherwise.
+            IsConnectionStatusWarning = false;
+        }
+    }
+
+    private bool _isConnectionStatusWarning;
+    /// <summary>
+    /// Whether the sidebar draws <see cref="ConnectionStatus"/> in the warning colour, for
+    /// example for a connection that did not check its certificate.
+    /// </summary>
+    public bool IsConnectionStatusWarning
+    {
+        get => _isConnectionStatusWarning;
+        private set => SetProperty(ref _isConnectionStatusWarning, value);
     }
 
     /// <summary>
@@ -133,10 +149,29 @@ public class ServerViewModel : IrcViewModel
         _server.CameBack += Server_CameBack;
     }
 
-    private string ConnectedStatus() =>
-        _server.Connection.ConnectionData.Ssl
-            ? ServerStrings.StatusConnectedSecure
-            : ServerStrings.StatusConnected;
+    private string ConnectedStatus()
+    {
+        if (!_server.Connection.ConnectionData.Ssl)
+            return ServerStrings.StatusConnected;
+
+        return _server.CertificateAcceptance == CertificateAcceptance.VerificationOff
+            ? ServerStrings.StatusConnectedUnverified
+            : ServerStrings.StatusConnectedSecure;
+    }
+
+    /// <summary>
+    /// Warns, in the status and in the server window, when the connection accepted its
+    /// certificate only because the network's verify switch is off.
+    /// </summary>
+    private void WarnIfCertificateNotChecked()
+    {
+        if (_server.CertificateAcceptance != CertificateAcceptance.VerificationOff)
+            return;
+
+        IsConnectionStatusWarning = true;
+        AddIncoming(new WarningMessageViewModel(DateTime.Now,
+            ServerStrings.ConnectedUnverifiedWarning.With(_server.Url, _server.Port)));
+    }
 
     // A panel's unread flag is one of the parts HasUnreadAnywhere is made of, so the aggregate
     // has to be re-announced whenever one of them changes, whenever the set of panels changes,
@@ -409,6 +444,7 @@ public class ServerViewModel : IrcViewModel
             _server.Port);
         NetworkName = network.Name;
         ConnectionStatus = ConnectedStatus();
+        WarnIfCertificateNotChecked();
 
         if (_nickRetryFailed)
             AddMessage(ServerStrings.RandomNickMessage);

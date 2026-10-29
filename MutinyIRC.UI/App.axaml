@@ -143,6 +143,21 @@
             </Border>
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type vm:WarningMessageViewModel}">
+            <Border Margin="12,3,12,3" Background="{DynamicResource StatusWarningBackground}"
+                    CornerRadius="4" Padding="10,6">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding Time, StringFormat='HH:mm'}"
+                               Foreground="{DynamicResource TextQuaternary}"
+                               FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
+                               IsVisible="{Binding ShowTimestamps}"/>
+                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource StatusWarningForeground}"/>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type vm:ChatItemViewModel}">
             <DockPanel Margin="16,1,16,1">
                 <TextBlock DockPanel.Dock="Left"

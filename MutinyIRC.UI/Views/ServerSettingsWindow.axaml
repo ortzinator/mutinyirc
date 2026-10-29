@@ -94,6 +94,16 @@
             <Setter Property="Margin" Value="0,0,0,5"/>
         </Style>
 
+        <!-- The line under a switch that says what it does now. A setting that lowers your
+             protection says so in the warning colour. -->
+        <Style Selector="TextBlock.switchHint">
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiary}"/>
+        </Style>
+        <Style Selector="TextBlock.switchHint.warning">
+            <Setter Property="Foreground" Value="{DynamicResource StatusWarningForeground}"/>
+        </Style>
+
         <Style Selector="TextBlock.sectionLabel">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
@@ -340,21 +350,22 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- Connection settings. Every switch here is drawn and disabled: the
-                         settings behind them are not wired up yet, and the tooltip on each
-                         card says so. -->
-                    <Border Classes="card" Padding="14,10"
-                            ToolTip.Tip="Not wired up yet — Mutiny always verifies the certificate chain it is given.">
+                    <!-- Connection settings. The verify switch is live. The others are drawn
+                         and disabled: the settings behind them are not wired up yet, and the
+                         tooltip on each card says so. -->
+                    <Border Classes="card" Padding="14,10">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Verify TLS certificates" FontSize="13"/>
-                                <TextBlock Text="Refuses to connect if the server's certificate looks wrong"
-                                           FontSize="11.5"
-                                           TextWrapping="Wrap"
-                                           Foreground="{DynamicResource TextTertiary}"/>
+                                <TextBlock x:Name="verifyTlsHint"
+                                           Classes="switchHint"
+                                           Classes.warning="{Binding IsVerifyCertificatesHintWarning}"
+                                           Text="{Binding VerifyCertificatesHint}"
+                                           TextWrapping="Wrap"/>
                             </StackPanel>
                             <ToggleSwitch Grid.Column="1" x:Name="verifyTlsToggle"
-                                          IsChecked="True" IsEnabled="False"
+                                          IsChecked="{Binding VerifyCertificates}"
+                                          IsEnabled="{Binding CanVerifyCertificates}"
                                           OnContent="" OffContent=""
                                           VerticalAlignment="Center"/>
                         </Grid>

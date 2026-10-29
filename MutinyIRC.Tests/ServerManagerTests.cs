@@ -1,3 +1,4 @@
+using System;
 using FakeItEasy;
 using FlamingIRC;
 using NUnit.Framework;
@@ -67,6 +68,25 @@ public class ServerManagerTests
         finally
         {
             _manager.ServerAdded -= Handler;
+        }
+    }
+
+    [Test]
+    public void Create_GivesEveryNewServerTheCertificateTrustLookup()
+    {
+        Func<string, CertificateTrust> lookup = _ => CertificateTrust.Default;
+        _manager.CertificateTrustLookup = lookup;
+        try
+        {
+            Server one = _manager.Create(new ConnectionArgs("test", "irc.one.example", true));
+            Server many = _manager.Create(new[] { new ConnectionArgs("test", "irc.two.example", true) });
+
+            Assert.AreSame(lookup, one.CertificateTrustLookup);
+            Assert.AreSame(lookup, many.CertificateTrustLookup);
+        }
+        finally
+        {
+            _manager.CertificateTrustLookup = null;
         }
     }
 

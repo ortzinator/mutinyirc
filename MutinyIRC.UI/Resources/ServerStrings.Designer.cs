@@ -27,6 +27,7 @@
 
         internal static string AttemptingReconnect => ResourceManager.GetString("AttemptingReconnect", resourceCulture);
         internal static string CertificateRejectedMessage => ResourceManager.GetString("CertificateRejectedMessage", resourceCulture);
+        internal static string ConnectedUnverifiedWarning => ResourceManager.GetString("ConnectedUnverifiedWarning", resourceCulture);
         internal static string ConnectingMessage => ResourceManager.GetString("ConnectingMessage", resourceCulture);
         internal static string ConnectionFailedMessage => ResourceManager.GetString("ConnectionFailedMessage", resourceCulture);
         internal static string ConnectionFailedUnknownMessage => ResourceManager.GetString("ConnectionFailedUnknownMessage", resourceCulture);
@@ -42,6 +43,7 @@
         internal static string ServerFormTitleBar => ResourceManager.GetString("ServerFormTitleBar", resourceCulture);
         internal static string StatusConnected => ResourceManager.GetString("StatusConnected", resourceCulture);
         internal static string StatusConnectedSecure => ResourceManager.GetString("StatusConnectedSecure", resourceCulture);
+        internal static string StatusConnectedUnverified => ResourceManager.GetString("StatusConnectedUnverified", resourceCulture);
         internal static string StatusConnecting => ResourceManager.GetString("StatusConnecting", resourceCulture);
         internal static string StatusDisconnected => ResourceManager.GetString("StatusDisconnected", resourceCulture);
         internal static string StatusReconnecting => ResourceManager.GetString("StatusReconnecting", resourceCulture);

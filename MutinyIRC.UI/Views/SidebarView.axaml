@@ -22,6 +22,20 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
+    <UserControl.Styles>
+        <!-- A connection's status line. A status that warns you, such as a connection that
+             did not check its certificate, takes the warning colour. -->
+        <Style Selector="TextBlock.switcherStatus">
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiary}"/>
+        </Style>
+        <Style Selector="TextBlock.rowStatus">
+            <Setter Property="Foreground" Value="{DynamicResource TextQuaternary}"/>
+        </Style>
+        <Style Selector="TextBlock.switcherStatus.warning, TextBlock.rowStatus.warning">
+            <Setter Property="Foreground" Value="{DynamicResource StatusWarningForeground}"/>
+        </Style>
+    </UserControl.Styles>
+
     <DockPanel Background="{DynamicResource SurfaceNav}">
 
         <!-- App header row. ElementRole=TitleBar hands this strip to the platform's
@@ -74,8 +88,9 @@
                                    FontSize="13" FontWeight="SemiBold" LineHeight="15"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding ShownServer.ConnectionStatus}"
+                                   Classes="switcherStatus"
+                                   Classes.warning="{Binding ShownServer.IsConnectionStatusWarning, FallbackValue=False}"
                                    FontSize="10" LineHeight="12"
-                                   Foreground="{DynamicResource TextTertiary}"
                                    TextTrimming="CharacterEllipsis"
                                    IsVisible="{Binding ShownServer, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                     </StackPanel>
@@ -118,9 +133,10 @@
                                                          Fill="{DynamicResource AccentFillBrush}"
                                                          IsVisible="{Binding HasUnreadAnywhere}"/>
                                                 <TextBlock Grid.Column="3" Text="{Binding ConnectionStatus}"
+                                                           Classes="rowStatus"
+                                                           Classes.warning="{Binding IsConnectionStatusWarning}"
                                                            FontSize="10" Margin="10,0,0,0"
-                                                           VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource TextQuaternary}"/>
+                                                           VerticalAlignment="Center"/>
                                             </Grid>
                                         </Button>
                                     </DataTemplate>

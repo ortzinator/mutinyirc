@@ -44,18 +44,69 @@ public class ServerSettingsWindowTests
     }
 
     [AvaloniaTest]
-    public void TheThreeConnectionSwitches_AreDrawnAndDisabled()
+    public void TheSwitchesThatAreNotWiredUp_AreDrawnAndDisabled()
     {
         var window = ShowWindow(out _);
 
-        var toggles = window.GetVisualDescendants().OfType<ToggleSwitch>().ToList();
+        var toggles = window.GetVisualDescendants().OfType<ToggleSwitch>()
+            .Where(t => t.Name != "verifyTlsToggle")
+            .ToList();
 
         Assert.Multiple(() =>
         {
-            Assert.That(toggles, Has.Count.EqualTo(3),
-                "the dialog draws all three settings even though none of them is wired up");
+            Assert.That(toggles, Has.Count.EqualTo(2),
+                "the dialog draws the other settings even though they are not wired up");
             Assert.That(toggles.All(t => !t.IsEffectivelyEnabled), Is.True,
                 "a switch that writes nothing must not look as if it does");
+        });
+    }
+
+    private static ToggleSwitch VerifyToggle(Window window) =>
+        window.GetVisualDescendants().OfType<ToggleSwitch>().Single(t => t.Name == "verifyTlsToggle");
+
+    private static TextBlock VerifyHint(Window window) =>
+        window.GetVisualDescendants().OfType<TextBlock>().Single(t => t.Name == "verifyTlsHint");
+
+    [AvaloniaTest]
+    public void TheVerifySwitch_IsEnabledAndWritesTheNetwork()
+    {
+        var window = ShowWindow(out SettingsViewModel vm);
+        ToggleSwitch toggle = VerifyToggle(window);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(toggle.IsEffectivelyEnabled, Is.True, "Libera has a TLS entry point");
+            Assert.That(toggle.IsChecked, Is.True, "verification is on by default");
+            Assert.That(ToolTip.GetTip((Control)toggle.Parent!.Parent!), Is.Null,
+                "the 'not wired up yet' tooltip is gone");
+        });
+
+        toggle.IsChecked = false;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.SelectedNetwork!.VerifyCertificates, Is.False);
+            Assert.That(VerifyHint(window).Text,
+                Is.EqualTo("Off: Mutiny accepts any certificate from this network's servers"));
+            Assert.That(VerifyHint(window).Classes.Contains("warning"), Is.True,
+                "the off state is drawn in the warning colour");
+        });
+    }
+
+    [AvaloniaTest]
+    public void TheVerifySwitch_IsDisabledForANetworkWithNoTls()
+    {
+        var window = ShowWindow(out SettingsViewModel vm);
+
+        vm.SelectedNetwork!.RemoveServerCommand.Execute(vm.SelectedNetwork.Servers[0]);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(VerifyToggle(window).IsEffectivelyEnabled, Is.False);
+            Assert.That(VerifyHint(window).Text,
+                Is.EqualTo("None of this network's servers use TLS, so there is no certificate to check."));
         });
     }
 

@@ -164,8 +164,26 @@ public sealed class IrcSettingsManager
             network.AutoConnect = false;
     }
 
-    private ServerSettings? GetServer(Server server) =>
+    /// <summary>
+    /// Gives the certificate trust settings for <paramref name="host"/>, from the network that
+    /// lists it. A host that no saved network lists is verified.
+    /// </summary>
+    /// <remarks>
+    /// This reads the settings, which only the UI thread changes. Call it on the UI thread.
+    /// </remarks>
+    public CertificateTrust GetCertificateTrust(string host)
+    {
+        NetworkSettings? network = GetServer(host)?.Network;
+        if (network == null)
+            return CertificateTrust.Default;
+
+        return new CertificateTrust { VerifyCertificates = network.VerifyCertificates };
+    }
+
+    private ServerSettings? GetServer(Server server) => GetServer(server.Url);
+
+    private ServerSettings? GetServer(string host) =>
         Networks.SelectMany(network => network.Servers)
                 .FirstOrDefault(entryPoint =>
-                    entryPoint.Url.Equals(server.Url, StringComparison.OrdinalIgnoreCase));
+                    entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase));
 }

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using Avalonia.Threading;
 using FlamingIRC;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -148,6 +149,11 @@ public class MainViewModel : ViewModelBase
     public void Start()
     {
         LoadSettings();
+
+        // A connection asks this at each TLS handshake, on a thread-pool thread. Only the UI
+        // thread changes the settings, so the read goes to the UI thread too.
+        ServerManager.Instance.CertificateTrustLookup = host =>
+            Dispatcher.UIThread.Invoke(() => IrcSettingsManager.Instance.GetCertificateTrust(host));
 
         List<NetworkSettings> networks = IrcSettingsManager.Instance.GetAutoConnectNetworks();
 

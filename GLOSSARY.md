@@ -90,6 +90,16 @@ pin. The verb is *pin*.
 See `docs/adr/0002-pins-as-fallback-trust.md`. Avoid "trusted fingerprint": "trusted" means only that a
 certificate passes the normal check.
 
+## Verify switch
+
+The per-[network](#network) "Verify TLS certificates" switch, saved as `NetworkSettings.VerifyCertificates`
+(on by default). When it is off, a connection accepts any certificate from that network's entry points.
+`Server` does not read settings: at each TLS handshake whose certificate fails the normal check, it asks
+`Server.CertificateTrustLookup` for the host's `CertificateTrust`. The UI sets that lookup once, on
+`ServerManager`, to `IrcSettingsManager.GetCertificateTrust` marshalled to the UI thread.
+`Server.CertificateAcceptance` then says why the certificate was accepted: `Trusted` (it passed the normal
+check, or there is no TLS) or `VerificationOff`. See `docs/adr/0003-certificate-callback-on-connection.md`.
+
 ## Row list (user list)
 
 The flat `IReadOnlyList<IUserListRow>` a channel's user list binds to (`ChannelViewModel.UserRows`),

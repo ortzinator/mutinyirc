@@ -56,6 +56,25 @@ public class Server : MessageContext, IDisposable
     /// </summary>
     public HashSet<string> ServiceNicks { get; } = new(StringComparer.OrdinalIgnoreCase);
 
+    // Set by the certificate callback on a thread-pool thread during the TLS handshake, and
+    // read by the host when the connection opens. Each new connection, failed dial or drop
+    // sets it back to Trusted, because the callback runs only when the normal check fails.
+    private volatile CertificateAcceptance _certificateAcceptance;
+
+    /// <summary>
+    /// Gives the trust settings for a host when its server certificate fails the normal check.
+    /// The connection calls it again at each TLS handshake, so a change to the settings
+    /// applies to the next connect attempt. It runs on a thread-pool thread, so the host must
+    /// make it safe to call from there. Null, the default, verifies every certificate.
+    /// </summary>
+    public Func<string, CertificateTrust> CertificateTrustLookup { get; set; }
+
+    /// <summary>
+    /// Why the current connection accepted the server certificate. Read it when
+    /// <see cref="Connected"/> fires.
+    /// </summary>
+    public CertificateAcceptance CertificateAcceptance => _certificateAcceptance;
+
     public Server() { }
 
     public Server(ConnectionArgs settings)
@@ -138,6 +157,7 @@ public class Server : MessageContext, IDisposable
             throw new ArgumentNullException("ConnectionArgs.Nick");
         }
 
+        _certificateAcceptance = CertificateAcceptance.Trusted;
         Connection = CreateConnection(args);
     }
 
@@ -148,8 +168,27 @@ public class Server : MessageContext, IDisposable
     protected virtual IConnection CreateConnection(ConnectionArgs args) =>
         new Connection(args, true, false) { HandleNickTaken = false };
 
+    /// <summary>
+    /// Decides whether to accept a certificate of <paramref name="host"/> that failed the
+    /// normal check. It reads the trust settings live, at each handshake.
+    /// </summary>
+    private bool AcceptRejectedCertificate(string host)
+    {
+        CertificateTrust trust = CertificateTrustLookup?.Invoke(host) ?? CertificateTrust.Default;
+        if (trust.VerifyCertificates)
+            return false;
+
+        _certificateAcceptance = CertificateAcceptance.VerificationOff;
+        return true;
+    }
+
     public void HookEvents()
     {
+        // The callback is on Connection only, not on IConnection (ADR 0003).
+        if (Connection is Connection connection)
+            connection.CertificateValidationFailedCallback = (_, _, _) =>
+                AcceptRejectedCertificate(connection.ConnectionData.Hostname);
+
         Connection.ConnectionEstablished += Connection_OnConnectSuccess;
         Connection.ConnectFailed += Connection_ConnectFailed;
         Connection.ConnectionLost += Connection_ConnectionLost;
@@ -229,6 +268,7 @@ public class Server : MessageContext, IDisposable
         // reconnect can rejoin in place). Reset each so nothing treats a stale channel as
         // joined while disconnected, and so a rejoin transitions cleanly through Joining.
         ResetChannelMembership();
+        _certificateAcceptance = CertificateAcceptance.Trusted;
 
         if (e.Reason == DisconnectReason.UserInitiated)
         {
@@ -332,6 +372,9 @@ public class Server : MessageContext, IDisposable
 
     public void UnhookEvents()
     {
+        if (Connection is Connection connection)
+            connection.CertificateValidationFailedCallback = null;
+
         Connection.ConnectionEstablished -= Connection_OnConnectSuccess;
         Connection.ConnectFailed -= Connection_ConnectFailed;
         Connection.ConnectionLost -= Connection_ConnectionLost;
@@ -687,6 +730,7 @@ public class Server : MessageContext, IDisposable
 
     private void Connection_ConnectFailed(object sender, ConnectFailedEventArgs e)
     {
+        _certificateAcceptance = CertificateAcceptance.Trusted;
         ConnectFailed.Fire(this, e);
         AdvanceOrReconnect();
     }

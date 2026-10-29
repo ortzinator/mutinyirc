@@ -57,6 +57,26 @@ public class NetworkSettingsPersistenceTests
         Assert.That(loaded[0].Channels[0].AutoJoin, Is.True);
     }
 
+    [Test]
+    public void RoundTrip_KeepsTheVerifySwitchOff()
+    {
+        NetworkSettingsList list = BuildSavedList();
+        list[0].VerifyCertificates = false;
+
+        Assert.That(RoundTrip(list)[0].VerifyCertificates, Is.False);
+    }
+
+    [Test]
+    public void ANetworkWithNoVerifyField_Verifies()
+    {
+        const string json = """[{ "Name": "Libera", "Servers": [], "Channels": [] }]""";
+
+        var loaded = JsonSerializer.Deserialize<List<NetworkSettings>>(json, Options)!;
+
+        Assert.That(loaded[0].VerifyCertificates, Is.True,
+            "a servers.json written before the switch existed must load with verification on");
+    }
+
     // ── The shape written before a network owned the port, nick and autoconnect ──
 
     /// <summary>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using MutinyIRC.Common;
@@ -466,5 +467,103 @@ public class NetworkSettingsViewModelTests
         var vm = new NetworkSettingsViewModel { AutoConnect = true };
 
         Assert.That(vm.ToModel().AutoConnect, Is.True);
+    }
+
+    // ── Verify TLS certificates ──────────────────────────────────────────────
+
+    private static NetworkSettingsViewModel WithTlsServer(bool verify)
+    {
+        var model = new NetworkSettings("TestNet") { VerifyCertificates = verify };
+        model.AddServer(new ServerSettings("irc.example.net", 6697, true));
+        return new NetworkSettingsViewModel(model);
+    }
+
+    [Test]
+    public void VerifySwitch_RoundTripsThroughTheModel()
+    {
+        NetworkSettingsViewModel vm = WithTlsServer(verify: false);
+
+        Assert.That(vm.VerifyCertificates, Is.False);
+        vm.VerifyCertificates = true;
+        Assert.That(vm.ToModel().VerifyCertificates, Is.True);
+        vm.VerifyCertificates = false;
+        Assert.That(vm.ToModel().VerifyCertificates, Is.False);
+    }
+
+    [Test]
+    public void ANewNetwork_Verifies()
+    {
+        Assert.That(new NetworkSettingsViewModel().VerifyCertificates, Is.True);
+    }
+
+    [Test]
+    public void VerifySwitchOn_DescribesTheCheck()
+    {
+        NetworkSettingsViewModel vm = WithTlsServer(verify: true);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.CanVerifyCertificates, Is.True);
+            Assert.That(vm.VerifyCertificatesHint,
+                Is.EqualTo("Refuses a server whose certificate fails the check, unless you pinned that certificate"));
+            Assert.That(vm.IsVerifyCertificatesHintWarning, Is.False);
+        });
+    }
+
+    [Test]
+    public void VerifySwitchOff_WarnsThatAnyCertificateIsAccepted()
+    {
+        NetworkSettingsViewModel vm = WithTlsServer(verify: false);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.VerifyCertificatesHint,
+                Is.EqualTo("Off: Mutiny accepts any certificate from this network's servers"));
+            Assert.That(vm.IsVerifyCertificatesHintWarning, Is.True);
+        });
+    }
+
+    [Test]
+    public void ANetworkWithNoTlsServer_CannotVerify()
+    {
+        NetworkSettingsViewModel vm = WithServers("irc.example.net");
+        vm.VerifyCertificates = false;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.CanVerifyCertificates, Is.False);
+            Assert.That(vm.VerifyCertificatesHint,
+                Is.EqualTo("None of this network's servers use TLS, so there is no certificate to check."));
+            Assert.That(vm.IsVerifyCertificatesHintWarning, Is.False,
+                "a switch that does nothing has nothing to warn about");
+        });
+    }
+
+    [Test]
+    public void AddingATlsServer_EnablesTheSwitch()
+    {
+        NetworkSettingsViewModel vm = WithServers("irc.example.net");
+        var changed = new List<string?>();
+        vm.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        vm.NewServerText = "tls.example.net:6697";
+        vm.AddServerCommand.Execute(null);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.CanVerifyCertificates, Is.True);
+            Assert.That(changed, Does.Contain(nameof(NetworkSettingsViewModel.CanVerifyCertificates)));
+            Assert.That(changed, Does.Contain(nameof(NetworkSettingsViewModel.VerifyCertificatesHint)));
+        });
+    }
+
+    [Test]
+    public void RemovingTheLastTlsServer_DisablesTheSwitch()
+    {
+        NetworkSettingsViewModel vm = WithTlsServer(verify: true);
+
+        vm.RemoveServerCommand.Execute(vm.Servers[0]);
+
+        Assert.That(vm.CanVerifyCertificates, Is.False);
     }
 }

@@ -79,6 +79,16 @@ public class ErrorMessageViewModel : ChatItemViewModel
         : base(time, message) { }
 }
 
+/// <summary>
+/// A line from Mutiny that warns you, for example that a connection did not check its
+/// certificate. It is drawn in the warning colour.
+/// </summary>
+public class WarningMessageViewModel : ChatItemViewModel
+{
+    public WarningMessageViewModel(DateTime time, string message)
+        : base(time, message) { }
+}
+
 public class PrivateNoticeViewModel : ChannelMessageViewModel
 {
     public PrivateNoticeViewModel(DateTime time, string message, string nick)

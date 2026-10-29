@@ -186,6 +186,14 @@
     <value>Connected · TLS</value>
     <comment>Sidebar connection state for a registered connection over TLS.</comment>
   </data>
+  <data name="StatusConnectedUnverified" xml:space="preserve">
+    <value>Connected · TLS · not verified</value>
+    <comment>Sidebar connection state for a TLS connection that was accepted only because the network's "Verify TLS certificates" switch is off.</comment>
+  </data>
+  <data name="ConnectedUnverifiedWarning" xml:space="preserve">
+    <value>Connected to {0}:{1} without checking its certificate. Verification is off for this network.</value>
+    <comment>Warning in the server window when a TLS connection was accepted only because verification is off. {0} is the host, {1} the port.</comment>
+  </data>
   <data name="StatusConnecting" xml:space="preserve">
     <value>Connecting…</value>
     <comment>Sidebar connection state while a connection attempt is in flight.</comment>

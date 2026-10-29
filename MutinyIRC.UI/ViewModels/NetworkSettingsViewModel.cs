@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MutinyIRC.Common;
@@ -33,17 +34,61 @@ public partial class NetworkSettingsViewModel : ObservableObject
     /// <inheritdoc cref="NickWatermark"/>
     public static string AlternateNickWatermark => AppSettings.Instance.SecondNick;
 
+    /// <summary>The "Verify TLS certificates" switch. See <see cref="NetworkSettings.VerifyCertificates"/>.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(VerifyCertificatesHint))]
+    [NotifyPropertyChangedFor(nameof(IsVerifyCertificatesHintWarning))]
+    private bool _verifyCertificates = true;
+
+    internal const string VerifyOnHint =
+        "Refuses a server whose certificate fails the check, unless you pinned that certificate";
+
+    internal const string VerifyOffHint =
+        "Off: Mutiny accepts any certificate from this network's servers";
+
+    internal const string NoTlsHint =
+        "None of this network's servers use TLS, so there is no certificate to check.";
+
+    /// <summary>
+    /// Whether the verify switch can do anything. A plaintext entry point has no certificate,
+    /// so the switch is disabled when no entry point uses TLS.
+    /// </summary>
+    public bool CanVerifyCertificates => Servers.Any(server => server.Ssl);
+
+    /// <summary>The line under the verify switch that says what it does now.</summary>
+    public string VerifyCertificatesHint =>
+        !CanVerifyCertificates ? NoTlsHint
+        : VerifyCertificates ? VerifyOnHint
+        : VerifyOffHint;
+
+    /// <summary>
+    /// Whether <see cref="VerifyCertificatesHint"/> is a warning: the switch is off for a
+    /// network that has a TLS entry point.
+    /// </summary>
+    public bool IsVerifyCertificatesHintWarning => CanVerifyCertificates && !VerifyCertificates;
+
     public ObservableCollection<ServerSettingsViewModel> Servers { get; } = new();
     public ObservableCollection<ChannelSettingsViewModel> Channels { get; } = new();
 
-    public NetworkSettingsViewModel() { }
+    public NetworkSettingsViewModel()
+    {
+        // The entry points decide whether the switch applies. A row cannot change its TLS
+        // flag, so only an add or a remove can change the answer.
+        Servers.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(CanVerifyCertificates));
+            OnPropertyChanged(nameof(VerifyCertificatesHint));
+            OnPropertyChanged(nameof(IsVerifyCertificatesHintWarning));
+        };
+    }
 
-    public NetworkSettingsViewModel(NetworkSettings model)
+    public NetworkSettingsViewModel(NetworkSettings model) : this()
     {
         _name = model.Name ?? string.Empty;
         _nick = model.Nick ?? string.Empty;
         _alternateNick = model.AlternateNick ?? string.Empty;
         _autoConnect = model.AutoConnect;
+        _verifyCertificates = model.VerifyCertificates;
         foreach (var server in model.Servers)
             Servers.Add(new ServerSettingsViewModel(server));
         foreach (var channel in model.Channels)
@@ -218,6 +263,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
             Nick = string.IsNullOrWhiteSpace(Nick) ? null : Nick,
             AlternateNick = string.IsNullOrWhiteSpace(AlternateNick) ? null : AlternateNick,
             AutoConnect = AutoConnect,
+            VerifyCertificates = VerifyCertificates,
         };
 
         foreach (var vm in Servers)

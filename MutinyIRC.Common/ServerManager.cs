@@ -14,6 +14,13 @@ public class ServerManager
 
     public List<Server> ServerList { get; private set; }
 
+    /// <summary>
+    /// The trust lookup that every new <see cref="Server"/> gets as its
+    /// <see cref="Server.CertificateTrustLookup"/>. The host sets it once, at startup, so a
+    /// connection that a command creates gets it too.
+    /// </summary>
+    public Func<string, CertificateTrust> CertificateTrustLookup { get; set; }
+
     public static ServerManager Instance
     {
         get
@@ -39,6 +46,7 @@ public class ServerManager
 
     private Server Add(Server newServer)
     {
+        newServer.CertificateTrustLookup = CertificateTrustLookup;
         ServerList.Add(newServer);
 
         ServerAdded.Fire(this, new ServerEventArgs(newServer));
