@@ -253,4 +253,23 @@ public class SettingsViewModelTests
         Assert.That(manager.GetCertificateTrust("a.example", 6697).PinnedFingerprint, Is.Null,
             "removing an entry point removes its pin");
     }
+
+    [Test]
+    public void Save_KeepsTheMintedByPinMark()
+    {
+        // Until a registration names a minted network, the mark is what lets that registration
+        // move the entry point to the saved network of that name. A dialog save before then
+        // must not clear it.
+        var minted = new NetworkSettings("a.example") { MintedByPin = true };
+        minted.AddServer(new ServerSettings("a.example", 6697, true) { PinnedFingerprint = Fingerprint });
+        IrcSettingsManager manager = ManagerWith(minted, Network("Libera", "irc.libera.chat"));
+
+        new SettingsViewModel(manager).Save();
+
+        Assert.That(manager.Networks.Select(n => (n.Name, n.MintedByPin)), Is.EqualTo(new[]
+        {
+            ("a.example", true),
+            ("Libera", false)
+        }));
+    }
 }

@@ -67,6 +67,12 @@ public partial class NetworkSettingsViewModel : ObservableObject
     /// </summary>
     public bool IsVerifyCertificatesHintWarning => CanVerifyCertificates && !VerifyCertificates;
 
+    /// <summary>
+    /// The mark that the pin action minted this network. The dialog does not show or change it,
+    /// but a save must keep it. See <see cref="NetworkSettings.MintedByPin"/>.
+    /// </summary>
+    public bool MintedByPin { get; }
+
     public ObservableCollection<ServerSettingsViewModel> Servers { get; } = new();
     public ObservableCollection<ChannelSettingsViewModel> Channels { get; } = new();
 
@@ -89,6 +95,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
         _alternateNick = model.AlternateNick ?? string.Empty;
         _autoConnect = model.AutoConnect;
         _verifyCertificates = model.VerifyCertificates;
+        MintedByPin = model.MintedByPin;
         foreach (var server in model.Servers)
             Servers.Add(new ServerSettingsViewModel(server));
         foreach (var channel in model.Channels)
@@ -264,6 +271,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
             AlternateNick = string.IsNullOrWhiteSpace(AlternateNick) ? null : AlternateNick,
             AutoConnect = AutoConnect,
             VerifyCertificates = VerifyCertificates,
+            MintedByPin = MintedByPin,
         };
 
         foreach (var vm in Servers)

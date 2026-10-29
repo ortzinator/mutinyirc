@@ -501,6 +501,14 @@ public class NetworkSettingsViewModelTests
     }
 
     [Test]
+    public void ToModel_CarriesTheMintedByPinMarkThrough([Values] bool minted)
+    {
+        var vm = new NetworkSettingsViewModel(new NetworkSettings("TestNet") { MintedByPin = minted });
+
+        Assert.That(vm.ToModel().MintedByPin, Is.EqualTo(minted));
+    }
+
+    [Test]
     public void VerifySwitch_RoundTripsThroughTheModel()
     {
         NetworkSettingsViewModel vm = WithTlsServer(verify: false);
