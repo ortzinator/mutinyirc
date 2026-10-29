@@ -9,6 +9,7 @@ using FakeItEasy;
 using FlamingIRC;
 using MutinyIRC.Common;
 using MutinyIRC.PluginFramework;
+using MutinyIRC.UI.Resources;
 using MutinyIRC.UI.ViewModels;
 using NUnit.Framework;
 
@@ -65,8 +66,11 @@ public class ServerViewModelCertificateRefusalTests
             new ConnectFailedEventArgs(ConnectError.CertificateRejected,
                                        new RejectedCertificate(certificate.RawData, errors)));
 
+    // The connection has one entry point, so its refusal also stops the run, and a second
+    // error block ("Every server refused its certificate...") follows the refusal.
     private ErrorMessageViewModel TheErrorBlock() =>
-        _vm.ChatLines.OfType<ErrorMessageViewModel>().Single();
+        _vm.ChatLines.OfType<ErrorMessageViewModel>()
+            .First(l => l.Message != ServerStrings.EveryEntryPointRefusedMessage);
 
     private static X509Certificate2 SelfSigned(string subject, DateTimeOffset notBefore, DateTimeOffset notAfter)
     {
@@ -183,6 +187,8 @@ public class ServerViewModelCertificateRefusalTests
 
         Assert.That(_vm.ChatLines.Select(l => l.Message),
             Does.Contain("Could not connect: the server's TLS certificate is not trusted."));
-        Assert.That(_vm.ChatLines.OfType<ErrorMessageViewModel>(), Is.Empty);
+        Assert.That(_vm.ChatLines.OfType<ErrorMessageViewModel>().Select(l => l.Message),
+            Is.EqualTo(new[] { ServerStrings.EveryEntryPointRefusedMessage }),
+            "the only error block is the stop message, not a refusal block");
     }
 }
