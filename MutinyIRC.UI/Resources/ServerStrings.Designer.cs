@@ -27,6 +27,16 @@
 
         internal static string AttemptingReconnect => ResourceManager.GetString("AttemptingReconnect", resourceCulture);
         internal static string CertificateRejectedMessage => ResourceManager.GetString("CertificateRejectedMessage", resourceCulture);
+        internal static string CertificateRefusedMessage => ResourceManager.GetString("CertificateRefusedMessage", resourceCulture);
+        internal static string CertificateFingerprintLine => ResourceManager.GetString("CertificateFingerprintLine", resourceCulture);
+        internal static string CertificateChangedMessage => ResourceManager.GetString("CertificateChangedMessage", resourceCulture);
+        internal static string CertificatePinnedLine => ResourceManager.GetString("CertificatePinnedLine", resourceCulture);
+        internal static string CertificateNowLine => ResourceManager.GetString("CertificateNowLine", resourceCulture);
+        internal static string CertificateReasonNameMismatch => ResourceManager.GetString("CertificateReasonNameMismatch", resourceCulture);
+        internal static string CertificateReasonSelfSigned => ResourceManager.GetString("CertificateReasonSelfSigned", resourceCulture);
+        internal static string CertificateReasonExpired => ResourceManager.GetString("CertificateReasonExpired", resourceCulture);
+        internal static string CertificateReasonUntrusted => ResourceManager.GetString("CertificateReasonUntrusted", resourceCulture);
+        internal static string CertificateReasonSeparator => ResourceManager.GetString("CertificateReasonSeparator", resourceCulture);
         internal static string ConnectingMessage => ResourceManager.GetString("ConnectingMessage", resourceCulture);
         internal static string ConnectionFailedMessage => ResourceManager.GetString("ConnectionFailedMessage", resourceCulture);
         internal static string ConnectionFailedUnknownMessage => ResourceManager.GetString("ConnectionFailedUnknownMessage", resourceCulture);

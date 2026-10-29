@@ -353,8 +353,25 @@ public class ServerViewModel : IrcViewModel
     /// </summary>
     public void AddServerNotice(string message) => AddMessage(message);
 
+    /// <summary>
+    /// Gives the fingerprint that is pinned on an entry point (host, port), or null when that
+    /// entry point has no pin. A refused certificate for an entry point with a pin shows the
+    /// changed-certificate warning. The default finds no pins.
+    /// </summary>
+    public Func<string, int, string?> PinnedFingerprintLookup { get; set; } = (_, _) => null;
+
     private void Server_ConnectFailed(object? sender, ConnectFailedEventArgs e)
     {
+        if (e.RejectedCertificate is { } certificate)
+        {
+            // Server raises ConnectFailed before it moves on, so Connection is the refused entry point.
+            ConnectionArgs entryPoint = _server.Connection.ConnectionData;
+            AddIncoming(new ErrorMessageViewModel(DateTime.Now, CertificateRefusal.Describe(
+                certificate, entryPoint.Hostname, entryPoint.Port,
+                PinnedFingerprintLookup(entryPoint.Hostname, entryPoint.Port))));
+            return;
+        }
+
         // Only SocketError has a socket error code. Every other reason needs its own wording,
         // or the socket wording says "0".
         AddMessage(e.Reason switch
