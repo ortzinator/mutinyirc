@@ -152,8 +152,8 @@ public class MainViewModel : ViewModelBase
 
         // A connection asks this at each TLS handshake, on a thread-pool thread. Only the UI
         // thread changes the settings, so the read goes to the UI thread too.
-        ServerManager.Instance.CertificateTrustLookup = host =>
-            Dispatcher.UIThread.Invoke(() => IrcSettingsManager.Instance.GetCertificateTrust(host));
+        ServerManager.Instance.CertificateTrustLookup = (host, port) =>
+            Dispatcher.UIThread.Invoke(() => IrcSettingsManager.Instance.GetCertificateTrust(host, port));
 
         List<NetworkSettings> networks = IrcSettingsManager.Instance.GetAutoConnectNetworks();
 

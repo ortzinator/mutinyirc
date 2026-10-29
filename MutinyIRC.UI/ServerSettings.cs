@@ -30,6 +30,14 @@ public class ServerSettings : IEquatable<ServerSettings>
     public bool Ssl { get; set; }
 
     /// <summary>
+    /// The SHA-256 fingerprint of the certificate pinned on this entry point, as hex digits, or
+    /// null when it has no pin. A certificate that fails the normal check but matches the pin is
+    /// accepted. An entry point has at most one pin, so pinning a new certificate replaces it.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? PinnedFingerprint { get; set; }
+
+    /// <summary>
     /// Read from disk only, so a file written before the network owned these flags can be folded
     /// up. <see cref="IrcSettingsManager.Load"/> moves the value onto the network, and the
     /// serializer is told to skip the default, so it leaves the file on the next save.

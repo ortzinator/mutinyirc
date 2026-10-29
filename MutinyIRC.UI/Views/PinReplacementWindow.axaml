@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MutinyIRC.UI.Views.PinReplacementWindow"
+        Width="520" SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SurfaceContent}">
+
+    <DockPanel>
+
+        <!-- ── Footer: Replace / Cancel. Cancel is the default, because it changes nothing. ── -->
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource SurfaceLayerAlt}"
+                BorderBrush="{DynamicResource DividerBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="12,8">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="6">
+                <Button x:Name="replaceButton" MinWidth="80" Classes="accent"
+                        Click="ReplaceButton_Click"/>
+                <Button x:Name="cancelButton" MinWidth="80" IsDefault="True" IsCancel="True"
+                        Click="CancelButton_Click"/>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Margin="16,12" Spacing="10">
+            <TextBlock x:Name="messageText" TextWrapping="Wrap"
+                       Foreground="{DynamicResource StatusWarningForeground}"/>
+            <SelectableTextBlock x:Name="fingerprintsText" TextWrapping="Wrap"
+                                 FontFamily="monospace" FontSize="12"/>
+        </StackPanel>
+
+    </DockPanel>
+
+</Window>

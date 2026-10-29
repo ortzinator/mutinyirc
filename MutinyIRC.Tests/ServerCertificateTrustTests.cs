@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -85,7 +86,7 @@ public class ServerCertificateTrustTests
         }
     }
 
-    private Server NewServer(Func<string, CertificateTrust> lookup)
+    private Server NewServer(Func<string, int, CertificateTrust> lookup)
     {
         _server = new Server(new ConnectionArgs("tester", "localhost", true) { Port = _port })
         {
@@ -115,7 +116,7 @@ public class ServerCertificateTrustTests
     [Test]
     public async Task VerifySwitchOff_ConnectsAndSaysTheCertificateWasNotChecked()
     {
-        Server server = NewServer(_ => new CertificateTrust { VerifyCertificates = false });
+        Server server = NewServer((_, _) => new CertificateTrust { VerifyCertificates = false });
 
         Task<bool> result = NextConnectResult(server);
         server.Connect();
@@ -128,7 +129,7 @@ public class ServerCertificateTrustTests
     [Test]
     public async Task VerifySwitchOn_RefusesTheCertificate()
     {
-        Server server = NewServer(_ => new CertificateTrust { VerifyCertificates = true });
+        Server server = NewServer((_, _) => new CertificateTrust { VerifyCertificates = true });
         Task<ConnectFailedEventArgs> failure = NextConnectFailure(server);
 
         server.Connect();
@@ -150,12 +151,14 @@ public class ServerCertificateTrustTests
     }
 
     [Test]
-    public async Task Lookup_GetsTheDialledHost()
+    public async Task Lookup_GetsTheDialledEntryPoint()
     {
-        string asked = null;
-        Server server = NewServer(host =>
+        string askedHost = null;
+        int askedPort = 0;
+        Server server = NewServer((host, port) =>
         {
-            asked = host;
+            askedHost = host;
+            askedPort = port;
             return CertificateTrust.Default;
         });
         Task<ConnectFailedEventArgs> failure = NextConnectFailure(server);
@@ -163,14 +166,64 @@ public class ServerCertificateTrustTests
         server.Connect();
         await failure.WaitAsync(Wait);
 
-        Assert.That(asked, Is.EqualTo("localhost"));
+        Assert.That((askedHost, askedPort), Is.EqualTo(("localhost", _port)),
+            "a pin belongs to one entry point, so the lookup gets the host and the port");
+    }
+
+    /// <summary>
+    /// The fingerprint of the test certificate, worked out apart from the code under test, in
+    /// the display form but in lowercase. A pin in any case, with or without colons, matches.
+    /// </summary>
+    private string LowercaseDisplayFingerprint() =>
+        string.Join(":", SHA256.HashData(_certificate.RawData).Select(b => b.ToString("x2")));
+
+    [Test]
+    public async Task APinThatMatchesTheCertificate_ConnectsThroughThePin()
+    {
+        Server server = NewServer((_, _) =>
+            new CertificateTrust { PinnedFingerprint = LowercaseDisplayFingerprint() });
+
+        Task<bool> result = NextConnectResult(server);
+        server.Connect();
+
+        Assert.That(await result.WaitAsync(Wait), Is.True, "a pin is a fallback to the normal check");
+        Assert.That(server.CertificateAcceptance, Is.EqualTo(CertificateAcceptance.Pinned));
+    }
+
+    [Test]
+    public async Task APinThatDoesNotMatchTheCertificate_RefusesIt()
+    {
+        Server server = NewServer((_, _) => new CertificateTrust { PinnedFingerprint = new string('A', 64) });
+        Task<ConnectFailedEventArgs> failure = NextConnectFailure(server);
+
+        server.Connect();
+
+        Assert.That((await failure.WaitAsync(Wait)).Reason, Is.EqualTo(ConnectError.CertificateRejected));
+        Assert.That(server.CertificateAcceptance, Is.EqualTo(CertificateAcceptance.Trusted));
+    }
+
+    [Test]
+    public async Task APinThatMatches_SaysPinnedEvenWhenTheVerifySwitchIsOff()
+    {
+        Server server = NewServer((_, _) => new CertificateTrust
+        {
+            VerifyCertificates = false,
+            PinnedFingerprint = LowercaseDisplayFingerprint()
+        });
+
+        Task<bool> result = NextConnectResult(server);
+        server.Connect();
+
+        Assert.That(await result.WaitAsync(Wait), Is.True);
+        Assert.That(server.CertificateAcceptance, Is.EqualTo(CertificateAcceptance.Pinned),
+            "the certificate matched the pin, so the connection did not go unchecked");
     }
 
     [Test]
     public async Task ASwitchChange_AppliesToTheNextConnectAttempt()
     {
         bool verify = true;
-        Server server = NewServer(_ => new CertificateTrust { VerifyCertificates = verify });
+        Server server = NewServer((_, _) => new CertificateTrust { VerifyCertificates = verify });
 
         Task<ConnectFailedEventArgs> refused = NextConnectFailure(server);
         server.Connect();

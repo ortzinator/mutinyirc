@@ -479,6 +479,28 @@ public class NetworkSettingsViewModelTests
     }
 
     [Test]
+    public void ToModel_KeepsEveryPin()
+    {
+        // Saving the Networks dialog writes the networks it rebuilt, so a pin that the dialog
+        // does not carry through is lost.
+        var model = new NetworkSettings("TestNet");
+        model.AddServer(new ServerSettings("a.example.net", 6697, true) { PinnedFingerprint = new string('A', 64) });
+        model.AddServer(new ServerSettings("b.example.net", 6697, true));
+        model.AddServer(new ServerSettings("c.example.net", 6697, true) { PinnedFingerprint = new string('C', 64) });
+        var vm = new NetworkSettingsViewModel(model);
+        vm.MoveServerUpCommand.Execute(vm.Servers[2]);
+
+        NetworkSettings saved = vm.ToModel();
+
+        Assert.That(saved.Servers.Select(s => (s.Url, s.PinnedFingerprint)), Is.EqualTo(new[]
+        {
+            ("a.example.net", new string('A', 64)),
+            ("c.example.net", new string('C', 64)),
+            ("b.example.net", null)
+        }));
+    }
+
+    [Test]
     public void VerifySwitch_RoundTripsThroughTheModel()
     {
         NetworkSettingsViewModel vm = WithTlsServer(verify: false);

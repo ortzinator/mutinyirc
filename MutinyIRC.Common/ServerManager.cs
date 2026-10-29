@@ -19,7 +19,7 @@ public class ServerManager
     /// <see cref="Server.CertificateTrustLookup"/>. The host sets it once, at startup, so a
     /// connection that a command creates gets it too.
     /// </summary>
-    public Func<string, CertificateTrust> CertificateTrustLookup { get; set; }
+    public Func<string, int, CertificateTrust> CertificateTrustLookup { get; set; }
 
     public static ServerManager Instance
     {

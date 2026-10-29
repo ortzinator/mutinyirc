@@ -67,6 +67,23 @@ public class NetworkSettingsPersistenceTests
     }
 
     [Test]
+    public void RoundTrip_KeepsAPinnedFingerprint()
+    {
+        NetworkSettingsList list = BuildSavedList();
+        list[0].Servers[0].PinnedFingerprint = new string('A', 64);
+
+        Assert.That(RoundTrip(list)[0].Servers[0].PinnedFingerprint, Is.EqualTo(new string('A', 64)));
+    }
+
+    [Test]
+    public void AnEntryPointWithNoPin_WritesNoPinField()
+    {
+        string json = JsonSerializer.Serialize(BuildSavedList(), Options);
+
+        Assert.That(json, Does.Not.Contain("PinnedFingerprint"));
+    }
+
+    [Test]
     public void ANetworkWithNoVerifyField_Verifies()
     {
         const string json = """[{ "Name": "Libera", "Servers": [], "Channels": [] }]""";

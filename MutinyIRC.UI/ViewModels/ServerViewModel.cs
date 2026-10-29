@@ -4,9 +4,12 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 using System;
+using Avalonia.Threading;
 using FlamingIRC;
 using MutinyIRC.Common;
 using MutinyIRC.PluginFramework;
@@ -155,9 +158,22 @@ public class ServerViewModel : IrcViewModel
         if (!_server.Connection.ConnectionData.Ssl)
             return ServerStrings.StatusConnected;
 
-        return _server.CertificateAcceptance == CertificateAcceptance.VerificationOff
-            ? ServerStrings.StatusConnectedUnverified
-            : ServerStrings.StatusConnectedSecure;
+        return _server.CertificateAcceptance switch
+        {
+            CertificateAcceptance.VerificationOff => ServerStrings.StatusConnectedUnverified,
+            CertificateAcceptance.Pinned => ServerStrings.StatusConnectedPinned,
+            _ => ServerStrings.StatusConnectedSecure,
+        };
+    }
+
+    /// <summary>
+    /// Says, in the server window, that the connection accepted its certificate because it
+    /// matches the pin.
+    /// </summary>
+    private void SayIfConnectedThroughPin()
+    {
+        if (_server.CertificateAcceptance == CertificateAcceptance.Pinned)
+            AddMessage(ServerStrings.ConnectedPinnedMessage.With(_server.Url, _server.Port));
     }
 
     /// <summary>
@@ -389,21 +405,20 @@ public class ServerViewModel : IrcViewModel
     public void AddServerNotice(string message) => AddMessage(message);
 
     /// <summary>
-    /// Gives the fingerprint that is pinned on an entry point (host, port), or null when that
-    /// entry point has no pin. A refused certificate for an entry point with a pin shows the
-    /// changed-certificate warning. The default finds no pins.
+    /// Asks the user to confirm that a changed pinned certificate replaces the pin. The view sets
+    /// it to show a dialog. The default says no, so a pin never changes without a confirm.
     /// </summary>
-    public Func<string, int, string?> PinnedFingerprintLookup { get; set; } = (_, _) => null;
+    public Func<CertificateRefusalViewModel, Task<bool>> ConfirmPinReplacement { get; set; } =
+        _ => Task.FromResult(false);
+
+    // The newest refusal, the only one whose button works. Only the UI thread reads or writes it.
+    private CertificateRefusalViewModel? _trustableRefusal;
 
     private void Server_ConnectFailed(object? sender, ConnectFailedEventArgs e)
     {
         if (e.RejectedCertificate is { } certificate)
         {
-            // Server raises ConnectFailed before it moves on, so Connection is the refused entry point.
-            ConnectionArgs entryPoint = _server.Connection.ConnectionData;
-            AddIncoming(new ErrorMessageViewModel(DateTime.Now, CertificateRefusal.Describe(
-                certificate, entryPoint.Hostname, entryPoint.Port,
-                PinnedFingerprintLookup(entryPoint.Hostname, entryPoint.Port))));
+            AddRefusal(certificate);
             return;
         }
 
@@ -422,8 +437,81 @@ public class ServerViewModel : IrcViewModel
         });
     }
 
+    /// <summary>
+    /// Shows the refusal of <paramref name="certificate"/> with its Trust button, and takes the
+    /// button off the older refusals.
+    /// </summary>
+    private void AddRefusal(RejectedCertificate certificate)
+    {
+        // Server raises ConnectFailed before it moves on, so Connection is the refused entry point.
+        ConnectionArgs entryPoint = _server.Connection.ConnectionData;
+
+        // The same lookup that the certificate callback reads, so the refusal and the decision
+        // see the same pin.
+        string? pin = (_server.CertificateTrustLookup?.Invoke(entryPoint.Hostname, entryPoint.Port)
+                       ?? CertificateTrust.Default).PinnedFingerprint;
+
+        var refusal = new CertificateRefusalViewModel(DateTime.Now,
+            CertificateRefusal.Describe(certificate, entryPoint.Hostname, entryPoint.Port, pin),
+            entryPoint.Hostname, entryPoint.Port,
+            certificate.GetFingerprint(HashAlgorithmName.SHA256), pin, TrustCertificateAsync);
+
+        OnUiThread(() =>
+        {
+            RetireRefusal();
+            _trustableRefusal = refusal;
+        });
+        AddIncoming(refusal);
+    }
+
+    /// <summary>Takes the Trust button off the newest refusal, if it still has one.</summary>
+    private void RetireRefusal()
+    {
+        if (_trustableRefusal != null)
+            _trustableRefusal.CanTrust = false;
+        _trustableRefusal = null;
+    }
+
+    // The refusal state belongs to the UI thread, because the Trust button binds to it. Server
+    // events come on socket threads.
+    private static void OnUiThread(Action action)
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+            action();
+        else
+            Dispatcher.UIThread.Post(action);
+    }
+
+    /// <summary>
+    /// Pins the refused certificate on the refused entry point, then dials that entry point at
+    /// once. A pin that changes needs a confirm first.
+    /// </summary>
+    private async Task TrustCertificateAsync(CertificateRefusalViewModel refusal)
+    {
+        if (refusal != _trustableRefusal)
+            return;
+
+        if (refusal.ReplacesPin && !await ConfirmPinReplacement(refusal))
+            return;
+
+        // The connection may have registered, or refused again, while the dialog was open.
+        if (refusal != _trustableRefusal)
+            return;
+
+        if (!IrcSettingsManager.Instance.PinCertificate(refusal.Host, refusal.Port, refusal.Fingerprint))
+        {
+            AddIncoming(new ErrorMessageViewModel(DateTime.Now,
+                ServerStrings.CertificatePinNeedsSavedNetwork.With(refusal.Host, refusal.Port)));
+            return;
+        }
+
+        RetireRefusal();
+        _server.DialEntryPoint(refusal.Host, refusal.Port);
+    }
+
     private void Server_Registered(object? sender, EventArgs e)
     {
+        OnUiThread(RetireRefusal);
         DoRegister();
     }
 
@@ -470,6 +558,7 @@ public class ServerViewModel : IrcViewModel
         NetworkName = network.Name;
         ConnectionStatus = ConnectedStatus();
         WarnIfCertificateNotChecked();
+        SayIfConnectedThroughPin();
 
         if (_nickRetryFailed)
             AddMessage(ServerStrings.RandomNickMessage);

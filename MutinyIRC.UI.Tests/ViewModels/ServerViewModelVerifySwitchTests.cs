@@ -1,6 +1,9 @@
+using System;
 using System.Linq;
 using System.Net.Security;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using FlamingIRC;
 using MutinyIRC.Common;
 using MutinyIRC.PluginFramework;
@@ -53,9 +56,34 @@ public class ServerViewModelVerifySwitchTests
     /// <summary>Plays a handshake whose certificate fails the normal check.</summary>
     private bool HandshakeWithUntrustedCertificate(bool verify)
     {
-        _server.CertificateTrustLookup = _ => new CertificateTrust { VerifyCertificates = verify };
+        _server.CertificateTrustLookup = (_, _) => new CertificateTrust { VerifyCertificates = verify };
         return _connection.CertificateValidationFailedCallback(
             null, null, SslPolicyErrors.RemoteCertificateChainErrors);
+    }
+
+    [Test]
+    public void APinnedCertificate_ConnectsWithThePinnedMessageAndStatus()
+    {
+        using var key = RSA.Create(2048);
+        using X509Certificate2 certificate = new CertificateRequest(
+                "CN=bouncer.home", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+            .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(30));
+        _server.CertificateTrustLookup = (host, port) => host == Host && port == Port
+            ? new CertificateTrust { PinnedFingerprint = Convert.ToHexString(SHA256.HashData(certificate.RawData)) }
+            : CertificateTrust.Default;
+        Assert.That(_connection.CertificateValidationFailedCallback(
+            certificate, null, SslPolicyErrors.RemoteCertificateChainErrors), Is.True, "Precondition: accepted");
+
+        Register();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_vm.ConnectionStatus, Is.EqualTo("Connected · TLS · pinned"));
+            Assert.That(_vm.IsConnectionStatusWarning, Is.False);
+            Assert.That(_vm.ChatLines.Select(l => l.Message), Does.Contain(
+                "Connected to bouncer.home:6697. Its certificate failed the normal check, but it matches the one you pinned."));
+            Assert.That(_vm.ChatLines.OfType<WarningMessageViewModel>(), Is.Empty);
+        });
     }
 
     private void Register() => _connection.Listener.Parse(":bouncer.home 001 me :Welcome");
@@ -90,7 +118,7 @@ public class ServerViewModelVerifySwitchTests
     {
         // The callback never runs for a certificate that passes the normal check, whatever
         // the switch says.
-        _server.CertificateTrustLookup = _ => new CertificateTrust { VerifyCertificates = false };
+        _server.CertificateTrustLookup = (_, _) => new CertificateTrust { VerifyCertificates = false };
 
         Register();
 

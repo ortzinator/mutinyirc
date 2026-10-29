@@ -16,5 +16,11 @@ public enum CertificateAcceptance
     /// The certificate failed the normal check, and the connection accepted it only because
     /// the network's verify switch is off.
     /// </summary>
-    VerificationOff
+    VerificationOff,
+
+    /// <summary>
+    /// The certificate failed the normal check, and the connection accepted it because it
+    /// matches the certificate that is pinned on the entry point.
+    /// </summary>
+    Pinned
 }

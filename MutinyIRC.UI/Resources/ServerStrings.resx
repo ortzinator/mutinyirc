@@ -254,4 +254,40 @@
     <value>Disconnected</value>
     <comment>Sidebar connection state for a connection that is down.</comment>
   </data>
+  <data name="StatusConnectedPinned" xml:space="preserve">
+    <value>Connected · TLS · pinned</value>
+    <comment>Sidebar connection state for a TLS connection whose certificate failed the normal check but matches the pinned certificate.</comment>
+  </data>
+  <data name="ConnectedPinnedMessage" xml:space="preserve">
+    <value>Connected to {0}:{1}. Its certificate failed the normal check, but it matches the one you pinned.</value>
+    <comment>Displayed in the server window when a TLS connection was accepted through a pinned certificate. {0} is the host, {1} the port.</comment>
+  </data>
+  <data name="TrustCertificateButton" xml:space="preserve">
+    <value>Trust this certificate</value>
+    <comment>Button on a certificate refusal that pins the refused certificate and connects again.</comment>
+  </data>
+  <data name="ReplacePinnedCertificateButton" xml:space="preserve">
+    <value>Replace pinned certificate</value>
+    <comment>Button on a changed-certificate refusal. It opens a confirm dialog before it replaces the pin.</comment>
+  </data>
+  <data name="CertificatePinNeedsSavedNetwork" xml:space="preserve">
+    <value>Mutiny can pin a certificate only for a server that a saved network lists. Add {0}:{1} to a network in the Networks dialog, then connect again.</value>
+    <comment>Displayed when the user trusts a certificate of a server that no saved network lists. {0} is the host, {1} the port.</comment>
+  </data>
+  <data name="ReplacePinTitle" xml:space="preserve">
+    <value>Replace pinned certificate?</value>
+    <comment>Title of the dialog that confirms a pin replacement.</comment>
+  </data>
+  <data name="ReplacePinMessage" xml:space="preserve">
+    <value>The certificate of {0}:{1} is not the one you pinned. Someone may be intercepting the connection. Replace the pin only if you know that the server got a new certificate.</value>
+    <comment>Text of the dialog that confirms a pin replacement. {0} is the host, {1} the port.</comment>
+  </data>
+  <data name="ReplacePinConfirmButton" xml:space="preserve">
+    <value>Replace</value>
+    <comment>Button in the pin replacement dialog that replaces the pin.</comment>
+  </data>
+  <data name="ReplacePinCancelButton" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>Button in the pin replacement dialog that keeps the old pin.</comment>
+  </data>
 </root>

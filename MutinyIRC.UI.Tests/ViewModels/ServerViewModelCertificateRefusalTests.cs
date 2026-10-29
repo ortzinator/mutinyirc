@@ -53,12 +53,14 @@ public class ServerViewModelCertificateRefusalTests
         var conn = A.Fake<IConnection>();
         A.CallTo(() => conn.Listener).Returns(new Listener());
         A.CallTo(() => conn.ConnectionData).Returns(new ConnectionArgs("me", "irc.fake.com", true) { Port = 6697 });
-        _server = new Server(conn);
-        _vm = new ServerViewModel(_server, new PluginManager())
+        _server = new Server(conn)
         {
-            PinnedFingerprintLookup = (host, port) =>
-                host == "irc.fake.com" && port == 6697 ? pinnedFingerprint : null
+            CertificateTrustLookup = (host, port) =>
+                host == "irc.fake.com" && port == 6697
+                    ? new CertificateTrust { PinnedFingerprint = pinnedFingerprint }
+                    : CertificateTrust.Default
         };
+        _vm = new ServerViewModel(_server, new PluginManager());
     }
 
     private void Refuse(X509Certificate2 certificate, SslPolicyErrors errors) =>

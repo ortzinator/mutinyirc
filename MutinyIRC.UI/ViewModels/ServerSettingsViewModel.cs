@@ -11,6 +11,9 @@ public partial class ServerSettingsViewModel : ObservableObject
     [ObservableProperty] private int _port = ServerSettings.DefaultPort;
     [ObservableProperty] private bool _ssl;
 
+    // The pin of this entry point. ToModel carries it through, so saving the dialog keeps it.
+    [ObservableProperty] private string? _pinnedFingerprint;
+
     // Position in the failover order. The owning network writes both whenever the order
     // changes, because a row cannot see the list it is in.
     [ObservableProperty] private int _order;
@@ -23,7 +26,8 @@ public partial class ServerSettingsViewModel : ObservableObject
         _url = model.Url ?? string.Empty;
         _port = model.Port;
         _ssl = model.Ssl;
+        _pinnedFingerprint = model.PinnedFingerprint;
     }
 
-    public ServerSettings ToModel() => new(Url, Port, Ssl);
+    public ServerSettings ToModel() => new(Url, Port, Ssl) { PinnedFingerprint = PinnedFingerprint };
 }

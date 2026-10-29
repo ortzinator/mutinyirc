@@ -128,6 +128,30 @@
             </Border>
         </DataTemplate>
 
+        <!-- A certificate refusal: an error block with the Trust button. It comes before the
+             ErrorMessageViewModel template, which would match it too. -->
+        <DataTemplate DataType="{x:Type vm:CertificateRefusalViewModel}">
+            <Border Margin="12,3,12,3" Background="{DynamicResource StatusErrorBackground}"
+                    CornerRadius="4" Padding="10,6">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding Time, StringFormat='HH:mm'}"
+                               Foreground="{DynamicResource TextQuaternary}"
+                               FontSize="11" VerticalAlignment="Top" Margin="0,2,10,0"
+                               IsVisible="{Binding ShowTimestamps}"/>
+                    <StackPanel Spacing="6">
+                        <SelectableTextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                                             Foreground="{DynamicResource StatusErrorForeground}"/>
+                        <Button Name="trustCertificateButton"
+                                Content="{Binding TrustLabel}"
+                                Command="{Binding TrustCommand}"
+                                IsVisible="{Binding CanTrust}"
+                                Padding="10,3" FontSize="12"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type vm:ErrorMessageViewModel}">
             <Border Margin="12,3,12,3" Background="{DynamicResource StatusErrorBackground}"
                     CornerRadius="4" Padding="10,6">

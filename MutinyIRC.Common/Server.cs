@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
 namespace MutinyIRC.Common;
@@ -68,12 +70,13 @@ public class Server : MessageContext, IDisposable
     private volatile CertificateAcceptance _certificateAcceptance;
 
     /// <summary>
-    /// Gives the trust settings for a host when its server certificate fails the normal check.
-    /// The connection calls it again at each TLS handshake, so a change to the settings
-    /// applies to the next connect attempt. It runs on a thread-pool thread, so the host must
-    /// make it safe to call from there. Null, the default, verifies every certificate.
+    /// Gives the trust settings for an entry point (host, port) when its server certificate
+    /// fails the normal check. The connection calls it again at each TLS handshake, so a change
+    /// to the settings applies to the next connect attempt. It runs on a thread-pool thread, so
+    /// the host must make it safe to call from there. Null, the default, verifies every
+    /// certificate.
     /// </summary>
-    public Func<string, CertificateTrust> CertificateTrustLookup { get; set; }
+    public Func<string, int, CertificateTrust> CertificateTrustLookup { get; set; }
 
     /// <summary>
     /// Why the current connection accepted the server certificate. Read it when
@@ -175,12 +178,22 @@ public class Server : MessageContext, IDisposable
         new Connection(args, true, false) { HandleNickTaken = false };
 
     /// <summary>
-    /// Decides whether to accept a certificate of <paramref name="host"/> that failed the
-    /// normal check. It reads the trust settings live, at each handshake.
+    /// Decides whether to accept a certificate of the entry point <paramref name="args"/> that
+    /// failed the normal check. It reads the trust settings live, at each handshake. A match
+    /// with the pin comes first, because then the certificate was checked (ADR 0002).
     /// </summary>
-    private bool AcceptRejectedCertificate(string host)
+    private bool AcceptRejectedCertificate(ConnectionArgs args, X509Certificate certificate)
     {
-        CertificateTrust trust = CertificateTrustLookup?.Invoke(host) ?? CertificateTrust.Default;
+        CertificateTrust trust = CertificateTrustLookup?.Invoke(args.Hostname, args.Port)
+                                 ?? CertificateTrust.Default;
+
+        if (certificate != null
+            && trust.IsPinned(certificate.GetCertHashString(HashAlgorithmName.SHA256)))
+        {
+            _certificateAcceptance = CertificateAcceptance.Pinned;
+            return true;
+        }
+
         if (trust.VerifyCertificates)
             return false;
 
@@ -192,8 +205,8 @@ public class Server : MessageContext, IDisposable
     {
         // The callback is on Connection only, not on IConnection (ADR 0003).
         if (Connection is Connection connection)
-            connection.CertificateValidationFailedCallback = (_, _, _) =>
-                AcceptRejectedCertificate(connection.ConnectionData.Hostname);
+            connection.CertificateValidationFailedCallback = (certificate, _, _) =>
+                AcceptRejectedCertificate(connection.ConnectionData, certificate);
 
         Connection.ConnectionEstablished += Connection_OnConnectSuccess;
         Connection.ConnectFailed += Connection_ConnectFailed;

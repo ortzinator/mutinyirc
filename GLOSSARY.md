@@ -92,6 +92,10 @@ It is a fallback: a certificate is accepted when it is trusted (it passes the no
 check) *or* when it matches the pin, so a pin never refuses a trusted certificate. A pin belongs to one
 [entry point](#entry-point), and an entry point has at most one: pinning a new certificate replaces the old
 pin. The verb is *pin*.
+Saved as `ServerSettings.PinnedFingerprint` (hex) and read through `CertificateTrust.PinnedFingerprint`.
+`IrcSettingsManager.PinCertificate` sets it. The **Trust this certificate** button on the newest refusal
+in the server window (`CertificateRefusalViewModel`) pins the refused certificate and dials that entry
+point again; on a changed pin it reads **Replace pinned certificate** and asks first.
 See `docs/adr/0002-pins-as-fallback-trust.md`. Avoid "trusted fingerprint": "trusted" means only that a
 certificate passes the normal check.
 
@@ -100,10 +104,12 @@ certificate passes the normal check.
 The per-[network](#network) "Verify TLS certificates" switch, saved as `NetworkSettings.VerifyCertificates`
 (on by default). When it is off, a connection accepts any certificate from that network's entry points.
 `Server` does not read settings: at each TLS handshake whose certificate fails the normal check, it asks
-`Server.CertificateTrustLookup` for the host's `CertificateTrust`. The UI sets that lookup once, on
-`ServerManager`, to `IrcSettingsManager.GetCertificateTrust` marshalled to the UI thread.
-`Server.CertificateAcceptance` then says why the certificate was accepted: `Trusted` (it passed the normal
-check, or there is no TLS) or `VerificationOff`. See `docs/adr/0003-certificate-callback-on-connection.md`.
+`Server.CertificateTrustLookup` for the entry point's (host, port) `CertificateTrust`: the switch and the
+[pin](#pinned-certificate). The UI sets that lookup once, on `ServerManager`, to
+`IrcSettingsManager.GetCertificateTrust` marshalled to the UI thread. `Server.CertificateAcceptance` then
+says why the certificate was accepted: `Trusted` (it passed the normal check, or there is no TLS),
+`Pinned` (it matches the pin; checked first) or `VerificationOff`. See
+`docs/adr/0003-certificate-callback-on-connection.md`.
 
 ## Row list (user list)
 

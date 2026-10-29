@@ -74,7 +74,7 @@ public class ServerManagerTests
     [Test]
     public void Create_GivesEveryNewServerTheCertificateTrustLookup()
     {
-        Func<string, CertificateTrust> lookup = _ => CertificateTrust.Default;
+        Func<string, int, CertificateTrust> lookup = (_, _) => CertificateTrust.Default;
         _manager.CertificateTrustLookup = lookup;
         try
         {
