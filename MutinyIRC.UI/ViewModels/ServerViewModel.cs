@@ -498,10 +498,14 @@ public class ServerViewModel : IrcViewModel
         if (refusal != _trustableRefusal)
             return;
 
-        if (!IrcSettingsManager.Instance.PinCertificate(refusal.Host, refusal.Port, refusal.Fingerprint))
+        // A host that no saved network lists gets a network of its own to hold the pin. A refusal
+        // is always TLS, so the minted entry point is too.
+        IrcSettingsManager settings = IrcSettingsManager.Instance;
+        if (!settings.PinCertificate(refusal.Host, refusal.Port, refusal.Fingerprint)
+            && settings.MintPinnedNetwork(refusal.Host, refusal.Port, refusal.Fingerprint) == null)
         {
             AddIncoming(new ErrorMessageViewModel(DateTime.Now,
-                ServerStrings.CertificatePinNeedsSavedNetwork.With(refusal.Host, refusal.Port)));
+                ServerStrings.CertificatePinHostOnOtherPort.With(refusal.Host, refusal.Port)));
             return;
         }
 
@@ -581,14 +585,20 @@ public class ServerViewModel : IrcViewModel
     /// the server reports is the only link we have, and a host that reports a known name joins
     /// that network instead of standing up a duplicate. A server that reports no name leaves the
     /// host as the sole thing to name the network after.
+    ///
+    /// A network that the pin action minted is the exception: the host is saved only because its
+    /// certificate was pinned, so the first reported name can still move it into a saved network.
     /// </remarks>
     private NetworkSettings ResolveNetwork()
     {
+        IrcSettingsManager settings = IrcSettingsManager.Instance;
         string reportedName = _server.Connection.ServerProperties["Network"];
 
-        NetworkSettings network = IrcSettingsManager.Instance.GetNetwork(_server)
-            ?? IrcSettingsManager.Instance.GetOrAddNetwork(
-                   reportedName == string.Empty ? _server.Url : reportedName);
+        NetworkSettings network = settings.GetNetwork(_server)
+            ?? settings.GetOrAddNetwork(reportedName == string.Empty ? _server.Url : reportedName);
+
+        if (network.MintedByPin && reportedName != string.Empty)
+            network = settings.SettleMintedNetwork(network, reportedName);
 
         // The server owns the name and may change it on any connect.
         if (reportedName != string.Empty)

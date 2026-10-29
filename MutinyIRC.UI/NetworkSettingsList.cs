@@ -44,6 +44,21 @@ public sealed class NetworkSettingsList : IReadOnlyList<NetworkSettings>
         return net;
     }
 
+    /// <summary>
+    /// Adds <paramref name="network"/> as a new network, even when another network has its name.
+    /// </summary>
+    /// <returns>False, and nothing changes, when another network lists one of its hosts.</returns>
+    public bool TryAdd(NetworkSettings network)
+    {
+        foreach (ServerSettings server in network.Servers)
+            foreach (NetworkSettings other in _networks)
+                if (other.GetServer(server.Url) != null)
+                    return false;
+
+        _networks.Add(network);
+        return true;
+    }
+
     public NetworkSettings? GetNetwork(string name)
     {
         foreach (NetworkSettings network in _networks)

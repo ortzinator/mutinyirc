@@ -1,4 +1,4 @@
-﻿namespace MutinyIRC.UI.Resources
+namespace MutinyIRC.UI.Resources
 {
     using System;
 
@@ -65,7 +65,7 @@
         internal static string ConnectedPinnedMessage => ResourceManager.GetString("ConnectedPinnedMessage", resourceCulture);
         internal static string TrustCertificateButton => ResourceManager.GetString("TrustCertificateButton", resourceCulture);
         internal static string ReplacePinnedCertificateButton => ResourceManager.GetString("ReplacePinnedCertificateButton", resourceCulture);
-        internal static string CertificatePinNeedsSavedNetwork => ResourceManager.GetString("CertificatePinNeedsSavedNetwork", resourceCulture);
+        internal static string CertificatePinHostOnOtherPort => ResourceManager.GetString("CertificatePinHostOnOtherPort", resourceCulture);
         internal static string ReplacePinTitle => ResourceManager.GetString("ReplacePinTitle", resourceCulture);
         internal static string ReplacePinMessage => ResourceManager.GetString("ReplacePinMessage", resourceCulture);
         internal static string ReplacePinConfirmButton => ResourceManager.GetString("ReplacePinConfirmButton", resourceCulture);
