@@ -154,7 +154,12 @@ public sealed class IrcSettingsManager
     /// Finds the saved network a connection belongs to. A hostname belongs to at most one
     /// network, so the first entry point that matches settles it.
     /// </summary>
-    public NetworkSettings? GetNetwork(Server server) => GetServer(server)?.Network;
+    public NetworkSettings? GetNetwork(Server server) => GetNetwork(server.Url);
+
+    /// <summary>
+    /// Finds the saved network that lists the host <paramref name="host"/>, on any port.
+    /// </summary>
+    public NetworkSettings? GetNetwork(string host) => GetServer(host)?.Network;
 
     /// <summary>Stops the network this connection belongs to being dialled at startup.</summary>
     public void DisableAutoConnect(Server server)
@@ -175,7 +180,7 @@ public sealed class IrcSettingsManager
     /// </remarks>
     public CertificateTrust GetCertificateTrust(string host, int port)
     {
-        NetworkSettings? network = GetServer(host)?.Network;
+        NetworkSettings? network = GetNetwork(host);
         if (network == null)
             return CertificateTrust.Default;
 
@@ -257,8 +262,6 @@ public sealed class IrcSettingsManager
                 .FirstOrDefault(entryPoint =>
                     entryPoint.Port == port
                     && entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase));
-
-    private ServerSettings? GetServer(Server server) => GetServer(server.Url);
 
     private ServerSettings? GetServer(string host) =>
         Networks.SelectMany(network => network.Servers)
