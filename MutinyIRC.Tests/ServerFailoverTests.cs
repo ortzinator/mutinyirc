@@ -692,6 +692,116 @@ public class ServerFailoverTests
         Assert.That(changed, Is.True);
     }
 
+    // ── No entry points left ─────────────────────────────────────────────────
+
+    [Test]
+    public void NoEntryPoints_ADrop_StopsWithoutAReconnect()
+    {
+        Build(Candidate("a.example", 6697));
+        _server.Register();
+        int stops = 0;
+        _server.NoEntryPoints += (_, _) => stops++;
+
+        _server.ReplaceEntryPoints(Array.Empty<ConnectionArgs>());
+        _server.DropCurrentConnection();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(stops, Is.EqualTo(1));
+            Assert.That(_reconnectAttempts, Is.Empty);
+            Assert.That(_server.Dialled, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void NoEntryPoints_AFailedDial_StopsWithoutAReconnect()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+        int stops = 0;
+        _server.NoEntryPoints += (_, _) => stops++;
+
+        _server.ReplaceEntryPoints(Array.Empty<ConnectionArgs>());
+        _server.FailCurrentDial();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(stops, Is.EqualTo(1));
+            Assert.That(_reconnectAttempts, Is.Empty);
+            Assert.That(_server.Dialled, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void NoEntryPoints_WhileAReconnectWaits_StopsAtOnce()
+    {
+        Build(Candidate("a.example", 6697));
+        _server.Register();
+        _server.DropCurrentConnection();
+        int stops = 0;
+        _server.NoEntryPoints += (_, _) => stops++;
+
+        _server.ReplaceEntryPoints(Array.Empty<ConnectionArgs>());
+
+        Assert.That(stops, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void NoEntryPoints_WhileTheSessionIsUp_DoesNotStop()
+    {
+        Build(Candidate("a.example", 6697));
+        _server.Register();
+        IConnection live = _server.Current;
+        int stops = 0;
+        _server.NoEntryPoints += (_, _) => stops++;
+
+        _server.ReplaceEntryPoints(Array.Empty<ConnectionArgs>());
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(stops, Is.Zero);
+            A.CallTo(() => live.Disconnect(A<string>._)).MustNotHaveHappened();
+        });
+    }
+
+    [Test]
+    public void NoEntryPoints_Reconnect_StopsWithoutADial()
+    {
+        Build(Candidate("a.example", 6697));
+        int stops = 0;
+        _server.NoEntryPoints += (_, _) => stops++;
+
+        _server.ReplaceEntryPoints(Array.Empty<ConnectionArgs>());
+        _server.Reconnect();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(stops, Is.EqualTo(1));
+            Assert.That(_server.Dialled, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void NoEntryPoints_ThenEntryPointsAgain_ReconnectDialsThem()
+    {
+        Build(Candidate("a.example", 6697));
+
+        _server.ReplaceEntryPoints(Array.Empty<ConnectionArgs>());
+        _server.ReplaceEntryPoints(new[] { Candidate("b.example", 6697) });
+        _server.Reconnect();
+
+        Assert.That(_server.Dialled, Is.EqualTo(new[] { "b.example:6697" }));
+    }
+
+    [Test]
+    public void NoEntryPoints_SaysTheCurrentOneChanged()
+    {
+        Build(Candidate("a.example", 6697));
+
+        bool changed = _server.ReplaceEntryPoints(Array.Empty<ConnectionArgs>());
+
+        Assert.That(changed, Is.True);
+    }
+
     // ── Guards ───────────────────────────────────────────────────────────────
 
     [Test]

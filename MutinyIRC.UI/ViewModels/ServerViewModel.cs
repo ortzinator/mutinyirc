@@ -138,6 +138,7 @@ public class ServerViewModel : IrcViewModel
         _server.ConnectFailed += Server_ConnectFailed;
         _server.Reconnecting += Server_Reconnecting;
         _server.EveryEntryPointRefused += Server_EveryEntryPointRefused;
+        _server.NoEntryPoints += Server_NoEntryPoints;
         _server.ErrorMessageRecieved += Server_ErrorMessageRecieved;
         _server.Connecting += Server_Connecting;
         _server.Disconnected += Server_Disconnected;
@@ -392,6 +393,14 @@ public class ServerViewModel : IrcViewModel
         AddIncoming(stop);
     }
 
+    // The bound network has no entry points now, or the dialog deleted it, so the Server stopped
+    // and nothing reconnects.
+    private void Server_NoEntryPoints(object? sender, EventArgs e)
+    {
+        ConnectionStatus = ServerStrings.StatusDisconnected;
+        AddIncoming(new ErrorMessageViewModel(DateTime.Now, ServerStrings.NoEntryPointsMessage));
+    }
+
     /// <summary>Takes the Reconnect button off the newest stop block, if it still has one.</summary>
     private void RetireStop()
     {
@@ -517,6 +526,7 @@ public class ServerViewModel : IrcViewModel
         {
             RetireRefusal();
             _trustableRefusal = refusal;
+            refusal.EntryPointRemoved = !BoundNetworkLists(refusal.Host, refusal.Port);
         });
         AddIncoming(refusal);
     }
@@ -555,6 +565,14 @@ public class ServerViewModel : IrcViewModel
         // The connection may have registered, or refused again, while the dialog was open.
         if (refusal != _trustableRefusal)
             return;
+
+        // A save may have removed the entry point from the bound network. Then a pin would go
+        // to another network, or mint one.
+        if (!BoundNetworkLists(refusal.Host, refusal.Port))
+        {
+            refusal.EntryPointRemoved = true;
+            return;
+        }
 
         // A host that no saved network lists gets a network of its own to hold the pin. A refusal
         // is always TLS, so the minted entry point is too.
@@ -665,6 +683,10 @@ public class ServerViewModel : IrcViewModel
         NetworkSettings network;
         if (_boundNetwork is { } bound)
         {
+            // The dialog deleted the network. Registration does not write it back.
+            if (!IsSaved(bound))
+                return;
+
             // The connection keeps the network it was dialed for. It does not look up its host
             // again, so an edit or a move of its entry point does not change the network, and
             // the entry point does not go back into the settings.
@@ -718,15 +740,42 @@ public class ServerViewModel : IrcViewModel
     /// The session stays up, and the new list applies at the next dial. When the save changed or
     /// removed the entry point that the connection is on, the server panel shows one line.
     /// </summary>
-    /// <remarks>It reads the settings. Call it on the UI thread.</remarks>
+    /// <remarks>
+    /// A network that the dialog deleted has no entry points for the connection. With no entry
+    /// points, the connection stops at its next dial. The Trust button of the newest refusal is
+    /// disabled when the bound network does not list the refused entry point now. It reads the
+    /// settings. Call it on the UI thread.
+    /// </remarks>
     internal void FollowSavedEntryPoints()
     {
         if (_boundNetwork is not { } network)
             return;
 
-        if (_server.ReplaceEntryPoints(network.ToConnectionCandidates()))
+        IReadOnlyList<ConnectionArgs> entryPoints = IsSaved(network)
+            ? network.ToConnectionCandidates()
+            : Array.Empty<ConnectionArgs>();
+        if (_server.ReplaceEntryPoints(entryPoints))
             AddMessage(ServerStrings.EntryPointChangedMessage);
+
+        if (_trustableRefusal is { } refusal)
+            refusal.EntryPointRemoved = !BoundNetworkLists(refusal.Host, refusal.Port);
     }
+
+    /// <summary>Whether <paramref name="network"/> is in the saved settings.</summary>
+    private static bool IsSaved(NetworkSettings network) =>
+        IrcSettingsManager.Instance.Networks.Contains(network);
+
+    /// <summary>
+    /// Whether the bound network is saved and lists the entry point <paramref name="host"/>:
+    /// <paramref name="port"/>. A connection with no network yet has no such limit, thus it is
+    /// true for it.
+    /// </summary>
+    /// <remarks>It reads the settings. Call it on the UI thread.</remarks>
+    private bool BoundNetworkLists(string host, int port) =>
+        _boundNetwork is not { } bound
+        || (IsSaved(bound) && bound.Servers.Any(entryPoint =>
+                entryPoint.Port == port
+                && entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase)));
 
     /// <summary>
     /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
@@ -840,7 +889,8 @@ public class ServerViewModel : IrcViewModel
             int session = _session;
             IrcSettingsManager.Instance.WhenWritable(() =>
             {
-                if (_boundNetwork is not { } bound)
+                // The dialog deleted the network. Registration does not write it back.
+                if (_boundNetwork is not { } bound || !IsSaved(bound))
                     return;
 
                 NetworkSettings settled = SettleByReportedName(bound, reportedName);
@@ -912,6 +962,7 @@ public class ServerViewModel : IrcViewModel
         _server.ConnectFailed -= Server_ConnectFailed;
         _server.Reconnecting -= Server_Reconnecting;
         _server.EveryEntryPointRefused -= Server_EveryEntryPointRefused;
+        _server.NoEntryPoints -= Server_NoEntryPoints;
         _server.ErrorMessageRecieved -= Server_ErrorMessageRecieved;
         _server.Connecting -= Server_Connecting;
         _server.Disconnected -= Server_Disconnected;

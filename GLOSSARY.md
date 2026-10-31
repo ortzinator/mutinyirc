@@ -30,6 +30,8 @@ network dials a different entry point, the network, its channels, and their pane
 of its entry point does not give it to another network, and it reaches the connection only at its next dial.
 A dialog save gives the connection the bound network's new entry points as its *dial list*
 (`Server.ReplaceEntryPoints`); the session stays up, and the new list applies at the next dial.
+If the bound network has no entry points now, or the dialog deleted it, the dial list is empty: the session
+stays up, and its next dial stops the connection with no backoff (`Server.NoEntryPoints`).
 A connection resolves its network by host only when it has none yet, and `/server` without `-n` leaves it with
 none. `ServerViewModel.BoundNetwork` holds the bound network. `ServerManager`
 holds the live ones — and still calls a `Server` parameter `ntw` in `Remove`, a fossil of the same drift.

@@ -49,9 +49,21 @@ public partial class CertificateRefusalViewModel : ErrorMessageViewModel
     /// </summary>
     public bool ReplacesPin => PinnedFingerprint is not null;
 
-    public string TrustLabel => ReplacesPin
-        ? ServerStrings.ReplacePinnedCertificateButton
-        : ServerStrings.TrustCertificateButton;
+    public string TrustLabel => EntryPointRemoved
+        ? ServerStrings.TrustEntryPointRemovedButton
+        : ReplacesPin
+            ? ServerStrings.ReplacePinnedCertificateButton
+            : ServerStrings.TrustCertificateButton;
+
+    /// <summary>
+    /// Whether an edit or a move removed the refused entry point from the network of the
+    /// connection. Then the button stays in view, but it is disabled, and its text gives the
+    /// reason.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TrustLabel))]
+    [NotifyCanExecuteChangedFor(nameof(TrustCommand))]
+    private bool _entryPointRemoved;
 
     /// <summary>
     /// Whether the button shows and works. It is false when a newer refusal came, when the
@@ -61,6 +73,8 @@ public partial class CertificateRefusalViewModel : ErrorMessageViewModel
     [NotifyCanExecuteChangedFor(nameof(TrustCommand))]
     private bool _canTrust = true;
 
-    [RelayCommand(CanExecute = nameof(CanTrust))]
+    private bool CanUseTrust() => CanTrust && !EntryPointRemoved;
+
+    [RelayCommand(CanExecute = nameof(CanUseTrust))]
     private Task Trust() => _trust(this);
 }
