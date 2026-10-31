@@ -16,6 +16,12 @@ public partial class SettingsViewModel : ObservableObject
 
     public ObservableCollection<NetworkSettingsViewModel> Networks { get; } = new();
 
+    /// <summary>
+    /// Occurs during <see cref="Save"/>, after the dialog and the held live writes are applied
+    /// to the saved networks, and before the settings go to disk.
+    /// </summary>
+    public event EventHandler? NetworksApplied;
+
     public SettingsViewModel() : this(IrcSettingsManager.Instance) { }
 
     /// <summary>
@@ -132,9 +138,10 @@ public partial class SettingsViewModel : ObservableObject
     /// <summary>
     /// Gives each live connection the new entry point list of its bound network. It comes after
     /// the held writes, because a held merge can move an entry point, and before the disk write.
+    /// The owner of the connections does the hand-off when <see cref="NetworksApplied"/> occurs.
     /// </summary>
-    /// <remarks>Ticket #32 does the hand-off. Until then, this step does nothing.</remarks>
-    private static void GiveConnectionsTheirEntryPoints()
+    private void GiveConnectionsTheirEntryPoints()
     {
+        NetworksApplied?.Invoke(this, EventArgs.Empty);
     }
 }

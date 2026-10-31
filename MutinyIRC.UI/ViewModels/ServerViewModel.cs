@@ -714,6 +714,21 @@ public class ServerViewModel : IrcViewModel
     internal void BindNetwork(NetworkSettings network) => _boundNetwork = network;
 
     /// <summary>
+    /// Gives the connection the entry points of its bound network, after a Networks dialog save.
+    /// The session stays up, and the new list applies at the next dial. When the save changed or
+    /// removed the entry point that the connection is on, the server panel shows one line.
+    /// </summary>
+    /// <remarks>It reads the settings. Call it on the UI thread.</remarks>
+    internal void FollowSavedEntryPoints()
+    {
+        if (_boundNetwork is not { } network)
+            return;
+
+        if (_server.ReplaceEntryPoints(network.ToConnectionCandidates()))
+            AddMessage(ServerStrings.EntryPointChangedMessage);
+    }
+
+    /// <summary>
     /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
     /// <paramref name="port"/> of this connection. A bound connection takes the verify switch
     /// from its bound network, and the pin from that entry point in its bound network. A

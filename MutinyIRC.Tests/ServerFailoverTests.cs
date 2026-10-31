@@ -478,6 +478,220 @@ public class ServerFailoverTests
         Assert.That(() => _server.DialEntryPoint("other.example", 6697), Throws.ArgumentException);
     }
 
+    // ── A save replaces the entry points ─────────────────────────────────────
+
+    private static ConnectionArgs TlsCandidate(string host, int port) =>
+        new("nick", host, true) { Port = port };
+
+    [Test]
+    public void ReplaceEntryPoints_KeepsTheSessionUp()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+        _server.Register();
+        IConnection live = _server.Current;
+
+        _server.ReplaceEntryPoints(new[] { Candidate("b.example", 6697) });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Current, Is.SameAs(live), "a save never rebuilds the connection");
+            A.CallTo(() => live.Disconnect(A<string>._)).MustNotHaveHappened();
+            Assert.That(_server.Dialled, Is.Empty, "a save never dials");
+        });
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_AFailureGoesToTheEntryPointAfterTheCurrentHostInTheNewOrder()
+    {
+        Build(Candidate("a.example", 6697),
+              Candidate("b.example", 6697),
+              Candidate("c.example", 6697));
+        _server.FailCurrentDial();
+
+        _server.ReplaceEntryPoints(new[]
+        {
+            Candidate("c.example", 6697),
+            Candidate("b.example", 6697),
+            Candidate("a.example", 6697)
+        });
+        _server.FailCurrentDial();
+
+        Assert.That(_server.Dialled, Is.EqualTo(new[] { "b.example:6697", "a.example:6697" }));
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_AnAddedEntryPointIsDialledOnFailure()
+    {
+        Build(Candidate("a.example", 6697));
+
+        _server.ReplaceEntryPoints(new[] { Candidate("a.example", 6697), Candidate("new.example", 6667) });
+        _server.FailCurrentDial();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Dialled, Is.EqualTo(new[] { "new.example:6667" }));
+            Assert.That(_reconnectAttempts, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_CurrentHostRemoved_AFailureStartsAgainFromTheTop()
+    {
+        Build(Candidate("a.example", 6697),
+              Candidate("b.example", 6697),
+              Candidate("c.example", 6697));
+        _server.FailCurrentDial();
+
+        _server.ReplaceEntryPoints(new[] { Candidate("c.example", 6697), Candidate("a.example", 6697) });
+        _server.FailCurrentDial();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Dialled, Is.EqualTo(new[] { "b.example:6697", "c.example:6697" }));
+            Assert.That(_reconnectAttempts, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_CurrentHostRemoved_ADropGoesToTheTop()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+        _server.Register();
+
+        _server.ReplaceEntryPoints(new[] { Candidate("c.example", 6667), Candidate("b.example", 6697) });
+        _server.DropCurrentConnection();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Url, Is.EqualTo("c.example"));
+            Assert.That(_server.Port, Is.EqualTo(6667));
+            Assert.That(_reconnectAttempts, Is.EqualTo(new[] { 1 }));
+        });
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_CurrentEntryPointEdited_ADropUsesTheEdit()
+    {
+        Build(Candidate("a.example", 6667));
+        _server.Register();
+
+        _server.ReplaceEntryPoints(new[] { TlsCandidate("a.example", 6697) });
+        _server.DropCurrentConnection();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Port, Is.EqualTo(6697));
+            Assert.That(_server.Current.ConnectionData.Ssl, Is.True);
+        });
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_CurrentEntryPointUnchanged_ADropKeepsTheConnection()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+        _server.Register();
+        IConnection live = _server.Current;
+
+        _server.ReplaceEntryPoints(new[] { Candidate("b.example", 6697), Candidate("a.example", 6697) });
+        _server.DropCurrentConnection();
+
+        Assert.That(_server.Current, Is.SameAs(live));
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_TheSkipListKeepsAnEntryPointThatIsStillListed()
+    {
+        Build(Candidate("refused.example", 6697), Candidate("healthy.example", 6697));
+        _server.RefuseCurrentCertificate();
+
+        _server.ReplaceEntryPoints(new[]
+        {
+            Candidate("healthy.example", 6697),
+            Candidate("refused.example", 6697)
+        });
+        _server.FailCurrentDial();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Url, Is.EqualTo("healthy.example"),
+                "the refused entry point is still skipped, so the round wraps to the healthy host");
+            Assert.That(_reconnectAttempts, Is.EqualTo(new[] { 1 }));
+        });
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_TheSkipListDropsAnEntryPointThatIsNoLongerListed()
+    {
+        Build(Candidate("refused.example", 6697), Candidate("healthy.example", 6697));
+        _server.RefuseCurrentCertificate();
+
+        // The port edit makes the refused host a different entry point.
+        _server.ReplaceEntryPoints(new[]
+        {
+            Candidate("healthy.example", 6697),
+            Candidate("refused.example", 7000)
+        });
+        _server.FailCurrentDial();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Dialled,
+                        Is.EqualTo(new[] { "healthy.example:6697", "refused.example:7000" }));
+            Assert.That(_reconnectAttempts, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_Reconnect_DialsTheTopOfTheNewList()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+
+        _server.ReplaceEntryPoints(new[] { Candidate("b.example", 6697), Candidate("a.example", 6697) });
+        _server.Reconnect();
+
+        Assert.That(_server.Dialled, Is.EqualTo(new[] { "b.example:6697" }));
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_ReorderOrAnotherEntryPointEdited_SaysTheCurrentOneIsUnchanged()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+
+        bool changed = _server.ReplaceEntryPoints(new[]
+        {
+            Candidate("b.example", 7000),
+            Candidate("A.EXAMPLE", 6697)
+        });
+
+        Assert.That(changed, Is.False);
+    }
+
+    [TestCase("a.example", 7000, false, TestName = "ReplaceEntryPoints_PortEdited_SaysTheCurrentOneChanged")]
+    [TestCase("a.example", 6697, true, TestName = "ReplaceEntryPoints_TlsChanged_SaysTheCurrentOneChanged")]
+    [TestCase("other.example", 6697, false, TestName = "ReplaceEntryPoints_HostEdited_SaysTheCurrentOneChanged")]
+    public void ReplaceEntryPoints_CurrentEntryPointEdited_SaysItChanged(string host, int port, bool tls)
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+
+        bool changed = _server.ReplaceEntryPoints(new[]
+        {
+            new ConnectionArgs("nick", host, tls) { Port = port },
+            Candidate("b.example", 6697)
+        });
+
+        Assert.That(changed, Is.True);
+    }
+
+    [Test]
+    public void ReplaceEntryPoints_CurrentEntryPointRemoved_SaysItChanged()
+    {
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+
+        bool changed = _server.ReplaceEntryPoints(new[] { Candidate("b.example", 6697) });
+
+        Assert.That(changed, Is.True);
+    }
+
     // ── Guards ───────────────────────────────────────────────────────────────
 
     [Test]

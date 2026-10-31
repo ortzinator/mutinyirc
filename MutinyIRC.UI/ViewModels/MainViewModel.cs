@@ -167,6 +167,16 @@ public class MainViewModel : ViewModelBase
         _ = RandomMessages.Instance;
     }
 
+    /// <summary>
+    /// Gives each live connection the entry points of its bound network. Call it on the UI
+    /// thread after a Networks dialog save applies its edits.
+    /// </summary>
+    internal void FollowSavedEntryPoints()
+    {
+        foreach (ServerViewModel server in Servers)
+            server.FollowSavedEntryPoints();
+    }
+
     private void Server_JoinSelf(object? sender, Common.DataEventArgs<Channel> e)
     {
         // A reconnect (or any rejoin) re-fires JoinSelf for a channel whose panel is still

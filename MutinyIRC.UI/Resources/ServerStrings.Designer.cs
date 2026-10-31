@@ -47,6 +47,7 @@ namespace MutinyIRC.UI.Resources
         internal static string ConnectionLostUnknownMessage => ResourceManager.GetString("ConnectionLostUnknownMessage", resourceCulture);
         internal static string Disconnected => ResourceManager.GetString("Disconnected", resourceCulture);
         internal static string DisconnectSocketError => ResourceManager.GetString("DisconnectSocketError", resourceCulture);
+        internal static string EntryPointChangedMessage => ResourceManager.GetString("EntryPointChangedMessage", resourceCulture);
         internal static string EveryEntryPointRefusedMessage => ResourceManager.GetString("EveryEntryPointRefusedMessage", resourceCulture);
         internal static string NickTakenMessage => ResourceManager.GetString("NickTakenMessage", resourceCulture);
         internal static string RandomNickMessage => ResourceManager.GetString("RandomNickMessage", resourceCulture);

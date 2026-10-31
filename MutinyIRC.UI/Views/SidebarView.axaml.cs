@@ -40,6 +40,10 @@ public partial class SidebarView : UserControl
         Window? owner = Owner;
         if (owner is null) return;
 
-        await new ServerSettingsWindow().ShowDialog(owner);
+        var dialog = new SettingsViewModel();
+        if (DataContext is MainViewModel main)
+            dialog.NetworksApplied += (_, _) => main.FollowSavedEntryPoints();
+
+        await new ServerSettingsWindow(dialog).ShowDialog(owner);
     }
 }
