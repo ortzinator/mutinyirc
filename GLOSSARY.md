@@ -55,7 +55,9 @@ Networks dialog the row becomes the editor (`ServerSettingsViewModel.Editor`, an
 *move* an entry point is to give it to a different network. It stays the same entry point, with the same
 hostname, port, TLS flag, and pin, and it goes to the end of the new network's failover order. The network it
 leaves keeps its name, channels, and settings, also when no entry points remain. A network with no entry
-points is never dialed.
+points is never dialed. In the Networks dialog, the row menu's Move to submenu calls
+`NetworkSettingsViewModel.MoveServerTo`, which moves the same `ServerSettingsViewModel` and sets the
+network's `MoveStatus` line.
 
 ## Failover order
 

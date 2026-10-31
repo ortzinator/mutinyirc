@@ -77,5 +77,6 @@ namespace MutinyIRC.UI.Resources
         internal static string EntryPointPinLine => ResourceManager.GetString("EntryPointPinLine", resourceCulture);
         internal static string HostListedInNetwork => ResourceManager.GetString("HostListedInNetwork", resourceCulture);
         internal static string HostListedInThisNetwork => ResourceManager.GetString("HostListedInThisNetwork", resourceCulture);
+        internal static string EntryPointMoved => ResourceManager.GetString("EntryPointMoved", resourceCulture);
     }
 }

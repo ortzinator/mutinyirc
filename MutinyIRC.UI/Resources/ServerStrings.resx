@@ -318,4 +318,8 @@
     <value>{0} is already listed in this network.</value>
     <comment>Networks dialog: the refusal under the host fields when the same network lists the host, on any port. {0} is the host.</comment>
   </data>
+  <data name="EntryPointMoved" xml:space="preserve">
+    <value>Moved {0} to {1}.</value>
+    <comment>Networks dialog: the status line under the entry point list after a move. {0} is the host, {1} the name of the network it went to.</comment>
+  </data>
 </root>
