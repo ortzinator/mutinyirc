@@ -55,6 +55,12 @@ public class Server : MessageContext, IDisposable
     // list. Guarded by _reconnectGate.
     private bool _connectionOutdated;
 
+    // True when ReplaceEntryPoints gave an empty list: the network has no entry points now. The
+    // session stays up, but the next dial stops with NoEntryPoints. A Server built round a bare
+    // connection also has an empty list, but this flag is false for it. Guarded by
+    // _reconnectGate.
+    private bool _noEntryPoints;
+
     // The skip list: the indexes in _candidates of the entry points that refused their
     // certificate in this connect attempt. The walk and the backoff rounds pass over them. A
     // registration does not clear it, because a later drop is part of the same attempt. Only
@@ -303,9 +309,32 @@ public class Server : MessageContext, IDisposable
         else
         {
             ConnectionLost.Fire(this, e);
+            if (StopIfNoEntryPoints())
+                return;
             UseListIfOutdated();
             ScheduleReconnect();
         }
+    }
+
+    /// <summary>
+    /// Stops the run when the network has no entry points now. It cancels the pending dial, if
+    /// there is one, and fires <see cref="NoEntryPoints"/>.
+    /// </summary>
+    /// <returns>True when the run stopped, so the caller must not dial.</returns>
+    private bool StopIfNoEntryPoints()
+    {
+        lock (_reconnectGate)
+        {
+            if (!_noEntryPoints)
+                return false;
+
+            _reconnectTimer?.Dispose();
+            _reconnectTimer = null;
+            _reconnectAttempt = 0;
+        }
+
+        NoEntryPoints.Fire(this, EventArgs.Empty);
+        return true;
     }
 
     /// <summary>
@@ -487,6 +516,14 @@ public class Server : MessageContext, IDisposable
     /// <see cref="DialEntryPoint"/> starts a new attempt.
     /// </summary>
     public event EventHandler EveryEntryPointRefused;
+
+    /// <summary>
+    /// Fired when the connection must dial but its network has no entry points now: after a
+    /// drop, a failed dial, a pending reconnect or <see cref="Reconnect"/>. The run stops: no
+    /// reconnect is scheduled. <see cref="ReplaceEntryPoints"/> with entry points makes the
+    /// connection dial again at the next <see cref="Reconnect"/>.
+    /// </summary>
+    public event EventHandler NoEntryPoints;
 
     public event EventHandler<DataEventArgs<string>> RawMessageReceived;
 
@@ -693,6 +730,8 @@ public class Server : MessageContext, IDisposable
             return;
 
         Disconnect();
+        if (StopIfNoEntryPoints())
+            return;
 
         lock (_reconnectGate)
         {
@@ -868,6 +907,8 @@ public class Server : MessageContext, IDisposable
     {
         _certificateAcceptance = CertificateAcceptance.Trusted;
         ConnectFailed.Fire(this, e);
+        if (StopIfNoEntryPoints())
+            return;
         AdvanceOrReconnect(e.Reason == ConnectError.CertificateRejected);
     }
 
@@ -962,6 +1003,8 @@ public class Server : MessageContext, IDisposable
     /// After the swap, the next failure goes to the entry point after the current host in the
     /// new order. If the new list does not have the current host, the walk starts again from the
     /// top. The skip list keeps only the entry points whose host and port are in the new list.
+    /// An empty list stops the connection at its next dial, with <see cref="NoEntryPoints"/>.
+    /// When a dial waits already, because the session dropped, the connection stops now.
     /// It is safe to call from any thread.
     /// </remarks>
     /// <returns>
@@ -972,12 +1015,34 @@ public class Server : MessageContext, IDisposable
     {
         ArgumentNullException.ThrowIfNull(entryPoints);
 
+        bool changed = SwapEntryPoints(entryPoints);
+
+        // The waiting dial would use the old settings, so stop it.
+        bool dialWaits;
+        lock (_reconnectGate)
+        {
+            dialWaits = _reconnectTimer != null;
+        }
+
+        if (dialWaits)
+            StopIfNoEntryPoints();
+        return changed;
+    }
+
+    /// <summary>
+    /// Puts <paramref name="entryPoints"/> in place of the entry points of this connection. See
+    /// <see cref="ReplaceEntryPoints"/>.
+    /// </summary>
+    private bool SwapEntryPoints(IReadOnlyList<ConnectionArgs> entryPoints)
+    {
         lock (_reconnectGate)
         {
             ConnectionArgs live = Connection.ConnectionData;
             // A Server built round a bare connection has no list: its one entry point is the
             // live connection.
-            ConnectionArgs? before = _candidates.Count == 0 ? live : EntryPointFor(live.Hostname);
+            ConnectionArgs? before = _candidates.Count == 0 && !_noEntryPoints
+                ? live
+                : EntryPointFor(live.Hostname);
 
             var refused = new List<ConnectionArgs>();
             foreach (int i in _refused)
@@ -985,6 +1050,7 @@ public class Server : MessageContext, IDisposable
 
             _candidates.Clear();
             _candidates.AddRange(entryPoints);
+            _noEntryPoints = _candidates.Count == 0;
 
             _refused.Clear();
             foreach (ConnectionArgs entryPoint in refused)
@@ -1333,6 +1399,7 @@ public class Server : MessageContext, IDisposable
             _candidateIndex = 0;
             _refused.Clear();
             _connectionOutdated = false;
+            _noEntryPoints = false;
         }
 
         UnhookEvents();

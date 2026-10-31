@@ -269,6 +269,14 @@
     <value>Reconnect</value>
     <comment>Button on the message that every server refused its certificate. It dials the first server of the network again.</comment>
   </data>
+  <data name="NoEntryPointsMessage" xml:space="preserve">
+    <value>This network has no entry points. Add one in the Networks dialog.</value>
+    <comment>Displayed in the server window when a connection must dial, but its network has no entry points now (they were moved or deleted, or the network was deleted). Mutiny stopped trying.</comment>
+  </data>
+  <data name="TrustEntryPointRemovedButton" xml:space="preserve">
+    <value>Cannot trust: this entry point is no longer in this network's settings</value>
+    <comment>Text of the disabled Trust button on a certificate refusal, when an edit or a move removed the refused entry point from the network of the connection.</comment>
+  </data>
   <data name="TrustCertificateButton" xml:space="preserve">
     <value>Trust this certificate</value>
     <comment>Button on a certificate refusal that pins the refused certificate and connects again.</comment>

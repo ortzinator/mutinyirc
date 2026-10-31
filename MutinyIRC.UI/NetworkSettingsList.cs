@@ -74,6 +74,12 @@ public sealed class NetworkSettingsList : IReadOnlyList<NetworkSettings>
     public bool Remove(NetworkSettings network) => _networks.Remove(network);
 
     /// <summary>
+    /// Whether the set holds the network you pass. Identity is by reference, as for
+    /// <see cref="Remove"/>.
+    /// </summary>
+    public bool Contains(NetworkSettings network) => _networks.Contains(network);
+
+    /// <summary>
     /// Swaps the whole set for <paramref name="networks"/> in one step, dropping any entry point
     /// a network earlier in the sequence already claims.
     /// </summary>
