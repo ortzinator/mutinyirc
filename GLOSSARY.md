@@ -42,6 +42,13 @@ with the same hostname are the same entry point, whatever their ports, and the h
 first hit. "Server" in the settings window means entry point; "server" in `MutinyIRC.Common` means
 connection.
 
+To *edit* an entry point is to change its hostname, port, or TLS flag in place. It keeps its place in the
+failover order. A changed hostname or port, or TLS turned off, clears its [pin](#pinned-certificate). To
+*move* an entry point is to give it to a different network. It stays the same entry point, with the same
+hostname, port, TLS flag, and pin, and it goes to the end of the new network's failover order. The network it
+leaves keeps its name, channels, and settings, also when no entry points remain. A network with no entry
+points is never dialed.
+
 ## Failover order
 
 The order a [network](#network) dials its [entry points](#entry-point) in — top to bottom until one
