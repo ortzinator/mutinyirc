@@ -36,9 +36,10 @@ matching an existing network donates its entry point to that network rather than
 
 A hostname belongs to at most one network. This is what lets `IrcSettingsManager.GetNetwork(Server)` stop
 at the first host that matches. `NetworkSettingsList` enforces it rather than assuming it: it exposes no
-general `Add`, and `ReplaceAll` — the only way to fill it, used by both the loader and the settings
-window — drops a host a earlier network already claims. A duplicate host was unreachable anyway, so
-dropping it makes the saved state agree with what lookup does.
+general `Add`. `ReplaceAll` fills it from disk, and drops a host that an earlier network already claims.
+`TryAdd` refuses a network with a claimed host. The settings window writes onto the saved networks in
+place, and drops a claimed host by the same rule before it adds a new network. A duplicate host was
+unreachable anyway, so dropping it makes the saved state agree with what lookup does.
 
 "Identified by its entry points" describes lookup, not `Equals`. A `NetworkSettings` instance *is* a
 network, so it keeps reference identity: `NetworkSettingsList.Remove` deletes the network you hand it
