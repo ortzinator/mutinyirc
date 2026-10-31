@@ -75,5 +75,7 @@ namespace MutinyIRC.UI.Resources
         internal static string VerifyCertificatesOffHint => ResourceManager.GetString("VerifyCertificatesOffHint", resourceCulture);
         internal static string VerifyCertificatesNoTlsHint => ResourceManager.GetString("VerifyCertificatesNoTlsHint", resourceCulture);
         internal static string EntryPointPinLine => ResourceManager.GetString("EntryPointPinLine", resourceCulture);
+        internal static string HostListedInNetwork => ResourceManager.GetString("HostListedInNetwork", resourceCulture);
+        internal static string HostListedInThisNetwork => ResourceManager.GetString("HostListedInThisNetwork", resourceCulture);
     }
 }

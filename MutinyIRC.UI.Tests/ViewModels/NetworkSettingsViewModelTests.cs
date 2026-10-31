@@ -164,6 +164,56 @@ public class NetworkSettingsViewModelTests
         Assert.That(vm.NewServerText, Is.Empty);
     }
 
+    // ── AddServer: a host the network already lists ─────────────────────────
+
+    [TestCase("irc.example.net", "irc.example.net")]
+    [TestCase("irc.example.net:6697", "irc.example.net")]
+    [TestCase("IRC.Example.NET:7000", "IRC.Example.NET")]
+    public void AddServer_AHostThisNetworkLists_CannotRunAndSaysSo(string text, string host)
+    {
+        // The hostname alone is the key: the port, the TLS flag and the case do not count.
+        var vm = WithServers("irc.example.net");
+
+        vm.NewServerText = text;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.AddServerCommand.CanExecute(null), Is.False);
+            Assert.That(vm.HasNewServerClash, Is.True);
+            Assert.That(vm.NewServerClash, Is.EqualTo($"{host} is already listed in this network."));
+        });
+    }
+
+    [Test]
+    public void AddServer_AHostNoRowLists_HasNoClash()
+    {
+        var vm = WithServers("irc.example.net");
+
+        vm.NewServerText = "irc.other.net";
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.AddServerCommand.CanExecute(null), Is.True);
+            Assert.That(vm.HasNewServerClash, Is.False);
+            Assert.That(vm.NewServerClash, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void AddServer_RemovingTheRowThatHoldsTheHost_FreesItAtOnce()
+    {
+        var vm = WithServers("irc.example.net");
+        vm.NewServerText = "irc.example.net:6697";
+
+        vm.RemoveServerCommand.Execute(vm.Servers[0]);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.AddServerCommand.CanExecute(null), Is.True);
+            Assert.That(vm.HasNewServerClash, Is.False);
+        });
+    }
+
     // ── RemoveServer and reordering ──────────────────────────────────────────
 
     [Test]

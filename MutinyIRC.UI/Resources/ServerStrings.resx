@@ -310,4 +310,12 @@
     <value>Pinned {0}…</value>
     <comment>Networks dialog: the line under a pinned entry point. {0} is the first bytes of the pinned fingerprint.</comment>
   </data>
+  <data name="HostListedInNetwork" xml:space="preserve">
+    <value>{0} is already listed in {1}.</value>
+    <comment>Networks dialog: the refusal under the host fields when another network lists the host. {0} is the host, {1} the name of the network that lists it.</comment>
+  </data>
+  <data name="HostListedInThisNetwork" xml:space="preserve">
+    <value>{0} is already listed in this network.</value>
+    <comment>Networks dialog: the refusal under the host fields when the same network lists the host, on any port. {0} is the host.</comment>
+  </data>
 </root>

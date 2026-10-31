@@ -271,4 +271,94 @@ public class SettingsViewModelTests
             ("Libera", false)
         }));
     }
+
+    // ── The Add box refuses a host that another network lists ────────────────
+
+    [Test]
+    public void AddServer_AHostAnotherNetworkLists_CannotRunAndNamesThatNetwork()
+    {
+        var vm = new SettingsViewModel(ManagerWith(
+            Network("ExampleNet", "irc.example.net"),
+            Network("OFTC", "irc.oftc.net")));
+        NetworkSettingsViewModel oftc = vm.Networks[1];
+
+        oftc.NewServerText = "IRC.example.net:6697";
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(oftc.AddServerCommand.CanExecute(null), Is.False);
+            Assert.That(oftc.NewServerClash,
+                Is.EqualTo("IRC.example.net is already listed in ExampleNet."));
+        });
+    }
+
+    [Test]
+    public void AddServer_DeletingTheHoldingRowInAnotherNetwork_FreesTheHostAtOnce()
+    {
+        // The check runs against the dialog's rows, not the saved settings, so an unsaved
+        // delete counts.
+        var vm = new SettingsViewModel(ManagerWith(
+            Network("ExampleNet", "irc.example.net"),
+            Network("OFTC", "irc.oftc.net")));
+        NetworkSettingsViewModel example = vm.Networks[0];
+        NetworkSettingsViewModel oftc = vm.Networks[1];
+        oftc.NewServerText = "irc.example.net";
+
+        example.RemoveServerCommand.Execute(example.Servers[0]);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(oftc.AddServerCommand.CanExecute(null), Is.True);
+            Assert.That(oftc.HasNewServerClash, Is.False);
+        });
+    }
+
+    [Test]
+    public void AddServer_DeletingTheHoldingNetwork_FreesTheHostAtOnce()
+    {
+        var vm = new SettingsViewModel(ManagerWith(
+            Network("ExampleNet", "irc.example.net"),
+            Network("OFTC", "irc.oftc.net")));
+        NetworkSettingsViewModel oftc = vm.Networks[1];
+        oftc.NewServerText = "irc.example.net";
+
+        vm.SelectedNetwork = vm.Networks[0];
+        vm.RemoveNetworkCommand.Execute(null);
+
+        Assert.That(oftc.AddServerCommand.CanExecute(null), Is.True);
+    }
+
+    [Test]
+    public void AddServer_AnUnsavedAddInAnotherNetwork_AlreadyCounts()
+    {
+        var vm = new SettingsViewModel(ManagerWith(Network("ExampleNet", "irc.example.net")));
+        vm.AddNetworkCommand.Execute(null);
+        NetworkSettingsViewModel example = vm.Networks[0];
+        NetworkSettingsViewModel added = vm.Networks[1];
+        added.NewServerText = "irc.new.net";
+
+        example.NewServerText = "irc.new.net:6697";
+        example.AddServerCommand.Execute(null);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(added.AddServerCommand.CanExecute(null), Is.False);
+            Assert.That(added.NewServerClash,
+                Is.EqualTo("irc.new.net is already listed in ExampleNet."));
+        });
+    }
+
+    [Test]
+    public void AddServer_RenamingTheHoldingNetwork_RenamesItInTheMessage()
+    {
+        var vm = new SettingsViewModel(ManagerWith(
+            Network("ExampleNet", "irc.example.net"),
+            Network("OFTC", "irc.oftc.net")));
+        NetworkSettingsViewModel oftc = vm.Networks[1];
+        oftc.NewServerText = "irc.example.net";
+
+        vm.Networks[0].Name = "Example";
+
+        Assert.That(oftc.NewServerClash, Is.EqualTo("irc.example.net is already listed in Example."));
+    }
 }

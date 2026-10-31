@@ -24,6 +24,11 @@ public partial class SettingsViewModel : ObservableObject
     public SettingsViewModel(IrcSettingsManager settings)
     {
         _settings = settings;
+
+        // The rule watches Networks and gives itself to each network in it, so those
+        // references keep it alive. Networks added later, also by a subclass, get it too.
+        _ = new ListedHosts(Networks);
+
         foreach (var network in _settings.Networks)
             Networks.Add(new NetworkSettingsViewModel(network));
         SelectedNetwork = Networks.Count > 0 ? Networks[0] : null;

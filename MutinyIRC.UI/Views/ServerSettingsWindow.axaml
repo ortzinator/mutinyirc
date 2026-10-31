@@ -383,6 +383,15 @@
                                                 Command="{Binding AddServerCommand}"/>
                                     </Grid>
                                 </Border>
+
+                                <!-- The refusal when the dialog already lists the typed host.
+                                     It names the network that lists it. -->
+                                <TextBlock x:Name="newServerClash"
+                                           Classes="switchHint warning"
+                                           Margin="10,4,8,6"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding NewServerClash}"
+                                           IsVisible="{Binding HasNewServerClash}"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>

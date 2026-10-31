@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -21,9 +23,20 @@ public partial class NetworkSettingsViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(AddServerCommand))]
     private string _newServerText = string.Empty;
 
+    /// <summary>
+    /// The refusal under the Add box when the dialog already lists the typed host, or empty
+    /// when it does not. See <see cref="DescribeClash"/>.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNewServerClash))]
+    [NotifyCanExecuteChangedFor(nameof(AddServerCommand))]
+    private string _newServerClash = string.Empty;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(AddChannelCommand))]
     private string _newChannelText = string.Empty;
+
+    private ListedHosts? _hosts;
 
     /// <summary>Whether the "+ Add channel" affordance has opened its input.</summary>
     [ObservableProperty] private bool _isAddingChannel;
@@ -68,16 +81,39 @@ public partial class NetworkSettingsViewModel : ObservableObject
     public ObservableCollection<ServerSettingsViewModel> Servers { get; } = new();
     public ObservableCollection<ChannelSettingsViewModel> Channels { get; } = new();
 
+    /// <summary>Whether <see cref="NewServerClash"/> has a refusal to show.</summary>
+    public bool HasNewServerClash => NewServerClash.Length > 0;
+
+    /// <summary>
+    /// Occurs when a host of this network can have a different holder: a row was added or
+    /// removed, a row changed its host, or the network changed its name.
+    /// </summary>
+    internal event EventHandler? HostsChanged;
+
+    /// <summary>
+    /// The host rule of the dialog that shows this network. The dialog sets it. When it is null,
+    /// the rule reads only the rows of this network.
+    /// </summary>
+    internal ListedHosts? Hosts
+    {
+        get => _hosts;
+        set
+        {
+            if (_hosts == value)
+                return;
+
+            if (_hosts is not null)
+                _hosts.Changed -= OnListedHostsChanged;
+            _hosts = value;
+            if (_hosts is not null)
+                _hosts.Changed += OnListedHostsChanged;
+            CheckNewServer();
+        }
+    }
+
     public NetworkSettingsViewModel()
     {
-        // The entry points decide whether the switch applies. A row cannot change its TLS
-        // flag, so only an add or a remove can change the answer.
-        Servers.CollectionChanged += (_, _) =>
-        {
-            OnPropertyChanged(nameof(CanVerifyCertificates));
-            OnPropertyChanged(nameof(VerifyCertificatesHint));
-            OnPropertyChanged(nameof(IsVerifyCertificatesHintWarning));
-        };
+        Servers.CollectionChanged += OnServersChanged;
     }
 
     public NetworkSettingsViewModel(NetworkSettings model) : this()
@@ -171,7 +207,82 @@ public partial class NetworkSettingsViewModel : ObservableObject
         NewServerText = string.Empty;
     }
 
-    private bool CanAddServer() => ParseServer(NewServerText) is not null;
+    private bool CanAddServer() => ParseServer(NewServerText) is not null && !HasNewServerClash;
+
+    /// <summary>
+    /// Whether a row of this network has <paramref name="host"/>, compared without case.
+    /// </summary>
+    /// <param name="host">The hostname to find.</param>
+    /// <param name="except">A row that does not count.</param>
+    internal bool Lists(string host, ServerSettingsViewModel? except = null) =>
+        Servers.Any(server => server != except
+                              && string.Equals(server.Url, host, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Gets the refusal for a host that the dialog already lists, from the view of this network.
+    /// Returns empty when no row lists <paramref name="host"/>.
+    /// </summary>
+    /// <param name="host">The hostname to check.</param>
+    /// <param name="except">A row that does not count. A row is never a clash with itself.</param>
+    public string DescribeClash(string host, ServerSettingsViewModel? except = null)
+    {
+        NetworkSettingsViewModel? holder = _hosts is not null
+            ? _hosts.FindHolder(host, except)
+            : Lists(host, except) ? this : null;
+
+        if (holder is null)
+            return string.Empty;
+
+        return holder == this
+            ? ServerStrings.HostListedInThisNetwork.With(host)
+            : ServerStrings.HostListedInNetwork.With(host, holder.Name);
+    }
+
+    // Sets the refusal under the Add box for the text in it now.
+    private void CheckNewServer()
+    {
+        ServerSettingsViewModel? parsed = ParseServer(NewServerText);
+        NewServerClash = parsed is null ? string.Empty : DescribeClash(parsed.Url);
+    }
+
+    partial void OnNewServerTextChanged(string value) => CheckNewServer();
+
+    partial void OnNameChanged(string value) => OnHostsChanged();
+
+    private void OnListedHostsChanged(object? sender, EventArgs e) => CheckNewServer();
+
+    private void OnHostsChanged()
+    {
+        HostsChanged?.Invoke(this, EventArgs.Empty);
+
+        // With a dialog, the dialog tells every network, this network too.
+        if (_hosts is null)
+            CheckNewServer();
+    }
+
+    private void OnServersChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems is not null)
+            foreach (ServerSettingsViewModel server in e.OldItems)
+                server.PropertyChanged -= OnServerPropertyChanged;
+        if (e.NewItems is not null)
+            foreach (ServerSettingsViewModel server in e.NewItems)
+                server.PropertyChanged += OnServerPropertyChanged;
+
+        // The entry points decide whether the verify switch applies. A row cannot change its
+        // TLS flag, so only an add or a remove can change the answer.
+        OnPropertyChanged(nameof(CanVerifyCertificates));
+        OnPropertyChanged(nameof(VerifyCertificatesHint));
+        OnPropertyChanged(nameof(IsVerifyCertificatesHintWarning));
+
+        OnHostsChanged();
+    }
+
+    private void OnServerPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ServerSettingsViewModel.Url))
+            OnHostsChanged();
+    }
 
     [RelayCommand]
     private void RemoveServer(ServerSettingsViewModel? server)

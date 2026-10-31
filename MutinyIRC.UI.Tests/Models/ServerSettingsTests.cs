@@ -73,4 +73,15 @@ public class ServerSettingsTests
 
         Assert.That(plain.Equals(secure), Is.True);
     }
+
+    [Test]
+    public void Equals_SameUrlInAnotherCase_IsEqual()
+    {
+        // A hostname is not case-sensitive. NetworkSettingsList.ReplaceAll compares it without
+        // case too, so the two checks agree on what one host is.
+        var lower = new ServerSettings("irc.libera.chat", 6667, false);
+        var upper = new ServerSettings("IRC.Libera.Chat", 6667, false);
+
+        Assert.That(lower.Equals(upper), Is.True);
+    }
 }

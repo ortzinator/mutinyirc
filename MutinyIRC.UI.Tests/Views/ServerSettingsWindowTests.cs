@@ -204,6 +204,39 @@ public class ServerSettingsWindowTests
     }
 
     [AvaloniaTest]
+    public void AHostTheDialogLists_DisablesAddAndShowsTheMessage()
+    {
+        var window = ShowWindow(out SettingsViewModel vm);
+        Button addButton = window.GetVisualDescendants()
+            .OfType<Button>()
+            .Single(b => b.Name == "addServerButton");
+        TextBlock clash = window.GetVisualDescendants()
+            .OfType<TextBlock>()
+            .Single(t => t.Name == "newServerClash");
+
+        Assert.That(clash.IsVisible, Is.False, "there is no clash before anything is typed");
+
+        vm.SelectedNetwork!.NewServerText = "EU.libera.chat:6697";
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(addButton.IsEffectivelyEnabled, Is.False);
+            Assert.That(clash.IsVisible, Is.True);
+            Assert.That(clash.Text, Is.EqualTo("EU.libera.chat is already listed in this network."));
+        });
+
+        vm.SelectedNetwork.NewServerText = "irc.oftc.net";
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(addButton.IsEffectivelyEnabled, Is.True);
+            Assert.That(clash.IsVisible, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
     public void SelectingAnotherNetwork_RedrawsItsServers()
     {
         var window = ShowWindow(out SettingsViewModel vm);
