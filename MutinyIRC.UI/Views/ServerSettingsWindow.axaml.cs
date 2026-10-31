@@ -22,6 +22,10 @@ public partial class ServerSettingsWindow : Window
         InitializeComponent();
         DataContext = viewModel;
 
+        // Every close that is not OK is a Cancel, also the close button of the window. After OK,
+        // Cancel does nothing.
+        Closed += (_, _) => viewModel.Cancel();
+
         networksListBox.AddHandler(
             LostFocusEvent,
             (object? _, RoutedEventArgs e) =>
