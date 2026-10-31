@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MutinyIRC.Common;
 
 namespace MutinyIRC.UI.ViewModels;
 
@@ -18,9 +19,18 @@ public partial class SettingsViewModel : ObservableObject
 
     /// <summary>
     /// Occurs during <see cref="Save"/>, after the dialog and the held live writes are applied
-    /// to the saved networks, and before the settings go to disk.
+    /// to the saved networks, and before the settings go to disk. The owner of the live
+    /// connections then gives each connection the new entry point list of its bound network.
+    /// It comes after the held writes, because a held merge can move an entry point.
     /// </summary>
     public event EventHandler? NetworksApplied;
+
+    /// <summary>
+    /// The rule that the dialog lists a hostname at most once. It watches
+    /// <see cref="Networks"/>, and gives itself to each network in it, also to a network that a
+    /// subclass adds later. It lives as long as the dialog.
+    /// </summary>
+    internal ListedHosts ListedHosts { get; }
 
     public SettingsViewModel() : this(IrcSettingsManager.Instance) { }
 
@@ -37,9 +47,7 @@ public partial class SettingsViewModel : ObservableObject
         // that the copy stays the same as the networks.
         _settings.HoldLiveWrites();
 
-        // The rule watches Networks and gives itself to each network in it, so those
-        // references keep it alive. Networks added later, also by a subclass, get it too.
-        _ = new ListedHosts(Networks);
+        ListedHosts = new ListedHosts(Networks);
 
         foreach (var network in _settings.Networks)
             Networks.Add(new NetworkSettingsViewModel(network));
@@ -84,7 +92,7 @@ public partial class SettingsViewModel : ObservableObject
         DialogEdits edits = DialogEdits.Find(Networks, _settings.Networks);
         ApplyToSavedNetworks();
         _settings.ApplyHeldWrites(edits);
-        GiveConnectionsTheirEntryPoints();
+        NetworksApplied?.Invoke(this, EventArgs.Empty);
         _settings.Save();
     }
 
@@ -117,7 +125,7 @@ public partial class SettingsViewModel : ObservableObject
 
         // A hostname belongs to one network. The first row that lists a host keeps it, and a
         // later row drops it, as NetworkSettingsList.ReplaceAll does for data from disk.
-        var claimed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var claimed = new HashSet<string>(EntryPoint.HostComparer);
         var added = new List<NetworkSettings>();
         foreach (NetworkSettingsViewModel vm in Networks)
         {
@@ -133,15 +141,5 @@ public partial class SettingsViewModel : ObservableObject
             bool accepted = saved.TryAdd(network);
             Debug.Assert(accepted, "The save drops every host that another network claims");
         }
-    }
-
-    /// <summary>
-    /// Gives each live connection the new entry point list of its bound network. It comes after
-    /// the held writes, because a held merge can move an entry point, and before the disk write.
-    /// The owner of the connections does the hand-off when <see cref="NetworksApplied"/> occurs.
-    /// </summary>
-    private void GiveConnectionsTheirEntryPoints()
-    {
-        NetworksApplied?.Invoke(this, EventArgs.Empty);
     }
 }
