@@ -29,6 +29,14 @@ public partial class ServerSettingsViewModel : ObservableObject
     [ObservableProperty] private int _order;
     [ObservableProperty] private bool _isFirst;
 
+    /// <summary>
+    /// The editor that this row is now, or null when the row shows its values. See
+    /// <see cref="EntryPointEditorViewModel"/>.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditing))]
+    private EntryPointEditorViewModel? _editor;
+
     public ServerSettingsViewModel() { }
 
     public ServerSettingsViewModel(ServerSettings model)
@@ -38,6 +46,9 @@ public partial class ServerSettingsViewModel : ObservableObject
         _ssl = model.Ssl;
         _pinnedFingerprint = model.PinnedFingerprint;
     }
+
+    /// <summary>Whether the row is an editor now.</summary>
+    public bool IsEditing => Editor is not null;
 
     /// <summary>Whether this entry point has a pinned certificate.</summary>
     public bool IsPinned => PinnedFingerprint is not null;
@@ -65,6 +76,32 @@ public partial class ServerSettingsViewModel : ObservableObject
     /// </summary>
     [RelayCommand]
     private void ForgetPin() => PinnedFingerprint = null;
+
+    /// <summary>
+    /// Opens the editor for this row. When the editor is open already, it keeps its draft.
+    /// </summary>
+    /// <param name="describeClash">
+    /// Gets the refusal for a host, or empty when no other row lists it.
+    /// </param>
+    internal void OpenEditor(Func<string, string> describeClash) =>
+        Editor ??= new EntryPointEditorViewModel(this, describeClash);
+
+    /// <summary>Closes the editor. The row keeps its values.</summary>
+    internal void CloseEditor() => Editor = null;
+
+    /// <summary>
+    /// Writes the values of an editor to this row and closes the editor. The rules below forget
+    /// the pin for a new host or port, or TLS off.
+    /// </summary>
+    internal void Apply(string host, int port, bool ssl)
+    {
+        CloseEditor();
+        Url = host;
+        Port = port;
+        Ssl = ssl;
+    }
+
+    partial void OnPinnedFingerprintChanged(string? value) => Editor?.OnPinChanged();
 
     // A pin belongs to one host and port. A different host or port is a different server, so
     // the pin does not apply to it. A host name is not case-sensitive, so a change of case keeps it.

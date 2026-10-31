@@ -253,12 +253,14 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type vm:ServerSettingsViewModel}">
                                             <Border Classes="serverRow"
+                                                    DoubleTapped="ServerRow_DoubleTapped"
                                                     Padding="4,0,6,0"
                                                     BorderBrush="{DynamicResource DividerBrush}"
                                                     BorderThickness="0,0,0,1"
                                                     Background="Transparent">
                                               <StackPanel>
-                                                <Grid ColumnDefinitions="16,20,*,Auto,Auto,22"
+                                                <Grid ColumnDefinitions="16,20,*,Auto,Auto,22,22"
+                                                      IsVisible="{Binding !IsEditing}"
                                                       Height="35"
                                                       VerticalAlignment="Center">
 
@@ -318,7 +320,25 @@
                                                         </Panel>
                                                     </Border>
 
+                                                    <!-- The actions on this entry point. Each one is a
+                                                         MenuItem in this menu. -->
                                                     <Button Grid.Column="5"
+                                                            x:Name="rowMenuButton"
+                                                            Classes="rowAction rowReveal"
+                                                            Width="22" Height="22"
+                                                            VerticalAlignment="Center"
+                                                            ToolTip.Tip="Edit this server">
+                                                        <ic:SymbolIcon Symbol="MoreHorizontal" FontSize="12"/>
+                                                        <Button.Flyout>
+                                                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                                <MenuItem x:Name="editMenuItem"
+                                                                          Header="Edit…"
+                                                                          Click="EditMenuItem_Click"/>
+                                                            </MenuFlyout>
+                                                        </Button.Flyout>
+                                                    </Button>
+
+                                                    <Button Grid.Column="6"
                                                             Classes="rowAction rowReveal"
                                                             Width="22" Height="22"
                                                             VerticalAlignment="Center"
@@ -328,6 +348,67 @@
                                                         <ic:SymbolIcon Symbol="Dismiss" FontSize="10"/>
                                                     </Button>
                                                 </Grid>
+
+                                                <!-- The row as an editor. Enter applies and Escape cancels.
+                                                     The key handler marks both keys as handled, so that they
+                                                     never reach the Save and Cancel buttons of the dialog. -->
+                                                <ContentControl Content="{Binding Editor}"
+                                                                IsVisible="{Binding IsEditing}">
+                                                    <ContentControl.ContentTemplate>
+                                                        <DataTemplate DataType="{x:Type vm:EntryPointEditorViewModel}">
+                                                            <StackPanel x:Name="entryPointEditor"
+                                                                        Margin="36,6,0,7"
+                                                                        Spacing="5"
+                                                                        KeyDown="EntryPointEditor_KeyDown">
+                                                                <Grid ColumnDefinitions="*,72,Auto,Auto,Auto"
+                                                                      ColumnSpacing="6">
+                                                                    <TextBox x:Name="editHostBox"
+                                                                             Text="{Binding Host}"
+                                                                             PlaceholderText="host"
+                                                                             FontSize="12.5"/>
+                                                                    <TextBox Grid.Column="1"
+                                                                             x:Name="editPortBox"
+                                                                             Text="{Binding Port}"
+                                                                             PlaceholderText="{Binding PortPlaceholder}"
+                                                                             FontSize="12.5"/>
+                                                                    <CheckBox Grid.Column="2"
+                                                                              x:Name="editTlsBox"
+                                                                              Content="TLS"
+                                                                              IsChecked="{Binding Ssl}"
+                                                                              FontSize="12"
+                                                                              Margin="4,0,0,0"/>
+                                                                    <Button Grid.Column="3"
+                                                                            x:Name="applyEditButton"
+                                                                            Content="Apply"
+                                                                            Classes="accent"
+                                                                            FontSize="12"
+                                                                            Padding="10,3"
+                                                                            VerticalAlignment="Center"
+                                                                            Command="{Binding ApplyCommand}"
+                                                                            Click="EditorButton_Click"/>
+                                                                    <Button Grid.Column="4"
+                                                                            x:Name="cancelEditButton"
+                                                                            Content="Cancel"
+                                                                            FontSize="12"
+                                                                            Padding="10,3"
+                                                                            VerticalAlignment="Center"
+                                                                            Command="{Binding CancelCommand}"
+                                                                            Click="EditorButton_Click"/>
+                                                                </Grid>
+                                                                <TextBlock x:Name="pinWarning"
+                                                                           Classes="switchHint warning"
+                                                                           Text="Applying forgets the pinned certificate."
+                                                                           IsVisible="{Binding PinWillClear}"/>
+                                                                <TextBlock x:Name="editRefusal"
+                                                                           FontSize="11.5"
+                                                                           TextWrapping="Wrap"
+                                                                           Foreground="{DynamicResource StatusErrorForeground}"
+                                                                           Text="{Binding Refusal}"
+                                                                           IsVisible="{Binding HasRefusal}"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ContentControl.ContentTemplate>
+                                                </ContentControl>
 
                                                 <!-- The pin of this entry point, if it has one. Forget clears it
                                                      when the dialog is saved, as the other edits here are. -->

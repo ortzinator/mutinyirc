@@ -48,7 +48,10 @@ box refuses a host that a row already has. "Server" in the settings window means
 connection.
 
 To *edit* an entry point is to change its hostname, port, or TLS flag in place. It keeps its place in the
-failover order. A changed hostname or port, or TLS turned off, clears its [pin](#pinned-certificate). To
+failover order. A changed hostname or port, or TLS turned off, clears its [pin](#pinned-certificate). In the
+Networks dialog the row becomes the editor (`ServerSettingsViewModel.Editor`, an
+`EntryPointEditorViewModel`): a draft that changes the row only on Apply, and that the host rule of
+`ListedHosts` checks as you type. To
 *move* an entry point is to give it to a different network. It stays the same entry point, with the same
 hostname, port, TLS flag, and pin, and it goes to the end of the new network's failover order. The network it
 leaves keeps its name, channels, and settings, also when no entry points remain. A network with no entry
