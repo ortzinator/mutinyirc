@@ -82,6 +82,9 @@ value equality: one instance is one network, and you find a network by entry poi
 `IrcSettingsManager.GetNetwork(Server)`. The name is only how a host that reports a known name finds the
 network it belongs to — see `NetworkSettingsList.GetOrAddNetwork`.
 
+A Networks dialog save writes onto the same `NetworkSettings` objects (`SettingsViewModel.Save`,
+`NetworkSettingsViewModel.Source`), so a holder of a network keeps it after the save.
+
 No runtime type represents a network yet. A `Server` panel stands in for one, and `ServerViewModel.DoRegister`
 writes the network back to settings as a side effect of registering, resolving it through
 `ServerViewModel.ResolveNetwork`.

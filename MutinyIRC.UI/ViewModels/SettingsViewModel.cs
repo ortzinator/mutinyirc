@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -58,11 +60,46 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnSelectedNetworkChanged(NetworkSettingsViewModel? value)
         => RemoveNetworkCommand.NotifyCanExecuteChanged();
 
+    /// <summary>
+    /// Writes the dialog onto the saved networks in place, then writes the settings to disk.
+    /// </summary>
+    /// <remarks>
+    /// A network that was in the dialog before and after the save is the same object as before,
+    /// so a live connection that holds it keeps it. A network added in the dialog becomes a new
+    /// object, and a network deleted in the dialog is removed.
+    /// </remarks>
     public void Save()
     {
-        // One swap rather than a clear-then-refill, so the settings are never momentarily empty
-        // and ReplaceAll gets to hold the one-network-per-hostname rule over the whole set.
-        _settings.Networks.ReplaceAll(Networks.Select(vm => vm.ToModel()));
+        NetworkSettingsList saved = _settings.Networks;
+
+        // Remove the deleted networks first. Then a host that moved from a deleted network to
+        // another network is not claimed twice.
+        var kept = new HashSet<NetworkSettings>(
+            Networks.Select(vm => vm.Source).OfType<NetworkSettings>(),
+            ReferenceEqualityComparer.Instance);
+        foreach (NetworkSettings network in saved.ToList())
+            if (!kept.Contains(network))
+                saved.Remove(network);
+
+        // A hostname belongs to one network. The first row that lists a host keeps it, and a
+        // later row drops it, as NetworkSettingsList.ReplaceAll does for data from disk.
+        var claimed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var added = new List<NetworkSettings>();
+        foreach (NetworkSettingsViewModel vm in Networks)
+        {
+            NetworkSettings network = vm.Source ?? new NetworkSettings();
+            vm.ApplyTo(network, server => claimed.Add(server.Url));
+            if (vm.Source is null)
+                added.Add(network);
+        }
+
+        // The dialog adds a network only at the end, so an added network goes after the others.
+        foreach (NetworkSettings network in added)
+        {
+            bool accepted = saved.TryAdd(network);
+            Debug.Assert(accepted, "The save drops every host that another network claims");
+        }
+
         _settings.Save();
     }
 }

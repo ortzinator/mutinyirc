@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using MutinyIRC.Common;
 using NUnit.Framework;
 using MutinyIRC.UI.ViewModels;
 
@@ -117,6 +118,177 @@ public class SettingsViewModelTests
         });
     }
 
+    // ── In-place save: a network keeps its object ────────────────────────────
+
+    [Test]
+    public void Save_EachNetworkIsTheSameObjectAsBefore()
+    {
+        // A live connection holds its network by reference. A save that made new objects
+        // would cut the connection off from the settings it was dialed for.
+        NetworkSettings libera = Network("Libera", "irc.libera.chat");
+        NetworkSettings oftc = Network("OFTC", "irc.oftc.net");
+        IrcSettingsManager manager = ManagerWith(libera, oftc);
+        var vm = new SettingsViewModel(manager);
+        vm.Networks[0].Name = "Libera.Chat";
+        vm.Networks[1].NewServerText = "irc2.oftc.net";
+        vm.Networks[1].AddServerCommand.Execute(null);
+
+        vm.Save();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(manager.Networks[0], Is.SameAs(libera));
+            Assert.That(manager.Networks[1], Is.SameAs(oftc));
+        });
+    }
+
+    [Test]
+    public void Save_WritesEveryEditOntoTheSameObject()
+    {
+        var libera = new NetworkSettings("Libera") { VerifyCertificates = true };
+        libera.AddServer(new ServerSettings("a.example", 6697, true) { PinnedFingerprint = Fingerprint });
+        libera.AddServer(new ServerSettings("b.example", 6667, false));
+        libera.AddChannel(new ChannelSettings("#old", true));
+        IrcSettingsManager manager = ManagerWith(libera);
+        var vm = new SettingsViewModel(manager);
+        NetworkSettingsViewModel row = vm.Networks[0];
+
+        row.Name = "Libera.Chat";
+        row.Nick = "sparkplug";
+        row.AlternateNick = "sparkplug_";
+        row.AutoConnect = true;
+        row.VerifyCertificates = false;
+        row.RemoveServerCommand.Execute(row.Servers[1]);
+        row.NewServerText = "c.example:6697";
+        row.AddServerCommand.Execute(null);
+        row.RemoveChannelCommand.Execute(row.Channels[0]);
+        row.NewChannelText = "#new key";
+        row.AddChannelCommand.Execute(null);
+
+        vm.Save();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(libera.Name, Is.EqualTo("Libera.Chat"));
+            Assert.That(libera.Nick, Is.EqualTo("sparkplug"));
+            Assert.That(libera.AlternateNick, Is.EqualTo("sparkplug_"));
+            Assert.That(libera.AutoConnect, Is.True);
+            Assert.That(libera.VerifyCertificates, Is.False);
+            Assert.That(libera.Servers.Select(s => (s.Url, s.Port, s.Ssl, s.PinnedFingerprint)), Is.EqualTo(new (string, int, bool, string?)[]
+            {
+                ("a.example", 6697, true, Fingerprint),
+                ("c.example", 6697, true, null)
+            }));
+            Assert.That(libera.Servers.Select(s => s.Network), Is.All.SameAs(libera));
+            Assert.That(libera.Channels.Select(c => (c.Name, c.Key)), Is.EqualTo(new[] { ("#new", "key") }));
+        });
+    }
+
+    [Test]
+    public void Save_BlankNicks_AreSavedAsNoNick()
+    {
+        var libera = new NetworkSettings("Libera") { Nick = "sparkplug", AlternateNick = "sparkplug_" };
+        IrcSettingsManager manager = ManagerWith(libera);
+        var vm = new SettingsViewModel(manager);
+        vm.Networks[0].Nick = " ";
+        vm.Networks[0].AlternateNick = string.Empty;
+
+        vm.Save();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(libera.Nick, Is.Null);
+            Assert.That(libera.AlternateNick, Is.Null);
+        });
+    }
+
+    [Test]
+    public void Save_AddedNetwork_IsSavedAfterTheOthers()
+    {
+        NetworkSettings libera = Network("Libera", "irc.libera.chat");
+        IrcSettingsManager manager = ManagerWith(libera);
+        var vm = new SettingsViewModel(manager);
+        vm.AddNetworkCommand.Execute(null);
+        vm.Networks[1].Name = "OFTC";
+        vm.Networks[1].NewServerText = "irc.oftc.net";
+        vm.Networks[1].AddServerCommand.Execute(null);
+
+        vm.Save();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(manager.Networks.Select(n => n.Name), Is.EqualTo(new[] { "Libera", "OFTC" }));
+            Assert.That(manager.Networks[0], Is.SameAs(libera));
+            Assert.That(manager.Networks.GetNetwork("OFTC")!.Servers.Select(s => s.Url), Is.EqualTo(new[] { "irc.oftc.net" }));
+        });
+    }
+
+    [Test]
+    public void Save_DeletedNetwork_IsGoneFromTheSettingsAndTheFile()
+    {
+        NetworkSettings libera = Network("Libera", "irc.libera.chat");
+        NetworkSettings oftc = Network("OFTC", "irc.oftc.net");
+        IrcSettingsManager manager = ManagerWith(libera, oftc);
+        var vm = new SettingsViewModel(manager);
+        vm.SelectedNetwork = vm.Networks[0];
+        vm.RemoveNetworkCommand.Execute(null);
+
+        vm.Save();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(manager.Networks, Is.EqualTo(new[] { oftc }));
+            Assert.That(NetworkNamesInTheFile(), Is.EqualTo(new[] { "OFTC" }));
+        });
+    }
+
+    [Test]
+    public void Save_AHostMovedFromADeletedNetwork_IsKept()
+    {
+        // The deleted network gives up its host before the save checks which hosts are claimed.
+        NetworkSettings libera = Network("Libera", "irc.libera.chat");
+        NetworkSettings oftc = Network("OFTC", "irc.oftc.net");
+        IrcSettingsManager manager = ManagerWith(libera, oftc);
+        var vm = new SettingsViewModel(manager);
+        vm.SelectedNetwork = vm.Networks[0];
+        vm.RemoveNetworkCommand.Execute(null);
+        vm.Networks[0].NewServerText = "irc.libera.chat";
+        vm.Networks[0].AddServerCommand.Execute(null);
+
+        vm.Save();
+
+        Assert.That(oftc.Servers.Select(s => s.Url), Is.EqualTo(new[] { "irc.oftc.net", "irc.libera.chat" }));
+    }
+
+    private string[] NetworkNamesInTheFile() =>
+        System.Text.Json.JsonSerializer
+            .Deserialize<NetworkSettings[]>(File.ReadAllText(_settingsFile))!
+            .Select(n => n.Name)
+            .ToArray();
+
+    [Test]
+    public void Cancelling_LeavesTheNetworkObjectsAlone()
+    {
+        NetworkSettings libera = Network("Libera", "irc.libera.chat");
+        libera.AddChannel(new ChannelSettings("#mutiny", true));
+        IrcSettingsManager manager = ManagerWith(libera);
+        var vm = new SettingsViewModel(manager);
+        NetworkSettingsViewModel row = vm.Networks[0];
+
+        row.NewServerText = "irc2.libera.chat";
+        row.AddServerCommand.Execute(null);
+        row.RemoveChannelCommand.Execute(row.Channels[0]);
+        vm.AddNetworkCommand.Execute(null);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(manager.Networks, Is.EqualTo(new[] { libera }));
+            Assert.That(libera.Servers.Select(s => s.Url), Is.EqualTo(new[] { "irc.libera.chat" }));
+            Assert.That(libera.Channels.Select(c => c.Name), Is.EqualTo(new[] { "#mutiny" }));
+            Assert.That(File.Exists(_settingsFile), Is.False);
+        });
+    }
+
     [Test]
     public void Save_KeepsTheFailoverOrder()
     {
@@ -136,8 +308,8 @@ public class SettingsViewModelTests
     [Test]
     public void Save_DropsAHostAnEarlierNetworkAlreadyClaims()
     {
-        // ReplaceAll holds the one-network-per-hostname rule, and Save is the one door the
-        // settings window writes through.
+        // A hostname belongs to one network. Save is the one door the settings window writes
+        // through, so Save holds the rule.
         IrcSettingsManager manager = ManagerWith();
         var vm = new SettingsViewModel(manager);
 

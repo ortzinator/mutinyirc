@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -78,6 +79,12 @@ public partial class NetworkSettingsViewModel : ObservableObject
     /// </summary>
     public bool MintedByPin { get; }
 
+    /// <summary>
+    /// The saved network that this row is a copy of, or null for a network added in the dialog.
+    /// A save writes onto this object, so that a holder of the network keeps it after the save.
+    /// </summary>
+    public NetworkSettings? Source { get; }
+
     public ObservableCollection<ServerSettingsViewModel> Servers { get; } = new();
     public ObservableCollection<ChannelSettingsViewModel> Channels { get; } = new();
 
@@ -124,6 +131,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
         _autoConnect = model.AutoConnect;
         _verifyCertificates = model.VerifyCertificates;
         MintedByPin = model.MintedByPin;
+        Source = model;
         foreach (var server in model.Servers)
             Servers.Add(new ServerSettingsViewModel(server));
         foreach (var channel in model.Channels)
@@ -368,19 +376,41 @@ public partial class NetworkSettingsViewModel : ObservableObject
 
     public NetworkSettings ToModel()
     {
-        var model = new NetworkSettings(Name)
-        {
-            Nick = string.IsNullOrWhiteSpace(Nick) ? null : Nick,
-            AlternateNick = string.IsNullOrWhiteSpace(AlternateNick) ? null : AlternateNick,
-            AutoConnect = AutoConnect,
-            VerifyCertificates = VerifyCertificates,
-            MintedByPin = MintedByPin
-        };
+        var model = new NetworkSettings { MintedByPin = MintedByPin };
+        ApplyTo(model, _ => true);
+        return model;
+    }
 
+    /// <summary>
+    /// Writes the fields of this row onto <paramref name="model"/>. The entry point list and the
+    /// channel list are replaced as a whole, because nothing live holds them by reference.
+    /// </summary>
+    /// <param name="model">The network to write onto. The object stays the same.</param>
+    /// <param name="keepServer">
+    /// Says if an entry point goes into the list. An entry point it refuses is not saved.
+    /// </param>
+    /// <remarks>
+    /// <see cref="NetworkSettings.MintedByPin"/> is not written. The dialog does not edit the
+    /// mark, so the network keeps its own value.
+    /// </remarks>
+    public void ApplyTo(NetworkSettings model, Func<ServerSettings, bool> keepServer)
+    {
+        model.Name = Name;
+        model.Nick = string.IsNullOrWhiteSpace(Nick) ? null : Nick;
+        model.AlternateNick = string.IsNullOrWhiteSpace(AlternateNick) ? null : AlternateNick;
+        model.AutoConnect = AutoConnect;
+        model.VerifyCertificates = VerifyCertificates;
+
+        model.Servers = new List<ServerSettings>();
         foreach (var vm in Servers)
-            model.AddServer(vm.ToModel());
+        {
+            ServerSettings server = vm.ToModel();
+            if (keepServer(server))
+                model.AddServer(server);
+        }
+
+        model.Channels = new List<ChannelSettings>();
         foreach (var vm in Channels)
             model.AddChannel(vm.ToModel());
-        return model;
     }
 }
