@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MutinyIRC.Common;
 using MutinyIRC.UI.ViewModels;
 
 namespace MutinyIRC.UI;
@@ -88,12 +89,11 @@ internal sealed class DialogEdits
 
         public bool Equals(ServerSettings? x, ServerSettings? y) =>
             x is not null && y is not null
-            && x.Url.Equals(y.Url, StringComparison.OrdinalIgnoreCase)
-            && x.Port == y.Port
+            && x.IsAt(y.Url, y.Port)
             && x.Ssl == y.Ssl;
 
         public int GetHashCode(ServerSettings obj) =>
             HashCode.Combine(
-                StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Url), obj.Port, obj.Ssl);
+                EntryPoint.HostComparer.GetHashCode(obj.Url), obj.Port, obj.Ssl);
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -12,6 +13,15 @@ public readonly record struct EntryPoint(string Host, int Port, bool Ssl)
     /// <summary>A bare host, or a host and a port. Ported from the mockup's `parseServer()`.</summary>
     private static readonly Regex Pattern =
         new(@"^([A-Za-z0-9.\-_]+)(?::([0-9]{2,5}))?$", RegexOptions.Compiled);
+
+    /// <summary>
+    /// The one rule to compare hostnames: without case, as DNS compares them. Every check that
+    /// two entry points have the same host uses it.
+    /// </summary>
+    public static StringComparer HostComparer => StringComparer.OrdinalIgnoreCase;
+
+    /// <summary>Whether <paramref name="a"/> and <paramref name="b"/> are the same host.</summary>
+    public static bool SameHost(string a, string b) => HostComparer.Equals(a, b);
 
     /// <summary>
     /// Reads "host" or "host:port" out of what the user typed. With no port, the entry point

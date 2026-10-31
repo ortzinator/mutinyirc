@@ -773,9 +773,7 @@ public class ServerViewModel : IrcViewModel
     /// <remarks>It reads the settings. Call it on the UI thread.</remarks>
     private bool BoundNetworkLists(string host, int port) =>
         _boundNetwork is not { } bound
-        || (IsSaved(bound) && bound.Servers.Any(entryPoint =>
-                entryPoint.Port == port
-                && entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase)));
+        || (IsSaved(bound) && bound.FindEntryPoint(host, port) != null);
 
     /// <summary>
     /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
@@ -786,7 +784,7 @@ public class ServerViewModel : IrcViewModel
     /// <remarks>It reads the settings. Call it on the UI thread.</remarks>
     internal CertificateTrust GetCertificateTrust(string host, int port) =>
         _boundNetwork is { } bound
-            ? IrcSettingsManager.GetCertificateTrust(bound, host, port)
+            ? bound.GetCertificateTrust(host, port)
             : IrcSettingsManager.Instance.GetCertificateTrust(host, port);
 
     // The network that registration named after the host, because no saved network listed the

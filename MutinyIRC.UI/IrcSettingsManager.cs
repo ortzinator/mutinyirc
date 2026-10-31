@@ -172,8 +172,8 @@ public sealed class IrcSettingsManager
     /// <summary>
     /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
     /// <paramref name="port"/>. The verify switch comes from the network that lists the host.
-    /// The pin comes from the saved entry point with that host and port. A host that no saved network lists
-    /// is verified and has no pin.
+    /// The pin comes from the saved entry point with that host and port. A host that no saved
+    /// network lists is verified and has no pin.
     /// </summary>
     /// <remarks>
     /// This reads the settings, which only the UI thread changes. Call it on the UI thread.
@@ -190,25 +190,6 @@ public sealed class IrcSettingsManager
             PinnedFingerprint = GetEntryPoint(host, port)?.PinnedFingerprint
         };
     }
-
-    /// <summary>
-    /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
-    /// <paramref name="port"/> of a connection bound to <paramref name="network"/>. The verify
-    /// switch comes from <paramref name="network"/>. The pin comes from the entry point with that
-    /// host and port in <paramref name="network"/>. If <paramref name="network"/> does not list
-    /// that entry point now, there is no pin.
-    /// </summary>
-    /// <remarks>Call it on the UI thread.</remarks>
-    public static CertificateTrust GetCertificateTrust(NetworkSettings network, string host, int port) =>
-        new()
-        {
-            VerifyCertificates = network.VerifyCertificates,
-            PinnedFingerprint = network.Servers
-                .FirstOrDefault(entryPoint =>
-                    entryPoint.Port == port
-                    && entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase))
-                ?.PinnedFingerprint
-        };
 
     /// <summary>
     /// Pins <paramref name="fingerprint"/> on the saved entry point <paramref name="host"/>:
@@ -380,13 +361,10 @@ public sealed class IrcSettingsManager
     }
 
     private ServerSettings? GetEntryPoint(string host, int port) =>
-        Networks.SelectMany(network => network.Servers)
-                .FirstOrDefault(entryPoint =>
-                    entryPoint.Port == port
-                    && entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase));
+        Networks.Select(network => network.FindEntryPoint(host, port))
+                .FirstOrDefault(entryPoint => entryPoint != null);
 
     private ServerSettings? GetServer(string host) =>
         Networks.SelectMany(network => network.Servers)
-                .FirstOrDefault(entryPoint =>
-                    entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(entryPoint => EntryPoint.SameHost(entryPoint.Url, host));
 }

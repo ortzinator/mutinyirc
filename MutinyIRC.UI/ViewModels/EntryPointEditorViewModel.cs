@@ -69,7 +69,7 @@ public sealed partial class EntryPointEditorViewModel : ObservableObject
     /// </summary>
     public bool PinWillClear =>
         _row.IsPinned
-        && (!string.Equals(Host.Trim(), _row.Url, StringComparison.OrdinalIgnoreCase)
+        && (!EntryPoint.SameHost(Host.Trim(), _row.Url)
             || ParsePort() != _row.Port
             || !Ssl);
 

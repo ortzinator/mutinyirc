@@ -82,5 +82,11 @@ public class ServerSettings : IEquatable<ServerSettings>
     /// not count.
     /// </summary>
     public bool Equals(ServerSettings? server) =>
-        server != null && string.Equals(server.Url, Url, StringComparison.OrdinalIgnoreCase);
+        server != null && EntryPoint.SameHost(server.Url, Url);
+
+    /// <summary>
+    /// Whether this is the entry point <paramref name="host"/>:<paramref name="port"/>. The host
+    /// is compared without case. The TLS flag does not count.
+    /// </summary>
+    public bool IsAt(string host, int port) => Port == port && EntryPoint.SameHost(Url, host);
 }

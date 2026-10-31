@@ -272,8 +272,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
     /// <param name="host">The hostname to find.</param>
     /// <param name="except">A row that does not count.</param>
     internal bool Lists(string host, ServerSettingsViewModel? except = null) =>
-        Servers.Any(server => server != except
-                              && string.Equals(server.Url, host, StringComparison.OrdinalIgnoreCase));
+        Servers.Any(server => server != except && EntryPoint.SameHost(server.Url, host));
 
     /// <summary>
     /// Gets the refusal for a host that the dialog already lists, from the view of this network.
