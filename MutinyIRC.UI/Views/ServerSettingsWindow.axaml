@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ic="using:FluentIcons.Avalonia"
         xmlns:vm="clr-namespace:MutinyIRC.UI.ViewModels"
+        xmlns:proto="clr-namespace:MutinyIRC.UI.ViewModels.Prototype"
         xmlns:design="clr-namespace:MutinyIRC.UI.ViewModels.Design"
         x:Class="MutinyIRC.UI.Views.ServerSettingsWindow"
         Title="Networks"
@@ -147,6 +148,7 @@
         </Style>
     </Window.Styles>
 
+    <Panel>
     <DockPanel>
 
         <!-- Header -->
@@ -233,6 +235,7 @@
 
             <!-- The selected network -->
             <ScrollViewer Grid.Column="1"
+                          IsVisible="{Binding !IsSheetOpen, Source={x:Static proto:EntryPointEditPrototype.Instance}}"
                           HorizontalScrollBarVisibility="Disabled"
                           IsEnabled="{Binding SelectedNetwork, Converter={x:Static ObjectConverters.IsNotNull}}">
                 <StackPanel Spacing="8" Margin="0,0,10,0" DataContext="{Binding SelectedNetwork}">
@@ -253,12 +256,14 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type vm:ServerSettingsViewModel}">
                                             <Border Classes="serverRow"
+                                                    DoubleTapped="ServerRow_DoubleTapped"
                                                     Padding="4,0,6,0"
                                                     BorderBrush="{DynamicResource DividerBrush}"
                                                     BorderThickness="0,0,0,1"
                                                     Background="Transparent">
                                               <StackPanel>
-                                                <Grid ColumnDefinitions="16,20,*,Auto,Auto,22"
+                                                <Grid ColumnDefinitions="16,20,*,Auto,Auto,Auto,22"
+                                                      IsVisible="{Binding !IsInlineEditing}"
                                                       Height="35"
                                                       VerticalAlignment="Center">
 
@@ -318,7 +323,87 @@
                                                         </Panel>
                                                     </Border>
 
-                                                    <Button Grid.Column="5"
+                                                    <!-- PROTOTYPE: one edit/move affordance per variant. -->
+                                                    <Panel Grid.Column="5">
+                                                        <Button Classes="rowAction rowReveal"
+                                                                Width="22" Height="22"
+                                                                ToolTip.Tip="Edit or move this server"
+                                                                IsVisible="{Binding IsA, Source={x:Static proto:EntryPointEditPrototype.Instance}}"
+                                                                Click="MoreButton_Click">
+                                                            <ic:SymbolIcon Symbol="MoreHorizontal" FontSize="12"/>
+                                                        </Button>
+                                                        <Button Classes="rowAction rowReveal"
+                                                                Width="22" Height="22"
+                                                                ToolTip.Tip="Edit this server"
+                                                                IsVisible="{Binding IsB, Source={x:Static proto:EntryPointEditPrototype.Instance}}">
+                                                            <ic:SymbolIcon Symbol="Edit" FontSize="11"/>
+                                                            <Button.Flyout>
+                                                                <Flyout Placement="BottomEdgeAlignedRight"
+                                                                        Opening="EditFlyout_Opening"
+                                                                        Closed="EditFlyout_Closed">
+                                                                    <StackPanel Width="300" Spacing="8" Margin="4" KeyDown="Editor_KeyDown">
+                                                                        <TextBlock Text="Edit server" FontWeight="SemiBold" FontSize="13"/>
+                                                                        <StackPanel Spacing="3">
+                                                                            <TextBlock Classes="fieldLabel" Text="Host" Margin="0"/>
+                                                                            <TextBox Text="{Binding DraftHost}" FontSize="12.5"/>
+                                                                        </StackPanel>
+                                                                        <Grid ColumnDefinitions="90,*" ColumnSpacing="12">
+                                                                            <StackPanel Spacing="3">
+                                                                                <TextBlock Classes="fieldLabel" Text="Port" Margin="0"/>
+                                                                                <TextBox Text="{Binding DraftPort}"
+                                                                                         PlaceholderText="{Binding DraftPortPlaceholder}"
+                                                                                         FontSize="12.5"/>
+                                                                            </StackPanel>
+                                                                            <StackPanel Grid.Column="1" Spacing="3">
+                                                                                <TextBlock Classes="fieldLabel" Text="TLS" Margin="0"/>
+                                                                                <ToggleSwitch IsChecked="{Binding DraftSsl}"
+                                                                                              OnContent="On" OffContent="Off"/>
+                                                                            </StackPanel>
+                                                                        </Grid>
+                                                                        <StackPanel Spacing="3">
+                                                                            <TextBlock Classes="fieldLabel" Text="Network" Margin="0"/>
+                                                                            <ComboBox ItemsSource="{Binding AllNetworks}"
+                                                                                      SelectedItem="{Binding DraftNetwork}"
+                                                                                      HorizontalAlignment="Stretch" FontSize="12.5">
+                                                                                <ComboBox.ItemTemplate>
+                                                                                    <DataTemplate DataType="{x:Type vm:NetworkSettingsViewModel}">
+                                                                                        <TextBlock Text="{Binding Name}"/>
+                                                                                    </DataTemplate>
+                                                                                </ComboBox.ItemTemplate>
+                                                                            </ComboBox>
+                                                                            <TextBlock Classes="switchHint" IsVisible="{Binding IsMoving}"
+                                                                                       TextWrapping="Wrap"
+                                                                                       Text="Moves this server to the end of that network's list. The pin goes with it."/>
+                                                                        </StackPanel>
+                                                                        <TextBlock Classes="switchHint" IsVisible="{Binding IsPinned}"
+                                                                                   Text="{Binding PinLine}"/>
+                                                                        <TextBlock Classes="switchHint warning" IsVisible="{Binding PinWillClear}"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Text="Applying this change forgets the pinned certificate."/>
+                                                                        <Border IsVisible="{Binding HasRefusal}"
+                                                                                Background="{DynamicResource StatusErrorBackground}"
+                                                                                CornerRadius="3" Padding="8,5">
+                                                                            <TextBlock Text="{Binding Refusal}" FontSize="11.5" TextWrapping="Wrap"
+                                                                                       Foreground="{DynamicResource StatusErrorForeground}"/>
+                                                                        </Border>
+                                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
+                                                                            <Button Content="Cancel" FontSize="12" Click="FlyoutCancel_Click"/>
+                                                                            <Button Content="Apply" Classes="accent" FontSize="12" Click="FlyoutApply_Click"/>
+                                                                        </StackPanel>
+                                                                    </StackPanel>
+                                                                </Flyout>
+                                                            </Button.Flyout>
+                                                        </Button>
+                                                        <Button Classes="rowAction rowReveal"
+                                                                Width="22" Height="22"
+                                                                ToolTip.Tip="Open this server"
+                                                                IsVisible="{Binding IsC, Source={x:Static proto:EntryPointEditPrototype.Instance}}"
+                                                                Click="OpenSheet_Click">
+                                                            <ic:SymbolIcon Symbol="ChevronRight" FontSize="11"/>
+                                                        </Button>
+                                                    </Panel>
+
+                                                    <Button Grid.Column="6"
                                                             Classes="rowAction rowReveal"
                                                             Width="22" Height="22"
                                                             VerticalAlignment="Center"
@@ -328,6 +413,30 @@
                                                         <ic:SymbolIcon Symbol="Dismiss" FontSize="10"/>
                                                     </Button>
                                                 </Grid>
+
+                                                <!-- PROTOTYPE A: the row itself becomes the editor. -->
+                                                <StackPanel IsVisible="{Binding IsInlineEditing}"
+                                                            Margin="36,6,0,7" Spacing="5"
+                                                            KeyDown="Editor_KeyDown">
+                                                    <Grid ColumnDefinitions="*,72,Auto,Auto,Auto" ColumnSpacing="6">
+                                                        <TextBox Text="{Binding DraftHost}" FontSize="12.5"
+                                                                 PlaceholderText="host"/>
+                                                        <TextBox Grid.Column="1" Text="{Binding DraftPort}"
+                                                                 PlaceholderText="{Binding DraftPortPlaceholder}" FontSize="12.5"/>
+                                                        <CheckBox Grid.Column="2" Content="TLS" IsChecked="{Binding DraftSsl}"
+                                                                  FontSize="12" Margin="4,0,0,0"/>
+                                                        <Button Grid.Column="3" Content="Apply" Classes="accent"
+                                                                FontSize="12" Padding="10,3" VerticalAlignment="Center"
+                                                                Click="InlineApply_Click"/>
+                                                        <Button Grid.Column="4" Content="Cancel"
+                                                                FontSize="12" Padding="10,3" VerticalAlignment="Center"
+                                                                Click="InlineCancel_Click"/>
+                                                    </Grid>
+                                                    <TextBlock Classes="switchHint warning" IsVisible="{Binding PinWillClear}"
+                                                               Text="Applying this change forgets the pinned certificate."/>
+                                                    <TextBlock IsVisible="{Binding HasRefusal}" Text="{Binding Refusal}"
+                                                               FontSize="11.5" Foreground="{DynamicResource StatusErrorForeground}"/>
+                                                </StackPanel>
 
                                                 <!-- The pin of this entry point, if it has one. Forget clears it
                                                      when the dialog is saved, as the other edits here are. -->
@@ -548,6 +657,115 @@
 
                 </StackPanel>
             </ScrollViewer>
+
+            <!-- PROTOTYPE C: the edit sheet takes over the right column. -->
+            <DockPanel Grid.Column="1"
+                       IsVisible="{Binding IsSheetOpen, Source={x:Static proto:EntryPointEditPrototype.Instance}}"
+                       DataContext="{Binding SheetRow, Source={x:Static proto:EntryPointEditPrototype.Instance}}"
+                       KeyDown="Editor_KeyDown">
+                <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,12">
+                    <Button Classes="link" FontSize="12" Content="‹ All servers" Click="SheetCancel_Click"/>
+                    <TextBlock Text="{Binding Url}" FontSize="17" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding Order, StringFormat='Number {0} in the failover order'}"
+                               FontSize="11.5" Foreground="{DynamicResource TextTertiary}"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"
+                            Spacing="6" Margin="0,10,0,0">
+                    <Button Content="Cancel" FontSize="12" Click="SheetCancel_Click"/>
+                    <Button Content="Done" Classes="accent" FontSize="12" Click="SheetApply_Click"/>
+                </StackPanel>
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="10" Margin="0,0,10,0">
+                        <Border IsVisible="{Binding HasRefusal}"
+                                Background="{DynamicResource StatusErrorBackground}"
+                                CornerRadius="4" Padding="10,7">
+                            <TextBlock Text="{Binding Refusal}" FontSize="12" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource StatusErrorForeground}"/>
+                        </Border>
+
+                        <TextBlock Classes="sectionLabel" Text="Address"/>
+                        <Border Classes="card" Padding="14,10">
+                            <StackPanel Spacing="8">
+                                <StackPanel Spacing="3">
+                                    <TextBlock Classes="fieldLabel" Text="Host" Margin="0"/>
+                                    <TextBox Text="{Binding DraftHost}" FontSize="12.5"/>
+                                </StackPanel>
+                                <Grid ColumnDefinitions="110,*" ColumnSpacing="16">
+                                    <StackPanel Spacing="3">
+                                        <TextBlock Classes="fieldLabel" Text="Port" Margin="0"/>
+                                        <TextBox Text="{Binding DraftPort}"
+                                                 PlaceholderText="{Binding DraftPortPlaceholder}" FontSize="12.5"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="3">
+                                        <TextBlock Classes="fieldLabel" Text="TLS" Margin="0"/>
+                                        <ToggleSwitch IsChecked="{Binding DraftSsl}" OnContent="On" OffContent="Off"/>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Classes="switchHint" TextWrapping="Wrap"
+                                           Text="Leave the port blank to use 6697 with TLS or 6667 without."/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Classes="sectionLabel" Text="Certificate"/>
+                        <Border Classes="card" Padding="14,10">
+                            <StackPanel Spacing="4">
+                                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsPinned}">
+                                    <TextBlock Text="{Binding PinLine}" FontSize="12" VerticalAlignment="Center"/>
+                                    <Button Classes="link" Content="Forget" Command="{Binding ForgetPinCommand}"/>
+                                </StackPanel>
+                                <TextBlock Text="No pinned certificate." FontSize="12"
+                                           Foreground="{DynamicResource TextTertiary}"
+                                           IsVisible="{Binding !IsPinned}"/>
+                                <TextBlock Classes="switchHint warning" IsVisible="{Binding PinWillClear}" TextWrapping="Wrap"
+                                           Text="A new host or port, or TLS off, forgets the pinned certificate when you press Done."/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Classes="sectionLabel" Text="Network"/>
+                        <Border Classes="card" Padding="14,10">
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <TextBlock Text="Belongs to" FontSize="13" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding AllNetworks}"
+                                              SelectedItem="{Binding DraftNetwork}"
+                                              HorizontalAlignment="Stretch" FontSize="12.5">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:NetworkSettingsViewModel}">
+                                                <TextBlock Text="{Binding Name}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </Grid>
+                                <TextBlock Classes="switchHint" IsVisible="{Binding IsMoving}" TextWrapping="Wrap"
+                                           Text="Done moves this server to the end of that network's failover order. The pin goes with it."/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
         </Grid>
     </DockPanel>
+
+    <!-- PROTOTYPE: the variant switcher. Not part of any design. ← and → also switch. -->
+    <Border IsVisible="{x:Static proto:EntryPointEditPrototype.IsEnabled}"
+            DataContext="{x:Static proto:EntryPointEditPrototype.Instance}"
+            HorizontalAlignment="Center" VerticalAlignment="Bottom"
+            Margin="0,0,0,74" Padding="6,4"
+            CornerRadius="16" Background="#E6202020"
+            BoxShadow="0 2 10 0 #60000000">
+        <StackPanel Spacing="1">
+            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                <Button Content="◀" Command="{Binding PreviousCommand}" Foreground="White"
+                        Background="Transparent" Padding="8,2" Focusable="False"/>
+                <TextBlock Text="{Binding VariantLabel}" Foreground="White" FontWeight="SemiBold"
+                           FontSize="12.5" VerticalAlignment="Center" MinWidth="130" TextAlignment="Center"/>
+                <Button Content="▶" Command="{Binding NextCommand}" Foreground="White"
+                        Background="Transparent" Padding="8,2" Focusable="False"/>
+            </StackPanel>
+            <TextBlock Text="{Binding LastAction}" Foreground="#C0FFFFFF" FontSize="10.5"
+                       HorizontalAlignment="Center" Margin="10,0,10,3" MaxWidth="560"
+                       TextTrimming="CharacterEllipsis"/>
+        </StackPanel>
+    </Border>
+    </Panel>
 </Window>

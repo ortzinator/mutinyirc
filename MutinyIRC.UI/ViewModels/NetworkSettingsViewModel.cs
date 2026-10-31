@@ -211,7 +211,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
     /// Rewrites every row's place in the order. A row cannot see the list it is in, so the list
     /// tells it, once per change.
     /// </summary>
-    private void RenumberServers()
+    internal void RenumberServers()
     {
         for (int i = 0; i < Servers.Count; i++)
         {
