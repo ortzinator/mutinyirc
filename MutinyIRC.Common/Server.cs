@@ -1004,7 +1004,8 @@ public class Server : MessageContext, IDisposable
     /// new order. If the new list does not have the current host, the walk starts again from the
     /// top. The skip list keeps only the entry points whose host and port are in the new list.
     /// An empty list stops the connection at its next dial, with <see cref="NoEntryPoints"/>.
-    /// When a dial waits already, because the session dropped, the connection stops now.
+    /// When a dial waits already, because the session dropped, the connection stops now. When a
+    /// dial waits and the list is not empty, that dial uses the new list.
     /// It is safe to call from any thread.
     /// </remarks>
     /// <returns>
@@ -1017,14 +1018,21 @@ public class Server : MessageContext, IDisposable
 
         bool changed = SwapEntryPoints(entryPoints);
 
-        // The waiting dial would use the old settings, so stop it.
-        bool dialWaits;
+        // A waiting dial would use the old settings. Rebuild the connection from the new list
+        // before it fires, or stop it when the list is empty. The timer dials under the gate,
+        // so it cannot fire between the check and the rebuild.
+        bool noEntryPoints;
         lock (_reconnectGate)
         {
-            dialWaits = _reconnectTimer != null;
+            if (_reconnectTimer == null)
+                return changed;
+
+            noEntryPoints = _noEntryPoints;
+            if (!noEntryPoints)
+                UseListIfOutdated();
         }
 
-        if (dialWaits)
+        if (noEntryPoints)
             StopIfNoEntryPoints();
         return changed;
     }

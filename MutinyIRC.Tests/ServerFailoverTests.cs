@@ -653,6 +653,25 @@ public class ServerFailoverTests
     }
 
     [Test]
+    public async Task ReplaceEntryPoints_WhileAReconnectWaits_TheReconnectDialsTheNewList()
+    {
+        // The save comes after the drop, so the reconnect waits already. It must not dial the
+        // old host: the current host is not in the new list, so the walk starts at the top.
+        Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
+        _server.Register();
+        _server.DropCurrentConnection();
+
+        _server.ReplaceEntryPoints(new[] { TlsCandidate("c.example", 7000), Candidate("b.example", 6697) });
+        await Task.Delay(TimeSpan.FromSeconds(5));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_server.Dialled, Is.EqualTo(new[] { "c.example:7000" }));
+            Assert.That(_server.Current.ConnectionData.Ssl, Is.True);
+        });
+    }
+
+    [Test]
     public void ReplaceEntryPoints_ReorderOrAnotherEntryPointEdited_SaysTheCurrentOneIsUnchanged()
     {
         Build(Candidate("a.example", 6697), Candidate("b.example", 6697));
