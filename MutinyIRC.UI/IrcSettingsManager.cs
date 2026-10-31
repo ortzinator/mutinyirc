@@ -192,6 +192,25 @@ public sealed class IrcSettingsManager
     }
 
     /// <summary>
+    /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
+    /// <paramref name="port"/> of a connection bound to <paramref name="network"/>. The verify
+    /// switch comes from <paramref name="network"/>. The pin comes from the entry point with that
+    /// host and port in <paramref name="network"/>. If <paramref name="network"/> does not list
+    /// that entry point now, there is no pin.
+    /// </summary>
+    /// <remarks>Call it on the UI thread.</remarks>
+    public static CertificateTrust GetCertificateTrust(NetworkSettings network, string host, int port) =>
+        new()
+        {
+            VerifyCertificates = network.VerifyCertificates,
+            PinnedFingerprint = network.Servers
+                .FirstOrDefault(entryPoint =>
+                    entryPoint.Port == port
+                    && entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase))
+                ?.PinnedFingerprint
+        };
+
+    /// <summary>
     /// Pins <paramref name="fingerprint"/> on the saved entry point <paramref name="host"/>:
     /// <paramref name="port"/> and saves the settings. The new pin replaces an old pin.
     /// </summary>

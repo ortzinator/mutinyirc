@@ -528,6 +528,12 @@ public class Server : MessageContext, IDisposable
 
     public event EventHandler ConnectCancelled;
 
+    /// <summary>
+    /// <see cref="ChangeServer(ConnectionArgs)"/> replaced the entry points with one host that
+    /// the user named. It occurs on the thread that called <see cref="ChangeServer(ConnectionArgs)"/>.
+    /// </summary>
+    public event EventHandler ServerChanged;
+
     public event EventHandler<DataEventArgs<string>> PingReceived;
 
     public event EventHandler<NickErrorEventArgs> NickError;
@@ -1229,6 +1235,7 @@ public class Server : MessageContext, IDisposable
         HookEvents();
 
         _serverChangeTime = DateTime.Now;
+        ServerChanged.Fire(this, EventArgs.Empty);
     }
 
     public void ChangeServer(string nick, string url, bool ssl)

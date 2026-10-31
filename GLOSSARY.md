@@ -28,7 +28,8 @@ replaceable part inside a [network](#network), not something you name or save: w
 network dials a different entry point, the network, its channels, and their panels stay. A connection is
 *bound* to the network it was dialed for, and it keeps that network for its whole session: an edit or a move
 of its entry point does not give it to another network, and it reaches the connection only at its next dial.
-A connection resolves its network by host only when it has none yet. `ServerManager`
+A connection resolves its network by host only when it has none yet, and `/server` without `-n` leaves it with
+none. `ServerViewModel.BoundNetwork` holds the bound network. `ServerManager`
 holds the live ones — and still calls a `Server` parameter `ntw` in `Remove`, a fossil of the same drift.
 
 ## Entry point
