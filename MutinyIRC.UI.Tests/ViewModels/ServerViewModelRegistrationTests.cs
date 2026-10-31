@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using Avalonia.Headless.NUnit;
+using Avalonia.Threading;
 using FakeItEasy;
 using FlamingIRC;
 using NUnit.Framework;
@@ -18,6 +21,9 @@ namespace MutinyIRC.UI.Tests.ViewModels;
 /// on a network that is saved: the connection must find that network by the name the server
 /// reports, add itself to it, and join its channels.
 /// </summary>
+/// <remarks>
+/// The view model writes settings on the UI thread only, so every test runs on it.
+/// </remarks>
 [TestFixture]
 public class ServerViewModelRegistrationTests
 {
@@ -56,11 +62,14 @@ public class ServerViewModelRegistrationTests
     /// </summary>
     private void Dial(string host)
     {
-        var args = new ConnectionArgs("me", host, false);
-        var conn = A.Fake<Connection>(x => x.WithArgumentsForConstructor(new object[] { args, false, false }));
-
-        _server = new Server(conn);
+        _server = new Server(FakeConnection(host));
         _vm = new ServerViewModel(_server, new PluginManager());
+    }
+
+    private static Connection FakeConnection(string host)
+    {
+        var args = new ConnectionArgs("me", host, false);
+        return A.Fake<Connection>(x => x.WithArgumentsForConstructor(new object[] { args, false, false }));
     }
 
     /// <summary>
@@ -88,7 +97,7 @@ public class ServerViewModelRegistrationTests
         return libera;
     }
 
-    [Test]
+    [AvaloniaTest]
     public void Registering_NewHostOfKnownNetwork_JoinsThatNetworksAutoJoinChannels()
     {
         // eu.libera.chat is not saved, but the server reports "Libera", which is saved and
@@ -104,7 +113,7 @@ public class ServerViewModelRegistrationTests
             "A host that reports a saved network's name must autojoin that network's channels on the first connect");
     }
 
-    [Test]
+    [AvaloniaTest]
     public void Registering_NewHostOfKnownNetwork_AddsTheHostToThatNetwork()
     {
         IrcSettingsManager manager = UseEmptySettings();
@@ -119,7 +128,7 @@ public class ServerViewModelRegistrationTests
             Is.EqualTo(new[] { "irc.libera.chat", "eu.libera.chat" }));
     }
 
-    [Test]
+    [AvaloniaTest]
     public void Registering_SavedHost_JoinsItsNetworksAutoJoinChannels()
     {
         IrcSettingsManager manager = UseEmptySettings();
@@ -131,7 +140,7 @@ public class ServerViewModelRegistrationTests
         Assert.That(_server.Channels.Keys, Does.Contain("#MutinyIRC"));
     }
 
-    [Test]
+    [AvaloniaTest]
     public void Registering_UnknownHostAndNoReportedName_MintsNetworkNamedForTheHost()
     {
         IrcSettingsManager manager = UseEmptySettings();
@@ -161,7 +170,7 @@ public class ServerViewModelRegistrationTests
 
     private const string NickInUse = ":irc.fake.com 433 me taken :Nickname is already in use";
 
-    [Test]
+    [AvaloniaTest]
     public void NickInUse_BeforeRegistration_RetriesWithAnotherNick()
     {
         UseEmptySettings();
@@ -174,7 +183,7 @@ public class ServerViewModelRegistrationTests
             "A nick collision during registration must make the client try another nick");
     }
 
-    [Test]
+    [AvaloniaTest]
     public void NickInUse_AfterRegistration_KeepsTheCurrentNick()
     {
         // After registration a 433 answers the user's own /nick. The user still holds the old
@@ -190,7 +199,7 @@ public class ServerViewModelRegistrationTests
             "A nick collision after registration must not rename the user");
     }
 
-    [Test]
+    [AvaloniaTest]
     public void Registering_ReportedNameChanged_RenamesTheNetworkItBelongsTo()
     {
         // The server owns the name and may change it on any connect. The network the host
@@ -205,7 +214,7 @@ public class ServerViewModelRegistrationTests
         Assert.That(libera.Name, Is.EqualTo("LiberaChat"));
     }
 
-    [Test]
+    [AvaloniaTest]
     public void Registering_NameReportedBeforeTheWelcome_StillJoinsTheNamedNetwork()
     {
         // Some servers send 005 before 001. Registration then reads the name itself.
@@ -222,7 +231,7 @@ public class ServerViewModelRegistrationTests
         Assert.That(_server.Channels.Keys, Does.Contain("#MutinyIRC"));
     }
 
-    [Test]
+    [AvaloniaTest]
     public void Registering_NewHostOfKnownNetwork_MarksThatNetworkForAutoConnect()
     {
         IrcSettingsManager manager = UseEmptySettings();
@@ -232,5 +241,85 @@ public class ServerViewModelRegistrationTests
         Register("Libera");
 
         Assert.That(libera.AutoConnect, Is.True);
+    }
+
+    // ── Thread of the writes ─────────────────────────────────────────────────
+    // IRC events come on socket threads, but only the UI thread changes the settings. Each
+    // test below raises the event on another thread, so the write must wait in the UI queue.
+
+    // A Thread of its own, because Task.Wait can run the task on the waiting thread.
+    private static void OnSocketThread(Action action)
+    {
+        var thread = new Thread(action.Invoke);
+        thread.Start();
+        thread.Join();
+    }
+
+    [AvaloniaTest]
+    public void Registering_OnASocketThread_WritesTheSettingsOnTheUiThread()
+    {
+        IrcSettingsManager manager = UseEmptySettings();
+        Dial("irc.example.net");
+
+        OnSocketThread(() => Register(string.Empty));
+
+        Assert.That(manager.Networks, Is.Empty,
+            "Registration must not write the settings on the socket thread");
+
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(manager.Networks.Select(n => n.Name), Is.EqualTo(new[] { "irc.example.net" }));
+    }
+
+    [AvaloniaTest]
+    public void NetworkNameReported_OnASocketThread_RenamesTheNetworkOnTheUiThread()
+    {
+        IrcSettingsManager manager = UseEmptySettings();
+        NetworkSettings libera = SaveLibera(manager);
+        Dial("irc.libera.chat");
+        Register(string.Empty);
+
+        OnSocketThread(() => ReportNetwork("LiberaChat"));
+
+        Assert.That(libera.Name, Is.EqualTo("Libera"),
+            "NETWORK= must not rename the network on the socket thread");
+
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(libera.Name, Is.EqualTo("LiberaChat"));
+    }
+
+    [AvaloniaTest]
+    public void PartingAChannel_OnASocketThread_RemovesItFromTheNetworkOnTheUiThread()
+    {
+        IrcSettingsManager manager = UseEmptySettings();
+        NetworkSettings libera = SaveLibera(manager);
+        Dial("irc.libera.chat");
+        Register("Libera");
+
+        OnSocketThread(() => _server.Connection.Listener.Parse(":me!u@h PART #MutinyIRC"));
+
+        Assert.That(libera.Channels.Select(c => c.Name), Is.EqualTo(new[] { "#MutinyIRC" }),
+            "A part must not change the channel list on the socket thread");
+
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(libera.Channels, Is.Empty);
+    }
+
+    [AvaloniaTest]
+    public void Registering_ThenTheConnectionMovesOn_DonatesTheEntryPointThatRegistered()
+    {
+        // The UI thread runs the write later than the 001. By then the connection can be on
+        // another entry point, so the write must use the entry point that registered.
+        IrcSettingsManager manager = UseEmptySettings();
+        Dial("irc.example.net");
+
+        OnSocketThread(() => Register(string.Empty));
+        _server.Connection = FakeConnection("other.example.net");
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(manager.Networks.SelectMany(n => n.Servers).Select(s => s.Url),
+            Is.EqualTo(new[] { "irc.example.net" }));
     }
 }

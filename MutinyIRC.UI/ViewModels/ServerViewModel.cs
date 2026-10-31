@@ -273,13 +273,21 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_PartSelf(object? sender, Common.PartEventArgs e)
     {
-        var nwSettings = IrcSettingsManager.Instance.GetNetwork(_server);
-        var chan = nwSettings?.GetChannel(e.Channel.Name);
+        // Read the host now. The connection can move to another entry point before the UI
+        // thread runs the write.
+        string host = _server.Url;
+        string channelName = e.Channel.Name;
 
-        // Membership of the network's channel list is the autojoin flag now, so leaving a
-        // channel takes it off the list rather than leaving a chip that does nothing.
-        if (chan != null)
-            nwSettings!.RemoveChannel(chan);
+        OnUiThread(() =>
+        {
+            NetworkSettings? nwSettings = IrcSettingsManager.Instance.GetNetwork(host);
+            ChannelSettings? chan = nwSettings?.GetChannel(channelName);
+
+            // Membership of the network's channel list is the autojoin flag now, so leaving a
+            // channel takes it off the list rather than leaving a chip that does nothing.
+            if (chan != null)
+                nwSettings!.RemoveChannel(chan);
+        });
     }
 
     private void Server_NickError(object? sender, NickErrorEventArgs e)
@@ -413,7 +421,9 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_Connecting(object? sender, CancelEventArgs e)
     {
-        _network = null;
+        // The UI thread owns the resolved network. Clear it in the UI queue, so that it comes
+        // after the writes of the previous registration and before those of the next one.
+        OnUiThread(() => _network = null);
         ConnectionStatus = ServerStrings.StatusConnecting;
         AddMessage(ServerStrings.ConnectingMessage.With(_server.Url, _server.Port));
     }
@@ -503,8 +513,9 @@ public class ServerViewModel : IrcViewModel
         _trustableRefusal = null;
     }
 
-    // The refusal state belongs to the UI thread, because the Trust button binds to it. Server
-    // events come on socket threads.
+    // Server events come on socket threads. The refusal and stop state belongs to the UI thread,
+    // because the buttons bind to it. Only the UI thread writes the network settings, because
+    // the Networks dialog and the sidebar read and replace them there.
     private static void OnUiThread(Action action)
     {
         if (Dispatcher.UIThread.CheckAccess())
@@ -546,12 +557,22 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_Registered(object? sender, EventArgs e)
     {
+        // Read the entry point now. The connection can move to another entry point before the
+        // UI thread runs the writes.
+        var entryPoint = new ServerSettings(_server.Url, _server.Port, _server.Connection.ConnectionData.Ssl);
+        string reportedName = _server.Connection.ServerProperties["Network"];
+
+        // The nick retry state belongs to the socket thread, where the next 433 arrives.
+        bool usedRandomNick = _nickRetryFailed;
+        _nickRetryAttempt = 0;
+        _nickRetryFailed = false;
+
         OnUiThread(() =>
         {
             RetireRefusal();
             RetireStop();
+            DoRegister(entryPoint, reportedName, usedRandomNick);
         });
-        DoRegister();
     }
 
     protected override void OnExecute(string? commandLine)
@@ -576,14 +597,19 @@ public class ServerViewModel : IrcViewModel
     /// channels. Runs on every registration, so it also picks up a network the server has renamed
     /// and an entry point we reached for the first time.
     /// </summary>
-    private void DoRegister()
+    /// <param name="entryPoint">The entry point that registered.</param>
+    /// <param name="reportedName">
+    /// The network name that the server reported before it registered, or empty.
+    /// </param>
+    /// <param name="usedRandomNick">Whether every nick was taken, so the server has a random one.</param>
+    /// <remarks>It writes the network settings. Call it on the UI thread.</remarks>
+    private void DoRegister(ServerSettings entryPoint, string reportedName, bool usedRandomNick)
     {
-        NetworkSettings network = ResolveNetwork();
+        NetworkSettings network = ResolveNetwork(entryPoint.Url, reportedName);
 
         // AddServer keys on the URL and ignores a host the network already lists, so this both
         // donates a new entry point and leaves a known one alone.
-        network.AddServer(new ServerSettings(_server.Url, _server.Port,
-            _server.Connection.ConnectionData.Ssl));
+        network.AddServer(entryPoint);
 
         _network = network;
         AdoptNetwork(network);
@@ -591,11 +617,8 @@ public class ServerViewModel : IrcViewModel
         WarnIfCertificateNotChecked();
         SayIfConnectedThroughPin();
 
-        if (_nickRetryFailed)
+        if (usedRandomNick)
             AddMessage(ServerStrings.RandomNickMessage);
-
-        _nickRetryAttempt = 0;
-        _nickRetryFailed = false;
 
         JoinAutoJoinChannels(network);
     }
@@ -636,7 +659,9 @@ public class ServerViewModel : IrcViewModel
     }
 
     /// <summary>
-    /// Finds the saved network this connection belongs to, minting one if it belongs to none.
+    /// Finds the saved network that the entry point <paramref name="host"/> belongs to, minting
+    /// one if it belongs to none. <paramref name="reportedName"/> is the network name that the
+    /// server reported, or empty.
     /// </summary>
     /// <remarks>
     /// The entry point identifies the network, so a saved host wins outright. Otherwise the name
@@ -647,14 +672,13 @@ public class ServerViewModel : IrcViewModel
     /// Most servers report the name in 005, after the 001 that registers the connection.
     /// <see cref="Server_NetworkNameReported"/> then does the merge and the rename.
     /// </remarks>
-    private NetworkSettings ResolveNetwork()
+    private NetworkSettings ResolveNetwork(string host, string reportedName)
     {
         IrcSettingsManager settings = IrcSettingsManager.Instance;
-        string reportedName = _server.Connection.ServerProperties["Network"];
 
-        NetworkSettings? saved = settings.GetNetwork(_server);
+        NetworkSettings? saved = settings.GetNetwork(host);
         NetworkSettings network = saved
-            ?? settings.GetOrAddNetwork(reportedName == string.Empty ? _server.Url : reportedName);
+            ?? settings.GetOrAddNetwork(reportedName == string.Empty ? host : reportedName);
 
         _hostNamedNetwork = saved == null && reportedName == string.Empty ? network : null;
 
@@ -685,14 +709,21 @@ public class ServerViewModel : IrcViewModel
     // comes before registration is for DoRegister to read.
     private void Server_NetworkNameReported(object? sender, Common.DataEventArgs<string> e)
     {
-        if (_network == null)
-            return;
+        string reportedName = e.Data;
 
-        NetworkSettings settled = SettleByReportedName(_network, e.Data);
-        AdoptNetwork(settled);
-        if (settled != _network)
-            JoinAutoJoinChannels(settled);
-        _network = settled;
+        // The UI queue keeps the order of the events, so the registration before this 005 has
+        // set _network when this runs.
+        OnUiThread(() =>
+        {
+            if (_network == null)
+                return;
+
+            NetworkSettings settled = SettleByReportedName(_network, reportedName);
+            AdoptNetwork(settled);
+            if (settled != _network)
+                JoinAutoJoinChannels(settled);
+            _network = settled;
+        });
     }
 
     private void Server_WhoisReceived(object? sender, Common.DataEventArgs<WhoisInfo> e)
