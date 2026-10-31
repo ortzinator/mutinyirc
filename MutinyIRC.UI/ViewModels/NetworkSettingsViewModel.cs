@@ -37,6 +37,14 @@ public partial class NetworkSettingsViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(AddChannelCommand))]
     private string _newChannelText = string.Empty;
 
+    /// <summary>
+    /// The status line under the entry point list after a move out of this network, or empty.
+    /// The next action in this network clears it. See <see cref="MoveServerTo"/>.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasMoveStatus))]
+    private string _moveStatus = string.Empty;
+
     private ListedHosts? _hosts;
 
     /// <summary>Whether the "+ Add channel" affordance has opened its input.</summary>
@@ -91,6 +99,18 @@ public partial class NetworkSettingsViewModel : ObservableObject
     /// <summary>Whether <see cref="NewServerClash"/> has a refusal to show.</summary>
     public bool HasNewServerClash => NewServerClash.Length > 0;
 
+    /// <summary>Whether <see cref="MoveStatus"/> has a line to show.</summary>
+    public bool HasMoveStatus => MoveStatus.Length > 0;
+
+    /// <summary>
+    /// The networks that an entry point of this network can move to: every other network of the
+    /// dialog, in the order that the dialog shows them. Empty when no dialog shows this network.
+    /// </summary>
+    public IReadOnlyList<NetworkSettingsViewModel> MoveTargets =>
+        _hosts is null
+            ? Array.Empty<NetworkSettingsViewModel>()
+            : _hosts.Networks.Where(network => network != this).ToList();
+
     /// <summary>
     /// Occurs when a host of this network can have a different holder: a row was added or
     /// removed, a row changed its host, or the network changed its name.
@@ -115,12 +135,14 @@ public partial class NetworkSettingsViewModel : ObservableObject
             if (_hosts is not null)
                 _hosts.Changed += OnListedHostsChanged;
             CheckHosts();
+            OnPropertyChanged(nameof(MoveTargets));
         }
     }
 
     public NetworkSettingsViewModel()
     {
         Servers.CollectionChanged += OnServersChanged;
+        Channels.CollectionChanged += (_, _) => ClearMoveStatus();
     }
 
     public NetworkSettingsViewModel(NetworkSettings model) : this()
@@ -141,6 +163,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
 
     public void BeginEdit()
     {
+        ClearMoveStatus();
         EditName = Name;
         IsEditing = true;
     }
@@ -215,6 +238,32 @@ public partial class NetworkSettingsViewModel : ObservableObject
         NewServerText = string.Empty;
     }
 
+    /// <summary>
+    /// Moves an entry point of this network to the end of the failover order of
+    /// <paramref name="target"/>. The entry point keeps its pin, and this network keeps its
+    /// settings, also when no entry point remains. The move sets <see cref="MoveStatus"/>.
+    /// </summary>
+    /// <remarks>
+    /// The move does no host check. The dialog lists a host at most once, so the target cannot
+    /// list it already. <see cref="MintedByPin"/> does not change on either network.
+    /// </remarks>
+    /// <param name="server">An entry point of this network. Another row does nothing.</param>
+    /// <param name="target">Another network of the dialog. This network does nothing.</param>
+    public void MoveServerTo(ServerSettingsViewModel? server, NetworkSettingsViewModel? target)
+    {
+        if (server is null || target is null || target == this || !Servers.Contains(server))
+            return;
+
+        server.CloseEditor();
+        Servers.Remove(server);
+        RenumberServers();
+        target.Servers.Add(server);
+        target.RenumberServers();
+        MoveStatus = ServerStrings.EntryPointMoved.With(server.Url, target.Name);
+    }
+
+    private void ClearMoveStatus() => MoveStatus = string.Empty;
+
     private bool CanAddServer() => ParseServer(NewServerText) is not null && !HasNewServerClash;
 
     /// <summary>
@@ -253,11 +302,33 @@ public partial class NetworkSettingsViewModel : ObservableObject
         NewServerClash = parsed is null ? string.Empty : DescribeClash(parsed.Url);
     }
 
-    partial void OnNewServerTextChanged(string value) => CheckNewServer();
+    partial void OnNewServerTextChanged(string value)
+    {
+        ClearMoveStatus();
+        CheckNewServer();
+    }
 
-    partial void OnNameChanged(string value) => OnHostsChanged();
+    partial void OnNameChanged(string value)
+    {
+        ClearMoveStatus();
+        OnHostsChanged();
+    }
 
-    private void OnListedHostsChanged(object? sender, EventArgs e) => CheckHosts();
+    // A change of a field of this network is an action in it, so it clears the status line.
+    partial void OnNickChanged(string value) => ClearMoveStatus();
+
+    partial void OnAlternateNickChanged(string value) => ClearMoveStatus();
+
+    partial void OnAutoConnectChanged(bool value) => ClearMoveStatus();
+
+    partial void OnVerifyCertificatesChanged(bool value) => ClearMoveStatus();
+
+    // A network can be added, removed or renamed, so the networks to move to can change too.
+    private void OnListedHostsChanged(object? sender, EventArgs e)
+    {
+        CheckHosts();
+        OnPropertyChanged(nameof(MoveTargets));
+    }
 
     // Sets every refusal of this network for the rows of the dialog now: the one under the Add
     // box, and the one in each open row editor.
@@ -286,12 +357,17 @@ public partial class NetworkSettingsViewModel : ObservableObject
             foreach (ServerSettingsViewModel server in e.NewItems)
                 server.PropertyChanged += OnServerPropertyChanged;
 
+        ClearMoveStatus();
         OnTlsChanged();
         OnHostsChanged();
     }
 
     private void OnServerPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        // The network writes the place of a row in the order. That is not an action of the user.
+        if (e.PropertyName is not (nameof(ServerSettingsViewModel.Order) or nameof(ServerSettingsViewModel.IsFirst)))
+            ClearMoveStatus();
+
         if (e.PropertyName == nameof(ServerSettingsViewModel.Url))
             OnHostsChanged();
         else if (e.PropertyName == nameof(ServerSettingsViewModel.Ssl))
@@ -370,6 +446,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
     [RelayCommand]
     private void BeginAddChannel()
     {
+        ClearMoveStatus();
         NewChannelText = string.Empty;
         IsAddingChannel = true;
     }

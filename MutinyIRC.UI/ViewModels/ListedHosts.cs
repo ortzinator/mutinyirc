@@ -25,6 +25,9 @@ internal sealed class ListedHosts
     /// </summary>
     public event EventHandler? Changed;
 
+    /// <summary>Every network of the dialog, in the order that the dialog shows them.</summary>
+    public IReadOnlyList<NetworkSettingsViewModel> Networks => _networks;
+
     public ListedHosts(ObservableCollection<NetworkSettingsViewModel> networks)
     {
         _networks = networks;

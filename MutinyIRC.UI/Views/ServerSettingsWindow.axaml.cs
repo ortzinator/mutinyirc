@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using System;
 using System.Linq;
 using MutinyIRC.UI.ViewModels;
 
@@ -90,6 +91,30 @@ public partial class ServerSettingsWindow : Window
     {
         if (sender is Control { DataContext: ServerSettingsViewModel row })
             OpenEntryPointEditor(row);
+    }
+
+    /// <summary>
+    /// Fills the Move to submenu of a row menu with every other network of the dialog. The
+    /// networks can change while the dialog is open, so the submenu is made again each time.
+    /// The submenu is disabled when no other network exists.
+    /// </summary>
+    private void RowMenu_Opening(object? sender, EventArgs e)
+    {
+        if (sender is not MenuFlyout { Target: Control { DataContext: ServerSettingsViewModel row } } menu)
+            return;
+        MenuItem? move = menu.Items.OfType<MenuItem>().FirstOrDefault(i => i.Name == "moveMenuItem");
+        NetworkSettingsViewModel? network = ((SettingsViewModel)DataContext!).SelectedNetwork;
+        if (move is null || network is null)
+            return;
+
+        move.Items.Clear();
+        foreach (NetworkSettingsViewModel target in network.MoveTargets)
+        {
+            var item = new MenuItem { Header = target.Name };
+            item.Click += (_, _) => network.MoveServerTo(row, target);
+            move.Items.Add(item);
+        }
+        move.IsEnabled = move.Items.Count > 0;
     }
 
     /// <summary>

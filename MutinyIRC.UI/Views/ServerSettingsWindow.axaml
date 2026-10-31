@@ -330,10 +330,15 @@
                                                             ToolTip.Tip="Edit this server">
                                                         <ic:SymbolIcon Symbol="MoreHorizontal" FontSize="12"/>
                                                         <Button.Flyout>
-                                                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                            <MenuFlyout Placement="BottomEdgeAlignedRight"
+                                                                        Opening="RowMenu_Opening">
                                                                 <MenuItem x:Name="editMenuItem"
                                                                           Header="Edit…"
                                                                           Click="EditMenuItem_Click"/>
+                                                                <!-- The code-behind fills this submenu with the
+                                                                     other networks each time the menu opens. -->
+                                                                <MenuItem x:Name="moveMenuItem"
+                                                                          Header="Move to"/>
                                                             </MenuFlyout>
                                                         </Button.Flyout>
                                                     </Button>
@@ -475,6 +480,17 @@
                                            IsVisible="{Binding HasNewServerClash}"/>
                             </StackPanel>
                         </Border>
+
+                        <!-- What the last move out of this network did. The next action in
+                             this network clears it. -->
+                        <TextBlock x:Name="moveStatus"
+                                   FontSize="11.5"
+                                   Margin="4,0,0,0"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextTertiary}"
+                                   AutomationProperties.LiveSetting="Polite"
+                                   Text="{Binding MoveStatus}"
+                                   IsVisible="{Binding HasMoveStatus}"/>
                     </StackPanel>
 
                     <!-- Connection settings. The verify switch is live. The others are drawn
