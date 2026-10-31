@@ -14,18 +14,21 @@ internal sealed class DialogEdits
     /// <summary>No edits: Cancel, and a live write when the dialog is not open.</summary>
     internal static DialogEdits None { get; } = new();
 
-    private readonly HashSet<NetworkSettings> _deleted = new(ReferenceEqualityComparer.Instance);
-    private readonly HashSet<NetworkSettings> _renamed = new(ReferenceEqualityComparer.Instance);
-    private readonly HashSet<NetworkSettings> _autoConnectChanged = new(ReferenceEqualityComparer.Instance);
-    private readonly HashSet<NetworkSettings> _entryPointsChanged = new(ReferenceEqualityComparer.Instance);
+    private readonly HashSet<NetworkSettings> _deleted = NewNetworkSet();
+    private readonly HashSet<NetworkSettings> _renamed = NewNetworkSet();
+    private readonly HashSet<NetworkSettings> _autoConnectChanged = NewNetworkSet();
+    private readonly HashSet<NetworkSettings> _entryPointsChanged = NewNetworkSet();
 
     private DialogEdits() { }
 
+    private static HashSet<NetworkSettings> NewNetworkSet() =>
+        new(ReferenceEqualityComparer.Instance);
+
     /// <summary>
-    /// Compares the rows of the dialog with the saved networks. Call it before the save writes
-    /// the rows onto the saved networks.
+    /// Finds the edits: it compares the rows of the dialog with the saved networks. Call it
+    /// before the save writes the rows onto the saved networks.
     /// </summary>
-    internal static DialogEdits Compare(
+    internal static DialogEdits Find(
         IEnumerable<NetworkSettingsViewModel> rows, IEnumerable<NetworkSettings> saved)
     {
         var edits = new DialogEdits();
@@ -53,20 +56,30 @@ internal sealed class DialogEdits
     }
 
     private static bool SameEntryPoints(NetworkSettingsViewModel row, NetworkSettings network) =>
-        row.Servers.Select(server => server.ToModel()).SequenceEqual(network.Servers, EntryPointComparer.Instance);
+        row.Servers.Select(server => server.ToModel())
+           .SequenceEqual(network.Servers, EntryPointComparer.Instance);
 
     /// <summary>Whether the dialog deleted <paramref name="network"/>.</summary>
     internal bool Deleted(NetworkSettings network) => _deleted.Contains(network);
 
-    /// <summary>Whether the dialog deleted <paramref name="network"/> or changed its name.</summary>
-    internal bool Renamed(NetworkSettings network) => Deleted(network) || _renamed.Contains(network);
+    /// <summary>
+    /// Whether the dialog decided the name of <paramref name="network"/>: it deleted the network
+    /// or changed its name. Then a reported name must not change it.
+    /// </summary>
+    internal bool DecidedName(NetworkSettings network) =>
+        Deleted(network) || _renamed.Contains(network);
 
-    /// <summary>Whether the dialog deleted <paramref name="network"/> or changed its AutoConnect.</summary>
-    internal bool ChangedAutoConnect(NetworkSettings network) =>
+    /// <summary>
+    /// Whether the dialog decided the AutoConnect of <paramref name="network"/>: it deleted the
+    /// network or changed its AutoConnect. Then a connection must not change it.
+    /// </summary>
+    internal bool DecidedAutoConnect(NetworkSettings network) =>
         Deleted(network) || _autoConnectChanged.Contains(network);
 
-    /// <summary>Whether the dialog changed the name or the entry points of <paramref name="network"/>.</summary>
-    internal bool EditedIdentity(NetworkSettings network) =>
+    /// <summary>
+    /// Whether the dialog changed the name or the entry points of <paramref name="network"/>.
+    /// </summary>
+    internal bool ChangedNameOrEntryPoints(NetworkSettings network) =>
         _renamed.Contains(network) || _entryPointsChanged.Contains(network);
 
     private sealed class EntryPointComparer : IEqualityComparer<ServerSettings>
@@ -80,6 +93,7 @@ internal sealed class DialogEdits
             && x.Ssl == y.Ssl;
 
         public int GetHashCode(ServerSettings obj) =>
-            HashCode.Combine(StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Url), obj.Port, obj.Ssl);
+            HashCode.Combine(
+                StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Url), obj.Port, obj.Ssl);
     }
 }

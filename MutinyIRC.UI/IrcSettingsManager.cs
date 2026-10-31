@@ -313,7 +313,7 @@ public sealed class IrcSettingsManager
     /// <remarks>Call it on the UI thread.</remarks>
     public void RenameNetwork(NetworkSettings network, string reportedName)
     {
-        if (!_edits.Renamed(network))
+        if (!_edits.DecidedName(network))
             network.Name = reportedName;
     }
 
@@ -324,7 +324,7 @@ public sealed class IrcSettingsManager
     /// <remarks>Call it on the UI thread.</remarks>
     public void MarkAutoConnect(NetworkSettings network)
     {
-        if (!_edits.ChangedAutoConnect(network))
+        if (!_edits.DecidedAutoConnect(network))
             network.AutoConnect = true;
     }
 
@@ -364,7 +364,7 @@ public sealed class IrcSettingsManager
             return minted;
 
         minted.MintedByPin = false;
-        if (minted.Servers.Count != 1 || _edits.EditedIdentity(minted))
+        if (minted.Servers.Count != 1 || _edits.ChangedNameOrEntryPoints(minted))
             return minted;
 
         NetworkSettings? named = Networks.FirstOrDefault(network =>

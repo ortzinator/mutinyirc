@@ -81,7 +81,7 @@ public partial class SettingsViewModel : ObservableObject
     /// </remarks>
     public void Save()
     {
-        DialogEdits edits = DialogEdits.Compare(Networks, _settings.Networks);
+        DialogEdits edits = DialogEdits.Find(Networks, _settings.Networks);
         ApplyToSavedNetworks();
         _settings.ApplyHeldWrites(edits);
         GiveConnectionsTheirEntryPoints();
