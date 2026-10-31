@@ -272,8 +272,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
     /// <param name="host">The hostname to find.</param>
     /// <param name="except">A row that does not count.</param>
     internal bool Lists(string host, ServerSettingsViewModel? except = null) =>
-        Servers.Any(server => server != except
-                              && string.Equals(server.Url, host, StringComparison.OrdinalIgnoreCase));
+        Servers.Any(server => server != except && EntryPoint.SameHost(server.Url, host));
 
     /// <summary>
     /// Gets the refusal for a host that the dialog already lists, from the view of this network.
@@ -302,26 +301,24 @@ public partial class NetworkSettingsViewModel : ObservableObject
         NewServerClash = parsed is null ? string.Empty : DescribeClash(parsed.Url);
     }
 
-    partial void OnNewServerTextChanged(string value)
+    partial void OnNewServerTextChanged(string value) => CheckNewServer();
+
+    partial void OnNameChanged(string value) => OnHostsChanged();
+
+    // The fields of this network that the user types in or switches. A change of one is an
+    // action in this network, so it clears the status line.
+    private static readonly HashSet<string> UserFields = new()
     {
-        ClearMoveStatus();
-        CheckNewServer();
-    }
+        nameof(Name), nameof(Nick), nameof(AlternateNick), nameof(AutoConnect),
+        nameof(VerifyCertificates), nameof(NewServerText),
+    };
 
-    partial void OnNameChanged(string value)
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
-        ClearMoveStatus();
-        OnHostsChanged();
+        base.OnPropertyChanged(e);
+        if (e.PropertyName is { } name && UserFields.Contains(name))
+            ClearMoveStatus();
     }
-
-    // A change of a field of this network is an action in it, so it clears the status line.
-    partial void OnNickChanged(string value) => ClearMoveStatus();
-
-    partial void OnAlternateNickChanged(string value) => ClearMoveStatus();
-
-    partial void OnAutoConnectChanged(bool value) => ClearMoveStatus();
-
-    partial void OnVerifyCertificatesChanged(bool value) => ClearMoveStatus();
 
     // A network can be added, removed or renamed, so the networks to move to can change too.
     private void OnListedHostsChanged(object? sender, EventArgs e)
@@ -365,7 +362,8 @@ public partial class NetworkSettingsViewModel : ObservableObject
     private void OnServerPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         // The network writes the place of a row in the order. That is not an action of the user.
-        if (e.PropertyName is not (nameof(ServerSettingsViewModel.Order) or nameof(ServerSettingsViewModel.IsFirst)))
+        if (e.PropertyName is not (nameof(ServerSettingsViewModel.Order)
+                                   or nameof(ServerSettingsViewModel.IsFirst)))
             ClearMoveStatus();
 
         if (e.PropertyName == nameof(ServerSettingsViewModel.Url))

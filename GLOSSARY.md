@@ -45,7 +45,8 @@ belongs to the entry point, not to the port: typed text only guesses it from the
 (`IrcPorts.IsTlsPort`), and the guess can be wrong, for example a plaintext server on port 7000. An entry point's place in `NetworkSettings.Servers` is its place in the
 [failover order](#failover-order), so the entry points of a network are ranked rather than
 interchangeable. A hostname belongs to at most one network, and is listed at most once in it: two entry points
-with the same hostname are the same entry point, whatever their ports, and the hostname is compared without case. That is what makes
+with the same hostname are the same entry point, whatever their ports, and the hostname is compared without case
+(`EntryPoint.SameHost`; `ServerSettings.IsAt` matches a host and a port). That is what makes
 `IrcSettingsManager.GetNetwork(Server)` able to scan every network's hosts for a URL match and stop at the
 first hit. In the Networks dialog, `ListedHosts` holds this rule over the dialog's unsaved rows, and the Add
 box refuses a host that a row already has. "Server" in the settings window means entry point; "server" in `MutinyIRC.Common` means

@@ -47,7 +47,8 @@ public sealed partial class EntryPointEditorViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(ApplyCommand))]
     private string _refusal = string.Empty;
 
-    internal EntryPointEditorViewModel(ServerSettingsViewModel row, Func<string, string> describeClash)
+    internal EntryPointEditorViewModel(
+        ServerSettingsViewModel row, Func<string, string> describeClash)
     {
         _row = row;
         _describeClash = describeClash;
@@ -69,13 +70,15 @@ public sealed partial class EntryPointEditorViewModel : ObservableObject
     /// </summary>
     public bool PinWillClear =>
         _row.IsPinned
-        && (!string.Equals(Host.Trim(), _row.Url, StringComparison.OrdinalIgnoreCase)
+        && (!EntryPoint.SameHost(Host.Trim(), _row.Url)
             || ParsePort() != _row.Port
             || !Ssl);
 
     private int DefaultPort => Ssl ? IrcPorts.DefaultTlsPort : IrcPorts.DefaultPlainPort;
 
-    /// <summary>Sets <see cref="Refusal"/> for the draft host and the rows of the dialog now.</summary>
+    /// <summary>
+    /// Sets <see cref="Refusal"/> for the draft host and the rows of the dialog now.
+    /// </summary>
     internal void CheckClash()
     {
         string host = Host.Trim();

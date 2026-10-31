@@ -595,7 +595,8 @@ public class Server : MessageContext, IDisposable
 
     /// <summary>
     /// <see cref="ChangeServer(ConnectionArgs)"/> replaced the entry points with one host that
-    /// the user named. It occurs on the thread that called <see cref="ChangeServer(ConnectionArgs)"/>.
+    /// the user named. It occurs on the thread that called
+    /// <see cref="ChangeServer(ConnectionArgs)"/>.
     /// </summary>
     public event EventHandler ServerChanged;
 
@@ -709,8 +710,7 @@ public class Server : MessageContext, IDisposable
         int index;
         lock (_reconnectGate)
         {
-            index = _candidates.FindIndex(c =>
-                string.Equals(c.Hostname, host, StringComparison.OrdinalIgnoreCase) && c.Port == port);
+            index = _candidates.FindIndex(c => IsAt(c, host, port));
         }
 
         if (index < 0)
@@ -1004,7 +1004,8 @@ public class Server : MessageContext, IDisposable
     /// new order. If the new list does not have the current host, the walk starts again from the
     /// top. The skip list keeps only the entry points whose host and port are in the new list.
     /// An empty list stops the connection at its next dial, with <see cref="NoEntryPoints"/>.
-    /// When a dial waits already, because the session dropped, the connection stops now.
+    /// When a dial waits already, because the session dropped, the connection stops now. When a
+    /// dial waits and the list is not empty, that dial uses the new list.
     /// It is safe to call from any thread.
     /// </remarks>
     /// <returns>
@@ -1017,14 +1018,21 @@ public class Server : MessageContext, IDisposable
 
         bool changed = SwapEntryPoints(entryPoints);
 
-        // The waiting dial would use the old settings, so stop it.
-        bool dialWaits;
+        // A waiting dial would use the old settings. Rebuild the connection from the new list
+        // before it fires, or stop it when the list is empty. The timer dials under the gate,
+        // so it cannot fire between the check and the rebuild.
+        bool noEntryPoints;
         lock (_reconnectGate)
         {
-            dialWaits = _reconnectTimer != null;
+            if (_reconnectTimer == null)
+                return changed;
+
+            noEntryPoints = _noEntryPoints;
+            if (!noEntryPoints)
+                UseListIfOutdated();
         }
 
-        if (dialWaits)
+        if (noEntryPoints)
             StopIfNoEntryPoints();
         return changed;
     }
@@ -1056,7 +1064,7 @@ public class Server : MessageContext, IDisposable
             foreach (ConnectionArgs entryPoint in refused)
             {
                 int i = _candidates.FindIndex(c =>
-                    IsHost(c, entryPoint.Hostname) && c.Port == entryPoint.Port);
+                    IsAt(c, entryPoint.Hostname, entryPoint.Port));
                 if (i >= 0)
                     _refused.Add(i);
             }
@@ -1082,10 +1090,13 @@ public class Server : MessageContext, IDisposable
     }
 
     private static bool IsHost(ConnectionArgs entryPoint, string host) =>
-        string.Equals(entryPoint.Hostname, host, StringComparison.OrdinalIgnoreCase);
+        EntryPoint.SameHost(entryPoint.Hostname, host);
+
+    private static bool IsAt(ConnectionArgs entryPoint, string host, int port) =>
+        IsHost(entryPoint, host) && entryPoint.Port == port;
 
     private static bool IsSameEntryPoint(ConnectionArgs a, ConnectionArgs b) =>
-        IsHost(a, b.Hostname) && a.Port == b.Port && a.Ssl == b.Ssl;
+        IsAt(a, b.Hostname, b.Port) && a.Ssl == b.Ssl;
 
     /// <summary>
     /// Rebuilds the connection against the entry point at <paramref name="index"/>, keeping the

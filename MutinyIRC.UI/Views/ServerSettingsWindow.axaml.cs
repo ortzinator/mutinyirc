@@ -87,7 +87,9 @@ public partial class ServerSettingsWindow : Window
         });
     }
 
-    /// <summary>Opens the editor of the row that the Edit… item of the row menu belongs to.</summary>
+    /// <summary>
+    /// Opens the editor of the row that the Edit… item of the row menu belongs to.
+    /// </summary>
     private void EditMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Control { DataContext: ServerSettingsViewModel row })
@@ -102,9 +104,13 @@ public partial class ServerSettingsWindow : Window
     /// </summary>
     private void RowMenu_Opening(object? sender, EventArgs e)
     {
-        if (sender is not MenuFlyout { Target: Control { DataContext: ServerSettingsViewModel row } } menu)
+        if (sender is not MenuFlyout
+            {
+                Target: Control { DataContext: ServerSettingsViewModel row }
+            } menu)
             return;
-        MenuItem? move = menu.Items.OfType<MenuItem>().FirstOrDefault(i => i.Name == "moveMenuItem");
+        MenuItem? move = menu.Items.OfType<MenuItem>()
+            .FirstOrDefault(i => i.Name == "moveMenuItem");
         NetworkSettingsViewModel? network = ((SettingsViewModel)DataContext!).SelectedNetwork;
         if (move is null || network is null)
             return;
