@@ -27,6 +27,10 @@ public partial class SettingsViewModel : ObservableObject
     {
         _settings = settings;
 
+        // The rows are a copy of the networks. The live writes wait until the dialog closes, so
+        // that the copy stays the same as the networks.
+        _settings.HoldLiveWrites();
+
         // The rule watches Networks and gives itself to each network in it, so those
         // references keep it alive. Networks added later, also by a subclass, get it too.
         _ = new ListedHosts(Networks);
@@ -61,14 +65,38 @@ public partial class SettingsViewModel : ObservableObject
         => RemoveNetworkCommand.NotifyCanExecuteChanged();
 
     /// <summary>
-    /// Writes the dialog onto the saved networks in place, then writes the settings to disk.
+    /// The OK of the dialog. All on the UI thread, in this order: it writes the dialog onto the
+    /// saved networks in place, applies the live writes that waited, gives each live connection
+    /// the new entry points of its network, and then writes the settings to disk once.
+    /// </summary>
+    /// <remarks>
+    /// A live write that waited obeys the edits of the dialog: see <see cref="DialogEdits"/> and
+    /// <see cref="IrcSettingsManager.WhenWritable"/>.
+    /// </remarks>
+    public void Save()
+    {
+        DialogEdits edits = DialogEdits.Compare(Networks, _settings.Networks);
+        ApplyToSavedNetworks();
+        _settings.ApplyHeldWrites(edits);
+        GiveConnectionsTheirEntryPoints();
+        _settings.Save();
+    }
+
+    /// <summary>
+    /// The Cancel of the dialog. It applies the live writes that waited as they are, in memory
+    /// only, and does not write to disk. After <see cref="Save"/>, it does nothing.
+    /// </summary>
+    public void Cancel() => _settings.ApplyHeldWrites(DialogEdits.None);
+
+    /// <summary>
+    /// Writes the dialog onto the saved networks in place.
     /// </summary>
     /// <remarks>
     /// A network that was in the dialog before and after the save is the same object as before,
     /// so a live connection that holds it keeps it. A network added in the dialog becomes a new
     /// object, and a network deleted in the dialog is removed.
     /// </remarks>
-    public void Save()
+    private void ApplyToSavedNetworks()
     {
         NetworkSettingsList saved = _settings.Networks;
 
@@ -99,7 +127,14 @@ public partial class SettingsViewModel : ObservableObject
             bool accepted = saved.TryAdd(network);
             Debug.Assert(accepted, "The save drops every host that another network claims");
         }
+    }
 
-        _settings.Save();
+    /// <summary>
+    /// Gives each live connection the new entry point list of its bound network. It comes after
+    /// the held writes, because a held merge can move an entry point, and before the disk write.
+    /// </summary>
+    /// <remarks>Ticket #32 does the hand-off. Until then, this step does nothing.</remarks>
+    private static void GiveConnectionsTheirEntryPoints()
+    {
     }
 }
