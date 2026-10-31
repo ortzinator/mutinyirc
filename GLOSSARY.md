@@ -73,6 +73,19 @@ the connect attempt: the walk and later backoff rounds pass over it. When every 
 that stop message (`EveryEntryPointRefusedViewModel`) calls `Server.Reconnect`. `Server.Reconnect` and
 `Server.DialEntryPoint` start a new attempt and clear the list. `Server.ChangeServer` clears it too.
 
+## Held write
+
+A settings write that a live [connection](#connection) makes while the Networks dialog is open. It waits
+in a queue until the dialog closes, so the copy that the dialog edits stays the same as the networks. The
+held writes are the rename to the `NETWORK=` name, `AutoConnect = true`, the merge of a minted network,
+the removal of a parted channel, and, for a connection that has no network yet, the whole step that finds
+its network (`ServerViewModel.FileUnderNetwork`). `SettingsViewModel` starts the hold
+(`IrcSettingsManager.HoldLiveWrites`). A connection queues a write with `IrcSettingsManager.WhenWritable`.
+
+OK applies the held writes after the dialog and before the disk write. A held write obeys the edits of the
+dialog (`DialogEdits`): the user's edit wins over it. Cancel, and every close that is not OK, applies them
+as they are and writes nothing to disk.
+
 ## Network
 
 The thing you connect to — "Libera", not `irc.libera.chat`. A network owns its entry points, its channels

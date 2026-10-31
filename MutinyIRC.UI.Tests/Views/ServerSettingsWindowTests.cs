@@ -291,4 +291,23 @@ public class ServerSettingsWindowTests
             Assert.That(vm.SelectedNetwork!.Servers[0].PinnedFingerprint, Is.Null);
         });
     }
+    [AvaloniaTest]
+    public void ClosingTheWindowWithoutOk_AppliesTheHeldWrites_AndWritesNothingToDisk()
+    {
+        string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".json");
+        var manager = new IrcSettingsManager(path);
+        NetworkSettings home = manager.GetOrAddNetwork("Home");
+        var window = new ServerSettingsWindow(new SettingsViewModel(manager));
+        window.Show();
+
+        manager.WhenWritable(() => manager.MarkAutoConnect(home));
+        Assert.That(home.AutoConnect, Is.False, "Precondition: the write waits");
+        window.Close();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(home.AutoConnect, Is.True);
+            Assert.That(File.Exists(path), Is.False);
+        });
+    }
 }

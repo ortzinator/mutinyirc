@@ -280,13 +280,14 @@ public class ServerViewModel : IrcViewModel
         // binds the connection.
         OnUiThread(() =>
         {
-            NetworkSettings? nwSettings = _boundNetwork;
-            ChannelSettings? chan = nwSettings?.GetChannel(channelName);
+            if (_boundNetwork is not { } network)
+                return;
 
             // Membership of the network's channel list is the autojoin flag now, so leaving a
-            // channel takes it off the list rather than leaving a chip that does nothing.
-            if (chan != null)
-                nwSettings!.RemoveChannel(chan);
+            // channel takes it off the list rather than leaving a chip that does nothing. While
+            // the Networks dialog is open, the removal waits, and then finds the channel by name.
+            IrcSettingsManager settings = IrcSettingsManager.Instance;
+            settings.WhenWritable(() => settings.RemoveChannel(network, channelName));
         });
     }
 
@@ -434,7 +435,11 @@ public class ServerViewModel : IrcViewModel
         // The connection keeps its bound network. Only the session state goes. Clear it in the
         // UI queue, so that it comes after the writes of the previous registration and before
         // those of the next one.
-        OnUiThread(() => _registered = false);
+        OnUiThread(() =>
+        {
+            _registered = false;
+            _session++;
+        });
         ConnectionStatus = ServerStrings.StatusConnecting;
         AddMessage(ServerStrings.ConnectingMessage.With(_server.Url, _server.Port));
     }
@@ -604,17 +609,58 @@ public class ServerViewModel : IrcViewModel
     }
 
     /// <summary>
-    /// Files this connection under the network it belongs to, then joins that network's autojoin
-    /// channels. Runs on every registration, so it also picks up a network the server has renamed
-    /// and an entry point we reached for the first time.
+    /// Shows that the connection registered, and files it under the network it belongs to. Runs
+    /// on every registration, so it also picks up a network the server has renamed and an entry
+    /// point we reached for the first time.
     /// </summary>
     /// <param name="entryPoint">The entry point that registered.</param>
     /// <param name="reportedName">
     /// The network name that the server reported before it registered, or empty.
     /// </param>
     /// <param name="usedRandomNick">Whether every nick was taken, so the server has a random one.</param>
-    /// <remarks>It writes the network settings. Call it on the UI thread.</remarks>
+    /// <remarks>
+    /// Call it on the UI thread. While the Networks dialog is open, the settings writes wait. A
+    /// bound connection joins the channels of its bound network at once. A connection with no
+    /// network yet uses the second nick as its alternate nick, and joins its channels when its
+    /// writes run.
+    /// </remarks>
     private void DoRegister(ServerSettings entryPoint, string reportedName, bool usedRandomNick)
+    {
+        _registered = true;
+        ConnectionStatus = ConnectedStatus();
+        WarnIfCertificateNotChecked();
+        SayIfConnectedThroughPin();
+
+        if (usedRandomNick)
+            AddMessage(ServerStrings.RandomNickMessage);
+
+        NetworkSettings? joined = _boundNetwork;
+        if (joined != null)
+        {
+            ShowNetwork(joined);
+            JoinAutoJoinChannels(joined);
+        }
+
+        int session = _session;
+        IrcSettingsManager.Instance.WhenWritable(
+            () => FileUnderNetwork(entryPoint, reportedName, session, joined));
+    }
+
+    /// <summary>
+    /// Writes the network settings for a registration: it finds or settles the network, binds
+    /// the connection to it, and marks it for startup. It joins the channels of the network if
+    /// the registration has not joined them and the session is still the same.
+    /// </summary>
+    /// <param name="entryPoint">The entry point that registered.</param>
+    /// <param name="reportedName">The network name that the server reported, or empty.</param>
+    /// <param name="session">The session of the registration.</param>
+    /// <param name="joined">The network whose channels the registration joined, or null.</param>
+    /// <remarks>
+    /// It can run after the Networks dialog closes, so it reads the binding then, not at the
+    /// registration.
+    /// </remarks>
+    private void FileUnderNetwork(
+        ServerSettings entryPoint, string reportedName, int session, NetworkSettings? joined)
     {
         NetworkSettings network;
         if (_boundNetwork is { } bound)
@@ -634,16 +680,9 @@ public class ServerViewModel : IrcViewModel
         }
 
         _boundNetwork = network;
-        _registered = true;
         AdoptNetwork(network);
-        ConnectionStatus = ConnectedStatus();
-        WarnIfCertificateNotChecked();
-        SayIfConnectedThroughPin();
-
-        if (usedRandomNick)
-            AddMessage(ServerStrings.RandomNickMessage);
-
-        JoinAutoJoinChannels(network);
+        if (network != joined && session == _session && _registered)
+            JoinAutoJoinChannels(network);
     }
 
     // The bound network: the network that this connection was dialed for. It is null until the
@@ -655,6 +694,11 @@ public class ServerViewModel : IrcViewModel
     // Whether the current session has registered. A new connect attempt clears it. Only the UI
     // thread reads or writes it.
     private bool _registered;
+
+    // The number of the current session. Each connect attempt adds one, so that a write that
+    // waited for the Networks dialog does not join channels for an old session. Only the UI
+    // thread reads or writes it.
+    private int _session;
 
     /// <summary>
     /// The network that this connection was dialed for (its bound network), or null when the
@@ -708,8 +752,13 @@ public class ServerViewModel : IrcViewModel
     {
         // Connecting to a network is what marks it worth dialling at startup. The flag sits on
         // the network, so reaching it through any of its hosts sets it once.
-        network.AutoConnect = true;
+        IrcSettingsManager.Instance.MarkAutoConnect(network);
+        ShowNetwork(network);
+    }
 
+    /// <summary>Shows the name of <paramref name="network"/> in the server window.</summary>
+    private void ShowNetwork(NetworkSettings network)
+    {
         Name = ServerStrings.ServerFormTitleBar.With(
             _server.UserNick,
             network.Name,
@@ -770,7 +819,7 @@ public class ServerViewModel : IrcViewModel
         _hostNamedNetwork = null;
 
         // The server owns the name and may change it on any connect.
-        network.Name = reportedName;
+        IrcSettingsManager.Instance.RenameNetwork(network, reportedName);
         return network;
     }
 
@@ -781,17 +830,25 @@ public class ServerViewModel : IrcViewModel
         string reportedName = e.Data;
 
         // The UI queue keeps the order of the events, so the registration before this 005 has
-        // run when this runs.
+        // run when this runs. The held writes keep their order too, so the writes of that
+        // registration have run when the writes of this name run.
         OnUiThread(() =>
         {
-            if (!_registered || _boundNetwork is not { } bound)
+            if (!_registered)
                 return;
 
-            NetworkSettings settled = SettleByReportedName(bound, reportedName);
-            AdoptNetwork(settled);
-            if (settled != bound)
-                JoinAutoJoinChannels(settled);
-            _boundNetwork = settled;
+            int session = _session;
+            IrcSettingsManager.Instance.WhenWritable(() =>
+            {
+                if (_boundNetwork is not { } bound)
+                    return;
+
+                NetworkSettings settled = SettleByReportedName(bound, reportedName);
+                AdoptNetwork(settled);
+                if (settled != bound && session == _session && _registered)
+                    JoinAutoJoinChannels(settled);
+                _boundNetwork = settled;
+            });
         });
     }
 
