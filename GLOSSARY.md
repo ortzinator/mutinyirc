@@ -25,7 +25,10 @@ One live socket to one [entry point](#entry-point), plus the session state that 
 the nick you actually got, and the channels you are in. Modeled by `MutinyIRC.Common.Server`, whose name
 predates the network model and does not mean the same thing as `ServerSettings`. A connection is a
 replaceable part inside a [network](#network), not something you name or save: when one drops and the
-network dials a different entry point, the network, its channels, and their panels stay. `ServerManager`
+network dials a different entry point, the network, its channels, and their panels stay. A connection is
+*bound* to the network it was dialed for, and it keeps that network for its whole session: an edit or a move
+of its entry point does not give it to another network, and it reaches the connection only at its next dial.
+A connection resolves its network by host only when it has none yet. `ServerManager`
 holds the live ones — and still calls a `Server` parameter `ntw` in `Remove`, a fossil of the same drift.
 
 ## Entry point
