@@ -122,4 +122,20 @@ public class MainViewModelTests
             ServerManager.Instance.Remove(created);
         }
     }
+
+    [AvaloniaTest]
+    public void AServerPanel_GivesItsServerATrustLookupThatUsesTheBoundNetwork()
+    {
+        // The handshake asks the server for its trust. The answer must come from the network
+        // that the connection was dialed for, not from a lookup by host.
+        var vm = CompositionRoot.Resolve<MainViewModel>();
+        var server = FakeServer();
+        vm.CreateServerPanel(server);
+        var home = new NetworkSettings("Home") { VerifyCertificates = false };
+        vm.Servers.Single().BindNetwork(home);
+
+        CertificateTrust trust = server.CertificateTrustLookup("irc.fake.com", 6697);
+
+        Assert.That(trust.VerifyCertificates, Is.False);
+    }
 }
