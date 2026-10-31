@@ -58,8 +58,9 @@
             <Setter Property="Background" Value="{DynamicResource SubtleHoverBackground}"/>
         </Style>
 
-        <!-- The reorder arrows and the row's remove cross. All three stay quiet until you are
-             on the row, which is what keeps a table of hosts readable. -->
+        <!-- The reorder arrows, the row menu and the row's remove cross. They stay quiet until
+             the pointer or the focus is on the row, which is what keeps a table of hosts
+             readable. -->
         <Style Selector="Button.rowAction">
             <Setter Property="Padding" Value="0"/>
             <Setter Property="CornerRadius" Value="3"/>
@@ -76,6 +77,9 @@
             <Setter Property="Opacity" Value="0"/>
         </Style>
         <Style Selector="Border.serverRow:pointerover Button.rowReveal">
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+        <Style Selector="Border.serverRow:focus-within Button.rowReveal">
             <Setter Property="Opacity" Value="1"/>
         </Style>
 
@@ -254,6 +258,7 @@
                                         <DataTemplate DataType="{x:Type vm:ServerSettingsViewModel}">
                                             <Border Classes="serverRow"
                                                     DoubleTapped="ServerRow_DoubleTapped"
+                                                    KeyDown="ServerRow_KeyDown"
                                                     Padding="4,0,6,0"
                                                     BorderBrush="{DynamicResource DividerBrush}"
                                                     BorderThickness="0,0,0,1"
@@ -268,6 +273,7 @@
                                                         <Button Classes="rowAction rowReveal"
                                                                 Width="16" Height="15"
                                                                 ToolTip.Tip="Try this server earlier"
+                                                                AutomationProperties.Name="{Binding Url, StringFormat='Try {0} earlier'}"
                                                                 Command="{Binding $parent[ItemsControl].DataContext.MoveServerUpCommand}"
                                                                 CommandParameter="{Binding}">
                                                             <ic:SymbolIcon Symbol="ChevronUp" FontSize="9"/>
@@ -275,6 +281,7 @@
                                                         <Button Classes="rowAction rowReveal"
                                                                 Width="16" Height="15"
                                                                 ToolTip.Tip="Try this server later"
+                                                                AutomationProperties.Name="{Binding Url, StringFormat='Try {0} later'}"
                                                                 Command="{Binding $parent[ItemsControl].DataContext.MoveServerDownCommand}"
                                                                 CommandParameter="{Binding}">
                                                             <ic:SymbolIcon Symbol="ChevronDown" FontSize="9"/>
@@ -290,6 +297,7 @@
                                                                VerticalAlignment="Center"/>
 
                                                     <TextBlock Grid.Column="2"
+                                                               x:Name="rowHost"
                                                                Text="{Binding Url}"
                                                                FontSize="13"
                                                                Margin="6,0,10,0"
@@ -328,12 +336,19 @@
                                                             Width="22" Height="22"
                                                             VerticalAlignment="Center"
                                                             ToolTip.Tip="Edit this server">
+                                                        <AutomationProperties.Name>
+                                                            <MultiBinding StringFormat="Actions for {0} port {1}">
+                                                                <Binding Path="Url"/>
+                                                                <Binding Path="Port"/>
+                                                            </MultiBinding>
+                                                        </AutomationProperties.Name>
                                                         <ic:SymbolIcon Symbol="MoreHorizontal" FontSize="12"/>
                                                         <Button.Flyout>
                                                             <MenuFlyout Placement="BottomEdgeAlignedRight"
                                                                         Opening="RowMenu_Opening">
                                                                 <MenuItem x:Name="editMenuItem"
                                                                           Header="Edit…"
+                                                                          InputGesture="F2"
                                                                           Click="EditMenuItem_Click"/>
                                                                 <!-- The code-behind fills this submenu with the
                                                                      other networks each time the menu opens. -->
@@ -348,6 +363,7 @@
                                                             Width="22" Height="22"
                                                             VerticalAlignment="Center"
                                                             ToolTip.Tip="Remove this server"
+                                                            AutomationProperties.Name="{Binding Url, StringFormat='Remove {0}'}"
                                                             Command="{Binding $parent[ItemsControl].DataContext.RemoveServerCommand}"
                                                             CommandParameter="{Binding}">
                                                         <ic:SymbolIcon Symbol="Dismiss" FontSize="10"/>
@@ -370,15 +386,19 @@
                                                                     <TextBox x:Name="editHostBox"
                                                                              Text="{Binding Host}"
                                                                              PlaceholderText="host"
+                                                                             AutomationProperties.Name="Host"
                                                                              FontSize="12.5"/>
                                                                     <TextBox Grid.Column="1"
                                                                              x:Name="editPortBox"
                                                                              Text="{Binding Port}"
                                                                              PlaceholderText="{Binding PortPlaceholder}"
+                                                                             AutomationProperties.Name="Port"
+                                                                             AutomationProperties.HelpText="{Binding PortPlaceholder}"
                                                                              FontSize="12.5"/>
                                                                     <CheckBox Grid.Column="2"
                                                                               x:Name="editTlsBox"
                                                                               Content="TLS"
+                                                                              AutomationProperties.Name="Use TLS"
                                                                               IsChecked="{Binding Ssl}"
                                                                               FontSize="12"
                                                                               Margin="4,0,0,0"/>
@@ -403,12 +423,14 @@
                                                                 <TextBlock x:Name="pinWarning"
                                                                            Classes="switchHint warning"
                                                                            Text="Applying forgets the pinned certificate."
+                                                                           AutomationProperties.LiveSetting="Polite"
                                                                            IsVisible="{Binding PinWillClear}"/>
                                                                 <TextBlock x:Name="editRefusal"
                                                                            FontSize="11.5"
                                                                            TextWrapping="Wrap"
                                                                            Foreground="{DynamicResource StatusErrorForeground}"
                                                                            Text="{Binding Refusal}"
+                                                                           AutomationProperties.LiveSetting="Assertive"
                                                                            IsVisible="{Binding HasRefusal}"/>
                                                             </StackPanel>
                                                         </DataTemplate>
@@ -430,6 +452,7 @@
                                                             Classes="link"
                                                             Content="Forget"
                                                             ToolTip.Tip="Forget the pinned certificate of this server"
+                                                            AutomationProperties.Name="{Binding Url, StringFormat='Forget the pinned certificate of {0}'}"
                                                             Command="{Binding ForgetPinCommand}"/>
                                                 </StackPanel>
                                               </StackPanel>
