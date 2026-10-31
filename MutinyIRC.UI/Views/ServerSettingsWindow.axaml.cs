@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -78,5 +79,108 @@ public partial class ServerSettingsWindow : Window
             textBox?.Focus();
             textBox?.SelectAll();
         });
+    }
+
+    /// <summary>Opens the editor of the row that the Edit… item of the row menu belongs to.</summary>
+    private void EditMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Control { DataContext: ServerSettingsViewModel row })
+            OpenEntryPointEditor(row);
+    }
+
+    /// <summary>
+    /// Opens the editor of the row you double-click. A double-click on a button of the row is
+    /// two clicks on that button, so it does not open the editor.
+    /// </summary>
+    private void ServerRow_DoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (e.Source is Visual source && source.GetSelfAndVisualAncestors().OfType<Button>().Any())
+            return;
+        if (sender is not Control { DataContext: ServerSettingsViewModel row } || row.IsEditing)
+            return;
+
+        OpenEntryPointEditor(row);
+    }
+
+    /// <summary>
+    /// Opens the editor of <paramref name="row"/> and puts the caret in its host field, with the
+    /// host selected. The field does not exist until the template reacts to the editor, so the
+    /// search waits a dispatcher turn.
+    /// </summary>
+    private void OpenEntryPointEditor(ServerSettingsViewModel row)
+    {
+        NetworkSettingsViewModel? network = ((SettingsViewModel)DataContext!).SelectedNetwork;
+        if (network is null)
+            return;
+
+        network.EditServerCommand.Execute(row);
+        Dispatcher.UIThread.Post(() =>
+        {
+            TextBox? host = RowControlFor(row)?.GetVisualDescendants()
+                .OfType<TextBox>()
+                .FirstOrDefault(tb => tb.Name == "editHostBox");
+            host?.Focus();
+            host?.SelectAll();
+        });
+    }
+
+    /// <summary>
+    /// Enter applies and Escape cancels. The handler marks both keys as handled, also when Apply
+    /// is disabled, so that Enter never saves the dialog and Escape never closes it.
+    /// </summary>
+    private void EntryPointEditor_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key is not (Key.Enter or Key.Escape))
+            return;
+        if (sender is not Control { DataContext: EntryPointEditorViewModel editor } control)
+            return;
+
+        e.Handled = true;
+        ServerSettingsViewModel? row = RowOf(control);
+        if (e.Key == Key.Escape)
+            editor.CancelCommand.Execute(null);
+        else if (editor.ApplyCommand.CanExecute(null))
+            editor.ApplyCommand.Execute(null);
+        else
+            return;
+
+        FocusRowMenuButton(row);
+    }
+
+    /// <summary>Gives the focus back to the row after a click on Apply or Cancel.</summary>
+    private void EditorButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Control control)
+            FocusRowMenuButton(RowOf(control));
+    }
+
+    // Gets the entry point row that a control of its editor is in.
+    private static ServerSettingsViewModel? RowOf(Control control) =>
+        control.GetVisualAncestors()
+            .OfType<Border>()
+            .FirstOrDefault(b => b.Classes.Contains("serverRow"))
+            ?.DataContext as ServerSettingsViewModel;
+
+    // Gets the drawn row of an entry point, or null when the dialog does not show it.
+    private Border? RowControlFor(ServerSettingsViewModel row) =>
+        this.GetVisualDescendants()
+            .OfType<Border>()
+            .FirstOrDefault(b => b.Classes.Contains("serverRow") && b.DataContext == row);
+
+    /// <summary>
+    /// Puts the focus on the menu button of <paramref name="row"/>. The editor closes before
+    /// this runs, and the focus must not stay on a field that is gone. The search waits a
+    /// dispatcher turn, because the row draws its values again only after that.
+    /// </summary>
+    private void FocusRowMenuButton(ServerSettingsViewModel? row)
+    {
+        if (row is null)
+            return;
+
+        Dispatcher.UIThread.Post(() =>
+            RowControlFor(row)?.GetVisualDescendants()
+                .OfType<Button>()
+                .FirstOrDefault(b => b.Name == "rowMenuButton")
+                ?.Focus());
     }
 }

@@ -114,7 +114,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
             _hosts = value;
             if (_hosts is not null)
                 _hosts.Changed += OnListedHostsChanged;
-            CheckNewServer();
+            CheckHosts();
         }
     }
 
@@ -257,7 +257,16 @@ public partial class NetworkSettingsViewModel : ObservableObject
 
     partial void OnNameChanged(string value) => OnHostsChanged();
 
-    private void OnListedHostsChanged(object? sender, EventArgs e) => CheckNewServer();
+    private void OnListedHostsChanged(object? sender, EventArgs e) => CheckHosts();
+
+    // Sets every refusal of this network for the rows of the dialog now: the one under the Add
+    // box, and the one in each open row editor.
+    private void CheckHosts()
+    {
+        CheckNewServer();
+        foreach (ServerSettingsViewModel server in Servers)
+            server.Editor?.CheckClash();
+    }
 
     private void OnHostsChanged()
     {
@@ -265,7 +274,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
 
         // With a dialog, the dialog tells every network, this network too.
         if (_hosts is null)
-            CheckNewServer();
+            CheckHosts();
     }
 
     private void OnServersChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -277,12 +286,7 @@ public partial class NetworkSettingsViewModel : ObservableObject
             foreach (ServerSettingsViewModel server in e.NewItems)
                 server.PropertyChanged += OnServerPropertyChanged;
 
-        // The entry points decide whether the verify switch applies. A row cannot change its
-        // TLS flag, so only an add or a remove can change the answer.
-        OnPropertyChanged(nameof(CanVerifyCertificates));
-        OnPropertyChanged(nameof(VerifyCertificatesHint));
-        OnPropertyChanged(nameof(IsVerifyCertificatesHintWarning));
-
+        OnTlsChanged();
         OnHostsChanged();
     }
 
@@ -290,6 +294,30 @@ public partial class NetworkSettingsViewModel : ObservableObject
     {
         if (e.PropertyName == nameof(ServerSettingsViewModel.Url))
             OnHostsChanged();
+        else if (e.PropertyName == nameof(ServerSettingsViewModel.Ssl))
+            OnTlsChanged();
+    }
+
+    // The TLS flags of the entry points decide whether the verify switch applies. An add, a
+    // remove, or an edit of a TLS flag can change the answer. The switch keeps its own value.
+    private void OnTlsChanged()
+    {
+        OnPropertyChanged(nameof(CanVerifyCertificates));
+        OnPropertyChanged(nameof(VerifyCertificatesHint));
+        OnPropertyChanged(nameof(IsVerifyCertificatesHintWarning));
+    }
+
+    /// <summary>
+    /// Opens the editor of an entry point row. The editor refuses a host that another row of
+    /// the dialog lists. See <see cref="DescribeClash"/>.
+    /// </summary>
+    [RelayCommand]
+    private void EditServer(ServerSettingsViewModel? server)
+    {
+        if (server is null || !Servers.Contains(server))
+            return;
+
+        server.OpenEditor(host => DescribeClash(host, server));
     }
 
     [RelayCommand]
