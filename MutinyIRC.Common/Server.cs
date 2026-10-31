@@ -595,7 +595,8 @@ public class Server : MessageContext, IDisposable
 
     /// <summary>
     /// <see cref="ChangeServer(ConnectionArgs)"/> replaced the entry points with one host that
-    /// the user named. It occurs on the thread that called <see cref="ChangeServer(ConnectionArgs)"/>.
+    /// the user named. It occurs on the thread that called
+    /// <see cref="ChangeServer(ConnectionArgs)"/>.
     /// </summary>
     public event EventHandler ServerChanged;
 

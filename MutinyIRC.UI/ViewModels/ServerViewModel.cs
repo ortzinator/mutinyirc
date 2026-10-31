@@ -593,7 +593,8 @@ public class ServerViewModel : IrcViewModel
     {
         // Read the entry point now. The connection can move to another entry point before the
         // UI thread runs the writes.
-        var entryPoint = new ServerSettings(_server.Url, _server.Port, _server.Connection.ConnectionData.Ssl);
+        var entryPoint = new ServerSettings(
+            _server.Url, _server.Port, _server.Connection.ConnectionData.Ssl);
         string reportedName = _server.Connection.ServerProperties["Network"];
 
         // The nick retry state belongs to the socket thread, where the next 433 arrives.
@@ -635,7 +636,9 @@ public class ServerViewModel : IrcViewModel
     /// <param name="reportedName">
     /// The network name that the server reported before it registered, or empty.
     /// </param>
-    /// <param name="usedRandomNick">Whether every nick was taken, so the server has a random one.</param>
+    /// <param name="usedRandomNick">
+    /// Whether every nick was taken, so the server has a random one.
+    /// </param>
     /// <remarks>
     /// Call it on the UI thread. While the Networks dialog is open, the settings writes wait. A
     /// bound connection joins the channels of its bound network at once. A connection with no
@@ -690,7 +693,9 @@ public class ServerViewModel : IrcViewModel
             // The connection keeps the network it was dialed for. It does not look up its host
             // again, so an edit or a move of its entry point does not change the network, and
             // the entry point does not go back into the settings.
-            network = reportedName == string.Empty ? bound : SettleByReportedName(bound, reportedName);
+            network = reportedName == string.Empty
+                ? bound
+                : SettleByReportedName(bound, reportedName);
         }
         else
         {

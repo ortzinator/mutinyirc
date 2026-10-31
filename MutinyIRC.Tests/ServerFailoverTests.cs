@@ -661,7 +661,11 @@ public class ServerFailoverTests
         _server.Register();
         _server.DropCurrentConnection();
 
-        _server.ReplaceEntryPoints(new[] { TlsCandidate("c.example", 7000), Candidate("b.example", 6697) });
+        _server.ReplaceEntryPoints(new[]
+        {
+            TlsCandidate("c.example", 7000),
+            Candidate("b.example", 6697)
+        });
         await Task.Delay(TimeSpan.FromSeconds(5));
 
         Assert.Multiple(() =>
