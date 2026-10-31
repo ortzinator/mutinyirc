@@ -150,11 +150,6 @@ public class MainViewModel : ViewModelBase
     {
         LoadSettings();
 
-        // A connection asks this at each TLS handshake, on a thread-pool thread. Only the UI
-        // thread changes the settings, so the read goes to the UI thread too.
-        ServerManager.Instance.CertificateTrustLookup = (host, port) =>
-            Dispatcher.UIThread.Invoke(() => IrcSettingsManager.Instance.GetCertificateTrust(host, port));
-
         List<NetworkSettings> networks = IrcSettingsManager.Instance.GetAutoConnectNetworks();
 
         // One network gives one connection, which dials that network's entry points in order
@@ -164,6 +159,7 @@ public class MainViewModel : ViewModelBase
             // Create fires ServerManager.ServerAdded synchronously, so CreateServerPanel has
             // already wired this server's JoinSelf handler by the time Connect() runs.
             Server newServer = ServerManager.Instance.Create(network.ToConnectionCandidates());
+            _serverMap[newServer].BindNetwork(network);
             newServer.Connect();
         }
 
@@ -324,6 +320,13 @@ public class MainViewModel : ViewModelBase
     {
         var vm = new ServerViewModel(server, _pluginManager);
         _serverMap[server] = vm;
+
+        // A connection asks this at each TLS handshake, on a thread-pool thread. The answer
+        // depends on the bound network of the connection, which its view model holds. Only the
+        // UI thread changes the settings, so the read goes to the UI thread too.
+        server.CertificateTrustLookup = (host, port) =>
+            Dispatcher.UIThread.Invoke(() => vm.GetCertificateTrust(host, port));
+
         Panels.Add(vm);
         Servers.Add(vm);
 

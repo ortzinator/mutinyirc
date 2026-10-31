@@ -152,6 +152,7 @@ public class ServerViewModel : IrcViewModel
         _server.NoticeSent += Server_NoticeSent;
         _server.WentAway += Server_WentAway;
         _server.CameBack += Server_CameBack;
+        _server.ServerChanged += Server_ServerChanged;
     }
 
     private string ConnectedStatus()
@@ -273,14 +274,13 @@ public class ServerViewModel : IrcViewModel
 
     private void Server_PartSelf(object? sender, Common.PartEventArgs e)
     {
-        // Read the host now. The connection can move to another entry point before the UI
-        // thread runs the write.
-        string host = _server.Url;
         string channelName = e.Channel.Name;
 
+        // The channel list is the bound network's. A part comes after registration, which
+        // binds the connection.
         OnUiThread(() =>
         {
-            NetworkSettings? nwSettings = IrcSettingsManager.Instance.GetNetwork(host);
+            NetworkSettings? nwSettings = _boundNetwork;
             ChannelSettings? chan = nwSettings?.GetChannel(channelName);
 
             // Membership of the network's channel list is the autojoin flag now, so leaving a
@@ -319,13 +319,18 @@ public class ServerViewModel : IrcViewModel
     }
 
     /// <summary>
-    /// The nick to try when the first one is taken: the network's own alternate where it names
-    /// one, and the app-wide second nick where it does not. Identity belongs to the network, so
-    /// the network answers first.
+    /// The nick to try when the first one is taken: the bound network's own alternate where it
+    /// names one, and the app-wide second nick where it does not. Identity belongs to the
+    /// network, so the network answers first. A connection with no network yet uses the second
+    /// nick.
     /// </summary>
+    /// <remarks>
+    /// It runs on the socket thread. It reads one property of the bound network and does not
+    /// go through the settings lists, which only the UI thread can read safely.
+    /// </remarks>
     private string AlternateNick()
     {
-        string? networkNick = IrcSettingsManager.Instance.GetNetwork(_server)?.AlternateNick;
+        string? networkNick = _boundNetwork?.AlternateNick;
         return string.IsNullOrWhiteSpace(networkNick)
             ? AppSettings.Instance.SecondNick
             : networkNick;
@@ -419,11 +424,17 @@ public class ServerViewModel : IrcViewModel
         _shownAwayReplies.Clear();
     }
 
+    // /server named a host. The connection has no network for it yet, so its next
+    // registration finds the network by host.
+    private void Server_ServerChanged(object? sender, EventArgs e) =>
+        OnUiThread(() => _boundNetwork = null);
+
     private void Server_Connecting(object? sender, CancelEventArgs e)
     {
-        // The UI thread owns the resolved network. Clear it in the UI queue, so that it comes
-        // after the writes of the previous registration and before those of the next one.
-        OnUiThread(() => _network = null);
+        // The connection keeps its bound network. Only the session state goes. Clear it in the
+        // UI queue, so that it comes after the writes of the previous registration and before
+        // those of the next one.
+        OnUiThread(() => _registered = false);
         ConnectionStatus = ServerStrings.StatusConnecting;
         AddMessage(ServerStrings.ConnectingMessage.With(_server.Url, _server.Port));
     }
@@ -605,13 +616,25 @@ public class ServerViewModel : IrcViewModel
     /// <remarks>It writes the network settings. Call it on the UI thread.</remarks>
     private void DoRegister(ServerSettings entryPoint, string reportedName, bool usedRandomNick)
     {
-        NetworkSettings network = ResolveNetwork(entryPoint.Url, reportedName);
+        NetworkSettings network;
+        if (_boundNetwork is { } bound)
+        {
+            // The connection keeps the network it was dialed for. It does not look up its host
+            // again, so an edit or a move of its entry point does not change the network, and
+            // the entry point does not go back into the settings.
+            network = reportedName == string.Empty ? bound : SettleByReportedName(bound, reportedName);
+        }
+        else
+        {
+            network = ResolveNetwork(entryPoint.Url, reportedName);
 
-        // AddServer keys on the URL and ignores a host the network already lists, so this both
-        // donates a new entry point and leaves a known one alone.
-        network.AddServer(entryPoint);
+            // AddServer keys on the URL and ignores a host the network already lists, so this
+            // both donates a new entry point and leaves a known one alone.
+            network.AddServer(entryPoint);
+        }
 
-        _network = network;
+        _boundNetwork = network;
+        _registered = true;
         AdoptNetwork(network);
         ConnectionStatus = ConnectedStatus();
         WarnIfCertificateNotChecked();
@@ -623,9 +646,40 @@ public class ServerViewModel : IrcViewModel
         JoinAutoJoinChannels(network);
     }
 
-    // The network that the registration of this connection resolved, or null before
-    // registration. A new connect attempt clears it.
-    private NetworkSettings? _network;
+    // The bound network: the network that this connection was dialed for. It is null until the
+    // connection has a network: a connection that /server made finds its network by host at its
+    // first registration. Only the UI thread writes it. The socket thread reads it for the
+    // alternate nick, thus it is volatile.
+    private volatile NetworkSettings? _boundNetwork;
+
+    // Whether the current session has registered. A new connect attempt clears it. Only the UI
+    // thread reads or writes it.
+    private bool _registered;
+
+    /// <summary>
+    /// The network that this connection was dialed for (its bound network), or null when the
+    /// connection has no network yet. Read it on the UI thread.
+    /// </summary>
+    internal NetworkSettings? BoundNetwork => _boundNetwork;
+
+    /// <summary>
+    /// Binds this connection to <paramref name="network"/>, the network that it is dialed for.
+    /// Registration then uses that network, and does not find the network by host.
+    /// </summary>
+    /// <remarks>Call it on the UI thread, before the connection dials.</remarks>
+    internal void BindNetwork(NetworkSettings network) => _boundNetwork = network;
+
+    /// <summary>
+    /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
+    /// <paramref name="port"/> of this connection. A bound connection takes the verify switch
+    /// from its bound network, and the pin from that entry point in its bound network. A
+    /// connection with no network yet finds the network by host.
+    /// </summary>
+    /// <remarks>It reads the settings. Call it on the UI thread.</remarks>
+    internal CertificateTrust GetCertificateTrust(string host, int port) =>
+        _boundNetwork is { } bound
+            ? IrcSettingsManager.GetCertificateTrust(bound, host, port)
+            : IrcSettingsManager.Instance.GetCertificateTrust(host, port);
 
     // The network that registration named after the host, because no saved network listed the
     // host and the server had not reported a name yet. The first reported name can still move
@@ -712,17 +766,17 @@ public class ServerViewModel : IrcViewModel
         string reportedName = e.Data;
 
         // The UI queue keeps the order of the events, so the registration before this 005 has
-        // set _network when this runs.
+        // run when this runs.
         OnUiThread(() =>
         {
-            if (_network == null)
+            if (!_registered || _boundNetwork is not { } bound)
                 return;
 
-            NetworkSettings settled = SettleByReportedName(_network, reportedName);
+            NetworkSettings settled = SettleByReportedName(bound, reportedName);
             AdoptNetwork(settled);
-            if (settled != _network)
+            if (settled != bound)
                 JoinAutoJoinChannels(settled);
-            _network = settled;
+            _boundNetwork = settled;
         });
     }
 
@@ -800,5 +854,6 @@ public class ServerViewModel : IrcViewModel
         _server.NoticeSent -= Server_NoticeSent;
         _server.WentAway -= Server_WentAway;
         _server.CameBack -= Server_CameBack;
+        _server.ServerChanged -= Server_ServerChanged;
     }
 }
