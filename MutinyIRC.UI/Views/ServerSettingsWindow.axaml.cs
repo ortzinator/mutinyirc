@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -96,7 +97,8 @@ public partial class ServerSettingsWindow : Window
     /// <summary>
     /// Fills the Move to submenu of a row menu with every other network of the dialog. The
     /// networks can change while the dialog is open, so the submenu is made again each time.
-    /// The submenu is disabled when no other network exists.
+    /// The submenu is disabled when no other network exists. Each item has the name of its
+    /// network as its accessible name.
     /// </summary>
     private void RowMenu_Opening(object? sender, EventArgs e)
     {
@@ -111,10 +113,44 @@ public partial class ServerSettingsWindow : Window
         foreach (NetworkSettingsViewModel target in network.MoveTargets)
         {
             var item = new MenuItem { Header = target.Name };
-            item.Click += (_, _) => network.MoveServerTo(row, target);
+            AutomationProperties.SetName(item, target.Name);
+            item.Click += (_, _) => MoveServer(network, row, target);
             move.Items.Add(item);
         }
         move.IsEnabled = move.Items.Count > 0;
+    }
+
+    /// <summary>
+    /// Moves <paramref name="row"/> to <paramref name="target"/>. Then the focus goes to the
+    /// menu button of the next row in <paramref name="network"/>. If there is no next row, it
+    /// goes to the previous row. If <paramref name="network"/> has no rows, it goes to the Add box.
+    /// </summary>
+    private void MoveServer(NetworkSettingsViewModel network, ServerSettingsViewModel row,
+        NetworkSettingsViewModel target)
+    {
+        int index = network.Servers.IndexOf(row);
+        network.MoveServerTo(row, target);
+        if (network.Servers.Contains(row))
+            return;
+
+        if (network.Servers.Count == 0)
+            Dispatcher.UIThread.Post(() => newServerBox.Focus());
+        else
+            FocusRowMenuButton(network.Servers[Math.Min(index, network.Servers.Count - 1)]);
+    }
+
+    /// <summary>
+    /// F2 opens the editor of the row that has the focus. In the editor, F2 does nothing, so that
+    /// the draft stays.
+    /// </summary>
+    private void ServerRow_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.F2 || sender is not Control { DataContext: ServerSettingsViewModel row })
+            return;
+
+        e.Handled = true;
+        if (!row.IsEditing)
+            OpenEntryPointEditor(row);
     }
 
     /// <summary>
