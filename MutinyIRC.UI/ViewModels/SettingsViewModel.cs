@@ -16,6 +16,12 @@ public partial class SettingsViewModel : ObservableObject
 
     public ObservableCollection<NetworkSettingsViewModel> Networks { get; } = new();
 
+    /// <summary>
+    /// Occurs during <see cref="Save"/>, after the dialog is applied to the saved networks and
+    /// before the settings go to disk.
+    /// </summary>
+    public event EventHandler? NetworksApplied;
+
     public SettingsViewModel() : this(IrcSettingsManager.Instance) { }
 
     /// <summary>
@@ -100,6 +106,7 @@ public partial class SettingsViewModel : ObservableObject
             Debug.Assert(accepted, "The save drops every host that another network claims");
         }
 
+        NetworksApplied?.Invoke(this, EventArgs.Empty);
         _settings.Save();
     }
 }

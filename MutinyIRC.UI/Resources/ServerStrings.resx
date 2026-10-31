@@ -189,6 +189,9 @@
   <data name="NickTakenMessage" xml:space="preserve">
     <value>The nick '{0}' was taken. Trying '{1}'</value>
   </data>
+  <data name="EntryPointChangedMessage" xml:space="preserve">
+    <value>Entry point changed. The change applies when you reconnect.</value>
+  </data>
   <data name="RandomNickMessage" xml:space="preserve">
     <value>All of your alternate nicks were taken, so one was randomly chosen for you.</value>
   </data>
