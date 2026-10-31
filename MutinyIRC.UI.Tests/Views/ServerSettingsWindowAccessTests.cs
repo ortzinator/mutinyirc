@@ -86,13 +86,24 @@ public class ServerSettingsWindowAccessTests
             menu.Items.OfType<MenuItem>().Single(i => i.Name == "moveMenuItem"));
     }
 
-    // Picks a network in the Move to submenu of a row, as a user does.
+    // Picks a network in the Move to submenu of a row with the keyboard, as a user does. The
+    // menu handles Enter, so the click and the close of the flyout go through the real path.
+    // Then the window gets the activation back from the closed popup, as on a real desktop. At
+    // that time the window gives the focus again to the element that its focus scope keeps.
     private static void MoveThroughMenu(Window window, int index, string network)
     {
-        (MenuFlyout menu, _, MenuItem move) = OpenMenu(window, index);
-        MenuItem target = move.Items.OfType<MenuItem>().Single(i => (string?)i.Header == network);
-        target.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
-        menu.Hide();
+        Button menuButton = Named<Button>(Row(window, index), "rowMenuButton");
+        menuButton.Focus();
+        Press(window, PhysicalKey.Enter);
+        var menu = (MenuFlyout)menuButton.Flyout!;
+        MenuItem move = menu.Items.OfType<MenuItem>().Single(i => i.Name == "moveMenuItem");
+        move.Focus();
+        Press(window, PhysicalKey.ArrowRight);
+        move.Items.OfType<MenuItem>().Single(i => (string?)i.Header == network).Focus();
+        Press(window, PhysicalKey.Enter);
+        Assert.That(menu.IsOpen, Is.False, "the menu closes itself after the click");
+
+        window.Activate();
         Dispatcher.UIThread.RunJobs();
     }
 
