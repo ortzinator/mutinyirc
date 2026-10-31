@@ -32,7 +32,9 @@ holds the live ones — and still calls a `Server` parameter `ntw` in `Remove`, 
 
 One host you may dial to reach a [network](#network): a hostname, the one port to dial it on, and a TLS
 flag. Saved as `ServerSettings`. `EntryPoint` in `MutinyIRC.Common` is the same thing as the user types it:
-`EntryPoint.TryParse` reads `host` or `host:port` for both the Add Server box and `/server`. An entry point's place in `NetworkSettings.Servers` is its place in the
+`EntryPoint.TryParse` reads `host` or `host:port` for both the Add Server box and `/server`. The TLS flag
+belongs to the entry point, not to the port: typed text only guesses it from the port
+(`IrcPorts.IsTlsPort`), and the guess can be wrong, for example a plaintext server on port 7000. An entry point's place in `NetworkSettings.Servers` is its place in the
 [failover order](#failover-order), so the entry points of a network are ranked rather than
 interchangeable. A hostname belongs to at most one network. That is what makes
 `IrcSettingsManager.GetNetwork(Server)` able to scan every network's hosts for a URL match and stop at the
