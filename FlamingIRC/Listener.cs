@@ -583,7 +583,7 @@ public class Listener
                 OnMotd?.Invoke(this, new MotdEventArgs(CondenseStrings(tokens, 3), true));
                 break;
             case ReplyCode.RPL_ISON:
-                OnIson?.Invoke(this, new IsonEventArgs(tokens[3]));
+                OnIson?.Invoke(this, new IsonEventArgs(CondenseStrings(tokens, 3)));
                 break;
             case ReplyCode.RPL_NAMREPLY:
                 ProcessNamesReply(tokens, false);
@@ -637,7 +637,7 @@ public class Listener
                     tokens[6],
                     tokens[8],
                     int.Parse(RemoveLeadingColon(tokens[9]), CultureInfo.InvariantCulture),
-                    tokens[10],
+                    CondenseStrings(tokens, 10),
                     false));
                 break;
             case ReplyCode.RPL_ENDOFWHO:
@@ -671,7 +671,7 @@ public class Listener
                 break;
             case ReplyCode.RPL_WHOISIDLE:
                 WhoisInfo whoisIdleInfo = LookupInfo(tokens[3]);
-                whoisIdleInfo.idleTime = long.Parse(tokens[5], CultureInfo.InvariantCulture);
+                whoisIdleInfo.idleTime = long.Parse(tokens[4], CultureInfo.InvariantCulture);
                 break;
             case ReplyCode.RPL_ENDOFWHOIS:
                 string nick = tokens[3];
@@ -751,6 +751,7 @@ public class Listener
                 OnVersion?.Invoke(this, new VersionEventArgs(CondenseStrings(tokens, 3)));
                 break;
             case ReplyCode.RPL_TIME:
+                tokens[4] = RemoveLeadingColon(tokens[4]);
                 OnTime?.Invoke(this, new TimeEventArgs(CondenseStrings(tokens, 3)));
                 break;
             case ReplyCode.RPL_INFO:

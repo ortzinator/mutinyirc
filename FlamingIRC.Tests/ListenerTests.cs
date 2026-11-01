@@ -604,8 +604,8 @@ public class ListenerTests
     {
         IsonEventArgs givenArgs = null;
         _listener.OnIson += (_, e) => givenArgs = e;
-        _listener.Parse(":irc.server.net 303 OrtzIRC Buster");
-        Assert.AreEqual("Buster", givenArgs.Nicks);
+        _listener.Parse(":irc.server.net 303 OrtzIRC :Buster Lucille");
+        Assert.AreEqual("Buster Lucille", givenArgs.Nicks);
     }
 
     [Test]
@@ -614,7 +614,7 @@ public class ListenerTests
         var given = new List<WhoEventArgs>();
         _listener.OnWho += (_, e) => given.Add(e);
         _listener.Parse(
-            ":irc.server.net 352 OrtzIRC #ortzirc ~buster buster.host hub.server.net Buster H@ :3 Buster");
+            ":irc.server.net 352 OrtzIRC #ortzirc ~buster buster.host hub.server.net Buster H@ :3 Buster Bluth");
         _listener.Parse(":irc.server.net 315 OrtzIRC #ortzirc :End of /WHO list.");
         Assert.AreEqual(2, given.Count);
         Assert.AreEqual("Buster", given[0].User.Nick);
@@ -622,7 +622,7 @@ public class ListenerTests
         Assert.AreEqual("hub.server.net", given[0].IrcServer);
         Assert.AreEqual("H@", given[0].Mask);
         Assert.AreEqual(3, given[0].HopCount);
-        Assert.AreEqual("Buster", given[0].RealName);
+        Assert.AreEqual("Buster Bluth", given[0].RealName);
         Assert.IsFalse(given[0].IsLast);
         Assert.IsTrue(given[1].IsLast);
     }
@@ -640,6 +640,17 @@ public class ListenerTests
         Assert.AreEqual("Buster Bluth", givenArgs.WhoisInfo.RealName);
         Assert.AreEqual("hub.server.net", givenArgs.WhoisInfo.Server);
         Assert.AreEqual("The hub", givenArgs.WhoisInfo.ServerDescription);
+        Assert.AreEqual(42L, givenArgs.WhoisInfo.IdleTime);
+    }
+
+    [Test]
+    public void Parse_WhoisIdleWithoutSignonTime_GetsTheIdleTime()
+    {
+        WhoisEventArgs givenArgs = null;
+        _listener.OnWhois += (_, e) => givenArgs = e;
+        _listener.Parse(":irc.server.net 317 OrtzIRC Buster 42 :seconds idle");
+        _listener.Parse(":irc.server.net 318 OrtzIRC Buster :End of /WHOIS list.");
+        Assert.AreEqual(42L, givenArgs.WhoisInfo.IdleTime);
     }
 
     [Test]
@@ -701,7 +712,7 @@ public class ListenerTests
         _listener.Parse(":irc.server.net 372 OrtzIRC :- Welcome aboard");
         _listener.Parse(":irc.server.net 376 OrtzIRC :End of /MOTD command.");
         Assert.AreEqual(2, given.Count);
-        Assert.That(given[0].Message, Does.EndWith("- Welcome aboard"));
+        Assert.AreEqual("- Welcome aboard", given[0].Message);
         Assert.IsFalse(given[0].IsLast);
         Assert.IsTrue(given[1].IsLast);
     }
@@ -712,8 +723,7 @@ public class ListenerTests
         TimeEventArgs givenArgs = null;
         _listener.OnTime += (_, e) => givenArgs = e;
         _listener.Parse(":irc.server.net 391 OrtzIRC irc.server.net :Tuesday October 14 2026");
-        Assert.That(givenArgs.Time, Does.StartWith("irc.server.net"));
-        Assert.That(givenArgs.Time, Does.EndWith("Tuesday October 14 2026"));
+        Assert.AreEqual("irc.server.net Tuesday October 14 2026", givenArgs.Time);
     }
 
     [Test]
@@ -724,7 +734,7 @@ public class ListenerTests
         _listener.Parse(":irc.server.net 371 OrtzIRC :Written in C");
         _listener.Parse(":irc.server.net 374 OrtzIRC :End of /INFO list.");
         Assert.AreEqual(2, given.Count);
-        Assert.That(given[0].Message, Does.EndWith("Written in C"));
+        Assert.AreEqual("Written in C", given[0].Message);
         Assert.IsFalse(given[0].IsLast);
         Assert.IsTrue(given[1].IsLast);
     }
