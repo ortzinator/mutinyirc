@@ -24,7 +24,8 @@ public class SessionTeardownTests
 
     /// <summary>
     /// True: read the registration, then close, so the client reads end of stream.
-    /// False: reset the connection at once, so the client's next send or read fails.
+    /// False: reset the connection when the registration starts, so the client's next send or
+    /// read fails.
     /// </summary>
     private bool _readBeforeClose;
 
@@ -53,11 +54,20 @@ public class SessionTeardownTests
                 using (client)
                 {
                     if (_readBeforeClose)
+                    {
                         await ReadUntilUser(client.GetStream());
-                    else
-                        // A zero linger time makes the close send RST, not FIN. The client then
-                        // always sees a socket error, whether its send or its read comes first.
-                        client.LingerState = new LingerOption(true, 0);
+                        return;
+                    }
+
+                    // Wait for the first bytes of the registration. Then the client's connect
+                    // is complete, and the reset cannot make the connect fail.
+                    await client.GetStream().ReadAsync(new byte[1]);
+
+                    // Close(0) sets a zero linger time and closes the socket, so the server
+                    // sends only RST. Do not use Dispose for this: on Linux it sends FIN
+                    // before RST, and a client read between the two sees the end of the stream.
+                    // With only RST, the client always sees a socket error.
+                    client.Client.Close(0);
                 }
             });
         }
