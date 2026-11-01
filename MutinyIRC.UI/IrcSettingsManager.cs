@@ -154,7 +154,12 @@ public sealed class IrcSettingsManager
     /// Finds the saved network a connection belongs to. A hostname belongs to at most one
     /// network, so the first entry point that matches settles it.
     /// </summary>
-    public NetworkSettings? GetNetwork(Server server) => GetServer(server)?.Network;
+    public NetworkSettings? GetNetwork(Server server) => GetNetwork(server.Url);
+
+    /// <summary>
+    /// Finds the saved network that lists the host <paramref name="host"/>, on any port.
+    /// </summary>
+    public NetworkSettings? GetNetwork(string host) => GetServer(host)?.Network;
 
     /// <summary>Stops the network this connection belongs to being dialled at startup.</summary>
     public void DisableAutoConnect(Server server)
@@ -167,15 +172,15 @@ public sealed class IrcSettingsManager
     /// <summary>
     /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
     /// <paramref name="port"/>. The verify switch comes from the network that lists the host.
-    /// The pin comes from the saved entry point with that host and port. A host that no saved network lists
-    /// is verified and has no pin.
+    /// The pin comes from the saved entry point with that host and port. A host that no saved
+    /// network lists is verified and has no pin.
     /// </summary>
     /// <remarks>
     /// This reads the settings, which only the UI thread changes. Call it on the UI thread.
     /// </remarks>
     public CertificateTrust GetCertificateTrust(string host, int port)
     {
-        NetworkSettings? network = GetServer(host)?.Network;
+        NetworkSettings? network = GetNetwork(host);
         if (network == null)
             return CertificateTrust.Default;
 
@@ -224,6 +229,101 @@ public sealed class IrcSettingsManager
         return network;
     }
 
+    // The live writes that wait while the Networks dialog is open, in the order they came. It is
+    // null when the dialog is not open. Only the UI thread reads or writes it.
+    private List<Action>? _heldWrites;
+
+    // What the dialog changed, while the held writes apply after an OK. At all other times it is
+    // DialogEdits.None, so a live write applies as it is.
+    private DialogEdits _edits = DialogEdits.None;
+
+    /// <summary>
+    /// Makes the live writes wait until <see cref="ApplyHeldWrites"/>. The Networks dialog calls
+    /// it when it takes its copy of the networks, so that the copy stays stable.
+    /// </summary>
+    /// <remarks>Call it on the UI thread.</remarks>
+    internal void HoldLiveWrites() => _heldWrites ??= new List<Action>();
+
+    /// <summary>
+    /// Runs <paramref name="write"/>, a settings write of a live connection, now. While the
+    /// Networks dialog is open, it runs when the dialog closes.
+    /// </summary>
+    /// <remarks>
+    /// Call it on the UI thread. The write must change the settings only through
+    /// <see cref="RenameNetwork"/>, <see cref="MarkAutoConnect"/>,
+    /// <see cref="SettleMintedNetwork"/>, <see cref="RemoveChannel"/> and the lookups that find
+    /// or add a network, because those obey the edits of the dialog.
+    /// </remarks>
+    public void WhenWritable(Action write)
+    {
+        if (_heldWrites != null)
+            _heldWrites.Add(write);
+        else
+            write();
+    }
+
+    /// <summary>
+    /// Runs the held live writes in their order, and stops the hold. Each held write obeys
+    /// <paramref name="edits"/>, the changes of the dialog. A write that comes while they run
+    /// runs at once.
+    /// </summary>
+    /// <remarks>Call it on the UI thread. It does not write to disk.</remarks>
+    internal void ApplyHeldWrites(DialogEdits edits)
+    {
+        List<Action>? held = _heldWrites;
+        _heldWrites = null;
+        if (held == null)
+            return;
+
+        _edits = edits;
+        try
+        {
+            foreach (Action write in held)
+                write();
+        }
+        finally
+        {
+            _edits = DialogEdits.None;
+        }
+    }
+
+    /// <summary>
+    /// Gives <paramref name="network"/> the name <paramref name="reportedName"/> that its server
+    /// reported. A rename of the network in the dialog wins.
+    /// </summary>
+    /// <remarks>Call it on the UI thread.</remarks>
+    public void RenameNetwork(NetworkSettings network, string reportedName)
+    {
+        if (!_edits.DecidedName(network))
+            network.Name = reportedName;
+    }
+
+    /// <summary>
+    /// Marks <paramref name="network"/> for startup, because a connection reached it. A change of
+    /// AutoConnect in the dialog wins.
+    /// </summary>
+    /// <remarks>Call it on the UI thread.</remarks>
+    public void MarkAutoConnect(NetworkSettings network)
+    {
+        if (!_edits.DecidedAutoConnect(network))
+            network.AutoConnect = true;
+    }
+
+    /// <summary>
+    /// Removes the channel <paramref name="channelName"/> from <paramref name="network"/>, if
+    /// the network lists it. Nothing changes for a network that the dialog deleted.
+    /// </summary>
+    /// <remarks>Call it on the UI thread.</remarks>
+    public void RemoveChannel(NetworkSettings network, string channelName)
+    {
+        if (_edits.Deleted(network))
+            return;
+
+        ChannelSettings? channel = network.GetChannel(channelName);
+        if (channel != null)
+            network.RemoveChannel(channel);
+    }
+
     /// <summary>
     /// Settles a network that Mutiny made, when the server reports its network name. The pin
     /// action makes such a network, and so does a registration that the server did not name.
@@ -233,11 +333,19 @@ public sealed class IrcSettingsManager
     /// entry point. The entry point keeps its pin, and <paramref name="minted"/> goes.
     /// </summary>
     /// <returns>The network that the entry point now belongs to.</returns>
-    /// <remarks>Call it on the UI thread, and only with a reported name that is not empty.</remarks>
+    /// <remarks>
+    /// Call it on the UI thread, and only with a reported name that is not empty. If the dialog
+    /// deleted <paramref name="minted"/>, nothing changes. If the dialog changed its name or its
+    /// entry points, the user has made it their own: the mark goes, and the entry point does not
+    /// move.
+    /// </remarks>
     public NetworkSettings SettleMintedNetwork(NetworkSettings minted, string reportedName)
     {
+        if (_edits.Deleted(minted))
+            return minted;
+
         minted.MintedByPin = false;
-        if (minted.Servers.Count != 1)
+        if (minted.Servers.Count != 1 || _edits.ChangedNameOrEntryPoints(minted))
             return minted;
 
         NetworkSettings? named = Networks.FirstOrDefault(network =>
@@ -253,15 +361,10 @@ public sealed class IrcSettingsManager
     }
 
     private ServerSettings? GetEntryPoint(string host, int port) =>
-        Networks.SelectMany(network => network.Servers)
-                .FirstOrDefault(entryPoint =>
-                    entryPoint.Port == port
-                    && entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase));
-
-    private ServerSettings? GetServer(Server server) => GetServer(server.Url);
+        Networks.Select(network => network.FindEntryPoint(host, port))
+                .FirstOrDefault(entryPoint => entryPoint != null);
 
     private ServerSettings? GetServer(string host) =>
         Networks.SelectMany(network => network.Servers)
-                .FirstOrDefault(entryPoint =>
-                    entryPoint.Url.Equals(host, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(entryPoint => EntryPoint.SameHost(entryPoint.Url, host));
 }

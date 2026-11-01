@@ -127,7 +127,7 @@ public class ServerViewModelMintedNetworkTests
         _server = new FakedServer(new ConnectionArgs("me", Host, true) { Port = Port })
         {
             // As MainViewModel sets it, less the marshal to the UI thread: the tests run there.
-            CertificateTrustLookup = (host, port) => _settings.GetCertificateTrust(host, port)
+            CertificateTrustLookup = _settings.GetCertificateTrust
         };
         _vm = new ServerViewModel(_server, new PluginManager());
         _server.Connect();

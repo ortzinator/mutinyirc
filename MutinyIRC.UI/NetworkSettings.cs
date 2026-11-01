@@ -128,6 +128,27 @@ public class NetworkSettings
         return candidates;
     }
 
+    /// <summary>
+    /// The entry point <paramref name="host"/>:<paramref name="port"/> of this network, or null
+    /// when the network does not list it.
+    /// </summary>
+    public ServerSettings? FindEntryPoint(string host, int port) =>
+        Servers.Find(entryPoint => entryPoint.IsAt(host, port));
+
+    /// <summary>
+    /// Gives the certificate trust settings for the entry point <paramref name="host"/>:
+    /// <paramref name="port"/> of a connection to this network. The verify switch comes from
+    /// this network. The pin comes from that entry point of this network. If this network does
+    /// not list that entry point now, there is no pin.
+    /// </summary>
+    /// <remarks>Call it on the UI thread.</remarks>
+    public CertificateTrust GetCertificateTrust(string host, int port) =>
+        new()
+        {
+            VerifyCertificates = VerifyCertificates,
+            PinnedFingerprint = FindEntryPoint(host, port)?.PinnedFingerprint
+        };
+
     public override string ToString() => Name;
 
     public bool RemoveServer(ServerSettings serverSettings) => Servers.Remove(serverSettings);

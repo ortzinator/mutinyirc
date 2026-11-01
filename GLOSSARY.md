@@ -28,7 +28,12 @@ replaceable part inside a [network](#network), not something you name or save: w
 network dials a different entry point, the network, its channels, and their panels stay. A connection is
 *bound* to the network it was dialed for, and it keeps that network for its whole session: an edit or a move
 of its entry point does not give it to another network, and it reaches the connection only at its next dial.
-A connection resolves its network by host only when it has none yet. `ServerManager`
+A dialog save gives the connection the bound network's new entry points as its *dial list*
+(`Server.ReplaceEntryPoints`); the session stays up, and the new list applies at the next dial.
+If the bound network has no entry points now, or the dialog deleted it, the dial list is empty: the session
+stays up, and its next dial stops the connection with no backoff (`Server.NoEntryPoints`).
+A connection resolves its network by host only when it has none yet, and `/server` without `-n` leaves it with
+none. `ServerViewModel.BoundNetwork` holds the bound network. `ServerManager`
 holds the live ones — and still calls a `Server` parameter `ntw` in `Remove`, a fossil of the same drift.
 
 ## Entry point
@@ -40,17 +45,24 @@ belongs to the entry point, not to the port: typed text only guesses it from the
 (`IrcPorts.IsTlsPort`), and the guess can be wrong, for example a plaintext server on port 7000. An entry point's place in `NetworkSettings.Servers` is its place in the
 [failover order](#failover-order), so the entry points of a network are ranked rather than
 interchangeable. A hostname belongs to at most one network, and is listed at most once in it: two entry points
-with the same hostname are the same entry point, whatever their ports, and the hostname is compared without case. That is what makes
+with the same hostname are the same entry point, whatever their ports, and the hostname is compared without case
+(`EntryPoint.SameHost`; `ServerSettings.IsAt` matches a host and a port). That is what makes
 `IrcSettingsManager.GetNetwork(Server)` able to scan every network's hosts for a URL match and stop at the
-first hit. "Server" in the settings window means entry point; "server" in `MutinyIRC.Common` means
+first hit. In the Networks dialog, `ListedHosts` holds this rule over the dialog's unsaved rows, and the Add
+box refuses a host that a row already has. "Server" in the settings window means entry point; "server" in `MutinyIRC.Common` means
 connection.
 
 To *edit* an entry point is to change its hostname, port, or TLS flag in place. It keeps its place in the
-failover order. A changed hostname or port, or TLS turned off, clears its [pin](#pinned-certificate). To
+failover order. A changed hostname or port, or TLS turned off, clears its [pin](#pinned-certificate). In the
+Networks dialog the row becomes the editor (`ServerSettingsViewModel.Editor`, an
+`EntryPointEditorViewModel`): a draft that changes the row only on Apply, and that the host rule of
+`ListedHosts` checks as you type. To
 *move* an entry point is to give it to a different network. It stays the same entry point, with the same
 hostname, port, TLS flag, and pin, and it goes to the end of the new network's failover order. The network it
 leaves keeps its name, channels, and settings, also when no entry points remain. A network with no entry
-points is never dialed.
+points is never dialed. In the Networks dialog, the row menu's Move to submenu calls
+`NetworkSettingsViewModel.MoveServerTo`, which moves the same `ServerSettingsViewModel` and sets the
+network's `MoveStatus` line.
 
 ## Failover order
 
@@ -66,6 +78,19 @@ the connect attempt: the walk and later backoff rounds pass over it. When every 
 that stop message (`EveryEntryPointRefusedViewModel`) calls `Server.Reconnect`. `Server.Reconnect` and
 `Server.DialEntryPoint` start a new attempt and clear the list. `Server.ChangeServer` clears it too.
 
+## Held write
+
+A settings write that a live [connection](#connection) makes while the Networks dialog is open. It waits
+in a queue until the dialog closes, so the copy that the dialog edits stays the same as the networks. The
+held writes are the rename to the `NETWORK=` name, `AutoConnect = true`, the merge of a minted network,
+the removal of a parted channel, and, for a connection that has no network yet, the whole step that finds
+its network (`ServerViewModel.FileUnderNetwork`). `SettingsViewModel` starts the hold
+(`IrcSettingsManager.HoldLiveWrites`). A connection queues a write with `IrcSettingsManager.WhenWritable`.
+
+OK applies the held writes after the dialog and before the disk write. A held write obeys the edits of the
+dialog (`DialogEdits`): the user's edit wins over it. Cancel, and every close that is not OK, applies them
+as they are and writes nothing to disk.
+
 ## Network
 
 The thing you connect to — "Libera", not `irc.libera.chat`. A network owns its entry points, its channels
@@ -80,6 +105,9 @@ change on any connect and two networks may briefly carry the same one. `NetworkS
 value equality: one instance is one network, and you find a network by entry point with
 `IrcSettingsManager.GetNetwork(Server)`. The name is only how a host that reports a known name finds the
 network it belongs to — see `NetworkSettingsList.GetOrAddNetwork`.
+
+A Networks dialog save writes onto the same `NetworkSettings` objects (`SettingsViewModel.Save`,
+`NetworkSettingsViewModel.Source`), so a holder of a network keeps it after the save.
 
 No runtime type represents a network yet. A `Server` panel stands in for one, and `ServerViewModel.DoRegister`
 writes the network back to settings as a side effect of registering, resolving it through

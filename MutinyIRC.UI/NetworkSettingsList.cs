@@ -74,14 +74,21 @@ public sealed class NetworkSettingsList : IReadOnlyList<NetworkSettings>
     public bool Remove(NetworkSettings network) => _networks.Remove(network);
 
     /// <summary>
+    /// Whether the set holds the network you pass. Identity is by reference, as for
+    /// <see cref="Remove"/>.
+    /// </summary>
+    public bool Contains(NetworkSettings network) => _networks.Contains(network);
+
+    /// <summary>
     /// Swaps the whole set for <paramref name="networks"/> in one step, dropping any entry point
     /// a network earlier in the sequence already claims.
     /// </summary>
     /// <remarks>
-    /// This is the only way to fill the list, so every network reaching it — whether it came from
-    /// disk or from the settings window — passes the same check. A duplicate host is dropped
-    /// rather than the network holding it, because the duplicate was already unreachable: a URL
-    /// lookup stops at the first network that lists it.
+    /// Use this for data from disk. The Networks dialog does not use it: its save writes onto
+    /// the saved networks in place, so that a holder of a network keeps it (see
+    /// <see cref="ViewModels.SettingsViewModel.Save"/>). A duplicate host is dropped rather than
+    /// the network holding it, because the duplicate was already unreachable: a URL lookup stops
+    /// at the first network that lists it.
     /// </remarks>
     public void ReplaceAll(IEnumerable<NetworkSettings> networks)
     {

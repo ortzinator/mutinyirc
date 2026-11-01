@@ -29,7 +29,7 @@ public class DesignSettingsViewModel : SettingsViewModel
             PinnedFingerprint = "3A7F0C9E51B2D84466E1A0F3C7D92B580E4A1C6F93D0B7E25A8C4F1D06B9E372"
         });
         libera.Servers.Add(new ServerSettingsViewModel
-        { Url = "irc.libera.chat", Port = 6667, Ssl = false, Order = 3 });
+        { Url = "irc.us.libera.chat", Port = 6667, Ssl = false, Order = 3 });
         libera.Channels.Add(new ChannelSettingsViewModel { Name = "#mutinyirc" });
         libera.Channels.Add(new ChannelSettingsViewModel { Name = "#avalonia" });
         libera.Channels.Add(new ChannelSettingsViewModel { Name = "#backstage", Key = "hunter2" });

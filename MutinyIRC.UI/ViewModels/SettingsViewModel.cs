@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MutinyIRC.Common;
 
 namespace MutinyIRC.UI.ViewModels;
 
@@ -14,6 +17,21 @@ public partial class SettingsViewModel : ObservableObject
 
     public ObservableCollection<NetworkSettingsViewModel> Networks { get; } = new();
 
+    /// <summary>
+    /// Occurs during <see cref="Save"/>, after the dialog and the held live writes are applied
+    /// to the saved networks, and before the settings go to disk. The owner of the live
+    /// connections then gives each connection the new entry point list of its bound network.
+    /// It comes after the held writes, because a held merge can move an entry point.
+    /// </summary>
+    public event EventHandler? NetworksApplied;
+
+    /// <summary>
+    /// The rule that the dialog lists a hostname at most once. It watches
+    /// <see cref="Networks"/>, and gives itself to each network in it, also to a network that a
+    /// subclass adds later. It lives as long as the dialog.
+    /// </summary>
+    internal ListedHosts ListedHosts { get; }
+
     public SettingsViewModel() : this(IrcSettingsManager.Instance) { }
 
     /// <summary>
@@ -24,6 +42,13 @@ public partial class SettingsViewModel : ObservableObject
     public SettingsViewModel(IrcSettingsManager settings)
     {
         _settings = settings;
+
+        // The rows are a copy of the networks. The live writes wait until the dialog closes, so
+        // that the copy stays the same as the networks.
+        _settings.HoldLiveWrites();
+
+        ListedHosts = new ListedHosts(Networks);
+
         foreach (var network in _settings.Networks)
             Networks.Add(new NetworkSettingsViewModel(network));
         SelectedNetwork = Networks.Count > 0 ? Networks[0] : null;
@@ -53,11 +78,68 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnSelectedNetworkChanged(NetworkSettingsViewModel? value)
         => RemoveNetworkCommand.NotifyCanExecuteChanged();
 
+    /// <summary>
+    /// The OK of the dialog. All on the UI thread, in this order: it writes the dialog onto the
+    /// saved networks in place, applies the live writes that waited, gives each live connection
+    /// the new entry points of its network, and then writes the settings to disk once.
+    /// </summary>
+    /// <remarks>
+    /// A live write that waited obeys the edits of the dialog: see <see cref="DialogEdits"/> and
+    /// <see cref="IrcSettingsManager.WhenWritable"/>.
+    /// </remarks>
     public void Save()
     {
-        // One swap rather than a clear-then-refill, so the settings are never momentarily empty
-        // and ReplaceAll gets to hold the one-network-per-hostname rule over the whole set.
-        _settings.Networks.ReplaceAll(Networks.Select(vm => vm.ToModel()));
+        DialogEdits edits = DialogEdits.Find(Networks, _settings.Networks);
+        ApplyToSavedNetworks();
+        _settings.ApplyHeldWrites(edits);
+        NetworksApplied?.Invoke(this, EventArgs.Empty);
         _settings.Save();
+    }
+
+    /// <summary>
+    /// The Cancel of the dialog. It applies the live writes that waited as they are, in memory
+    /// only, and does not write to disk. After <see cref="Save"/>, it does nothing.
+    /// </summary>
+    public void Cancel() => _settings.ApplyHeldWrites(DialogEdits.None);
+
+    /// <summary>
+    /// Writes the dialog onto the saved networks in place.
+    /// </summary>
+    /// <remarks>
+    /// A network that was in the dialog before and after the save is the same object as before,
+    /// so a live connection that holds it keeps it. A network added in the dialog becomes a new
+    /// object, and a network deleted in the dialog is removed.
+    /// </remarks>
+    private void ApplyToSavedNetworks()
+    {
+        NetworkSettingsList saved = _settings.Networks;
+
+        // Remove the deleted networks first. Then a host that moved from a deleted network to
+        // another network is not claimed twice.
+        var kept = new HashSet<NetworkSettings>(
+            Networks.Select(vm => vm.Source).OfType<NetworkSettings>(),
+            ReferenceEqualityComparer.Instance);
+        foreach (NetworkSettings network in saved.ToList())
+            if (!kept.Contains(network))
+                saved.Remove(network);
+
+        // A hostname belongs to one network. The first row that lists a host keeps it, and a
+        // later row drops it, as NetworkSettingsList.ReplaceAll does for data from disk.
+        var claimed = new HashSet<string>(EntryPoint.HostComparer);
+        var added = new List<NetworkSettings>();
+        foreach (NetworkSettingsViewModel vm in Networks)
+        {
+            NetworkSettings network = vm.Source ?? new NetworkSettings();
+            vm.ApplyTo(network, server => claimed.Add(server.Url));
+            if (vm.Source is null)
+                added.Add(network);
+        }
+
+        // The dialog adds a network only at the end, so an added network goes after the others.
+        foreach (NetworkSettings network in added)
+        {
+            bool accepted = saved.TryAdd(network);
+            Debug.Assert(accepted, "The save drops every host that another network claims");
+        }
     }
 }

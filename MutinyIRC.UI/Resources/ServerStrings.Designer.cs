@@ -47,7 +47,9 @@ namespace MutinyIRC.UI.Resources
         internal static string ConnectionLostUnknownMessage => ResourceManager.GetString("ConnectionLostUnknownMessage", resourceCulture);
         internal static string Disconnected => ResourceManager.GetString("Disconnected", resourceCulture);
         internal static string DisconnectSocketError => ResourceManager.GetString("DisconnectSocketError", resourceCulture);
+        internal static string EntryPointChangedMessage => ResourceManager.GetString("EntryPointChangedMessage", resourceCulture);
         internal static string EveryEntryPointRefusedMessage => ResourceManager.GetString("EveryEntryPointRefusedMessage", resourceCulture);
+        internal static string NoEntryPointsMessage => ResourceManager.GetString("NoEntryPointsMessage", resourceCulture);
         internal static string NickTakenMessage => ResourceManager.GetString("NickTakenMessage", resourceCulture);
         internal static string RandomNickMessage => ResourceManager.GetString("RandomNickMessage", resourceCulture);
         internal static string ServerErrorMessage => ResourceManager.GetString("ServerErrorMessage", resourceCulture);
@@ -65,6 +67,7 @@ namespace MutinyIRC.UI.Resources
         internal static string ConnectedPinnedMessage => ResourceManager.GetString("ConnectedPinnedMessage", resourceCulture);
         internal static string ReconnectButton => ResourceManager.GetString("ReconnectButton", resourceCulture);
         internal static string TrustCertificateButton => ResourceManager.GetString("TrustCertificateButton", resourceCulture);
+        internal static string TrustEntryPointRemovedButton => ResourceManager.GetString("TrustEntryPointRemovedButton", resourceCulture);
         internal static string ReplacePinnedCertificateButton => ResourceManager.GetString("ReplacePinnedCertificateButton", resourceCulture);
         internal static string CertificatePinHostOnOtherPort => ResourceManager.GetString("CertificatePinHostOnOtherPort", resourceCulture);
         internal static string ReplacePinTitle => ResourceManager.GetString("ReplacePinTitle", resourceCulture);
@@ -75,5 +78,8 @@ namespace MutinyIRC.UI.Resources
         internal static string VerifyCertificatesOffHint => ResourceManager.GetString("VerifyCertificatesOffHint", resourceCulture);
         internal static string VerifyCertificatesNoTlsHint => ResourceManager.GetString("VerifyCertificatesNoTlsHint", resourceCulture);
         internal static string EntryPointPinLine => ResourceManager.GetString("EntryPointPinLine", resourceCulture);
+        internal static string HostListedInNetwork => ResourceManager.GetString("HostListedInNetwork", resourceCulture);
+        internal static string HostListedInThisNetwork => ResourceManager.GetString("HostListedInThisNetwork", resourceCulture);
+        internal static string EntryPointMoved => ResourceManager.GetString("EntryPointMoved", resourceCulture);
     }
 }

@@ -204,6 +204,39 @@ public class ServerSettingsWindowTests
     }
 
     [AvaloniaTest]
+    public void AHostTheDialogLists_DisablesAddAndShowsTheMessage()
+    {
+        var window = ShowWindow(out SettingsViewModel vm);
+        Button addButton = window.GetVisualDescendants()
+            .OfType<Button>()
+            .Single(b => b.Name == "addServerButton");
+        TextBlock clash = window.GetVisualDescendants()
+            .OfType<TextBlock>()
+            .Single(t => t.Name == "newServerClash");
+
+        Assert.That(clash.IsVisible, Is.False, "there is no clash before anything is typed");
+
+        vm.SelectedNetwork!.NewServerText = "EU.libera.chat:6697";
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(addButton.IsEffectivelyEnabled, Is.False);
+            Assert.That(clash.IsVisible, Is.True);
+            Assert.That(clash.Text, Is.EqualTo("EU.libera.chat is already listed in this network."));
+        });
+
+        vm.SelectedNetwork.NewServerText = "irc.oftc.net";
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(addButton.IsEffectivelyEnabled, Is.True);
+            Assert.That(clash.IsVisible, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
     public void SelectingAnotherNetwork_RedrawsItsServers()
     {
         var window = ShowWindow(out SettingsViewModel vm);
@@ -256,6 +289,25 @@ public class ServerSettingsWindowTests
         {
             Assert.That(PinLines(window)[0].IsVisible, Is.False);
             Assert.That(vm.SelectedNetwork!.Servers[0].PinnedFingerprint, Is.Null);
+        });
+    }
+    [AvaloniaTest]
+    public void ClosingTheWindowWithoutOk_AppliesTheHeldWrites_AndWritesNothingToDisk()
+    {
+        string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".json");
+        var manager = new IrcSettingsManager(path);
+        NetworkSettings home = manager.GetOrAddNetwork("Home");
+        var window = new ServerSettingsWindow(new SettingsViewModel(manager));
+        window.Show();
+
+        manager.WhenWritable(() => manager.MarkAutoConnect(home));
+        Assert.That(home.AutoConnect, Is.False, "Precondition: the write waits");
+        window.Close();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(home.AutoConnect, Is.True);
+            Assert.That(File.Exists(path), Is.False);
         });
     }
 }
