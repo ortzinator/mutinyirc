@@ -38,7 +38,7 @@ Source of truth is the `renderVals()` block or the markup line each element come
 | 15 | Server row live state | **Cut** | — | `s.stateStyle` |
 | 16 | Row `×` remove | Migrate | `RemoveServerCommand(row)` | `s.onRemove` |
 | 17 | Inline `add server — host:port` | Migrate | `NewServerText` + `AddServerCommand` | 425–428, `parseServer()` |
-| 18 | Toggle — Verify TLS certificates | Adapt → drawn, disabled | — | `connToggles[0]` |
+| 18 | Toggle — Verify TLS certificates | Migrate | `NetworkSettingsViewModel.VerifyCertificates` | `connToggles[0]` |
 | 19 | Toggle — SASL authentication | Adapt → drawn, disabled | — | `connToggles[1]` |
 | 20 | Toggle — Connect on startup | Adapt → drawn, disabled; flag moves | `NetworkSettings.AutoConnect` | `connToggles[2]` |
 | 21 | Toggle control (switch, not checkbox) | Migrate | stock `ToggleSwitch` | `toggle(on)` |
@@ -116,18 +116,25 @@ replace. Dialling stays with `/server` and with autoconnect.
   button disabled.
 - **Adding a channel** parses `#channel` or `#channel key`. Membership of the list is the autojoin flag, so
   `ToModel()` always writes `AutoJoin = true` and removing the chip is how you stop autojoining.
-- **The three toggles are drawn and disabled.** They mark where the settings will live and read the state
-  they would control, but none of them writes. See the regression note below.
-- **Save** replaces the whole saved set through `NetworkSettingsList.ReplaceAll`, which keeps the
-  one-network-per-hostname rule. **Cancel** discards.
+- **The Verify TLS certificates switch** writes `NetworkSettings.VerifyCertificates`, which is on by
+  default. It is disabled when no entry point of the network uses TLS, because a plaintext connection has
+  no certificate to check (`CanVerifyCertificates`). The hint under it then says so, and the saved value
+  stays as it is. Adding a TLS entry point, or setting the TLS flag on one, enables it again.
+- **The SASL and Connect on startup toggles are drawn and disabled.** They mark where the settings will
+  live and read the state they would control, but neither writes. See the regression note below.
+- **Save** writes the dialog onto the saved networks in place (`SettingsViewModel.Save`). A network that
+  stays in the dialog keeps its object, so a live connection that holds it keeps it. An added network
+  becomes a new object at the end, and a deleted network is removed. A hostname belongs to one network:
+  the first row that lists it keeps it. **Cancel** discards the dialog's edits.
 
 ### Known regression
 
-With all three toggles disabled, nothing in this dialog can change autoconnect. Autoconnect keeps working
-from whatever `servers.json` already holds — the `Load()` fold preserves those values, and connecting to a
-host still sets the network's flag in `ServerViewModel.DoRegister` — but the "Auto-connect" checkbox that
-the old window offered goes away without a working replacement. This was raised and confirmed as a
-deliberate deferral; wiring the three toggles is a later run.
+With the Connect on startup toggle disabled, nothing in this dialog can change autoconnect. Autoconnect
+keeps working from whatever `servers.json` already holds — the `Load()` fold preserves those values, and
+connecting to a host still sets the network's flag in `ServerViewModel.DoRegister` — but the
+"Auto-connect" checkbox that the old window offered goes away without a working replacement. This was
+raised and confirmed as a deliberate deferral; wiring the SASL and Connect on startup toggles is a later
+run.
 
 ## Cut, and why
 
