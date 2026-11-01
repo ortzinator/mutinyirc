@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MutinyIRC.UI;
 
-public sealed class AppSettings
+public sealed partial class AppSettings : ObservableObject
 {
     private static AppSettings? Singleton;
     private static readonly string SettingsPath = Path.Combine(
@@ -22,7 +23,12 @@ public sealed class AppSettings
         }
     }
 
-    public bool ShowTimestamps { get; set; } = true;
+    /// <summary>
+    /// Whether chat lines show their time. The chat line templates bind to this property on
+    /// <see cref="Instance"/>, so a change also applies to the lines that are already shown.
+    /// </summary>
+    [ObservableProperty] private bool _showTimestamps = true;
+
     public bool LoggerActivated { get; set; } = false;
     public bool LoggerTimestampsActivated { get; set; } = true;
     public string LoggerTimestampFormat { get; set; } = "[hh:mm:ss]";

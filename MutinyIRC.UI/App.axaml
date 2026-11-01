@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:MutinyIRC.UI.ViewModels"
              xmlns:conv="clr-namespace:MutinyIRC.UI.Converters"
+             xmlns:ui="clr-namespace:MutinyIRC.UI"
              x:Class="MutinyIRC.UI.App">
 
     <Application.Styles>
@@ -31,7 +32,7 @@
                            Foreground="{DynamicResource TextQuaternary}"
                            FontSize="11" Width="40" TextAlignment="Right"
                            VerticalAlignment="Top" Margin="0,2,10,0"
-                           IsVisible="{Binding ShowTimestamps}"/>
+                           IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Top" Margin="0,2"
                            FontStyle="Italic">
                     <Run Text="* "
@@ -53,7 +54,7 @@
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
-                               IsVisible="{Binding ShowTimestamps}"/>
+                               IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding User.NamesLiteral}"
                                FontWeight="SemiBold"
@@ -74,7 +75,7 @@
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
-                               IsVisible="{Binding ShowTimestamps}"/>
+                               IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                     <TextBlock DockPanel.Dock="Left"
                                Foreground="{DynamicResource StatusWarningForeground}"
                                FontWeight="SemiBold"
@@ -96,7 +97,7 @@
                            Foreground="{DynamicResource TextQuaternary}"
                            FontSize="11" Width="40" TextAlignment="Right"
                            VerticalAlignment="Top" Margin="0,2,10,0"
-                           IsVisible="{Binding ShowTimestamps}"/>
+                           IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                 <TextBlock DockPanel.Dock="Left"
                            Text="{Binding User.NamesLiteral}"
                            FontWeight="SemiBold"
@@ -115,7 +116,7 @@
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
-                               IsVisible="{Binding ShowTimestamps}"/>
+                               IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                     <TextBlock Foreground="{DynamicResource StatusErrorForeground}" TextWrapping="Wrap">
                         <TextBlock.Text>
                             <MultiBinding StringFormat="Error {0}: {1}">
@@ -138,7 +139,7 @@
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Top" Margin="0,2,10,0"
-                               IsVisible="{Binding ShowTimestamps}"/>
+                               IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                     <StackPanel Spacing="6">
                         <SelectableTextBlock Text="{Binding Message}" TextWrapping="Wrap"
                                              Foreground="{DynamicResource StatusErrorForeground}"/>
@@ -163,7 +164,7 @@
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Top" Margin="0,2,10,0"
-                               IsVisible="{Binding ShowTimestamps}"/>
+                               IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                     <StackPanel Spacing="6">
                         <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
                                    Foreground="{DynamicResource StatusErrorForeground}"/>
@@ -185,7 +186,7 @@
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
-                               IsVisible="{Binding ShowTimestamps}"/>
+                               IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                     <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
                                Foreground="{DynamicResource StatusErrorForeground}"/>
                 </DockPanel>
@@ -200,7 +201,7 @@
                                Text="{Binding Time, StringFormat='HH:mm'}"
                                Foreground="{DynamicResource TextQuaternary}"
                                FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"
-                               IsVisible="{Binding ShowTimestamps}"/>
+                               IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                     <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
                                Foreground="{DynamicResource StatusWarningForeground}"/>
                 </DockPanel>
@@ -214,7 +215,7 @@
                            Foreground="{DynamicResource TextQuaternary}"
                            FontSize="11" Width="40" TextAlignment="Right"
                            VerticalAlignment="Center" Margin="0,0,10,0"
-                           IsVisible="{Binding ShowTimestamps}"/>
+                           IsVisible="{Binding ShowTimestamps, Source={x:Static ui:AppSettings.Instance}}"/>
                 <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
                            Foreground="{DynamicResource TextTertiary}"
                            FontStyle="Italic" VerticalAlignment="Center"/>
