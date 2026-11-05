@@ -1,4 +1,3 @@
-using MutinyIRC.PluginFramework;
 
 namespace MutinyIRC.PluginFramework.Tests.Fixtures;
 

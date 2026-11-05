@@ -18,6 +18,9 @@ internal static class CertificateRefusal
     /// <summary>
     /// Make the refusal text for the entry point <paramref name="host" />:<paramref name="port" />.
     /// </summary>
+    /// <param name="certificate">The certificate that the connection refused.</param>
+    /// <param name="host">The host of the refused entry point.</param>
+    /// <param name="port">The port of the refused entry point.</param>
     /// <param name="pinnedFingerprint">
     /// The fingerprint that is pinned on this entry point, or null when it has no pin. When it has
     /// a pin, the text warns that the certificate changed.

@@ -80,13 +80,9 @@ public class Listener
     /// The connection to the IRC server is open and registered.
     /// </summary>
     public event EventHandler OnRegistered;
-    /// <summary>
-    /// This connection is about to be closed.
-    /// </summary>
+    // This connection is about to be closed.
     //public event DisconnectingEventHandler OnDisconnecting;
-    /// <summary>
-    /// This connection has been closed.
-    /// </summary>
+    // This connection has been closed.
     //public event EventHandler OnDisconnected;
     /// <summary>
     /// A user sent a NOTICE to a channel.
@@ -165,7 +161,7 @@ public class Listener
     /// </summary>
     public event EventHandler<WhoisEventArgs> OnWhois;
     /// <summary>
-    /// The response to a <see cref="Sender.Whowas"/> request.
+    /// The response to a <see cref="Sender.Whowas(string)"/> request.
     /// </summary>
     public event EventHandler<WhowasEventArgs> OnWhowas;
     /// <summary>
@@ -189,7 +185,7 @@ public class Listener
     /// </summary>
     public event EventHandler<ChannelListEventArgs> OnChannelList;
     /// <summary>
-    /// The response to a <see cref="Sender.Version"/> request.
+    /// The response to a <see cref="Sender.Version()"/> request.
     /// </summary>
     public event EventHandler<VersionEventArgs> OnVersion;
     /// <summary>
@@ -197,27 +193,27 @@ public class Listener
     /// </summary>
     public event EventHandler<MotdEventArgs> OnMotd;
     /// <summary>
-    /// The response to a <see cref="Sender.Time"/> request.
+    /// The response to a <see cref="Sender.Time()"/> request.
     /// </summary>
     public event EventHandler<TimeEventArgs> OnTime;
     /// <summary>
-    /// The response to an <see cref="Sender.Info"/> request.
+    /// The response to an <see cref="Sender.Info()"/> request.
     /// </summary>
     public event EventHandler<InfoEventArgs> OnInfo;
     /// <summary>
-    /// The response to an <see cref="Sender.Admin"/> request.
+    /// The response to an <see cref="Sender.Admin()"/> request.
     /// </summary>
     public event EventHandler<AdminEventArgs> OnAdmin;
     /// <summary>
-    /// The response to a <see cref="Sender.Lusers"/> request.
+    /// The response to a <see cref="Sender.Lusers()"/> request.
     /// </summary>
     public event EventHandler<LusersEventArgs> OnLusers;
     /// <summary>
-    /// The response to a <see cref="Sender.Links"/> request.
+    /// The response to a <see cref="Sender.Links()"/> request.
     /// </summary>
     public event EventHandler<LinksEventArgs> OnLinks;
     /// <summary>
-    /// The response to a <see cref="Sender.Stats"/> request.
+    /// The response to a <see cref="Sender.Stats(StatsQuery)"/> request.
     /// </summary>
     public event EventHandler<StatsEventArgs> OnStats;
     /// <summary>

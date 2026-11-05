@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Assert = NUnit.Framework.Legacy.ClassicAssert;
-using FakeItEasy;
-using FlamingIRC;
 
 namespace FlamingIRC.Tests;
 

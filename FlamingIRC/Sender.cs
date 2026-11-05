@@ -1404,7 +1404,7 @@ public class Sender : CommandBuilder, ISender
     /// to <see cref="Listener.OnNickError"/>. If <see cref="Connection.HandleNickTaken"/>
     /// is set to true (which is its default value) then Thresher will automatically
     /// create an alternate nick and use that. The new nick can be retrieved
-    /// by calling <see cref="Connection.ConnectionData.Nick"/>.
+    /// by calling <see cref="Connection.Nick"/>.
     /// </remarks>
     /// <param name="newNick">The changed nick name.</param>
     public void Register(string newNick)

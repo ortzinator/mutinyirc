@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using MutinyIRC.Common;
-using MutinyIRC.PluginFramework;
 using MutinyIRC.PluginFramework.Tests.Fixtures;
 using MutinyIRC.TestShared;
 using NUnit.Framework;

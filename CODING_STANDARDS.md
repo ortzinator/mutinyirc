@@ -19,7 +19,11 @@ settings and records the conventions that `.editorconfig` cannot express.
   satisfies is an **error**, so a clean build has 0 errors and 0 warnings. When a warning-level
   rule reaches zero hits, promote it to `error` in `.editorconfig`.
 - **Unused code**, enforced at build time:
-  - `CS8019` — unnecessary `using` directives (**error**).
+  - `IDE0005` — unnecessary `using` directives (**error**). The build reports `IDE0005` only
+    because `Directory.Build.props` sets `GenerateDocumentationFile`. Without doc comments, the
+    compiler cannot tell whether a `using` is necessary for a `cref`, so it does not report the
+    rule. `IDE0005` gets its result from `CS8019`, which the build never reports itself. Do not
+    set `CS8019` to `none`, because that also stops `IDE0005`.
   - `CA1823` — unused private fields (**error**).
   - `IDE0051` / `IDE0052` / `IDE0059` / `IDE0060` — uncalled private code, unread private members,
     unused value assignments, unused parameters (**errors**).

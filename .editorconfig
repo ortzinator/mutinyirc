@@ -31,8 +31,8 @@ dotnet_diagnostic.IDE0072.severity = silent
 dotnet_diagnostic.IDE0010.severity = silent
 
 # https://github.com/dotnet/aspnetcore/issues/47912
-dotnet_diagnostic.IDE0005.severity = none # Remove unnecessary using directives (using CS8019 instead)
-dotnet_diagnostic.CS8019.severity = error # Remove unnecessary using directives
+dotnet_diagnostic.IDE0005.severity = error # Remove unnecessary using directives (needs GenerateDocumentationFile, see Directory.Build.props)
+dotnet_diagnostic.CS8019.severity = error # The build never reports CS8019, but IDE0005 uses its result: do not set it to none
 
 dotnet_diagnostic.CA1823.severity = error # Avoid unused private fields
 dotnet_diagnostic.IDE0052.severity = error # Remove unread private members (count is zero; keep it there)

@@ -15,6 +15,7 @@ public partial class CertificateRefusalViewModel : ErrorMessageViewModel
 {
     private readonly Func<CertificateRefusalViewModel, Task> _trust;
 
+    /// <param name="time">The time of the refusal.</param>
     /// <param name="message">The refusal text from <see cref="CertificateRefusal.Describe"/>.</param>
     /// <param name="host">The host of the refused entry point.</param>
     /// <param name="port">The port of the refused entry point.</param>

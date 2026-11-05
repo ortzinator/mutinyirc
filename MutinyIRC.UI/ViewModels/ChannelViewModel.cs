@@ -1,5 +1,4 @@
-﻿using Ninject;
-
+﻿
 using System;
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.Input;

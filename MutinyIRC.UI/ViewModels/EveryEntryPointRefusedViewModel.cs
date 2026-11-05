@@ -15,6 +15,7 @@ public partial class EveryEntryPointRefusedViewModel : ErrorMessageViewModel
 {
     private readonly Action<EveryEntryPointRefusedViewModel> _reconnect;
 
+    /// <param name="time">The time stamp of the error block.</param>
     /// <param name="reconnect">What the button does.</param>
     public EveryEntryPointRefusedViewModel(DateTime time,
                                            Action<EveryEntryPointRefusedViewModel> reconnect)

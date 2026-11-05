@@ -8,6 +8,15 @@
       CA1801/CA1804/CA1811 settings.
     -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!--
+      The compiler reports unused usings (CS8019) only when it parses doc comments, because a
+      using can be necessary only for a cref. Without this, the CS8019 error in .editorconfig
+      does not apply to `dotnet build`. See https://github.com/dotnet/roslyn/issues/41640.
+      CS1591 (no XML comment on a public member) is off: this setting is for CS8019 only.
+    -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
 </Project>

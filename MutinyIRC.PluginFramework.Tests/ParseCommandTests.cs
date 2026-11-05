@@ -1,5 +1,4 @@
 using System;
-using MutinyIRC.PluginFramework;
 using MutinyIRC.PluginFramework.Tests.Fixtures;
 using NUnit.Framework;
 

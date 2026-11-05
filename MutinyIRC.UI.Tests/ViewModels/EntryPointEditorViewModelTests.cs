@@ -1,6 +1,5 @@
 using System.IO;
 using System.Linq;
-using MutinyIRC.Common;
 using NUnit.Framework;
 using MutinyIRC.UI.ViewModels;
 

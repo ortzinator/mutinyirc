@@ -121,8 +121,8 @@ public abstract class TcpTextClient
 
     /// <summary>
     /// Start a session: connect to the server, and do the TLS handshake if
-    /// <paramref name="ssl" /> is true. The result comes later, through
-    /// <see cref="OnConnect()" /> or <see cref="OnConnectFailed" />.
+    /// <paramref name="ssl" /> is true. The result comes later, through <see cref="OnConnect()" />
+    /// or <see cref="OnConnectFailed(ConnectError, int?, RejectedCertificate)" />.
     /// </summary>
     /// <exception cref="InvalidOperationException">A session or a connect attempt is live.</exception>
     protected void Connect(string server, int port, bool ssl)
@@ -430,6 +430,9 @@ public abstract class TcpTextClient
         /// <summary>
         /// Connect to the server, and do the TLS handshake if <paramref name="ssl" /> is true.
         /// </summary>
+        /// <param name="server">The host name or the IP address of the server.</param>
+        /// <param name="port">The port of the server.</param>
+        /// <param name="ssl">True to do the TLS handshake after the connect.</param>
         /// <param name="validate">Decides whether to accept the server certificate.</param>
         /// <returns>Null if the session is open, or why the connect failed.</returns>
         public async Task<ConnectFailure?> OpenAsync(string server, int port, bool ssl,

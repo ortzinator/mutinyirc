@@ -5,7 +5,6 @@ using FakeItEasy;
 using FlamingIRC;
 using NUnit.Framework;
 using MutinyIRC.Common;
-using MutinyIRC.UI;
 using MutinyIRC.UI.ViewModels;
 
 namespace MutinyIRC.UI.Tests.ViewModels;
