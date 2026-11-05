@@ -25,9 +25,7 @@
 using System;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 using System.Globalization;
-using System.Threading;
 
 namespace FlamingIRC;
 
@@ -104,7 +102,7 @@ public sealed class DccListener
 
     internal void Parse(Connection connection, string message)
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccListener::Parse()");
+        DccUtil.DccTrace.Info();
         Match match = _parser.Match(message);
         string requestor = match.Groups[1].ToString();
         string[] tokens = _tokenizer.Split(match.Groups[2].ToString().Trim());
@@ -241,7 +239,7 @@ public sealed class DccListener
                 break;
             default:
                 connection.Listener.Error(ReplyCode.UnparseableMessage, message);
-                Debug.WriteLineIf(DccUtil.DccTrace.TraceError, "[" + Thread.CurrentThread.Name + "] DccListener::Parse() Unknown DCC command");
+                DccUtil.DccTrace.Error("Unknown DCC command");
                 break;
         }
     }
@@ -261,7 +259,7 @@ public sealed class DccListener
             {
                 if (Singleton == null)
                 {
-                    Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccListener::init");
+                    DccUtil.DccTrace.Verbose();
                     Singleton = new DccListener();
                 }
             }

@@ -92,7 +92,7 @@ public sealed class DccChatSession
         }
         catch (Exception ex)
         {
-            Debug.WriteLineIf(DccUtil.DccTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccChatSession::CloseClientConnection() " + ex);
+            DccUtil.DccTrace.Warning(ex.ToString());
         }
     }
     /// <summary>
@@ -100,7 +100,7 @@ public sealed class DccChatSession
     /// </summary>
     private void SendClosedEvent()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::SendClosedEvent()");
+        DccUtil.DccTrace.Info();
         OnChatSessionClosed?.Invoke(this, new DccChatSessionEventArgs(this));
     }
     /// <summary>
@@ -129,14 +129,14 @@ public sealed class DccChatSession
     {
         if (_listening)
         {
-            Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::TimerExpired() Chat session " + ToString() + " timed out.");
+            DccUtil.DccTrace.Info($"Chat session {ToString()} timed out.");
             OnChatRequestTimeout?.Invoke(this, new DccChatSessionEventArgs(this));
             Close();
         }
     }
     private void Listen()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Listen()");
+        DccUtil.DccTrace.Info();
         try
         {
             //Wait for remote client to connect
@@ -148,14 +148,14 @@ public sealed class DccChatSession
             _client = _server.AcceptTcpClient();
             _server.Stop();
             _listening = false;
-            Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Listen() Remote user connected.");
+            DccUtil.DccTrace.Info("Remote user connected.");
             OnChatSessionOpened?.Invoke(this, new DccChatSessionEventArgs(this));
             //Start listening for messages
             ReceiveMessages();
         }
         catch (Exception)
         {
-            Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Listen() Connection broken");
+            DccUtil.DccTrace.Info("Connection broken");
         }
         finally
         {
@@ -165,7 +165,7 @@ public sealed class DccChatSession
 
     private void Connect()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Connect()");
+        DccUtil.DccTrace.Info();
         try
         {
             _client = new TcpClient();
@@ -175,7 +175,7 @@ public sealed class DccChatSession
         }
         catch (Exception se)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccChatSession::Connect() exception=" + se);
+            Rfc2812Util.IrcTrace.Warning($"exception={se}");
             if (se.Message.IndexOf("refused") > 0)
             {
                 ClientInfo.Connection.Listener.Error(ReplyCode.DccConnectionRefused, "Connection refused by remote user.");
@@ -193,7 +193,7 @@ public sealed class DccChatSession
     }
     private void ReceiveMessages()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::ReceiveMessages()");
+        DccUtil.DccTrace.Info();
         try
         {
             _receiving = true;
@@ -204,7 +204,7 @@ public sealed class DccChatSession
                 if (OnChatMessageReceived != null)
                 {
                     Debug.Indent();
-                    Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccChatSession::ReceiveMessages() Session: " + ToString() + " Received: " + message);
+                    DccUtil.DccTrace.Verbose($"Session: {ToString()} Received: {message}");
                     Debug.Unindent();
                     OnChatMessageReceived?.Invoke(this, new DccChatMessageEventArgs(this, message));
                 }
@@ -215,7 +215,7 @@ public sealed class DccChatSession
         }
         catch (Exception ex)
         {
-            Debug.WriteLineIf(DccUtil.DccTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccChatSession::ReceiveMessages() exception= " + ex);
+            DccUtil.DccTrace.Warning($"exception= {ex}");
         }
         finally
         {
@@ -240,11 +240,11 @@ public sealed class DccChatSession
                 //we don't accidentally send two.
                 byte[] messageBytes = ClientInfo.Connection.TextEncoding.GetBytes(text.TrimEnd() + "\n");
                 _client.GetStream().Write(messageBytes, 0, messageBytes.Length);
-                Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccChatSession::SendMessage() Sent : " + text + " Size: " + messageBytes.Length);
+                DccUtil.DccTrace.Verbose($"Sent : {text} Size: {messageBytes.Length}");
             }
             catch (Exception ex)
             {
-                Debug.WriteLineIf(DccUtil.DccTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccChatSession::SendMessage() " + ex);
+                DccUtil.DccTrace.Warning(ex.ToString());
             }
         }
     }
@@ -256,7 +256,7 @@ public sealed class DccChatSession
         //Locked because it may be called by the Timer or client thread
         lock (this)
         {
-            Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Close()");
+            DccUtil.DccTrace.Info();
             if (_listening)
             {
                 _server.Stop();
@@ -289,7 +289,7 @@ public sealed class DccChatSession
     /// <returns>The DccChatSession instance for this session.</returns>
     public static DccChatSession Accept(DccUser dccUser)
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Accept()");
+        DccUtil.DccTrace.Info();
         DccChatSession session = new DccChatSession(dccUser);
         //Start session Thread
         session._thread = new Thread(new ThreadStart(session.Connect))
@@ -346,7 +346,7 @@ public sealed class DccChatSession
     /// A value of zero will disable the timeout.</param>
     public static DccChatSession Request(DccUser dccUser, string listenIPAddress, int listenPort, long timeout)
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Request()");
+        DccUtil.DccTrace.Info();
         //Create session object
         DccChatSession session = new DccChatSession(dccUser)
         {
@@ -368,7 +368,7 @@ public sealed class DccChatSession
                 session,
                 timeout,
                 0);
-            Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccChatSession::Request timeout thread started");
+            DccUtil.DccTrace.Info("timeout thread started");
         }
         return session;
     }

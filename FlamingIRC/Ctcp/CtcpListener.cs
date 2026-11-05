@@ -24,7 +24,6 @@
 
 using System;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 using System.Globalization;
 
 namespace FlamingIRC;
@@ -152,7 +151,7 @@ public class CtcpListener
         else
         {
             _connection.Listener.Error(ReplyCode.UnparseableMessage, line);
-            Debug.WriteLineIf(CtcpUtil.CtcpTrace.TraceWarning, "Unknown CTCP command '" + line + "' recieved by CtcpListener");
+            CtcpUtil.CtcpTrace.Warning($"Unknown CTCP command '{line}'");
         }
     }
 

@@ -25,10 +25,8 @@
 
 using System;
 using System.Collections;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Collections.Generic;
 
 namespace FlamingIRC;
@@ -282,8 +280,7 @@ public class Listener
     public void Parse(string message)
     {
         OnAnything?.Invoke(this, new EventArgs());
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::Parse() RAW: \"{message}\"");
+        Rfc2812Util.IrcTrace.Verbose($"RAW: \"{message}\"");
 
         IrcMessage ircMessage = ParseIrcMessage(message);
 
@@ -357,8 +354,7 @@ public class Listener
                 break;
             default:
                 OnError?.Invoke(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, ircMessage.Message));
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                    $"[{Thread.CurrentThread.Name}] Listener::ParseCommand() Unknown IRC command={ircMessage.Command}");
+                Rfc2812Util.IrcTrace.Warning($"Unknown IRC command={ircMessage.Command}");
                 break;
         }
     }
@@ -371,8 +367,7 @@ public class Listener
 
     private void ProcessKillCommand(IrcMessage ircMessage)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessKillCommand() target={ircMessage.Target}");
+        Rfc2812Util.IrcTrace.Verbose($"target={ircMessage.Target}");
         OnKill?.Invoke(this, new KillEventArgs(
             Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target,
             ircMessage.Message ?? string.Empty));
@@ -395,8 +390,7 @@ public class Listener
             catch (Exception)
             {
                 OnError?.Invoke(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, ircMessage.Message));
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                    "[" + Thread.CurrentThread.Name + "] Listener::ParseCommand() Bad IRC MODE string=" + ircMessage.From);
+                Rfc2812Util.IrcTrace.Warning($"Bad IRC MODE string={ircMessage.From}");
             }
         }
         else
@@ -409,8 +403,7 @@ public class Listener
 
     public void ProcessKickCommand(IrcMessage ircMessage)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessKickCommand() channel={ircMessage.Tokens[2]}");
+        Rfc2812Util.IrcTrace.Verbose($"channel={ircMessage.Tokens[2]}");
         OnKick?.Invoke(this, new KickEventArgs(
             Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Tokens[2], ircMessage.Tokens[3],
             ircMessage.Message));
@@ -418,23 +411,20 @@ public class Listener
 
     public void ProcessInviteCommand(string[] tokens)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessInviteCommand()");
+        Rfc2812Util.IrcTrace.Verbose();
         OnInvite?.Invoke(this, new InviteEventArgs(tokens[0], RemoveLeadingColon(tokens[3])));
     }
 
     private void ProcessQuitCommand(IrcMessage ircMessage)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessQuitCommand() from={ircMessage.From}");
+        Rfc2812Util.IrcTrace.Verbose($"from={ircMessage.From}");
         OnQuit?.Invoke(this, new QuitEventArgs(
             Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Message ?? string.Empty));
     }
 
     private void ProcessPartCommand(IrcMessage ircMessage)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessPartCommand() channel={ircMessage.Target}");
+        Rfc2812Util.IrcTrace.Verbose($"channel={ircMessage.Target}");
         OnPart?.Invoke(this, new PartEventArgs(
             Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target,
             ircMessage.Message ?? string.Empty));
@@ -442,23 +432,20 @@ public class Listener
 
     private void ProcessTopicCommand(IrcMessage ircMessage)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessTopicCommand() channel={ircMessage.Target}");
+        Rfc2812Util.IrcTrace.Verbose($"channel={ircMessage.Target}");
         OnTopicChanged?.Invoke(this, new UserChannelMessageEventArgs(
             Rfc2812Util.UserFromString(ircMessage.From), ircMessage.Target, ircMessage.Message));
     }
 
     public void ProcessNickCommand(IrcMessage message)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessNickCommand()");
+        Rfc2812Util.IrcTrace.Verbose();
         OnNick?.Invoke(this, new NickChangeEventArgs(Rfc2812Util.UserFromString(message.From), message.Message));
     }
 
     public void ProcessJoinCommand(IrcMessage ircMessage)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessJoinCommand() channel={ircMessage.Target}");
+        Rfc2812Util.IrcTrace.Verbose($"channel={ircMessage.Target}");
         OnJoin?.Invoke(this, new JoinEventArgs(
             Rfc2812Util.UserFromString(ircMessage.From), RemoveLeadingColon(ircMessage.Target)));
     }
@@ -472,16 +459,14 @@ public class Listener
                 Rfc2812Util.UserFromString(tokens[0]),
                 tokens[2],
                 CondenseStrings(tokens, 3)));
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                $"[{Thread.CurrentThread.Name}] Listener::ProcessNoticeCommand() public channel={tokens[2]}");
+            Rfc2812Util.IrcTrace.Verbose($"public channel={tokens[2]}");
         }
         else
         {
             OnPrivateNotice?.Invoke(this, new UserMessageEventArgs(
                 Rfc2812Util.UserFromString(tokens[0]),
                 CondenseStrings(tokens, 3)));
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                $"[{Thread.CurrentThread.Name}] Listener::ProcessNoticeCommand() private");
+            Rfc2812Util.IrcTrace.Verbose("private");
         }
     }
 
@@ -497,8 +482,7 @@ public class Listener
                 OnAction?.Invoke(this,
                     new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2],
                         CondenseStrings(tokens, 4)));
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                    $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() channel action channel={tokens[2]}");
+                Rfc2812Util.IrcTrace.Verbose($"channel action channel={tokens[2]}");
             }
             else
             {
@@ -506,8 +490,7 @@ public class Listener
                 tokens[last] = RemoveTrailingChar(tokens[last]);
                 OnPrivateAction?.Invoke(this,
                     new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 4)));
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                    $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() private action");
+                Rfc2812Util.IrcTrace.Verbose("private action");
             }
         }
         else if (_channelPattern.IsMatch(tokens[2]))
@@ -515,14 +498,12 @@ public class Listener
             OnPublic?.Invoke(this,
                 new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), tokens[2],
                     CondenseStrings(tokens, 3)));
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() public channel={tokens[2]}");
+            Rfc2812Util.IrcTrace.Verbose($"public channel={tokens[2]}");
         }
         else
         {
             OnPrivate?.Invoke(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(tokens[0]), CondenseStrings(tokens, 3)));
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() private");
+            Rfc2812Util.IrcTrace.Verbose("private");
         }
     }
 
@@ -535,15 +516,13 @@ public class Listener
             {
                 OnAction?.Invoke(this, new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Target,
                         CleanActionMessage(message.Message)));
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                    $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() channel action channel={message.Target}");
+                Rfc2812Util.IrcTrace.Verbose($"channel action channel={message.Target}");
             }
             else
             {
                 OnPrivateAction?.Invoke(this,
                     new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), CleanActionMessage(message.Message)));
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                    $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() private action");
+                Rfc2812Util.IrcTrace.Verbose("private action");
             }
         }
         else if (_channelPattern.IsMatch(message.Target))
@@ -551,14 +530,12 @@ public class Listener
             OnPublic?.Invoke(this,
                 new UserChannelMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Target,
                     message.Message));
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() public channel={message.Target}");
+            Rfc2812Util.IrcTrace.Verbose($"public channel={message.Target}");
         }
         else
         {
             OnPrivate?.Invoke(this, new UserMessageEventArgs(Rfc2812Util.UserFromString(message.From), message.Message));
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                $"[{Thread.CurrentThread.Name}] Listener::ProcessPrivmsgCommand() private");
+            Rfc2812Util.IrcTrace.Verbose("private");
         }
     }
 
@@ -571,8 +548,7 @@ public class Listener
             //Messages sent upon successful registration 
             case ReplyCode.RPL_WELCOME:
             case ReplyCode.RPL_YOURESERVICE:
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                    $"[{Thread.CurrentThread.Name}] Listener::ParseReply() Registered");
+                Rfc2812Util.IrcTrace.Info("Registered");
                 OnRegistered?.Invoke(this, new EventArgs());
                 break;
             case ReplyCode.RPL_MOTDSTART:
@@ -606,8 +582,7 @@ public class Listener
             case ReplyCode.ERR_NICKCOLLISION:
                 tokens[4] = RemoveLeadingColon(tokens[4]);
                 OnNickError?.Invoke(this, new NickErrorEventArgs(tokens[3], CondenseStrings(tokens, 4)));
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                    $"[{Thread.CurrentThread.Name}] Listener::ParseReply() Nick collision nick={tokens[3]}");
+                Rfc2812Util.IrcTrace.Warning($"Nick collision nick={tokens[3]}");
                 break;
             case ReplyCode.RPL_NOTOPIC:
                 OnError?.Invoke(this, new ErrorMessageEventArgs(code, CondenseStrings(tokens, 3)));
@@ -711,7 +686,7 @@ public class Listener
                 catch (Exception)
                 {
                     OnError?.Invoke(this, new ErrorMessageEventArgs(ReplyCode.UnparseableMessage, CondenseStrings(tokens, 0)));
-                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Listener::ParseReply() Bad IRC MODE string=" + tokens[0]);
+                    Rfc2812Util.IrcTrace.Warning($"Bad IRC MODE string={tokens[0]}");
                 }
                 break;
             case ReplyCode.RPL_BANLIST:
@@ -824,8 +799,7 @@ public class Listener
             string[] users = new string[numberOfUsers];
             Array.Copy(tokens, 5, users, 0, numberOfUsers);
             OnNames?.Invoke(this, new NamesEventArgs(tokens[4], users, false));
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                $"[{Thread.CurrentThread.Name}] Listener::ProcessNamesReply() channel={tokens[4]} count={numberOfUsers}");
+            Rfc2812Util.IrcTrace.Verbose($"channel={tokens[4]} count={numberOfUsers}");
         }
     }
 
@@ -960,8 +934,7 @@ public class Listener
         string[] users = new string[numberOfUsers];
         Array.Copy(tokens, 5, users, 0, numberOfUsers);
         OnNames?.Invoke(this, new NamesEventArgs(tokens[4], users, false));
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessNamesReply() channel={tokens[4]} count={numberOfUsers}");
+        Rfc2812Util.IrcTrace.Verbose($"channel={tokens[4]} count={numberOfUsers}");
     }
 
     /// <summary>
@@ -984,21 +957,18 @@ public class Listener
                 fromUser,
                 ircMessage.Target,
                 ircMessage.Message));
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                $"[{Thread.CurrentThread.Name}] Listener::ProcessNoticeCommand() public channel={ircMessage.Target}");
+            Rfc2812Util.IrcTrace.Verbose($"public channel={ircMessage.Target}");
         }
         else
         {
             OnPrivateNotice?.Invoke(this, new UserMessageEventArgs(fromUser, ircMessage.Message));
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                $"[{Thread.CurrentThread.Name}] Listener::ProcessNoticeCommand() private");
+            Rfc2812Util.IrcTrace.Verbose("private");
         }
     }
 
     public void ProcessInviteCommand(IrcMessage ircMessage)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] Listener::ProcessInviteCommand() channel={ircMessage.Message}");
+        Rfc2812Util.IrcTrace.Verbose($"channel={ircMessage.Message}");
         var fromUser = Rfc2812Util.UserFromString(ircMessage.From);
         OnInvite?.Invoke(this, new InviteEventArgs(fromUser.Nick, ircMessage.Message));
     }

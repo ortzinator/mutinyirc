@@ -23,7 +23,6 @@
 */
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -98,7 +97,7 @@ public sealed class Identd
             if (Running)
             {
                 ListenSocket.Stop();
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Stop()");
+                Rfc2812Util.IrcTrace.Info();
                 ListenSocket = null;
                 Running = false;
             }
@@ -107,7 +106,7 @@ public sealed class Identd
 
     private static void Run()
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run()");
+        Rfc2812Util.IrcTrace.Info();
         try
         {
             ListenSocket = new TcpListener(IPAddress.Loopback, IdentdPort);
@@ -121,7 +120,7 @@ public sealed class Identd
                     //Read query
                     StreamReader reader = new StreamReader(client.GetStream());
                     string line = reader.ReadLine();
-                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] Identd::Run() received=" + line);
+                    Rfc2812Util.IrcTrace.Verbose($"received={line}");
 
                     //Send back reply
                     StreamWriter writer = new StreamWriter(client.GetStream());
@@ -133,14 +132,14 @@ public sealed class Identd
                 }
                 catch (IOException ioe)
                 {
-                    Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] Identd::Run() exception=" + ioe);
+                    Rfc2812Util.IrcTrace.Warning($"exception={ioe}");
                 }
                 goto loop;
             }
         }
         catch (Exception)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] Identd::Run() Identd stopped");
+            Rfc2812Util.IrcTrace.Info("Identd stopped");
         }
         finally
         {

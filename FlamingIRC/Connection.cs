@@ -24,7 +24,6 @@
 
 using System;
 using System.Collections;
-using System.Diagnostics;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -331,8 +330,7 @@ public class Connection : TcpTextClient, IConnection
                 break;
 
             case KeepAliveAction.Timeout:
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                                  $"[{Thread.CurrentThread.Name}] Connection::SendKeepAlive() ping timeout; tearing down half-open connection");
+                Rfc2812Util.IrcTrace.Warning("ping timeout; tearing down half-open connection");
                 Disconnect(DisconnectReason.PingTimeout);
                 break;
         }
@@ -451,8 +449,7 @@ public class Connection : TcpTextClient, IConnection
             // trip an immediate ping timeout before any traffic has had a chance to arrive.
             _lastTraffic = DateTime.Now;
             _activityTimer.Start();
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                              $"[{Thread.CurrentThread.Name}] Connection::Connect()");
+            Rfc2812Util.IrcTrace.Info();
 
             Connect(_connectionArgs.Hostname, _connectionArgs.Port, _connectionArgs.Ssl);
             return true;
@@ -468,14 +465,12 @@ public class Connection : TcpTextClient, IConnection
         {
             Send(command.ToString());
 
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                              $"[{Thread.CurrentThread.Name}] Connection::SendCommand() sent= {command}");
+            Rfc2812Util.IrcTrace.Verbose($"sent= {command}");
             _timeLastSent = DateTime.Now;
         }
         catch (Exception ex)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                              $"[{Thread.CurrentThread.Name}] Connection::SendCommand() exception={ex}");
+            Rfc2812Util.IrcTrace.Warning($"exception={ex}");
         }
 
         RawMessageSent?.Invoke(this, new DataEventArgs<string>(command.ToString()));
@@ -493,13 +488,11 @@ public class Connection : TcpTextClient, IConnection
         {
             Send(command.ToString());
 
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                              $"[{Thread.CurrentThread.Name}] Connection::SendAutomaticReply() message={command}");
+            Rfc2812Util.IrcTrace.Verbose($"message={command}");
         }
         catch (Exception ex)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                              $"[{Thread.CurrentThread.Name}] Connection::SendAutomaticReply() exception={ex}");
+            Rfc2812Util.IrcTrace.Warning($"exception={ex}");
         }
         command.Remove(0, command.Length);
     }
@@ -526,8 +519,7 @@ public class Connection : TcpTextClient, IConnection
                 _sender.Quit(reason);
             Disconnect(DisconnectReason.UserInitiated);
             _activityTimer.Stop();
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                              $"[{Thread.CurrentThread.Name}] Connection::Disconnect()");
+            Rfc2812Util.IrcTrace.Info();
         }
     }
 
@@ -597,11 +589,9 @@ public class Connection : TcpTextClient, IConnection
     /// </summary>
     protected override void OnReceiveLine(string line)
     {
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                          $"[{Thread.CurrentThread.Name}] Connection::ReceiveIRCMessages()");
+        Rfc2812Util.IrcTrace.Info();
 
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-                          $"[{Thread.CurrentThread.Name}] Connection::ReceiveIRCMessages() rec'd:{line}");
+        Rfc2812Util.IrcTrace.Verbose($"rec'd:{line}");
         //Try any custom parsers first
         if (CustomParse(line))
         {

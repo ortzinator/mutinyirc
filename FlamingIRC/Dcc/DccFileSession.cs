@@ -23,7 +23,6 @@
 */
 
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Text;
 using System.Net;
@@ -161,7 +160,7 @@ public sealed class DccFileSession
     /// </summary>
     private void Cleanup()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Cleanup()");
+        DccUtil.DccTrace.Info();
         DccFileSessionManager.DefaultInstance.RemoveSession(this);
         _serverSocket?.Close();
         if (_socket != null)
@@ -185,7 +184,7 @@ public sealed class DccFileSession
     }
     private void Listen()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Listen()");
+        DccUtil.DccTrace.Info();
         try
         {
             //Wait for remote client to connect
@@ -196,7 +195,7 @@ public sealed class DccFileSession
             //Got one!
             _socket = _serverSocket.Accept();
             _serverSocket.Close();
-            Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Listen() Remote user connected.");
+            DccUtil.DccTrace.Info("Remote user connected.");
             //Advance to the correct point in the file in case this is a resume 
             dccFileInfo.GotoReadPosition();
             SignalTransferStart();
@@ -211,13 +210,13 @@ public sealed class DccFileSession
         }
         catch (Exception)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccFileSession::Listen() Connection broken");
+            Rfc2812Util.IrcTrace.Warning("Connection broken");
             Interrupted();
         }
     }
     private void Upload()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Upload()" + (_turboMode ? " Turbo" : " Legacy") + " mode");
+        DccUtil.DccTrace.Info($"{(_turboMode ? "Turbo" : "Legacy")} mode");
         try
         {
             int bytesRead = 0;
@@ -233,13 +232,13 @@ public sealed class DccFileSession
         }
         catch (Exception ex)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccFileSession::Upload() exception=" + ex);
+            Rfc2812Util.IrcTrace.Warning($"exception={ex}");
             Interrupted();
         }
     }
     private void UploadLegacy()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::UploadLegacy()");
+        DccUtil.DccTrace.Info();
         try
         {
             int bytesRead = 0;
@@ -264,13 +263,13 @@ public sealed class DccFileSession
         }
         catch (Exception ex)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccFileSession::UploadLegacy() exception=" + ex);
+            Rfc2812Util.IrcTrace.Warning($"exception={ex}");
             Interrupted();
         }
     }
     private void Download()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Download()" + (_turboMode ? " Turbo" : " Legacy") + " mode");
+        DccUtil.DccTrace.Info($"{(_turboMode ? "Turbo" : "Legacy")} mode");
         try
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -299,7 +298,7 @@ public sealed class DccFileSession
         }
         catch (Exception ex)
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning, "[" + Thread.CurrentThread.Name + "] DccFileSession::Download() exception=" + ex);
+            Rfc2812Util.IrcTrace.Warning($"exception={ex}");
             if (ex.Message.IndexOf("refused") > 0)
             {
                 User.Connection.Listener.Error(ReplyCode.DccConnectionRefused, "Connection refused by remote user.");
@@ -322,7 +321,7 @@ public sealed class DccFileSession
     /// </summary>
     internal void OnDccAcceptReceived(long position)
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::OnDccAcceptReceived()");
+        DccUtil.DccTrace.Info();
         lock (this)
         {
             //Are we still waiting on the accept?
@@ -358,7 +357,7 @@ public sealed class DccFileSession
     /// resume position was larger than the file.</exception>
     internal void OnDccResumeRequest(long resumePosition)
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::OnDccResumeRequest()");
+        DccUtil.DccTrace.Info();
         lock (this)
         {
             ResetActivityTimer();
@@ -387,7 +386,7 @@ public sealed class DccFileSession
     /// </summary>
     internal void TimedOut()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, ToString() + " timed out.");
+        DccUtil.DccTrace.Info($"{ToString()} timed out.");
         if (_waitingOnAccept)
         {
             _waitingOnAccept = false;
@@ -410,7 +409,7 @@ public sealed class DccFileSession
     /// </summary>
     internal void Interrupted()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Interrupted()");
+        DccUtil.DccTrace.Info();
         Cleanup();
         OnFileTransferInterrupted?.Invoke(this, new DccFileSessionEventArgs(this));
     }
@@ -420,7 +419,7 @@ public sealed class DccFileSession
     /// </summary>
     internal void Finished()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Finished()");
+        DccUtil.DccTrace.Info();
         Cleanup();
         OnFileTransferCompleted?.Invoke(this, new DccFileSessionEventArgs(this));
     }
@@ -430,7 +429,7 @@ public sealed class DccFileSession
     /// </summary>
     public void Stop()
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Stop()");
+        DccUtil.DccTrace.Info();
         lock (this)
         {
             Cleanup();
@@ -456,7 +455,7 @@ public sealed class DccFileSession
     /// <param name="turbo">True to use send-ahead mode for transfers.</param>
     public static void Get(Connection connection, string nick, string fileName, bool turbo)
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Get()");
+        DccUtil.DccTrace.Info();
         StringBuilder builder = new StringBuilder("PRIVMSG ", 512);
         builder.Append(nick);
         builder.Append(" :\x0001DCC GET ");
@@ -497,7 +496,7 @@ public sealed class DccFileSession
         int bufferSize,
         bool turbo)
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Send()");
+        DccUtil.DccTrace.Info();
         DccFileSession session = null;
         //Test if we are already using this port
         if (DccFileSessionManager.DefaultInstance.ContainsSession("S" + listenPort))
@@ -554,7 +553,7 @@ public sealed class DccFileSession
     /// <exception cref="ArgumentException">If the listen port is already in use.</exception>
     public static DccFileSession Receive(DccUser dccUser, DccFileInfo dccFileInfo, bool turbo)
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccFileSession::Receive()");
+        DccUtil.DccTrace.Info();
         //Test if we are already using this port
         if (DccFileSessionManager.DefaultInstance.ContainsSession("C" + dccUser.remoteEndPoint.Port))
         {

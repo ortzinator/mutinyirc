@@ -25,7 +25,6 @@
 // THE SOFTWARE.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -154,8 +153,7 @@ public abstract class TcpTextClient
             return;
         }
 
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-            $"[{Thread.CurrentThread.Name}] TcpTextClient::Disconnect() idle, reason={reason}");
+        Rfc2812Util.IrcTrace.Info($"idle, reason={reason}");
         OnDisconnect(reason, null);
     }
 
@@ -182,14 +180,12 @@ public abstract class TcpTextClient
         }
         catch (Exception e) when (IsIoFailure(e))
         {
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::Send() exception={e.Message}");
+            Rfc2812Util.IrcTrace.Warning($"exception={e.Message}");
             LoseToIoFailure(session, e);
             return;
         }
 
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceVerbose,
-            $"[{Thread.CurrentThread.Name}] TcpTextClient::Send() {message.TrimEnd()}");
+        Rfc2812Util.IrcTrace.Verbose(message.TrimEnd());
     }
 
     /// <summary>
@@ -217,8 +213,7 @@ public abstract class TcpTextClient
             return;
         }
 
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-            $"[{Thread.CurrentThread.Name}] TcpTextClient::RunSession() connected to {server}, tls={ssl}");
+        Rfc2812Util.IrcTrace.Info($"connected to {server}, tls={ssl}");
         OnConnect();
         await ReadLines(session).ConfigureAwait(false);
     }
@@ -240,8 +235,7 @@ public abstract class TcpTextClient
         {
             // An exception from the override counts as a rejection. SslStream calls this on a
             // thread-pool thread, where an exception would end the process.
-            Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                $"[{Thread.CurrentThread.Name}] TcpTextClient::OnCertificateValidate() exception={e}");
+            Rfc2812Util.IrcTrace.Warning($"exception={e}");
             return false;
         }
     }
@@ -260,16 +254,14 @@ public abstract class TcpTextClient
             }
             catch (Exception e) when (IsIoFailure(e))
             {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                    $"[{Thread.CurrentThread.Name}] TcpTextClient::ReadLines() exception={e.Message}");
+                Rfc2812Util.IrcTrace.Warning($"exception={e.Message}");
                 LoseToIoFailure(session, e);
                 return;
             }
 
             if (line == null)
             {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-                    $"[{Thread.CurrentThread.Name}] TcpTextClient::ReadLines() remote host closed connection");
+                Rfc2812Util.IrcTrace.Info("remote host closed connection");
                 Lose(session, DisconnectReason.RemoteHostClosedConnection);
                 return;
             }
@@ -306,8 +298,7 @@ public abstract class TcpTextClient
         if (!TryEnd(session))
             return;
 
-        Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceInfo,
-            $"[{Thread.CurrentThread.Name}] TcpTextClient::Lose() reason={reason}, code={socketErrorCode}");
+        Rfc2812Util.IrcTrace.Info($"reason={reason}, code={socketErrorCode}");
         OnDisconnect(reason, socketErrorCode);
     }
 
@@ -468,8 +459,7 @@ public abstract class TcpTextClient
             }
             catch (Exception e)
             {
-                Debug.WriteLineIf(Rfc2812Util.IrcTrace.TraceWarning,
-                    $"[{Thread.CurrentThread.Name}] TcpTextClient::Session.OpenAsync() connect failed={e}");
+                Rfc2812Util.IrcTrace.Warning($"connect failed={e}");
                 stream?.Dispose();
                 return ConnectFailure.From(e, certificateRejected, rejectedCertificate);
             }

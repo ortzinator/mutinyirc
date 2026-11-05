@@ -23,7 +23,6 @@
 */
 
 using System;
-using System.Diagnostics;
 using System.Collections;
 using System.Threading;
 
@@ -77,7 +76,7 @@ public sealed class DccFileSessionManager
             _timerStopped = false;
             _timerThread.Change(TimeoutCheckPeriod, TimeoutCheckPeriod);
         }
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccSessionManager::AddSession() ID=" + session.ID);
+        DccUtil.DccTrace.Info($"ID={session.ID}");
     }
     internal void RemoveSession(DccFileSession session)
     {
@@ -87,11 +86,11 @@ public sealed class DccFileSessionManager
             _timerStopped = true;
             _timerThread.Change(Timeout.Infinite, TimeoutCheckPeriod);
         }
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceInfo, "[" + Thread.CurrentThread.Name + "] DccSessionManager::RemoveSession() ID=" + session.ID);
+        DccUtil.DccTrace.Info($"ID={session.ID}");
     }
     internal void CheckSessions(object state)
     {
-        Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccSessionManager::CheckSessions()");
+        DccUtil.DccTrace.Verbose();
         _sessionClone = (Hashtable)_sessions.Clone();
         foreach (object session in _sessionClone.Values)
         {
@@ -129,7 +128,7 @@ public sealed class DccFileSessionManager
                 if (Singleton == null)
                 {
                     Singleton = new DccFileSessionManager();
-                    Debug.WriteLineIf(DccUtil.DccTrace.TraceVerbose, "[" + Thread.CurrentThread.Name + "] DccFileSessionManager::init");
+                    DccUtil.DccTrace.Verbose();
                 }
             }
             return Singleton;
